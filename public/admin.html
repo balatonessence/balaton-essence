@@ -477,7 +477,7 @@
     function delOwner(id) { if(confirm("Törli a partnert?")) { db.owners = db.owners.filter(o=>o.id!==id); saveDb(); render(); } }
     function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => { m.classList.remove('active'); setTimeout(()=>m.style.display='none', 400); }); activeAptId = null; activeOwnerId = null; }
 
-    render();
+    initDatabase(render);
 </script>
 </body>
 </html>
