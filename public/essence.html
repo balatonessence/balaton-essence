@@ -12,13 +12,14 @@
 
         /* HEADER */
         header { position: fixed; top: 0; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(249, 249, 247, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .logo { font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 700; cursor: pointer; }
+        .logo { font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 700; cursor: pointer; text-decoration: none; color: var(--text); }
         .logo span { color: var(--accent); }
         
-        nav { display: flex; gap: 1rem; }
-        .nav-btn { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 0.6rem 1.2rem; border-radius: 50px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; background: none; }
+        nav { display: flex; gap: 1rem; align-items: center; }
+        .nav-btn { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 0.6rem 1.2rem; border-radius: 50px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; background: none; text-decoration: none; color: var(--text); display: inline-block; }
         .btn-dark { background: var(--text); color: #fff; }
         .btn-outline { border-color: #ddd; color: var(--text); }
+        .btn-outline:hover { border-color: var(--text); }
 
         /* HERO */
         .hero { height: 90vh; display: flex; align-items: center; padding: 0 5vw; }
@@ -42,15 +43,13 @@
         .apt-img { width: 100%; height: 100%; background-size: cover; background-position: center; transition: 1s ease; }
         .apt-card:hover .apt-img { transform: scale(1.05); }
 
-        .apt-info { text-align: center; }
         .location-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; color: var(--accent); display: block; margin-bottom: 1rem; }
         .apt-name { font-family: 'Playfair Display'; font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 2rem; }
 
-       .apt-info { text-align: center; } /* Mobilon középen */
+        .apt-info { text-align: center; } /* Mobilon középen */
         .btn-group { display: flex; gap: 1.5rem; justify-content: center; align-items: center; margin-top: 3rem; }
         @media (min-width: 992px) { 
             .apt-info { flex: 1; padding: 0 4rem; text-align: center; } /* Asztalin is középen! */
-            /* A .btn-group-hoz itt nem kell semmi, marad a default center */
         }
 
         .btn-cta { background: var(--text); color: white; border: none; padding: 1.2rem 2.5rem; border-radius: 50px; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; transition: 0.4s; }
@@ -71,7 +70,7 @@
         .modal-body { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; }
         @media (min-width: 768px) { .modal-body { padding: 4rem 5rem; } }
 
-        /* NAPTÁR STÍLUSOK (VISSZAÁLLÍTVA) */
+        /* NAPTÁR STÍLUSOK */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; margin-top: 1rem; width: 100%; }
         .day { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; border-radius: 4px; transition: 0.2s; }
         @media (min-width: 768px) { .day { height: 50px; font-size: 0.9rem; } }
@@ -88,7 +87,7 @@
         .toast { background: var(--text); color: white; padding: 1rem 2rem; border-radius: 4px; font-size: 0.8rem; transform: translateX(150%); transition: 0.4s; }
         .toast.show { transform: translateX(0); }
 
-        /*Galéria nyilak*/
+        /* Galéria nyilak */
         .gallery-arrow { 
             position: absolute; 
             top: 50%; 
@@ -122,9 +121,9 @@
 <div id="toast-container"></div>
 
 <header>
-    <div class="logo" onclick="location.reload()">Balaton<span>.</span>Essence</div>
+    <a href="index.html" class="logo">Balaton<span>.</span>Essence</a>
     <nav>
-        <button class="nav-btn btn-outline" onclick="openLogin('owner')">Partner</button>
+        <a href="index.html" class="nav-btn btn-outline">Vissza a Portálra</a>
         <button class="nav-btn btn-dark" onclick="openLogin('admin')">Admin</button>
     </nav>
 </header>
@@ -239,10 +238,9 @@
         });
     }
 
-    // --- ÚJ, GOLYÓÁLLÓ LOGIN LOGIKA ---
     function openLogin(role) { 
         curRole = role; 
-        document.getElementById('login-title').innerText = role === 'admin' ? 'Központi Admin' : 'Partner Belépés'; 
+        document.getElementById('login-title').innerText = 'Központi Admin'; 
         document.getElementById('login-pwd').value = ''; 
         document.getElementById('login-modal').style.display='flex'; 
         setTimeout(()=>document.getElementById('login-modal').classList.add('active'),10); 
@@ -254,27 +252,16 @@
     }
     
     function attemptLogin() {
-        // Levágjuk a véletlenül beírt láthatatlan szóközöket az elejéről/végéről
         const rawInput = document.getElementById('login-pwd').value;
         const v = rawInput.trim(); 
 
         if (curRole === 'admin') {
-            // Admin belépés: nem különböztetjük meg a kis- és nagybetűket, ha a db.adminCode üres lenne, az "admin123" a fallback.
             const validAdminPass = (db.adminCode || "admin123").toLowerCase();
             if (v.toLowerCase() === validAdminPass) {
                 sessionStorage.setItem('isAdmin', 'true'); 
                 window.location.href = 'admin.html'; 
             } else {
                 showToast("Helytelen admin jelszó!");
-            }
-        } else { 
-            // Partner belépés
-            const o = db.owners.find(x => x.accessCode.trim() === v); 
-            if (o) { 
-                sessionStorage.setItem('loggedOwner', JSON.stringify(o)); 
-                window.location.href = 'tulaj.html'; 
-            } else { 
-                showToast("Érvénytelen belépési kód!"); 
             }
         }
     }
@@ -286,12 +273,11 @@
     }
     
     function changeGalleryImage(dir, event) {
-        if (event) event.stopPropagation(); // Ez megakadályozza, hogy a nyíl kattintásakor bezáródjon az egész modal
-        if (activeGallery.length <= 1) return; // Ha csak 1 kép van, ne lapozzon
+        if (event) event.stopPropagation();
+        if (activeGallery.length <= 1) return;
         
         currentImgIndex += dir;
         
-        // Ha a végére értünk, ugorjon az elejére, és fordítva (végtelenített lapozás)
         if (currentImgIndex >= activeGallery.length) currentImgIndex = 0;
         if (currentImgIndex < 0) currentImgIndex = activeGallery.length - 1;
         
