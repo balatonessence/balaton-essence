@@ -46,8 +46,12 @@
         .location-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; color: var(--accent); display: block; margin-bottom: 1rem; }
         .apt-name { font-family: 'Playfair Display'; font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 2rem; }
 
-        .btn-group { display: flex; gap: 1.5rem; justify-content: center; margin-top: 3rem; }
-        @media (min-width: 992px) { .btn-group { justify-content: flex-start; } }
+       .apt-info { text-align: center; } /* Mobilon középen */
+        .btn-group { display: flex; gap: 1.5rem; justify-content: center; align-items: center; margin-top: 3rem; }
+        @media (min-width: 992px) { 
+            .apt-info { flex: 1; padding: 0 4rem; text-align: center; } /* Asztalin is középen! */
+            /* A .btn-group-hoz itt nem kell semmi, marad a default center */
+        }
 
         .btn-cta { background: var(--text); color: white; border: none; padding: 1.2rem 2.5rem; border-radius: 50px; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; transition: 0.4s; }
         .btn-cta:hover { background: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(231, 111, 81, 0.2); }
