@@ -3,416 +3,167 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balaton Essence | Exkluzív Ingatlankezelés</title>
+    <title>Balaton | Essence • Sun • Morning</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #F9F9F7; --text: #1A1A1A; --accent: #E76F51; --blue: #0077B6; --selection: rgba(231, 111, 81, 0.15); }
+        :root { --accent-essence: #E76F51; --accent-sun: #E9C46A; --accent-morning: #2A9D8F; --text: #1A1A1A; }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+        body { font-family: 'Montserrat', sans-serif; background: #000; overflow: hidden; height: 100vh; }
 
-        /* HEADER */
-        header { position: fixed; top: 0; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(249, 249, 247, 0.9); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .logo { font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 700; cursor: pointer; }
-        .logo span { color: var(--accent); }
-        
-        nav { display: flex; gap: 1rem; }
-        .nav-btn { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; padding: 0.6rem 1.2rem; border-radius: 50px; cursor: pointer; transition: 0.3s; border: 1px solid transparent; background: none; }
-        .btn-dark { background: var(--text); color: #fff; }
-        .btn-outline { border-color: #ddd; color: var(--text); }
-
-        /* HERO */
-        .hero { height: 90vh; display: flex; align-items: center; padding: 0 5vw; }
-        .hero-title { font-family: 'Playfair Display'; font-size: clamp(3rem, 10vw, 9rem); line-height: 0.85; }
-        .hero-title span { color: var(--accent); display: block; margin-left: 10vw; font-style: italic; }
-
-        /* INGATLAN LISTA */
-        main { padding: 0 5vw 10rem 5vw; max-width: 1600px; margin: 0 auto; }
-        
-        .apt-card { display: flex; flex-direction: column; gap: 3rem; margin-bottom: 10rem; align-items: center; }
-        
-        /* Desktop: Minden második elem megcserélődik */
-        @media (min-width: 992px) {
-            .apt-card { flex-direction: row; height: 700px; }
-            .apt-card:nth-child(even) { flex-direction: row-reverse; }
-            .apt-visual { flex: 1.4; height: 100%; }
-            .apt-info { flex: 1; padding: 0 4rem; text-align: left; }
+        .portal-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            width: 100vw;
         }
 
-        .apt-visual { width: 100%; height: 400px; border-radius: 4px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.1); }
-        .apt-img { width: 100%; height: 100%; background-size: cover; background-position: center; transition: 1s ease; }
-        .apt-card:hover .apt-img { transform: scale(1.05); }
-
-        .apt-info { text-align: center; }
-        .location-tag { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 4px; color: var(--accent); display: block; margin-bottom: 1rem; }
-        .apt-name { font-family: 'Playfair Display'; font-size: clamp(2.5rem, 5vw, 4rem); line-height: 1.1; margin-bottom: 2rem; }
-
-       .apt-info { text-align: center; } /* Mobilon középen */
-        .btn-group { display: flex; gap: 1.5rem; justify-content: center; align-items: center; margin-top: 3rem; }
-        @media (min-width: 992px) { 
-            .apt-info { flex: 1; padding: 0 4rem; text-align: center; } /* Asztalin is középen! */
-            /* A .btn-group-hoz itt nem kell semmi, marad a default center */
+        @media (min-width: 768px) {
+            .portal-container { flex-direction: row; }
         }
 
-        .btn-cta { background: var(--text); color: white; border: none; padding: 1.2rem 2.5rem; border-radius: 50px; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; transition: 0.4s; }
-        .btn-cta:hover { background: var(--accent); transform: translateY(-3px); box-shadow: 0 10px 20px rgba(231, 111, 81, 0.2); }
-        .btn-more { background: none; border: none; border-bottom: 1px solid #ddd; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; cursor: pointer; padding-bottom: 5px; }
-
-        /* MODALOK ÁLTALÁNOS */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .custom-modal { background: #fff; width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; overflow-y: auto; }
-        @media (min-width: 768px) { .custom-modal { width: 90%; height: 85vh; border-radius: 4px; flex-direction: row; overflow: hidden; } }
-
-        .close-x { position: absolute; top: 1.5rem; right: 1.5rem; font-size: 1.5rem; cursor: pointer; z-index: 100; background: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-
-        .modal-visual { height: 35vh; background-color: #000; position: relative; flex-shrink: 0; }
-        @media (min-width: 768px) { .modal-visual { flex: 1.3; height: 100%; } }
-        
-        .modal-body { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; }
-        @media (min-width: 768px) { .modal-body { padding: 4rem 5rem; } }
-
-        /* NAPTÁR STÍLUSOK (VISSZAÁLLÍTVA) */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; margin-top: 1rem; width: 100%; }
-        .day { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; border-radius: 4px; transition: 0.2s; }
-        @media (min-width: 768px) { .day { height: 50px; font-size: 0.9rem; } }
-        .day.selected { background: var(--text) !important; color: #fff !important; }
-        .day.in-range { background: var(--selection); }
-        .day.disabled { color: #ccc !important; cursor: not-allowed !important; text-decoration: line-through; opacity: 0.3; }
-
-        .gallery-nav { display: flex; gap: 10px; margin-top: 2rem; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
-        .gallery-nav img { width: 80px; height: 60px; object-fit: cover; cursor: pointer; border-radius: 2px; opacity: 0.4; transition: 0.3s; }
-        .gallery-nav img.active { opacity: 1; border: 2px solid var(--accent); }
-
-        /* TOAST */
-        #toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
-        .toast { background: var(--text); color: white; padding: 1rem 2rem; border-radius: 4px; font-size: 0.8rem; transform: translateX(150%); transition: 0.4s; }
-        .toast.show { transform: translateX(0); }
-
-        /*Galéria nyilak*/
-        .gallery-arrow { 
-            position: absolute; 
-            top: 50%; 
-            transform: translateY(-50%); 
-            background: rgba(255, 255, 255, 0.7); 
-            border: none; 
-            font-size: 1.5rem; 
-            cursor: pointer; 
-            transition: 0.3s; 
-            z-index: 10; 
-            color: var(--text); 
-            border-radius: 50%; 
-            width: 45px; 
-            height: 45px; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.15); 
+        .portal-card {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            overflow: hidden;
+            transition: flex 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            cursor: pointer;
         }
-        .gallery-arrow:hover { 
-            background: #fff; 
-            transform: translateY(-50%) scale(1.1); 
+
+        /* Asztali nézeten kinyíló effekt */
+        @media (min-width: 768px) {
+            .portal-card:hover { flex: 1.6; }
         }
-        .prev-arrow { left: 1rem; }
-        .next-arrow { right: 1rem; }
+
+        .bg-img {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.8s ease;
+            z-index: 1;
+        }
+
+        .portal-card:hover .bg-img {
+            transform: scale(1.05);
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            transition: background 0.4s ease;
+            z-index: 2;
+        }
+
+        .portal-card:hover .overlay {
+            background: rgba(0, 0, 0, 0.3);
+        }
+
+        .content {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            color: white;
+            padding: 2rem;
+            transform: translateY(20px);
+            transition: transform 0.4s ease;
+        }
+
+        .portal-card:hover .content {
+            transform: translateY(0);
+        }
+
+        h2 {
+            font-family: 'Playfair Display';
+            font-size: clamp(2rem, 4vw, 4rem);
+            line-height: 1.1;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        .subtitle {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            opacity: 0.8;
+            margin-bottom: 1.5rem;
+        }
+
+        .btn-enter {
+            display: inline-block;
+            border: 1px solid white;
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: white;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.4s ease;
+            transition-delay: 0.1s;
+        }
+
+        .portal-card:hover .btn-enter {
+            opacity: 1;
+            transform: translateY(0);
+            background: white;
+            color: var(--text);
+        }
+
+        /* Egyedi színek és képek */
+        #essence .bg-img { background-image: url('https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=1200&q=80'); }
+        #essence h2 span { color: var(--accent-essence); }
+
+        #sun .bg-img { background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80'); }
+        #sun h2 span { color: var(--accent-sun); }
+
+        #morning .bg-img { background-image: url('https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=1200&q=80'); }
+        #morning h2 span { color: var(--accent-morning); }
 
     </style>
 </head>
 <body>
 
-<div id="toast-container"></div>
+<div class="portal-container">
 
-<header>
-    <div class="logo" onclick="location.reload()">Balaton<span>.</span>Essence</div>
-    <nav>
-        <button class="nav-btn btn-outline" onclick="openLogin('owner')">Partner</button>
-        <button class="nav-btn btn-dark" onclick="openLogin('admin')">Admin</button>
-    </nav>
-</header>
-
-<section class="hero">
-    <h1 class="hero-title">A Balaton<br><span>Esszenciája.</span></h1>
-</section>
-
-<main id="apt-list"></main>
-
-<div id="details-modal" class="modal-overlay" onclick="closeDetails()">
-    <div class="custom-modal" onclick="event.stopPropagation()">
-        <div class="close-x" onclick="closeDetails()">✕</div>
-        <div class="modal-visual" id="det-img" style="background-size: cover; background-position: center; position: relative;">
-            <button class="gallery-arrow prev-arrow" onclick="changeGalleryImage(-1, event)">❮</button>
-            <button class="gallery-arrow next-arrow" onclick="changeGalleryImage(1, event)">❯</button>
+    <a href="essence.html" class="portal-card" id="essence">
+        <div class="bg-img"></div>
+        <div class="overlay"></div>
+        <div class="content">
+            <h2>Balaton<span>.</span>Essence</h2>
+            <div class="subtitle">Exkluzív Szállások</div>
+            <div class="btn-enter">Felfedezés</div>
         </div>
-        <div class="modal-body">
-            <span class="location-tag" id="det-loc"></span>
-            <h2 id="det-name" style="font-family:'Playfair Display'; font-size:3rem; line-height:1; margin-bottom:1.5rem;"></h2>
-            <p id="det-desc" style="color:#666; font-size:1rem; line-height:1.6; margin-bottom:2rem;"></p>
-            <div id="det-gallery" class="gallery-nav"></div>
-            <button class="btn-cta" style="width:100%; margin-top:3rem;" id="det-book-btn">Foglalás indítása</button>
+    </a>
+
+    <a href="sun.html" class="portal-card" id="sun">
+        <div class="bg-img"></div>
+        <div class="overlay"></div>
+        <div class="content">
+            <h2>Balaton<span>.</span>Sun</h2>
+            <div class="subtitle">SUP & Napágy Bérlés</div>
+            <div class="btn-enter">Felfedezés</div>
         </div>
-    </div>
+    </a>
+
+    <a href="morning.html" class="portal-card" id="morning">
+        <div class="bg-img"></div>
+        <div class="overlay"></div>
+        <div class="content">
+            <h2>Balaton<span>.</span>Morning</h2>
+            <div class="subtitle">Prémium Reggelik</div>
+            <div class="btn-enter">Felfedezés</div>
+        </div>
+    </a>
+
 </div>
 
-<div id="booking-modal" class="modal-overlay" onclick="closeBooking()">
-    <div class="custom-modal" style="max-width: 1100px;" onclick="event.stopPropagation()">
-        <div class="close-x" onclick="closeBooking()">✕</div>
-        <div class="modal-visual" id="book-visual" style="background-color: var(--text); color: white; display:flex; flex-direction:column; justify-content:flex-end; padding: 3rem;">
-            <h3 id="book-name-tag" style="font-family:'Playfair Display'; font-size:2.5rem; line-height:1.1;"></h3>
-        </div>
-        <div class="modal-body">
-            <div id="step-1" style="height: 100%; display: flex; flex-direction: column;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-                    <button onclick="changeMonth(-1)" style="border:none; background:none; font-size:1.5rem; cursor:pointer;">←</button>
-                    <h4 id="cal-month-year" style="font-family:'Playfair Display'; font-size:1.5rem;"></h4>
-                    <button onclick="changeMonth(1)" style="border:none; background:none; font-size:1.5rem; cursor:pointer;">→</button>
-                </div>
-                <div class="calendar-grid" id="calendar-grid"></div>
-                
-                <div style="margin:2rem 0; padding:1.5rem 0; border-top:1px solid #eee; display:flex; justify-content:space-between; align-items:center;">
-                    <span style="font-size:0.8rem; font-weight:700;">VENDÉGEK:</span>
-                    <div style="display:flex; align-items:center; gap:1rem;">
-                        <button onclick="updateGuests(-1)" style="border:1px solid #ddd; background:#fff; padding:0.5rem 1rem; border-radius:4px; cursor:pointer;">-</button>
-                        <span id="val-guests" style="font-weight:700;">2</span>
-                        <button onclick="updateGuests(1)" style="border:1px solid #ddd; background:#fff; padding:0.5rem 1rem; border-radius:4px; cursor:pointer;">+</button>
-                    </div>
-                </div>
-                
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
-                    <span id="total-price" style="font-family:'Playfair Display'; font-size:2.2rem; color:var(--accent); font-weight:700;">0 Ft</span>
-                    <button class="btn-cta" id="confirm-btn" disabled onclick="goToStep2()">Tovább</button>
-                </div>
-            </div>
-
-            <div id="step-2" style="display:none; height:100%; flex-direction:column;">
-                <h2 style="font-family:'Playfair Display'; font-size:2.5rem; margin-bottom:2rem;">Kapcsolat</h2>
-                <input type="text" id="g-name" style="width:100%; border:none; border-bottom:2px solid #eee; padding:1rem 0; margin-bottom:1.5rem; outline:none; font-family:'Montserrat'; font-size:1.1rem;" placeholder="Teljes név *">
-                <input type="email" id="g-email" style="width:100%; border:none; border-bottom:2px solid #eee; padding:1rem 0; margin-bottom:2rem; outline:none; font-family:'Montserrat'; font-size:1.1rem;" placeholder="E-mail cím *">
-                <div style="margin-top:auto;">
-                    <button class="btn-cta" id="submit-booking-btn" style="width:100%" onclick="finalSubmit()">Foglalás véglegesítése</button>
-                </div>
-            </div>
-
-            <div id="success-msg" style="display:none; text-align:center; padding-top:4rem; height:100%;">
-                <h2 style="font-family:'Playfair Display'; font-size:3rem; color:var(--accent);">Sikeres!</h2>
-                <p style="margin-top:1rem; color:#666;">Foglalását rögzítettük, hamarosan felvesszük Önnel a kapcsolatot.</p>
-                <button class="btn-cta" style="margin-top:3rem;" onclick="closeBooking()">Vissza az oldalra</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div id="login-modal" class="modal-overlay" onclick="closeLogin()">
-    <div class="custom-modal" style="max-width: 400px; height: auto; border-radius: 8px; flex-direction: column; padding: 4rem 3rem;" onclick="event.stopPropagation()">
-        <div class="close-x" style="top:10px; right:10px; width:30px; height:30px;" onclick="closeLogin()">✕</div>
-        <h2 id="login-title" style="font-family:'Playfair Display'; margin-bottom: 2rem; text-align: center;">Belépés</h2>
-        <input type="password" id="login-pwd" style="width:100%; border:none; border-bottom:2px solid #eee; padding:1rem 0; outline:none; text-align:center; font-size:1.2rem;" placeholder="Kód..." onkeyup="if(event.key==='Enter') attemptLogin()">
-        <button class="btn-cta" style="width: 100%; margin-top: 2rem;" onclick="attemptLogin()">Belépés</button>
-    </div>
-</div>
-
-<script src="database.js"></script>
-<script>
-    let curRole = '', curApt = null, inD = null, outD = null, guests = 2, view = new Date(), activeGallery = [], currentImgIndex = 0;
-    view.setDate(1);
-
-    function showToast(m) {
-        const t = document.createElement('div'); t.className = 'toast show'; t.innerText = m;
-        document.getElementById('toast-container').appendChild(t);
-        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
-    }
-
-    function render() {
-        const cont = document.getElementById('apt-list'); cont.innerHTML = "";
-        db.apartments.forEach(apt => {
-            const img = apt.mainImage || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80';
-            cont.innerHTML += `
-                <div class="apt-card">
-                    <div class="apt-visual"><div class="apt-img" style="background-image: url(${img})"></div></div>
-                    <div class="apt-info">
-                        <span class="location-tag">${apt.location}</span>
-                        <h2 class="apt-name">${apt.name}</h2>
-                        <div class="btn-group">
-                            <button class="btn-more" onclick="showApt(${apt.id})">Felfedezés</button>
-                            <button class="btn-cta" onclick="openBooking(${apt.id})">Foglalás</button>
-                        </div>
-                    </div>
-                </div>`;
-        });
-    }
-
-    // --- ÚJ, GOLYÓÁLLÓ LOGIN LOGIKA ---
-    function openLogin(role) { 
-        curRole = role; 
-        document.getElementById('login-title').innerText = role === 'admin' ? 'Központi Admin' : 'Partner Belépés'; 
-        document.getElementById('login-pwd').value = ''; 
-        document.getElementById('login-modal').style.display='flex'; 
-        setTimeout(()=>document.getElementById('login-modal').classList.add('active'),10); 
-    }
-    
-    function closeLogin() { 
-        document.getElementById('login-modal').classList.remove('active'); 
-        setTimeout(()=>document.getElementById('login-modal').style.display='none',400); 
-    }
-    
-    function attemptLogin() {
-        // Levágjuk a véletlenül beírt láthatatlan szóközöket az elejéről/végéről
-        const rawInput = document.getElementById('login-pwd').value;
-        const v = rawInput.trim(); 
-
-        if (curRole === 'admin') {
-            // Admin belépés: nem különböztetjük meg a kis- és nagybetűket, ha a db.adminCode üres lenne, az "admin123" a fallback.
-            const validAdminPass = (db.adminCode || "admin123").toLowerCase();
-            if (v.toLowerCase() === validAdminPass) {
-                sessionStorage.setItem('isAdmin', 'true'); 
-                window.location.href = 'admin.html'; 
-            } else {
-                showToast("Helytelen admin jelszó!");
-            }
-        } else { 
-            // Partner belépés
-            const o = db.owners.find(x => x.accessCode.trim() === v); 
-            if (o) { 
-                sessionStorage.setItem('loggedOwner', JSON.stringify(o)); 
-                window.location.href = 'tulaj.html'; 
-            } else { 
-                showToast("Érvénytelen belépési kód!"); 
-            }
-        }
-    }
-
-    // RÉSZLETEK (GALÉRIA) MODAL
-    function updateGalleryView() {
-        document.getElementById('det-img').style.backgroundImage = `url(${activeGallery[currentImgIndex]})`;
-        document.querySelectorAll('.gallery-nav img').forEach((img, idx) => img.className = idx === currentImgIndex ? 'active' : '');
-    }
-    
-    function changeGalleryImage(dir, event) {
-        if (event) event.stopPropagation(); // Ez megakadályozza, hogy a nyíl kattintásakor bezáródjon az egész modal
-        if (activeGallery.length <= 1) return; // Ha csak 1 kép van, ne lapozzon
-        
-        currentImgIndex += dir;
-        
-        // Ha a végére értünk, ugorjon az elejére, és fordítva (végtelenített lapozás)
-        if (currentImgIndex >= activeGallery.length) currentImgIndex = 0;
-        if (currentImgIndex < 0) currentImgIndex = activeGallery.length - 1;
-        
-        updateGalleryView();
-    }
-
-    function showApt(id) {
-        const a = db.apartments.find(x => x.id === id);
-        document.getElementById('det-name').innerText = a.name; 
-        document.getElementById('det-loc').innerText = a.location;
-        document.getElementById('det-desc').innerText = a.desc || "Exkluzív balatoni pihenés modern környezetben.";
-        
-        activeGallery = []; 
-        if(a.mainImage) activeGallery.push(a.mainImage); 
-        if(a.gallery) activeGallery = activeGallery.concat(a.gallery);
-        if(activeGallery.length === 0) activeGallery.push('https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1200&q=80');
-        
-        currentImgIndex = 0; const g = document.getElementById('det-gallery'); g.innerHTML = "";
-        activeGallery.forEach((img, idx) => { const el = document.createElement('img'); el.src = img; el.onclick = () => { currentImgIndex = idx; updateGalleryView(); }; g.appendChild(el); });
-        
-        updateGalleryView(); 
-        document.getElementById('det-book-btn').onclick = () => { closeDetails(); openBooking(id); };
-        document.getElementById('details-modal').style.display='flex'; setTimeout(()=>document.getElementById('details-modal').classList.add('active'),10);
-    }
-    function closeDetails() { document.getElementById('details-modal').classList.remove('active'); setTimeout(()=>document.getElementById('details-modal').style.display='none',400); }
-
-    // FOGLALÁS ÉS NAPTÁR LOGIKA
-    function openBooking(id) {
-        curApt = db.apartments.find(a => a.id === id); 
-        document.getElementById('book-name-tag').innerText = curApt.name;
-        document.getElementById('book-visual').style.backgroundImage = `linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0)), url(${curApt.mainImage || ''})`;
-        document.getElementById('book-visual').style.backgroundSize = 'cover';
-        document.getElementById('book-visual').style.backgroundPosition = 'center';
-        
-        inD = null; outD = null; guests = 2; document.getElementById('val-guests').innerText = 2;
-        document.getElementById('step-1').style.display='flex'; document.getElementById('step-2').style.display='none'; document.getElementById('success-msg').style.display='none';
-        document.getElementById('booking-modal').style.display='flex'; renderCal(); 
-        setTimeout(()=>document.getElementById('booking-modal').classList.add('active'),10);
-    }
-    function closeBooking() { document.getElementById('booking-modal').classList.remove('active'); setTimeout(()=>document.getElementById('booking-modal').style.display='none',400); }
-    
-    function updateGuests(c) { guests = Math.max(1, guests + c); document.getElementById('val-guests').innerText = guests; updateSum(); }
-    
-    function renderCal() {
-        const grid = document.getElementById('calendar-grid'); grid.innerHTML = "";
-        const mNames = ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"];
-        document.getElementById('cal-month-year').innerText = `${view.getFullYear()} ${mNames[view.getMonth()]}`;
-        
-        ["Hé", "Ke", "Sze", "Cs", "Pé", "Szo", "Va"].forEach(d => grid.innerHTML += `<div style="font-size:0.6rem; font-weight:700; color:#999; margin-bottom:10px;">${d}</div>`);
-        
-        const first = new Date(view.getFullYear(), view.getMonth(), 1).getDay();
-        const days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
-        const offset = (first === 0 ? 7 : first) - 1;
-        
-        for(let i=0; i<offset; i++) grid.innerHTML += `<div></div>`;
-        const today = new Date(); today.setHours(0,0,0,0);
-        
-        for(let d=1; d<=days; d++) {
-            const date = new Date(view.getFullYear(), view.getMonth(), d);
-            const dStr = `${view.getFullYear()}-${(view.getMonth()+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
-            const isPast = date < today; 
-            const isBooked = curApt.bookedDates && curApt.bookedDates.includes(dStr);
-            const isS = (inD && date.getTime()===inD.getTime()) || (outD && date.getTime()===outD.getTime());
-            const inR = inD && outD && date > inD && date < outD;
-            
-            const el = document.createElement('div'); 
-            el.className = `day ${isS?'selected':''} ${inR?'in-range':''} ${(isPast || isBooked)?'disabled':''}`; 
-            el.innerText = d;
-            
-            if(!isPast && !isBooked) {
-                el.onclick = () => { 
-                    if(!inD || (inD && outD)) { inD=date; outD=null; } 
-                    else if(date > inD) outD=date; 
-                    else inD=date; 
-                    renderCal(); 
-                };
-            }
-            grid.appendChild(el);
-        }
-        updateSum();
-    }
-
-    function updateSum() {
-        if(inD && outD) {
-            const diff = Math.ceil((outD - inD) / (1000*60*60*24));
-            const total = (diff * curApt.price) + (Math.max(0, guests-2) * 5000 * diff);
-            document.getElementById('total-price').innerText = `${total.toLocaleString()} Ft`; 
-            document.getElementById('confirm-btn').disabled = false;
-        } else { 
-            document.getElementById('total-price').innerText = "0 Ft"; 
-            document.getElementById('confirm-btn').disabled = true; 
-        }
-    }
-
-    function changeMonth(dir) { view.setMonth(view.getMonth()+dir); renderCal(); }
-    function goToStep2() { document.getElementById('step-1').style.display='none'; document.getElementById('step-2').style.display='flex'; }
-    
-    async function finalSubmit() {
-        const n = document.getElementById('g-name').value, e = document.getElementById('g-email').value;
-        if(!n || !e) return showToast("Minden adat megadása kötelező!");
-        
-        document.getElementById('submit-booking-btn').disabled = true; 
-        document.getElementById('submit-booking-btn').innerText = "Feldolgozás...";
-        
-        await new Promise(r => setTimeout(r, 1500));
-        
-        db.bookings.push({ id: Date.now(), aptName: curApt.name, guestName: n, checkIn: inD.toISOString().split('T')[0], checkOut: outD.toISOString().split('T')[0], guests, totalPrice: parseInt(document.getElementById('total-price').innerText.replace(/\D/g,'')), source: 'direct' });
-        
-        let t = new Date(inD); 
-        while(t <= outD) { 
-            const s = t.toISOString().split('T')[0]; 
-            if(!curApt.bookedDates.includes(s)) curApt.bookedDates.push(s); 
-            t.setDate(t.getDate()+1); 
-        }
-        saveDb(); 
-        document.getElementById('step-2').style.display='none'; 
-        document.getElementById('success-msg').style.display='block'; 
-        showToast("Foglalás rögzítve!");
-    }
-
-    render();
-</script>
 </body>
 </html>
