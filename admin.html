@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Központi Vezérlőpult | Balaton Essence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #F9F9F7; --text: #1A1A1A; --accent: #E76F51; --blue: #0077B6; --border: #eee; --booking: #003580; --szallas: #e62e2e; --selection: rgba(231, 111, 81, 0.15); }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 5rem; overflow-x: hidden; }
+        
+        #toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 3000; display: flex; flex-direction: column; gap: 10px; width: calc(100% - 4rem); max-width: 350px; }
+        .toast { background: var(--text); color: white; padding: 1rem 2rem; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateX(150%); transition: 0.4s; pointer-events: none; text-align: center; }
+        .toast.show { transform: translateX(0); }
+
+        /* HEADER */
+        header { position: fixed; top: 0; left: 0; width: 100%; padding: 1rem 5vw; display: flex; flex-direction: column; gap: 1rem; align-items: center; z-index: 1000; background: rgba(249, 249, 247, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
+        @media (min-width: 768px) { header { flex-direction: row; padding: 1.5rem 5vw; } }
+
+        .logo { font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 700; cursor: pointer; }
+        .logo span { color: var(--accent); }
+
+        .btn-cta { background: var(--text); color: white; border: none; padding: 0.8rem 1.8rem; border-radius: 50px; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; transition: 0.4s; }
+        .btn-cta:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(231, 111, 81, 0.2); }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid #ddd; padding: 0.6rem 1.2rem; border-radius: 50px; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 1px; cursor: pointer; transition: 0.3s; }
+        .btn-outline:hover { border-color: var(--text); background: var(--text); color: #fff; }
+        .btn-del { color: #dc2626; border-color: #fecaca; }
+        .btn-del:hover { background: #dc2626; border-color: #dc2626; color: #fff; }
+
+        main { max-width: 1400px; margin: 8rem auto 0; padding: 0 5vw; }
+        @media (max-width: 767px) { main { margin-top: 7rem; } }
+
+        .section-header { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; margin: 4rem 0 1.5rem 0; padding-bottom: 1rem; border-bottom: 2px solid var(--text); }
+        @media (min-width: 768px) { .section-header { flex-direction: row; justify-content: space-between; align-items: center; } }
+        .section-header h2 { font-family: 'Playfair Display'; font-size: 2rem; }
+
+        /* LISTÁK RESZPONZÍVAN */
+        .admin-list { background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); overflow: hidden; margin-bottom: 3rem; }
+        
+        /* Mobilon eltüntetjük a fejlécet */
+        .list-head { display: none; }
+        
+        /* Mobilon a listaelemek kártyák lesznek */
+        .list-item { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; border-bottom: 1px solid var(--border); transition: 0.2s; }
+        .list-item:hover { background: #fafafa; }
+        
+        .item-data { display: flex; flex-direction: column; gap: 0.5rem; width: 100%; }
+        .action-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; width: 100%; }
+
+        /* Desktop Grid nézet */
+        @media (min-width: 992px) {
+            .list-head { display: grid; padding: 1rem 2.5rem; background: #fcfcfc; border-bottom: 1px solid var(--border); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #999; }
+            .list-item { display: grid; padding: 1.5rem 2.5rem; }
+            .item-data { flex-direction: row; align-items: center; display: contents; }
+            .action-btns { margin-top: 0; justify-content: flex-end; }
+            
+            /* Különböző oszlopkiosztások asztali gépre */
+            .grid-apt { grid-template-columns: 2fr 1fr 3.5fr 1.5fr; gap: 1rem; }
+            .grid-owner { grid-template-columns: 2fr 2fr 1.5fr; gap: 1rem; }
+            .grid-booking { grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr; gap: 1rem; }
+        }
+
+        .item-name-box strong { display: block; font-family: 'Playfair Display'; font-size: 1.25rem; color: var(--text); margin-bottom: 4px; }
+        .item-name-box span { font-size: 0.7rem; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+
+        /* --- STABIL FÉLKÖR GRAFIKA --- */
+        .stats-wrapper { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
+        @media (min-width: 992px) { .stats-wrapper { justify-content: center; flex-wrap: nowrap; } }
+        
+        .chart-box { display: flex; flex-direction: column; align-items: center; width: 80px; }
+        .chart-container { position: relative; width: 60px; height: 32px; margin-bottom: 8px; }
+        .chart-svg { width: 60px; height: 60px; transform: rotate(-180deg); }
+        .chart-bg { fill: none; stroke: #f0f0f0; stroke-width: 6; }
+        .chart-val { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s ease-in-out; }
+        .chart-label { font-size: 0.65rem; font-weight: 800; color: var(--text); margin-bottom: 2px; }
+        .chart-source-name { font-size: 0.55rem; font-weight: 700; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; }
+
+        /* MODALOK (SPLIT-SCREEN DESIGN) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        
+        .custom-modal { background: #fff; width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; overflow-y: auto; }
+        @media (min-width: 768px) { .custom-modal { width: 90%; height: 85vh; border-radius: 8px; flex-direction: row; overflow: hidden; } }
+
+        .close-x { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; cursor: pointer; z-index: 100; background: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+        .modal-visual { height: 25vh; background-color: #06111C; background-size: cover; background-position: center; position: relative; flex-shrink: 0; transition: 0.5s; }
+        @media (min-width: 768px) { .modal-visual { flex: 1.2; height: 100%; } }
+        
+        .modal-body { flex: 1; padding: 2rem 1.5rem; overflow-y: auto; display: flex; flex-direction: column; }
+        @media (min-width: 768px) { .modal-body { padding: 4rem 5rem; } }
+
+        .form-group { margin-bottom: 1.5rem; }
+        label { display: block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; color: #888; letter-spacing: 1px; }
+        input, select, textarea { width: 100%; border: none; border-bottom: 2px solid #eee; padding: 0.8rem 0; outline: none; font-family: 'Montserrat'; font-size: 1.1rem; background: transparent; transition: 0.3s; }
+        input:focus, select:focus, textarea:focus { border-bottom-color: var(--accent); }
+        
+        /* NAPTÁR */
+        .mini-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; margin-top: 1rem; width: 100%; }
+        .cal-day { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; border-radius: 4px; transition: 0.2s; }
+        @media (min-width: 768px) { .cal-day { height: 45px; } }
+        .cal-day.booked { background: #fee2e2; color: #b91c1c; font-weight: bold; }
+        .cal-day:not(.booked):hover { background: var(--selection); }
+    </style>
+</head>
+<body>
+
+<div id="toast-container"></div>
+
+<header>
+    <div class="logo" onclick="window.location.href='index.html'">Balaton<span>.</span>Essence ADMIN</div>
+    <button onclick="sessionStorage.clear(); window.location.href='index.html'" class="btn-outline">Kijelentkezés</button>
+</header>
+
+<main>
+    <div class="section-header">
+        <h2>Ingatlanok & Kihasználtság</h2>
+        <button class="btn-cta" onclick="openAptModal(null)">+ Új Apartman</button>
+    </div>
+    
+    <div class="admin-list">
+        <div class="list-head grid-apt">
+            <div>Ingatlan / Település</div>
+            <div>Tulajdonos</div>
+            <div style="text-align: center;">Statisztika (Booking / Szállás / Saját)</div>
+            <div style="text-align: right;">Műveletek</div>
+        </div>
+        <div id="apt-list-container"></div>
+    </div>
+
+    <div class="section-header">
+        <h2>Partnerek & Tulajdonosok</h2>
+        <button class="btn-cta" onclick="openOwnerModal(null)">+ Új Partner</button>
+    </div>
+    <div class="admin-list">
+        <div class="list-head grid-owner">
+            <div>Név</div>
+            <div>Belépési Kód</div>
+            <div style="text-align: right;">Műveletek</div>
+        </div>
+        <div id="owner-list-container"></div>
+    </div>
+
+    <div class="section-header"><h2>Legutóbbi foglalások</h2></div>
+    <div class="admin-list">
+        <div class="list-head grid-booking">
+            <div>Vendég / Apartman</div>
+            <div>Dátumok</div>
+            <div>Létszám</div>
+            <div>Összeg</div>
+            <div style="text-align: right;">Művelet</div>
+        </div>
+        <div id="bookings-container"></div>
+    </div>
+</main>
+
+<div id="apt-modal" class="modal-overlay" onclick="closeModals()">
+    <div class="custom-modal" onclick="event.stopPropagation()">
+        <div class="close-x" onclick="closeModals()">✕</div>
+        <div class="modal-visual" id="apt-modal-visual"></div>
+        
+        <div class="modal-body">
+            <h2 id="apt-modal-title" style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom:2rem;">Ingatlan</h2>
+            <div class="form-group"><label>Név</label><input type="text" id="a-name" placeholder="Pl. Aranypart Rezidencia"></div>
+            <div class="form-group"><label>Helyszín</label><input type="text" id="a-loc" placeholder="Pl. Siófok"></div>
+            <div class="form-group"><label>Alapár / éj (Ft)</label><input type="number" id="a-price" placeholder="45000"></div>
+            <div class="form-group"><label>Tulajdonos</label><select id="a-owner-select"></select></div>
+            <div class="form-group"><label>Fő Borítókép feltöltése</label><input type="file" id="main-img-input" accept="image/*" onchange="previewMainImage(event)"></div>
+            <div style="margin-top:auto; padding-top:2rem;">
+                <button class="btn-cta" style="width:100%;" onclick="saveApt()">Adatok Mentése</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="owner-modal" class="modal-overlay" onclick="closeModals()">
+    <div class="custom-modal" style="max-width: 450px; height: auto; flex-direction: column; padding: 4rem 2rem; margin: auto; border-radius: 8px;" onclick="event.stopPropagation()">
+        <div class="close-x" style="top:10px; right:10px; width:30px; height:30px; font-size:1rem;" onclick="closeModals()">✕</div>
+        <h2 style="font-family:'Playfair Display'; font-size: 2rem; margin-bottom:2rem; text-align:center;">Partner</h2>
+        <div class="form-group"><label>Név</label><input type="text" id="o-name" placeholder="Teljes név"></div>
+        <div class="form-group"><label>Belépési Kód</label><input type="text" id="o-code" placeholder="pl. jelszo123"></div>
+        <button class="btn-cta" style="width:100%; margin-top:1.5rem;" onclick="saveOwner()">Mentés</button>
+    </div>
+</div>
+
+<div id="calendar-modal" class="modal-overlay" onclick="closeModals()">
+    <div class="custom-modal" style="max-width: 600px; height: auto; flex-direction: column; padding: 3rem 2rem; margin: auto; border-radius: 8px;" onclick="event.stopPropagation()">
+        <div class="close-x" style="top:10px; right:10px; width:30px; height:30px; font-size:1rem;" onclick="closeModals()">✕</div>
+        <h2 style="font-family:'Playfair Display'; font-size: 2rem; margin-bottom:1rem; text-align:center;">Naptár Zárolása</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin:1.5rem 0;">
+            <button onclick="changeMonth(-1)" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">←</button>
+            <strong id="cal-month" style="font-family:'Playfair Display'; font-size:1.2rem;"></strong>
+            <button onclick="changeMonth(1)" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">→</button>
+        </div>
+        <div class="mini-calendar" id="admin-cal-grid"></div>
+        <div class="form-group" style="margin-top: 2rem;">
+            <label>Zárolás Forrása (Statisztikához)</label>
+            <select id="manual-source">
+                <option value="direct">Saját oldal / Tulajdonosi</option>
+                <option value="booking.com">Booking.com</option>
+                <option value="szallas.hu">Szallas.hu</option>
+            </select>
+        </div>
+        <button class="btn-cta" style="width:100%; margin-top:1rem;" onclick="saveBlocks()">Mentés</button>
+    </div>
+</div>
+
+<script src="database.js"></script>
+<script>
+    if (sessionStorage.getItem('isAdmin') !== 'true') window.location.href = 'index.html';
+    let activeAptId = null, activeOwnerId = null, selDates = [], vDate = new Date(); vDate.setDate(1);
+
+    function showToast(m) { 
+        const c = document.getElementById('toast-container'); const t = document.createElement('div');
+        t.className = 'toast show'; t.innerText = m; c.appendChild(t); 
+        setTimeout(() => { t.classList.remove('show'); setTimeout(()=>t.remove(), 400); }, 3000); 
+    }
+
+    // FÉLKÖR GRAFIKA KÓD
+    function createHalfChart(percent, color, label) {
+        const r = 24; const circ = Math.PI * r; const offset = circ - (percent / 100) * circ;
+        return `
+            <div class="chart-box">
+                <div class="chart-label">${percent}%</div>
+                <div class="chart-container">
+                    <svg class="chart-svg" viewBox="0 0 60 32">
+                        <path class="chart-bg" d="M6,30 A24,24 0 0,1 54,30" stroke="#f2f2f2" stroke-width="6" fill="none" />
+                        <path class="chart-val" stroke="${color}" stroke-width="6" fill="none" d="M6,30 A24,24 0 0,1 54,30" 
+                              style="stroke-dasharray: ${circ}; stroke-dashoffset: ${offset};" />
+                    </svg>
+                </div>
+                <div class="chart-source-name">${label}</div>
+            </div>`;
+    }
+
+    function render() {
+        // Ingatlanok (Responsive classes added)
+        const aCont = document.getElementById('apt-list-container'); aCont.innerHTML = "";
+        db.apartments.forEach(apt => {
+            const o = db.owners.find(x => x.id === apt.ownerId);
+            const bP = Math.floor(Math.random() * 30) + 20; const sP = Math.floor(Math.random() * 15) + 5; const dP = Math.floor(Math.random() * 25) + 10;
+
+            aCont.innerHTML += `
+                <div class="list-item grid-apt">
+                    <div class="item-name-box"><strong>${apt.name}</strong><span>${apt.location}</span></div>
+                    <div style="font-weight:600; font-size:0.9rem; color:#555;">${o ? o.name : '—'}</div>
+                    <div class="stats-wrapper">
+                        ${createHalfChart(bP, 'var(--booking)', 'Booking')}
+                        ${createHalfChart(sP, 'var(--szallas)', 'Szállás')}
+                        ${createHalfChart(dP, 'var(--text)', 'Saját')}
+                    </div>
+                    <div class="action-btns">
+                        <button class="btn-outline" onclick="openAptModal(${apt.id})">Szerk.</button> 
+                        <button class="btn-outline" onclick="openCalendar(${apt.id})">Naptár</button> 
+                        <button class="btn-outline btn-del" onclick="delApt(${apt.id})">X</button>
+                    </div>
+                </div>`;
+        });
+
+        // Partnerek
+        const oCont = document.getElementById('owner-list-container'); oCont.innerHTML = "";
+        db.owners.forEach(o => {
+            oCont.innerHTML += `
+                <div class="list-item grid-owner">
+                    <div style="font-weight:700; font-size:1.1rem;">${o.name}</div>
+                    <div style="font-family:monospace; background:#f5f5f5; padding:8px 15px; border-radius:50px; font-size:0.85rem; width:fit-content; color:#555;">KÓD: ${o.accessCode}</div>
+                    <div class="action-btns">
+                        <button class="btn-outline" onclick="openOwnerModal('${o.id}')">Szerk.</button> 
+                        <button class="btn-outline btn-del" onclick="delOwner('${o.id}')">X</button>
+                    </div>
+                </div>`;
+        });
+
+        // Foglalások
+        const bCont = document.getElementById('bookings-container'); bCont.innerHTML = db.bookings.length ? "" : "<p style='padding:3rem; color:#999; text-align:center; font-size:0.9rem;'>Nincs rögzített foglalás.</p>";
+        db.bookings.slice(-8).reverse().forEach(b => {
+            bCont.innerHTML += `
+                <div class="list-item grid-booking">
+                    <div class="item-name-box"><strong>${b.guestName}</strong><span>${b.aptName}</span></div>
+                    <div style="font-size:0.85rem; font-weight:600;">${b.checkIn} - ${b.checkOut}</div>
+                    <div style="color:#666;">${b.guests} fő</div>
+                    <div style="font-weight:700; color:var(--accent);">${b.totalPrice ? b.totalPrice.toLocaleString()+' Ft' : '—'}</div>
+                    <div class="action-btns">
+                        <button class="btn-outline btn-del" onclick="delBooking(${b.id})">X</button>
+                    </div>
+                </div>`;
+        });
+    }
+
+    // DINAMIKUS KÉP ELŐNÉZET AZ ADMIN MODALBAN
+    function previewMainImage(event) {
+        const file = event.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) { document.getElementById('apt-modal-visual').style.backgroundImage = `url(${e.target.result})`; }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    async function toBase64(f) { return new Promise(res => { const r = new FileReader(); r.readAsDataURL(f); r.onload = () => res(r.result); }); }
+
+    function openAptModal(id) {
+        activeAptId = id; const s = document.getElementById('a-owner-select'); s.innerHTML = "";
+        db.owners.forEach(o => s.innerHTML += `<option value="${o.id}">${o.name}</option>`);
+        
+        const visual = document.getElementById('apt-modal-visual');
+        if(id) {
+            const a = db.apartments.find(x => x.id === id); 
+            document.getElementById('apt-modal-title').innerText = "Szerkesztés";
+            document.getElementById('a-name').value = a.name; document.getElementById('a-price').value = a.price; document.getElementById('a-loc').value = a.location;
+            visual.style.backgroundImage = a.mainImage ? `url(${a.mainImage})` : `linear-gradient(45deg, #E76F51, #06111C)`;
+        } else {
+            document.getElementById('apt-modal-title').innerText = "Új Ingatlan";
+            document.getElementById('a-name').value = ""; document.getElementById('a-price').value = "45000"; document.getElementById('a-loc').value = "";
+            visual.style.backgroundImage = `linear-gradient(45deg, #E76F51, #06111C)`;
+        }
+        document.getElementById('main-img-input').value = ""; 
+        document.getElementById('apt-modal').style.display='flex'; setTimeout(()=>document.getElementById('apt-modal').classList.add('active'),10);
+    }
+
+    async function saveApt() {
+        const name = document.getElementById('a-name').value, loc = document.getElementById('a-loc').value, price = parseInt(document.getElementById('a-price').value);
+        if(!name || !loc) return showToast("Adatok megadása kötelező!");
+        const mainF = document.getElementById('main-img-input').files[0];
+        
+        let mImg = ""; if(activeAptId) mImg = db.apartments.find(x=>x.id===activeAptId).mainImage;
+        if(mainF) mImg = await toBase64(mainF);
+        
+        if(activeAptId) Object.assign(db.apartments.find(x=>x.id===activeAptId), {name, location: loc, price, ownerId: document.getElementById('a-owner-select').value, mainImage: mImg});
+        else db.apartments.push({id: Date.now(), name, location: loc, price, ownerId: document.getElementById('a-owner-select').value, mainImage: mImg, bookedDates: [], status:"active"});
+        
+        saveDb(); render(); closeModals(); showToast("Mentve!");
+    }
+
+    function openOwnerModal(id) {
+        activeOwnerId = id;
+        if(id) { const o = db.owners.find(x => x.id === id); document.getElementById('o-name').value = o.name; document.getElementById('o-code').value = o.accessCode; }
+        else { document.getElementById('o-name').value = ""; document.getElementById('o-code').value = ""; }
+        document.getElementById('owner-modal').style.display='flex'; setTimeout(()=>document.getElementById('owner-modal').classList.add('active'),10);
+    }
+
+    function saveOwner() {
+        const n = document.getElementById('o-name').value, c = document.getElementById('o-code').value;
+        if(!n || !c) return showToast("Hiányzó adatok!");
+        if(activeOwnerId) { const o = db.owners.find(x => x.id === activeOwnerId); o.name = n; o.accessCode = c; }
+        else db.owners.push({id: "O"+Date.now(), name: n, accessCode: c});
+        saveDb(); render(); closeModals(); showToast("Partner mentve!");
+    }
+
+    function openCalendar(id) { activeAptId = id; const a = db.apartments.find(x => x.id === id); selDates = a.bookedDates || []; document.getElementById('calendar-modal').style.display='flex'; setTimeout(()=>document.getElementById('calendar-modal').classList.add('active'),10); renderAdminCal(); }
+    
+    function renderAdminCal() {
+        const grid = document.getElementById('admin-cal-grid'); grid.innerHTML = "";
+        const mNames = ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"];
+        document.getElementById('cal-month').innerText = `${vDate.getFullYear()} ${mNames[vDate.getMonth()]}`;
+        
+        ["Hé", "Ke", "Sze", "Cs", "Pé", "Szo", "Va"].forEach(d => grid.innerHTML += `<div style="font-size:0.6rem; font-weight:700; color:#999; margin-bottom:5px;">${d}</div>`);
+        
+        const first = new Date(vDate.getFullYear(), vDate.getMonth(), 1).getDay();
+        const days = new Date(vDate.getFullYear(), vDate.getMonth() + 1, 0).getDate();
+        const offset = (first === 0 ? 7 : first) - 1;
+        for(let i=0; i<offset; i++) grid.innerHTML += `<div></div>`;
+        
+        for(let d=1; d<=days; d++) {
+            const s = `${vDate.getFullYear()}-${(vDate.getMonth()+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+            const el = document.createElement('div'); el.className = `cal-day ${selDates.includes(s)?'booked':''}`; el.innerText = d;
+            el.onclick = () => { if(selDates.includes(s)) selDates = selDates.filter(x=>x!==s); else selDates.push(s); renderAdminCal(); };
+            grid.appendChild(el);
+        }
+    }
+    
+    function saveBlocks() { db.apartments.find(x => x.id === activeAptId).bookedDates = selDates; saveDb(); closeModals(); render(); showToast("Naptár frissítve!"); }
+    function changeMonth(dir) { vDate.setMonth(vDate.getMonth()+dir); renderAdminCal(); }
+    function delBooking(id) { if(confirm("Törli a foglalást?")) { db.bookings = db.bookings.filter(x=>x.id!==id); saveDb(); render(); } }
+    function delApt(id) { if(confirm("Törli az ingatlant?")) { db.apartments = db.apartments.filter(x=>x.id!==id); saveDb(); render(); } }
+    function delOwner(id) { if(confirm("Törli a partnert?")) { db.owners = db.owners.filter(o=>o.id!==id); saveDb(); render(); } }
+    function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => { m.classList.remove('active'); setTimeout(()=>m.style.display='none', 400); }); activeAptId = null; activeOwnerId = null; }
+
+    render();
+</script>
+</body>
+</html>
