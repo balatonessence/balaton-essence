@@ -38,24 +38,20 @@
         /* LISTÁK RESZPONZÍVAN */
         .admin-list { background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); overflow: hidden; margin-bottom: 3rem; }
         
-        /* Mobilon eltüntetjük a fejlécet */
         .list-head { display: none; }
         
-        /* Mobilon a listaelemek kártyák lesznek */
         .list-item { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; border-bottom: 1px solid var(--border); transition: 0.2s; }
         .list-item:hover { background: #fafafa; }
         
         .item-data { display: flex; flex-direction: column; gap: 0.5rem; width: 100%; }
         .action-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; width: 100%; }
 
-        /* Desktop Grid nézet */
         @media (min-width: 992px) {
             .list-head { display: grid; padding: 1rem 2.5rem; background: #fcfcfc; border-bottom: 1px solid var(--border); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #999; }
             .list-item { display: grid; padding: 1.5rem 2.5rem; }
             .item-data { flex-direction: row; align-items: center; display: contents; }
             .action-btns { margin-top: 0; justify-content: flex-end; }
             
-            /* Különböző oszlopkiosztások asztali gépre */
             .grid-apt { grid-template-columns: 2fr 1fr 3.5fr 1.5fr; gap: 1rem; }
             .grid-owner { grid-template-columns: 2fr 2fr 1.5fr; gap: 1rem; }
             .grid-booking { grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr; gap: 1rem; }
@@ -76,7 +72,7 @@
         .chart-label { font-size: 0.65rem; font-weight: 800; color: var(--text); margin-bottom: 2px; }
         .chart-source-name { font-size: 0.55rem; font-weight: 700; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* MODALOK (SPLIT-SCREEN DESIGN) */
+        /* MODALOK */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
         .modal-overlay.active { display: flex; opacity: 1; }
         
@@ -96,6 +92,13 @@
         input, select, textarea { width: 100%; border: none; border-bottom: 2px solid #eee; padding: 0.8rem 0; outline: none; font-family: 'Montserrat'; font-size: 1.1rem; background: transparent; transition: 0.3s; }
         input:focus, select:focus, textarea:focus { border-bottom-color: var(--accent); }
         
+        /* GALÉRIA ELŐNÉZET STÍLUSOK */
+        .gallery-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .gallery-thumb-wrapper { position: relative; display: inline-block; }
+        .gallery-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .gallery-remove-btn { position: absolute; top: -5px; right: -5px; background: #dc2626; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .gallery-remove-btn:hover { background: #b91c1c; transform: scale(1.1); }
+
         /* NAPTÁR */
         .mini-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; margin-top: 1rem; width: 100%; }
         .cal-day { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; border-radius: 4px; transition: 0.2s; }
@@ -167,6 +170,13 @@
             <div class="form-group"><label>Alapár / éj (Ft)</label><input type="number" id="a-price" placeholder="45000"></div>
             <div class="form-group"><label>Tulajdonos</label><select id="a-owner-select"></select></div>
             <div class="form-group"><label>Fő Borítókép feltöltése</label><input type="file" id="main-img-input" accept="image/*" onchange="previewMainImage(event)"></div>
+            
+            <div class="form-group">
+                <label>Galéria képek feltöltése (Több is választható)</label>
+                <input type="file" id="gallery-img-input" accept="image/*" multiple onchange="handleGalleryUpload(event)">
+                <div id="gallery-preview-container" class="gallery-preview"></div>
+            </div>
+
             <div style="margin-top:auto; padding-top:2rem;">
                 <button class="btn-cta" style="width:100%;" onclick="saveApt()">Adatok Mentése</button>
             </div>
@@ -210,6 +220,7 @@
 <script>
     if (sessionStorage.getItem('isAdmin') !== 'true') window.location.href = 'index.html';
     let activeAptId = null, activeOwnerId = null, selDates = [], vDate = new Date(); vDate.setDate(1);
+    let currentGallery = []; // Ideiglenes tömb a galéria képek tárolására
 
     function showToast(m) { 
         const c = document.getElementById('toast-container'); const t = document.createElement('div');
@@ -217,7 +228,6 @@
         setTimeout(() => { t.classList.remove('show'); setTimeout(()=>t.remove(), 400); }, 3000); 
     }
 
-    // FÉLKÖR GRAFIKA KÓD
     function createHalfChart(percent, color, label) {
         const r = 24; const circ = Math.PI * r; const offset = circ - (percent / 100) * circ;
         return `
@@ -235,15 +245,18 @@
     }
 
     function render() {
-        // Ingatlanok (Responsive classes added)
         const aCont = document.getElementById('apt-list-container'); aCont.innerHTML = "";
         db.apartments.forEach(apt => {
             const o = db.owners.find(x => x.id === apt.ownerId);
             const bP = Math.floor(Math.random() * 30) + 20; const sP = Math.floor(Math.random() * 15) + 5; const dP = Math.floor(Math.random() * 25) + 10;
+            const galleryCount = apt.gallery ? apt.gallery.length : 0;
 
             aCont.innerHTML += `
                 <div class="list-item grid-apt">
-                    <div class="item-name-box"><strong>${apt.name}</strong><span>${apt.location}</span></div>
+                    <div class="item-name-box">
+                        <strong>${apt.name}</strong>
+                        <span>${apt.location} | ${galleryCount} galéria kép</span>
+                    </div>
                     <div style="font-weight:600; font-size:0.9rem; color:#555;">${o ? o.name : '—'}</div>
                     <div class="stats-wrapper">
                         ${createHalfChart(bP, 'var(--booking)', 'Booking')}
@@ -258,7 +271,6 @@
                 </div>`;
         });
 
-        // Partnerek
         const oCont = document.getElementById('owner-list-container'); oCont.innerHTML = "";
         db.owners.forEach(o => {
             oCont.innerHTML += `
@@ -272,7 +284,6 @@
                 </div>`;
         });
 
-        // Foglalások
         const bCont = document.getElementById('bookings-container'); bCont.innerHTML = db.bookings.length ? "" : "<p style='padding:3rem; color:#999; text-align:center; font-size:0.9rem;'>Nincs rögzített foglalás.</p>";
         db.bookings.slice(-8).reverse().forEach(b => {
             bCont.innerHTML += `
@@ -288,7 +299,6 @@
         });
     }
 
-    // DINAMIKUS KÉP ELŐNÉZET AZ ADMIN MODALBAN
     function previewMainImage(event) {
         const file = event.target.files[0];
         if (file) {
@@ -296,6 +306,37 @@
             reader.onload = function(e) { document.getElementById('apt-modal-visual').style.backgroundImage = `url(${e.target.result})`; }
             reader.readAsDataURL(file);
         }
+    }
+
+    // ÚJ GALÉRIA KEZELŐ FÜGGVÉNYEK
+    async function handleGalleryUpload(event) {
+        const files = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const base64 = await toBase64(files[i]);
+            currentGallery.push(base64);
+        }
+        renderGalleryPreview();
+        // Nullázzuk az inputot, hogy ugyanazt a fájlt is újra lehessen választani ha akarjuk
+        document.getElementById('gallery-img-input').value = ""; 
+    }
+
+    function renderGalleryPreview() {
+        const cont = document.getElementById('gallery-preview-container');
+        cont.innerHTML = "";
+        currentGallery.forEach((b64, index) => {
+            cont.innerHTML += `
+                <div class="gallery-thumb-wrapper">
+                    <img src="${b64}" class="gallery-thumb">
+                    <button class="gallery-remove-btn" onclick="removeGalleryImage(${index}, event)">✕</button>
+                </div>
+            `;
+        });
+    }
+
+    function removeGalleryImage(index, event) {
+        event.preventDefault(); // Megakadályozza az oldal ugrálását
+        currentGallery.splice(index, 1);
+        renderGalleryPreview();
     }
 
     async function toBase64(f) { return new Promise(res => { const r = new FileReader(); r.readAsDataURL(f); r.onload = () => res(r.result); }); }
@@ -310,12 +351,20 @@
             document.getElementById('apt-modal-title').innerText = "Szerkesztés";
             document.getElementById('a-name').value = a.name; document.getElementById('a-price').value = a.price; document.getElementById('a-loc').value = a.location;
             visual.style.backgroundImage = a.mainImage ? `url(${a.mainImage})` : `linear-gradient(45deg, #E76F51, #06111C)`;
+            // Meglévő galéria betöltése
+            currentGallery = a.gallery ? [...a.gallery] : [];
         } else {
             document.getElementById('apt-modal-title').innerText = "Új Ingatlan";
             document.getElementById('a-name').value = ""; document.getElementById('a-price').value = "45000"; document.getElementById('a-loc').value = "";
             visual.style.backgroundImage = `linear-gradient(45deg, #E76F51, #06111C)`;
+            // Új ingatlan esetén üres galéria
+            currentGallery = [];
         }
+        
         document.getElementById('main-img-input').value = ""; 
+        document.getElementById('gallery-img-input').value = "";
+        renderGalleryPreview(); // Frissítjük a vizuális előnézetet
+
         document.getElementById('apt-modal').style.display='flex'; setTimeout(()=>document.getElementById('apt-modal').classList.add('active'),10);
     }
 
@@ -327,8 +376,15 @@
         let mImg = ""; if(activeAptId) mImg = db.apartments.find(x=>x.id===activeAptId).mainImage;
         if(mainF) mImg = await toBase64(mainF);
         
-        if(activeAptId) Object.assign(db.apartments.find(x=>x.id===activeAptId), {name, location: loc, price, ownerId: document.getElementById('a-owner-select').value, mainImage: mImg});
-        else db.apartments.push({id: Date.now(), name, location: loc, price, ownerId: document.getElementById('a-owner-select').value, mainImage: mImg, bookedDates: [], status:"active"});
+        if(activeAptId) {
+            Object.assign(db.apartments.find(x=>x.id===activeAptId), {
+                name, location: loc, price, ownerId: document.getElementById('a-owner-select').value, mainImage: mImg, gallery: [...currentGallery]
+            });
+        } else {
+            db.apartments.push({
+                id: Date.now(), name, location: loc, price, ownerId: document.getElementById('a-owner-select').value, mainImage: mImg, gallery: [...currentGallery], bookedDates: [], status:"active"
+            });
+        }
         
         saveDb(); render(); closeModals(); showToast("Mentve!");
     }
@@ -370,7 +426,18 @@
         }
     }
     
-    function saveBlocks() { db.apartments.find(x => x.id === activeAptId).bookedDates = selDates; saveDb(); closeModals(); render(); showToast("Naptár frissítve!"); }
+    function saveBlocks() { 
+        const source = document.getElementById('manual-source').value;
+        const apt = db.apartments.find(x => x.id === activeAptId);
+        apt.bookedDates = selDates;
+        apt.lastBlockSource = source; 
+        
+        saveDb(); 
+        closeModals(); 
+        render(); 
+        showToast("Naptár frissítve!"); 
+    }
+    
     function changeMonth(dir) { vDate.setMonth(vDate.getMonth()+dir); renderAdminCal(); }
     function delBooking(id) { if(confirm("Törli a foglalást?")) { db.bookings = db.bookings.filter(x=>x.id!==id); saveDb(); render(); } }
     function delApt(id) { if(confirm("Törli az ingatlant?")) { db.apartments = db.apartments.filter(x=>x.id!==id); saveDb(); render(); } }

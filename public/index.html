@@ -204,13 +204,44 @@
         });
     }
 
-    // LOGIN LOGIKA
-    function openLogin(role) { curRole = role; document.getElementById('login-title').innerText = role === 'admin' ? 'Központi Admin' : 'Partner Belépés'; document.getElementById('login-pwd').value = ''; document.getElementById('login-modal').style.display='flex'; setTimeout(()=>document.getElementById('login-modal').classList.add('active'),10); }
-    function closeLogin() { document.getElementById('login-modal').classList.remove('active'); setTimeout(()=>document.getElementById('login-modal').style.display='none',400); }
+    // --- ÚJ, GOLYÓÁLLÓ LOGIN LOGIKA ---
+    function openLogin(role) { 
+        curRole = role; 
+        document.getElementById('login-title').innerText = role === 'admin' ? 'Központi Admin' : 'Partner Belépés'; 
+        document.getElementById('login-pwd').value = ''; 
+        document.getElementById('login-modal').style.display='flex'; 
+        setTimeout(()=>document.getElementById('login-modal').classList.add('active'),10); 
+    }
+    
+    function closeLogin() { 
+        document.getElementById('login-modal').classList.remove('active'); 
+        setTimeout(()=>document.getElementById('login-modal').style.display='none',400); 
+    }
+    
     function attemptLogin() {
-        const v = document.getElementById('login-pwd').value;
-        if(curRole === 'admin' && v === db.adminCode) { sessionStorage.setItem('isAdmin', 'true'); window.location.href='admin.html'; }
-        else { const o = db.owners.find(x => x.accessCode === v); if(o) { sessionStorage.setItem('loggedOwner', JSON.stringify(o)); window.location.href='tulaj.html'; } else showToast("Érvénytelen belépési kód!"); }
+        // Levágjuk a véletlenül beírt láthatatlan szóközöket az elejéről/végéről
+        const rawInput = document.getElementById('login-pwd').value;
+        const v = rawInput.trim(); 
+
+        if (curRole === 'admin') {
+            // Admin belépés: nem különböztetjük meg a kis- és nagybetűket, ha a db.adminCode üres lenne, az "admin123" a fallback.
+            const validAdminPass = (db.adminCode || "admin123").toLowerCase();
+            if (v.toLowerCase() === validAdminPass) {
+                sessionStorage.setItem('isAdmin', 'true'); 
+                window.location.href = 'admin.html'; 
+            } else {
+                showToast("Helytelen admin jelszó!");
+            }
+        } else { 
+            // Partner belépés
+            const o = db.owners.find(x => x.accessCode.trim() === v); 
+            if (o) { 
+                sessionStorage.setItem('loggedOwner', JSON.stringify(o)); 
+                window.location.href = 'tulaj.html'; 
+            } else { 
+                showToast("Érvénytelen belépési kód!"); 
+            }
+        }
     }
 
     // RÉSZLETEK (GALÉRIA) MODAL
