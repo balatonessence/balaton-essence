@@ -1,4 +1,4 @@
-// Globális változó, ami garantálja, hogy a tömbök alapból léteznek
+// Alapértelmezett állapot, ha a szerver nem válaszolna
 let db = { adminCode: "admin123", owners: [], apartments: [], bookings: [] };
 
 // 1. Az adatbázis betöltése a Node.js (Railway) szerverről
@@ -6,36 +6,36 @@ async function initDatabase(callback) {
     try {
         console.log("Adatok lekérése a Postgres adatbázisból...");
         
-        // A cache: 'no-store' kényszeríti a böngészőt, hogy a legfrissebb adatot kérje
-        const response = await fetch('/api/data', { cache: 'no-store' });
+        // Hozzáadunk egy időbélyeget az URL-hez, hogy a böngésző véletlenül se cache-elje
+        const response = await fetch('/api/data?t=' + Date.now(), { cache: 'no-store' });
         
         if (response.ok) {
             const serverData = await response.json();
             
-            // --- ADATGYÓGYÍTÁS (Data Healing) ---
-            // Ha a szerverről jövő adatból hiányzik valami, pótoljuk üres tömbbel!
-            // Így a weboldal render() függvénye soha nem fog összeomlani.
-            db.adminCode = serverData.adminCode || "admin123";
-            db.owners = serverData.owners || [];
-            db.apartments = serverData.apartments || [];
-            db.bookings = serverData.bookings || [];
+            // Ha a szerverről jövő adat valid, átvesszük, különben marad az alapértelmezett
+            if (serverData) {
+                db.adminCode = serverData.adminCode || "admin123";
+                db.owners = serverData.owners || [];
+                db.apartments = serverData.apartments || [];
+                db.bookings = serverData.bookings || [];
+            }
             
-            console.log("✅ Adatok sikeresen betöltve és ellenőrizve!");
-            
-            // Megrajzoljuk a felületet
+            console.log("✅ Adatok betöltve:", db);
             if (callback) callback();
         } else {
-            console.error("Hiba az adatok lekérésekor a szerverről.");
+            console.error("❌ Hiba a letöltésnél:", response.status);
+            if (callback) callback(); // Akkor is rajzoljunk, ha üres
         }
     } catch (error) {
-        console.error("Hálózati hiba az adatbázis betöltésekor:", error);
+        console.error("❌ Hálózati hiba:", error);
+        if (callback) callback();
     }
 }
 
 // 2. Az összes adat visszamentése a Postgres szerverre
 async function saveDb() {
     try {
-        console.log("Mentés folyamatban...");
+        console.log("📤 Mentés a szerverre...");
         const response = await fetch('/api/data', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -43,11 +43,15 @@ async function saveDb() {
         });
 
         if (response.ok) {
-            console.log("✅ Sikeresen mentve a Postgres adatbázisba!");
+            console.log("✅ Mentve a Postgres-be!");
+            // Egy kis villanásnyi várakozás, hogy a Postgres biztosan végezzen a háttérben
+            await new Promise(r => setTimeout(r, 100));
         } else {
-            console.error("Hiba a mentés során.");
+            const errBody = await response.text();
+            console.error("❌ Szerver hiba a mentésnél:", errBody);
+            alert("Hiba a mentés során: " + response.status);
         }
     } catch (error) {
-        console.error("Hálózati hiba a mentés során:", error);
+        console.error("❌ Hálózati hiba a mentésnél:", error);
     }
 }
