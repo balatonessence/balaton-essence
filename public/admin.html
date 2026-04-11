@@ -16,7 +16,7 @@
 
         /* HEADER */
         header { position: fixed; top: 0; left: 0; width: 100%; padding: 1rem 5vw; display: flex; flex-direction: column; gap: 1rem; align-items: center; z-index: 1000; background: rgba(249, 249, 247, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        @media (min-width: 768px) { header { flex-direction: row; padding: 1.5rem 5vw; } }
+        @media (min-width: 768px) { header { flex-direction: row; padding: 1.5rem 5vw; justify-content: space-between; } }
 
         .logo { font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 700; cursor: pointer; }
         .logo span { color: var(--accent); }
@@ -37,9 +37,7 @@
 
         /* LISTÁK RESZPONZÍVAN */
         .admin-list { background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); overflow: hidden; margin-bottom: 3rem; }
-        
         .list-head { display: none; }
-        
         .list-item { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; border-bottom: 1px solid var(--border); transition: 0.2s; }
         .list-item:hover { background: #fafafa; }
         
@@ -48,7 +46,7 @@
 
         @media (min-width: 992px) {
             .list-head { display: grid; padding: 1rem 2.5rem; background: #fcfcfc; border-bottom: 1px solid var(--border); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #999; }
-            .list-item { display: grid; padding: 1.5rem 2.5rem; }
+            .list-item { display: grid; padding: 1.5rem 2.5rem; align-items: center; }
             .item-data { flex-direction: row; align-items: center; display: contents; }
             .action-btns { margin-top: 0; justify-content: flex-end; }
             
@@ -57,13 +55,18 @@
             .grid-booking { grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr; gap: 1rem; }
         }
 
-        .item-name-box strong { display: block; font-family: 'Playfair Display'; font-size: 1.25rem; color: var(--text); margin-bottom: 4px; }
-        .item-name-box span { font-size: 0.7rem; color: #888; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; }
+        .item-name-box strong { display: flex; align-items: center; font-family: 'Playfair Display'; font-size: 1.25rem; color: var(--text); margin-bottom: 4px; flex-wrap: wrap; gap: 8px; }
+        .item-name-box span { font-size: 0.75rem; color: #666; font-weight: 600; line-height: 1.4; display: block; }
+
+        /* SZÍNES CÍMKÉK (BADGES) A KÜLÖNBÖZŐ RENDELÉSEKHEZ */
+        .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
+        .badge-essence { background: rgba(231, 111, 81, 0.15); color: #E76F51; }
+        .badge-sun { background: rgba(233, 196, 106, 0.2); color: #d4ae53; }
+        .badge-morning { background: rgba(42, 157, 143, 0.15); color: #2A9D8F; }
 
         /* --- STABIL FÉLKÖR GRAFIKA --- */
         .stats-wrapper { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
         @media (min-width: 992px) { .stats-wrapper { justify-content: center; flex-wrap: nowrap; } }
-        
         .chart-box { display: flex; flex-direction: column; align-items: center; width: 80px; }
         .chart-container { position: relative; width: 60px; height: 32px; margin-bottom: 8px; }
         .chart-svg { width: 60px; height: 60px; transform: rotate(-180deg); }
@@ -92,7 +95,7 @@
         input, select, textarea { width: 100%; border: none; border-bottom: 2px solid #eee; padding: 0.8rem 0; outline: none; font-family: 'Montserrat'; font-size: 1.1rem; background: transparent; transition: 0.3s; }
         input:focus, select:focus, textarea:focus { border-bottom-color: var(--accent); }
         
-        /* GALÉRIA ELŐNÉZET STÍLUSOK */
+        /* GALÉRIA ELŐNÉZET */
         .gallery-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
         .gallery-thumb-wrapper { position: relative; display: inline-block; }
         .gallery-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
@@ -113,10 +116,25 @@
 
 <header>
     <div class="logo" onclick="window.location.href='index.html'">Balaton<span>.</span>Essence ADMIN</div>
-    <button onclick="sessionStorage.clear(); window.location.href='index.html'" class="btn-outline">Kijelentkezés</button>
+    <div style="display:flex; gap:10px;">
+        <button onclick="window.location.href='index.html'" class="btn-outline">Vissza a Portálra</button>
+        <button onclick="sessionStorage.clear(); window.location.href='index.html'" class="btn-outline" style="border-color: #dc2626; color: #dc2626;">Kijelentkezés</button>
+    </div>
 </header>
 
 <main>
+    <div class="section-header"><h2>Beérkezett Foglalások és Rendelések</h2></div>
+    <div class="admin-list">
+        <div class="list-head grid-booking">
+            <div>Vendég / Részletek</div>
+            <div>Dátum(ok)</div>
+            <div>Mennyiség</div>
+            <div>Összeg</div>
+            <div style="text-align: right;">Művelet</div>
+        </div>
+        <div id="bookings-container"></div>
+    </div>
+
     <div class="section-header">
         <h2>Ingatlanok & Kihasználtság</h2>
         <button class="btn-cta" onclick="openAptModal(null)">+ Új Apartman</button>
@@ -143,18 +161,6 @@
             <div style="text-align: right;">Műveletek</div>
         </div>
         <div id="owner-list-container"></div>
-    </div>
-
-    <div class="section-header"><h2>Legutóbbi foglalások</h2></div>
-    <div class="admin-list">
-        <div class="list-head grid-booking">
-            <div>Vendég / Apartman</div>
-            <div>Dátumok</div>
-            <div>Létszám</div>
-            <div>Összeg</div>
-            <div style="text-align: right;">Művelet</div>
-        </div>
-        <div id="bookings-container"></div>
     </div>
 </main>
 
@@ -218,9 +224,11 @@
 
 <script src="database.js"></script>
 <script>
-    if (sessionStorage.getItem('isAdmin') !== 'true') window.location.href = 'index.html';
+    // Biztonsági ellenőrzés (élesítéshez)
+    // if (sessionStorage.getItem('isAdmin') !== 'true') window.location.href = 'index.html';
+    
     let activeAptId = null, activeOwnerId = null, selDates = [], vDate = new Date(); vDate.setDate(1);
-    let currentGallery = []; // Ideiglenes tömb a galéria képek tárolására
+    let currentGallery = []; 
 
     function showToast(m) { 
         const c = document.getElementById('toast-container'); const t = document.createElement('div');
@@ -245,6 +253,7 @@
     }
 
     function render() {
+        // Ingatlanok
         const aCont = document.getElementById('apt-list-container'); aCont.innerHTML = "";
         db.apartments.forEach(apt => {
             const o = db.owners.find(x => x.id === apt.ownerId);
@@ -271,6 +280,7 @@
                 </div>`;
         });
 
+        // Partnerek
         const oCont = document.getElementById('owner-list-container'); oCont.innerHTML = "";
         db.owners.forEach(o => {
             oCont.innerHTML += `
@@ -284,14 +294,41 @@
                 </div>`;
         });
 
-        const bCont = document.getElementById('bookings-container'); bCont.innerHTML = db.bookings.length ? "" : "<p style='padding:3rem; color:#999; text-align:center; font-size:0.9rem;'>Nincs rögzített foglalás.</p>";
-        db.bookings.slice(-8).reverse().forEach(b => {
+        // Foglalások & Rendelések (INTELLIGENS MEGJELENÍTÉS)
+        const bCont = document.getElementById('bookings-container'); 
+        bCont.innerHTML = db.bookings.length ? "" : "<p style='padding:3rem; color:#999; text-align:center; font-size:0.9rem;'>Nincs rögzített foglalás vagy rendelés.</p>";
+        
+        // Utolsó 15 foglalás visszafelé
+        db.bookings.slice(-15).reverse().forEach(b => {
+            
+            // 1. Badge típus meghatározása
+            let badgeHtml = '';
+            let dateHtml = '';
+            let qtyHtml = '';
+
+            if (b.source === 'sun_rental') {
+                badgeHtml = '<span class="badge badge-sun">Sun Bérlés</span>';
+                dateHtml = b.checkIn; // Sun-nál csak 1 nap van
+                qtyHtml = `${b.guests} db`;
+            } else if (b.source === 'morning_delivery') {
+                badgeHtml = '<span class="badge badge-morning">Morning Rendelés</span>';
+                dateHtml = b.checkIn; // Morning-nál is csak 1 nap
+                qtyHtml = `${b.guests / 2} tál`; // Mivel 2 fős egy tál
+            } else {
+                badgeHtml = '<span class="badge badge-essence">Szállás</span>';
+                dateHtml = `${b.checkIn} - ${b.checkOut}`;
+                qtyHtml = `${b.guests} fő`;
+            }
+
             bCont.innerHTML += `
                 <div class="list-item grid-booking">
-                    <div class="item-name-box"><strong>${b.guestName}</strong><span>${b.aptName}</span></div>
-                    <div style="font-size:0.85rem; font-weight:600;">${b.checkIn} - ${b.checkOut}</div>
-                    <div style="color:#666;">${b.guests} fő</div>
-                    <div style="font-weight:700; color:var(--accent);">${b.totalPrice ? b.totalPrice.toLocaleString()+' Ft' : '—'}</div>
+                    <div class="item-name-box">
+                        <strong>${b.guestName} ${badgeHtml}</strong>
+                        <span>${b.aptName}</span>
+                    </div>
+                    <div style="font-size:0.85rem; font-weight:600;">${dateHtml}</div>
+                    <div style="color:#666; font-size:0.85rem;">${qtyHtml}</div>
+                    <div style="font-weight:700; color:var(--text);">${b.totalPrice ? b.totalPrice.toLocaleString()+' Ft' : '—'}</div>
                     <div class="action-btns">
                         <button class="btn-outline btn-del" onclick="delBooking(${b.id})">X</button>
                     </div>
@@ -308,7 +345,6 @@
         }
     }
 
-    // ÚJ GALÉRIA KEZELŐ FÜGGVÉNYEK
     async function handleGalleryUpload(event) {
         const files = event.target.files;
         for (let i = 0; i < files.length; i++) {
@@ -316,7 +352,6 @@
             currentGallery.push(base64);
         }
         renderGalleryPreview();
-        // Nullázzuk az inputot, hogy ugyanazt a fájlt is újra lehessen választani ha akarjuk
         document.getElementById('gallery-img-input').value = ""; 
     }
 
@@ -334,7 +369,7 @@
     }
 
     function removeGalleryImage(index, event) {
-        event.preventDefault(); // Megakadályozza az oldal ugrálását
+        event.preventDefault(); 
         currentGallery.splice(index, 1);
         renderGalleryPreview();
     }
@@ -351,19 +386,17 @@
             document.getElementById('apt-modal-title').innerText = "Szerkesztés";
             document.getElementById('a-name').value = a.name; document.getElementById('a-price').value = a.price; document.getElementById('a-loc').value = a.location;
             visual.style.backgroundImage = a.mainImage ? `url(${a.mainImage})` : `linear-gradient(45deg, #E76F51, #06111C)`;
-            // Meglévő galéria betöltése
             currentGallery = a.gallery ? [...a.gallery] : [];
         } else {
             document.getElementById('apt-modal-title').innerText = "Új Ingatlan";
             document.getElementById('a-name').value = ""; document.getElementById('a-price').value = "45000"; document.getElementById('a-loc').value = "";
             visual.style.backgroundImage = `linear-gradient(45deg, #E76F51, #06111C)`;
-            // Új ingatlan esetén üres galéria
             currentGallery = [];
         }
         
         document.getElementById('main-img-input').value = ""; 
         document.getElementById('gallery-img-input').value = "";
-        renderGalleryPreview(); // Frissítjük a vizuális előnézetet
+        renderGalleryPreview(); 
 
         document.getElementById('apt-modal').style.display='flex'; setTimeout(()=>document.getElementById('apt-modal').classList.add('active'),10);
     }
@@ -439,7 +472,7 @@
     }
     
     function changeMonth(dir) { vDate.setMonth(vDate.getMonth()+dir); renderAdminCal(); }
-    function delBooking(id) { if(confirm("Törli a foglalást?")) { db.bookings = db.bookings.filter(x=>x.id!==id); saveDb(); render(); } }
+    function delBooking(id) { if(confirm("Törli a foglalást/rendelést?")) { db.bookings = db.bookings.filter(x=>x.id!==id); saveDb(); render(); } }
     function delApt(id) { if(confirm("Törli az ingatlant?")) { db.apartments = db.apartments.filter(x=>x.id!==id); saveDb(); render(); } }
     function delOwner(id) { if(confirm("Törli a partnert?")) { db.owners = db.owners.filter(o=>o.id!==id); saveDb(); render(); } }
     function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => { m.classList.remove('active'); setTimeout(()=>m.style.display='none', 400); }); activeAptId = null; activeOwnerId = null; }
