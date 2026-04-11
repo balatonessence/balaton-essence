@@ -10,12 +10,10 @@ const PORT = process.env.PORT || 8080;
 
 app.use(cors());
 app.use(bodyParser.json({ limit: '10mb' }));
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Adatbázis kapcsolat felépítése
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    // Ha a saját gépedről (kívülről) csatlakozol a Railway-hez, ez kell:
     ssl: { rejectUnauthorized: false } 
 });
 
@@ -29,7 +27,6 @@ async function initDb() {
             );
         `);
         
-        // Ellenőrizzük, van-e már mentett adatunk. Ha nincs (első indulás), létrehozzuk.
         const res = await pool.query('SELECT data FROM app_state WHERE id = 1');
         if (res.rows.length === 0) {
             const defaultData = {
@@ -49,54 +46,62 @@ async function initDb() {
 }
 initDb();
 
-// --- API VÉGPONTOK ---
+// --- 1. API VÉGPONTOK (Mindig a static elé!) ---
 
-// 1. Adatok lekérése a böngészőnek
+// Adatok lekérése a böngészőnek
 app.get('/api/data', async (req, res) => {
     try {
         const result = await pool.query('SELECT data FROM app_state WHERE id = 1');
+        if (result.rows.length === 0) {
+            return res.json({ owners: [], apartments: [], bookings: [] });
+        }
         res.json(result.rows[0].data);
     } catch (err) {
-        res.status(500).json({ error: "Szerver hiba" });
+        console.error("❌ GET hiba:", err);
+        res.status(500).json({ error: "Szerver hiba az adatok lekérésekor" });
     }
 });
 
-// 2. Adatok mentése a Postgres-be
+// Adatok mentése a Postgres-be
 app.post('/api/data', async (req, res) => {
     try {
         const newData = req.body;
         await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [newData]);
         res.json({ message: "Adatok sikeresen mentve a Postgres-be!" });
     } catch (err) {
+        console.error("❌ POST hiba:", err);
         res.status(500).json({ error: "Hiba a mentés során" });
     }
 });
 
-// 3. Új foglalás kezelése
+// Új foglalás kezelése
 app.post('/api/bookings', async (req, res) => {
     try {
         const newBooking = req.body;
-        
-        // Letöltjük az aktuális állapotot
         const result = await pool.query('SELECT data FROM app_state WHERE id = 1');
         let currentData = result.rows[0].data;
 
-        // Belerakjuk a foglalást
         currentData.bookings.push(newBooking);
 
-        // Zároljuk a naptárat
         const apt = currentData.apartments.find(a => a.name === newBooking.aptName);
         if(apt && newBooking.datesToBlock) {
             apt.bookedDates = [...new Set([...(apt.bookedDates || []), ...newBooking.datesToBlock])];
         }
 
-        // Visszamentjük a frissített állapotot
         await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [currentData]);
-
         res.json({ message: "Sikeres foglalás!", bookingId: newBooking.id });
     } catch (err) {
+        console.error("❌ Booking hiba:", err);
         res.status(500).json({ error: "Hiba a foglalás rögzítésekor" });
     }
+});
+
+// --- 2. STATIKUS FÁJLOK (public mappa) ---
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Fallback: Ha semmi nem talált, az index.html-t adjuk vissza
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
