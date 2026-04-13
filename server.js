@@ -7,7 +7,6 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-// Golyóálló CORS beállítás
 app.use(cors({
     origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -15,7 +14,7 @@ app.use(cors({
 }));
 app.options('*', cors());
 
-// --- ADATMÉRET LIMIT EMELÉSE (A képek miatt 50MB) ---
+// 50MB limit, hogy a WebP csomagok kényelmesen átférjenek
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -36,15 +35,14 @@ async function initDb() {
         if (res.rows.length === 0) {
             const defaultData = { adminCode: "admin123", owners: [], apartments: [], bookings: [] };
             await pool.query('INSERT INTO app_state (id, data) VALUES (1, $1)', [defaultData]);
-            console.log("✅ Adatbázis inicializálva.");
         }
     } catch (err) {
-        console.error("❌ Adatbázis hiba:", err);
+        console.error("Adatbázis hiba:", err);
     }
 }
 initDb();
 
-app.get('/api/ping', (req, res) => res.send('PONG - A szerver frissítve és fut!'));
+app.get('/api/ping', (req, res) => res.send('PONG - Szerver aktív!'));
 
 app.get('/api/data', async (req, res) => {
     try {
@@ -61,17 +59,15 @@ app.post('/api/data', async (req, res) => {
         await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [newData]);
         res.json({ message: "Sikeres mentés!" });
     } catch (err) {
-        console.error("❌ Mentési hiba:", err);
         res.status(500).json({ error: "Mentési hiba" });
     }
 });
 
 app.use(express.static(path.join(__dirname, 'public')));
-
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Szerver fut a ${PORT} porton!`);
+    console.log(`🚀 Balaton Essence Szerver fut: ${PORT}`);
 });
