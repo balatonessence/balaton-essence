@@ -4,7 +4,6 @@ const API_URL = isLocal ? 'http://localhost:8080' : PRODUCTION_URL;
 
 let db = { adminCode: "admin123", owners: [], apartments: [], bookings: [] };
 
-// 1. ADATOK BETÖLTÉSE
 async function initDatabase(callback) {
     try {
         const response = await fetch(`${API_URL}/api/data?t=${Date.now()}`, { cache: 'no-store' });
@@ -23,10 +22,9 @@ async function initDatabase(callback) {
     }
 }
 
-// 2. ADATOK MENTÉSE (ADMIN)
 async function saveDb() {
     try {
-        console.log("📤 Mentés indítása a Postgres-be...");
+        console.log("📤 Mentés indítása...");
         const response = await fetch(`${API_URL}/api/data?t=${Date.now()}`, {
             method: 'POST',
             headers: { 
@@ -37,18 +35,18 @@ async function saveDb() {
         });
 
         if (response.ok) {
+            console.log("✅ Mentés sikeres!");
             await new Promise(r => setTimeout(r, 200));
-            console.log("✅ Sikeres mentés!");
         } else {
             const errBody = await response.text();
-            alert("Hiba a mentésnél: " + response.status + " - Az adatok túl nagyok vagy hálózati hiba történt.");
+            alert("Hiba a mentésnél: " + response.status);
         }
     } catch (err) {
-        alert("Hálózati hiba! Nem sikerült elérni a szervert.");
+        alert("Hálózati hiba mentéskor!");
     }
 }
 
-// 3. INTELLIGENS KÉPTÖMÖRÍTŐ (Megelőzi a 413-as hibát)
+// EZ HIÁNYZIK A KONZOLOD SZERINT:
 async function compressImage(file, maxWidth = 1200, quality = 0.7) {
     return new Promise((resolve) => {
         const reader = new FileReader();
@@ -56,6 +54,7 @@ async function compressImage(file, maxWidth = 1200, quality = 0.7) {
         reader.onload = (event) => {
             const img = new Image();
             img.src = event.target.result;
+            img.onerror = () => resolve(null);
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 let width = img.width;
