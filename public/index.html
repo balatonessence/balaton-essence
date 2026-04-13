@@ -14,6 +14,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
+        /* HEADER */
         header { position: fixed; top: 0; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(252, 251, 249, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); transition: 0.3s; }
         .logo-container { display: flex; flex-direction: column; align-items: center; text-decoration: none; }
         .logo-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: var(--text); letter-spacing: 2px; line-height: 1; }
@@ -25,19 +26,28 @@
         .btn-primary { background: var(--accent); color: white; border: 1px solid var(--accent); padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.4s; text-decoration: none; }
         .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2); }
 
+        /* HERO */
         .hero { height: 100vh; display: flex; align-items: center; padding: 0 5vw; background: linear-gradient(to right, rgba(252,251,249, 1) 0%, rgba(252,251,249, 0.85) 45%, rgba(252,251,249, 0) 100%), url('https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat; }
         .hero-content { max-width: 650px; margin-top: 5rem; }
         .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 1.5rem; color: var(--text); }
 
         /* PILLARS */
         .pillars-section { padding: 5rem 5vw 8rem 5vw; background: var(--bg); max-width: 1600px; margin: 0 auto; }
-        .pillars-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; }
-        .pillar-card { background: white; border: 1px solid var(--border); box-shadow: 0 15px 40px var(--shadow); transition: 0.4s; text-align: center; }
-        .pillar-card:hover { transform: translateY(-10px); }
-        .pillar-header { padding: 3rem 2rem; }
-        .pillar-img { width: 100%; height: 250px; background-size: cover; background-position: center; }
+        .section-header { text-align: center; margin-bottom: 4rem; }
+        .section-header h2 { font-family: 'Playfair Display'; font-size: 2.5rem; color: var(--text); }
 
-        /* CUSTOM LOGIN MODAL STYLES */
+        .pillars-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; }
+        .pillar-card { background: white; border: 1px solid var(--border); box-shadow: 0 15px 40px var(--shadow); transition: 0.4s; text-align: center; overflow: hidden; display: flex; flex-direction: column; }
+        .pillar-card:hover { transform: translateY(-10px); }
+        .pillar-header { padding: 3rem 2rem; flex-grow: 1; }
+        .pillar-img { width: 100%; aspect-ratio: 4/3; background-size: cover; background-position: center; }
+
+        /* DINAMIKUS APARTMAN GRID */
+        .apt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 3rem; padding: 0 5vw; max-width: 1600px; margin: 0 auto 8rem; }
+        .apt-card { background: white; border: 1px solid var(--border); text-decoration: none; color: inherit; transition: 0.4s; display: flex; flex-direction: column; }
+        .apt-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px var(--shadow); }
+
+        /* LOGIN MODAL */
         .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 51, 37, 0.7); backdrop-filter: blur(8px); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
         .login-overlay.active { display: flex; opacity: 1; }
         .login-modal { background: var(--bg); width: 90%; max-width: 400px; padding: 4rem 3rem; position: relative; border-radius: 4px; box-shadow: 0 30px 60px rgba(0,0,0,0.2); text-align: center; }
@@ -71,6 +81,9 @@
 </section>
 
 <section id="pillars" class="pillars-section">
+    <div class="section-header">
+        <h2>Essence Életérzés</h2>
+    </div>
     <div class="pillars-grid">
         <div class="pillar-card">
             <div class="pillar-header">
@@ -82,20 +95,21 @@
         </div>
         <div class="pillar-card">
             <div class="pillar-header">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 1rem;">APARTMENTS</h3>
-                <p style="font-style: italic; color: var(--text-light); margin-bottom: 1.5rem;">Prémium szállások.</p>
-                <button class="btn-primary" onclick="window.location.href='apartman.html?id=1'">Megnézem</button>
-            </div>
-            <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80');"></div>
-        </div>
-        <div class="pillar-card">
-            <div class="pillar-header">
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 1rem;">SLOW MORNING</h3>
                 <p style="font-style: italic; color: var(--text-light); margin-bottom: 1.5rem;">Lassú reggelek.</p>
                 <button class="btn-primary">Rendelés</button>
             </div>
             <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80');"></div>
         </div>
+    </div>
+</section>
+
+<section id="apartments" class="pillars-section" style="padding-top: 0;">
+    <div class="section-header">
+        <h2>Prémium Apartmanok</h2>
+    </div>
+    <div id="apartment-grid" class="apt-grid">
+        <p style="text-align: center; grid-column: 1/-1; color: #999;">Apartmanok betöltése...</p>
     </div>
 </section>
 
@@ -113,10 +127,39 @@
     <p>© 2026 Balaton Essence - Ederics</p>
 </footer>
 
-<script src="database.js"></script>
+<script src="database.js?v=4.0"></script>
 <script>
-    // Adatbázis inicializálás indításkor
-    initDatabase();
+    // Inicializálás és betöltés
+    document.addEventListener('DOMContentLoaded', () => {
+        initDatabase(renderIndexApartments);
+    });
+
+    function renderIndexApartments() {
+        const grid = document.getElementById('apartment-grid');
+        
+        if (!db.apartments || db.apartments.length === 0) {
+            grid.innerHTML = "<p style='text-align: center; grid-column: 1/-1;'>Jelenleg nincs elérhető apartman.</p>";
+            return;
+        }
+
+        grid.innerHTML = ""; // Betöltés szöveg törlése
+
+        db.apartments.forEach(apt => {
+            const mainImg = apt.mainImage || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80';
+            
+            grid.innerHTML += `
+                <a href="apartman.html?id=${apt.id}" class="apt-card">
+                    <div class="pillar-header">
+                        <h3 style="font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 0.5rem;">${apt.name}</h3>
+                        <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">${apt.location}</p>
+                        <p style="font-weight: 700; color: var(--accent); margin-bottom: 1.5rem;">${(apt.price || 0).toLocaleString()} Ft / éj-től</p>
+                        <span class="btn-primary" style="font-size: 0.6rem; padding: 0.5rem 1.2rem;">Megnézem</span>
+                    </div>
+                    <div class="pillar-img" style="background-image: url('${mainImg}')"></div>
+                </a>
+            `;
+        });
+    }
 
     function openLoginModal() {
         const overlay = document.getElementById('login-overlay');
