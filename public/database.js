@@ -1,8 +1,10 @@
-// Intelligens API URL meghatározás
-// Ha helyi gépen tesztelsz (pl. Live Server az 5500-as porton), a 8080-as Node szerverhez fordul.
-// Ha élesben fut (Railway / saját domain), akkor relatív útvonalat használ.
+// --- FIGYELEM! Ezt az URL-t állítsd be a pontos szerver címedre! ---
+// Ha a balatonessence.com a statikus weboldalad, ide a Railway szervered pontos címét kell beírni!
+// Pl: 'https://valami-projekt.up.railway.app' (Ne legyen perjel a végén!)
+const PRODUCTION_API_URL = 'https://balatonessence.com'; 
+
 const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-const API_BASE_URL = isLocalhost ? 'http://localhost:8080' : '';
+const API_BASE_URL = isLocalhost ? 'http://localhost:8080' : PRODUCTION_API_URL;
 
 // Alapértelmezett állapot, ha a szerver nem válaszolna
 let db = { adminCode: "admin123", owners: [], apartments: [], bookings: [] };
@@ -41,7 +43,7 @@ async function initDatabase(callback) {
 // 2. Az összes adat visszamentése a Postgres szerverre
 async function saveDb() {
     try {
-        console.log("📤 Mentés a szerverre...");
+        console.log(`📤 Mentés a szerverre (${API_BASE_URL}/api/data)...`);
         
         const response = await fetch(`${API_BASE_URL}/api/data`, {
             method: 'POST',
@@ -53,6 +55,8 @@ async function saveDb() {
             console.log("✅ Mentve a Postgres-be!");
             // Egy kis villanásnyi várakozás, hogy a Postgres biztosan végezzen a háttérben
             await new Promise(r => setTimeout(r, 100));
+            
+            // Ha idáig eljutott, sikeres a mentés!
         } else {
             const errBody = await response.text();
             console.error("❌ Szerver hiba a mentésnél:", errBody);
@@ -60,5 +64,6 @@ async function saveDb() {
         }
     } catch (error) {
         console.error("❌ Hálózati hiba a mentésnél:", error);
+        alert("Hálózati hiba! Nem sikerült elérni a szervert.");
     }
 }
