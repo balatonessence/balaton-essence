@@ -9,8 +9,8 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-// STATIKUS FÁJLOK (Ez javítja a "Cannot GET /" hibát)
-app.use(express.static(path.join(__dirname)));
+// FONTOS: Megmondjuk a szervernek, hogy a 'public' mappából szolgálja ki a fájlokat
+app.use(express.static(path.join(__dirname, 'public')));
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -40,7 +40,6 @@ async function performSync() {
         for (let apt of db.apartments) {
             let externalDates = [];
             
-            // Booking szinkron
             if (apt.icalBooking) {
                 try {
                     const events = await ical.fromURL(apt.icalBooking);
@@ -65,7 +64,6 @@ async function performSync() {
                 } catch (e) { console.error("Booking hiba:", apt.name); }
             }
 
-            // Szállás.hu szinkron
             if (apt.icalSzallas) {
                 try {
                     const events = await ical.fromURL(apt.icalSzallas);
@@ -99,12 +97,10 @@ async function performSync() {
     } catch (err) { console.error("Szinkron hiba:", err.message); }
 }
 
-// Automatikus futtatás 30 percenként
 setInterval(performSync, 1800000);
 
 // --- API VÉGPONTOK ---
 
-// Ügyfél oldali rendelések (SUP, Reggeli)
 app.post('/api/order', async (req, res) => {
     try {
         const { type, guest, date, note, aptName } = req.body;
@@ -143,9 +139,19 @@ app.post('/api/sync', async (req, res) => {
     res.json({ success: true });
 });
 
-// Főoldal kiszolgálása
+// Főoldal betöltése a public mappából
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Admin és egyéb oldalak direkt elérése
+app.get('/:page', (req, res) => {
+    const page = req.params.page;
+    if (page.endsWith('.html')) {
+        res.sendFile(path.join(__dirname, 'public', page));
+    } else {
+        res.sendFile(path.join(__dirname, 'public', `${page}.html`));
+    }
 });
 
 const PORT = process.env.PORT || 8080;
