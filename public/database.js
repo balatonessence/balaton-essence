@@ -1,3 +1,9 @@
+// Intelligens API URL meghatározás
+// Ha helyi gépen tesztelsz (pl. Live Server az 5500-as porton), a 8080-as Node szerverhez fordul.
+// Ha élesben fut (Railway / saját domain), akkor relatív útvonalat használ.
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const API_BASE_URL = isLocalhost ? 'http://localhost:8080' : '';
+
 // Alapértelmezett állapot, ha a szerver nem válaszolna
 let db = { adminCode: "admin123", owners: [], apartments: [], bookings: [] };
 
@@ -6,14 +12,14 @@ async function initDatabase(callback) {
     try {
         console.log("Adatok lekérése a Postgres adatbázisból...");
         
-        // Hozzáadunk egy időbélyeget az URL-hez, hogy a böngésző véletlenül se cache-elje
-        const response = await fetch('/api/data?t=' + Date.now(), { cache: 'no-store' });
+        // Dinamikus API URL használata a cache elkerülésével
+        const response = await fetch(`${API_BASE_URL}/api/data?t=${Date.now()}`, { cache: 'no-store' });
         
         if (response.ok) {
             const serverData = await response.json();
             
             // Ha a szerverről jövő adat valid, átvesszük, különben marad az alapértelmezett
-            if (serverData) {
+            if (serverData && Object.keys(serverData).length > 0) {
                 db.adminCode = serverData.adminCode || "admin123";
                 db.owners = serverData.owners || [];
                 db.apartments = serverData.apartments || [];
@@ -36,7 +42,8 @@ async function initDatabase(callback) {
 async function saveDb() {
     try {
         console.log("📤 Mentés a szerverre...");
-        const response = await fetch('/api/data', {
+        
+        const response = await fetch(`${API_BASE_URL}/api/data`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(db)

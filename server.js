@@ -8,7 +8,18 @@ const { Pool } = require('pg'); // A Postgres csatlakozó
 const app = express();
 const PORT = process.env.PORT || 8080;
 
-app.use(cors());
+// --- RÉSZLETES CORS BEÁLLÍTÁS ---
+// Ez engedi át a kéréseket a külső domainekről (pl. GitHub Pages vagy helyi Live Server)
+app.use(cors({
+    origin: '*', // Fejlesztés alatt ez engedélyez minden forrást. Később ide írhatod a fix domainedet (pl. 'https://balatonessence.com')
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
+
+// A "preflight" (OPTIONS) kérések automatikus elfogadása
+app.options('*', cors());
+// --------------------------------
+
 app.use(bodyParser.json({ limit: '10mb' }));
 
 // Adatbázis kapcsolat felépítése
