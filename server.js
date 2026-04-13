@@ -3,10 +3,14 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg');
 const ical = require('node-ical');
+const path = require('path');
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
+
+// STATIKUS FÁJLOK (Ez javítja a "Cannot GET /" hibát)
+app.use(express.static(path.join(__dirname)));
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -25,12 +29,12 @@ function getDaysArray(start, end) {
     return arr;
 }
 
-// --- AUTOMATIKUS SZINKRONIZÁCIÓ ---
+// --- AUTOMATIKUS SZINKRONIZÁCIÓ LOGIKA ---
 async function performSync() {
+    console.log("🔄 Szinkronizáció indítása...");
     try {
         const result = await pool.query('SELECT data FROM app_state WHERE id = 1');
         let db = result.rows[0].data;
-
         db.bookings = db.bookings || [];
 
         for (let apt of db.apartments) {
@@ -44,7 +48,6 @@ async function performSync() {
                         if (ev.type === 'VEVENT') {
                             const dates = getDaysArray(ev.start, ev.end);
                             externalDates.push(...dates);
-                            // Ha ez a foglalás még nincs a listánkban, adjuk hozzá
                             const bookingId = `B-${ev.uid || ev.start.getTime()}`;
                             if (!db.bookings.find(b => b.id === bookingId)) {
                                 db.bookings.push({
@@ -89,22 +92,19 @@ async function performSync() {
 
             const manual = apt.manualBlocks || [];
             apt.bookedDates = [...new Set([...manual, ...externalDates])];
-        }require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-const ical = require('node-ical');
+        }
 
-const app = express();
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
+        await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [db]);
+        console.log("✅ Szinkron kész.");
+    } catch (err) { console.error("Szinkron hiba:", err.message); }
+}
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-});
+// Automatikus futtatás 30 percenként
+setInterval(performSync, 1800000);
 
-// --- API: ÜGYFÉL OLDALI RENDELÉSEK BEKÜLDÉSE ---
+// --- API VÉGPONTOK ---
+
+// Ügyfél oldali rendelések (SUP, Reggeli)
 app.post('/api/order', async (req, res) => {
     try {
         const { type, guest, date, note, aptName } = req.body;
@@ -114,11 +114,7 @@ app.post('/api/order', async (req, res) => {
         db.extras = db.extras || [];
         db.extras.push({
             id: Date.now(),
-            type, // 'SUP', 'BREAKFAST', 'SUN'
-            guest,
-            aptName,
-            date,
-            note,
+            type, guest, aptName, date, note,
             status: 'pending',
             createdAt: new Date().toISOString()
         });
@@ -128,44 +124,18 @@ app.post('/api/order', async (req, res) => {
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// --- AUTOMATIKUS SZINKRON (30 perc) ---
-async function performSync() {
+app.get('/api/data', async (req, res) => {
     try {
         const result = await pool.query('SELECT data FROM app_state WHERE id = 1');
-        let db = result.rows[0].data;
-        // ... (a korábbi iCal szinkron kódja változatlanul ide jön) ...
-        await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [db]);
-    } catch (e) { console.log("Szinkron hiba"); }
-}
-setInterval(performSync, 1800000);
-
-app.get('/api/data', async (req, res) => {
-    const r = await pool.query('SELECT data FROM app_state WHERE id = 1');
-    res.json(r.rows[0].data);
+        res.json(result.rows[0].data);
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post('/api/data', async (req, res) => {
-    await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [req.body]);
-    res.json({ message: "OK" });
-});
-
-app.listen(process.env.PORT || 8080);
-
-        await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [db]);
-        console.log("✅ Szinkron kész.");
-    } catch (err) { console.error("Szinkron hiba:", err.message); }
-}
-
-setInterval(performSync, 30 * 60 * 1000); // 30 percenként
-
-app.get('/api/data', async (req, res) => {
-    const result = await pool.query('SELECT data FROM app_state WHERE id = 1');
-    res.json(result.rows[0].data);
-});
-
-app.post('/api/data', async (req, res) => {
-    await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [req.body]);
-    res.json({ message: "OK" });
+    try {
+        await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [req.body]);
+        res.json({ message: "OK" });
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post('/api/sync', async (req, res) => {
@@ -173,4 +143,12 @@ app.post('/api/sync', async (req, res) => {
     res.json({ success: true });
 });
 
-app.listen(process.env.PORT || 8080);
+// Főoldal kiszolgálása
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => {
+    console.log(`🚀 Szerver fut a ${PORT} porton...`);
+});
