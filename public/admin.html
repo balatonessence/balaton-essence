@@ -5,6 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Központi Vezérlőpult | Balaton Essence</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+
+    <script src="js/database.js"></script>
+    <script>
+        // Azonnali ellenőrzés betöltéskor
+        (async function() {
+            // Megvárjuk, amíg a database.js betölti az adatokat a szerverről
+            await initDatabase();
+            
+            // Ha nincs belépve (pl. nem a checkAdmin-on keresztül jött), 
+            // itt is kérhetünk egy ellenőrzést, de a legegyszerűbb, ha a munkamenetet nézzük.
+            // Egyelőre egy egyszerű visszaküldés, ha illetéktelen próbálkozik:
+            const sessionActive = sessionStorage.getItem('adminLoggedIn');
+            
+            if (!sessionActive) {
+                const code = prompt("Admin hozzáférés szükséges:");
+                if (code === db.adminCode) {
+                    sessionStorage.setItem('adminLoggedIn', 'true');
+                } else {
+                    window.location.href = "index.html";
+                }
+            }
+        })();
+    </script>
+
     <style>
         :root { --bg: #F9F9F7; --text: #1A1A1A; --accent: #E76F51; --blue: #0077B6; --border: #eee; --booking: #003580; --szallas: #e62e2e; --selection: rgba(231, 111, 81, 0.15); }
         * { box-sizing: border-box; margin: 0; padding: 0; }
