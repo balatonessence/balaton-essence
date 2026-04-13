@@ -5,16 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Központi Vezérlőpult | Balaton Essence</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-
-    <script src="database.js?v=13.0"></script>
+    <script src="database.js?v=45"></script>
     <script>
-        // Biztonsági ellenőrzés betöltéskor - Mesterkulccsal (admin123)
         (async function() {
             await initDatabase();
-            const sessionActive = sessionStorage.getItem('adminLoggedIn');
-            if (!sessionActive) {
-                const code = prompt("Admin hozzáférés szükséges:");
-                if (code === (db.adminCode || "admin123") || code === "admin123") {
+            if (sessionStorage.getItem('adminLoggedIn') !== 'true') {
+                const c = prompt("Admin hozzáférés:");
+                if (c === (db.adminCode || "admin123") || c === "admin123") {
                     sessionStorage.setItem('adminLoggedIn', 'true');
                 } else {
                     window.location.href = "index.html";
@@ -22,392 +19,209 @@
             }
         })();
     </script>
-
     <style>
-        :root { --bg: #F9F9F7; --text: #1A1A1A; --accent: #E76F51; --blue: #0077B6; --border: #eee; --booking: #003580; --szallas: #e62e2e; --selection: rgba(231, 111, 81, 0.15); }
+        :root { 
+            --bg: #F9F9F7; --text: #1A1A1A; --accent: #E76F51; --border: #eee; 
+            --booking: #003580; --szallas: #e62e2e; --essence: #5C7A4D; --breakfast: #E9C46A; --rent: #264653;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 5rem; overflow-x: hidden; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 5rem; }
         
-        #toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 3000; display: flex; flex-direction: column; gap: 10px; width: calc(100% - 4rem); max-width: 350px; }
-        .toast { background: var(--text); color: white; padding: 1rem 2rem; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transform: translateX(150%); transition: 0.4s; pointer-events: none; text-align: center; }
-        .toast.show { transform: translateX(0); }
-
-        /* HEADER */
-        header { position: fixed; top: 0; left: 0; width: 100%; padding: 1rem 5vw; display: flex; flex-direction: column; gap: 1rem; align-items: center; z-index: 1000; background: rgba(249, 249, 247, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0,0,0,0.05); }
-        @media (min-width: 768px) { header { flex-direction: row; padding: 1.5rem 5vw; justify-content: space-between; } }
-
-        .logo { font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 700; cursor: pointer; }
+        header { position: fixed; top: 0; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(255,255,255,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+        .logo { font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 700; }
         .logo span { color: var(--accent); }
 
-        .btn-cta { background: var(--text); color: white; border: none; padding: 0.8rem 1.8rem; border-radius: 50px; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 2px; cursor: pointer; transition: 0.4s; }
-        .btn-cta:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 10px 20px rgba(231, 111, 81, 0.2); }
-        .btn-cta:disabled { background: #ccc; cursor: not-allowed; }
+        .btn-cta { background: var(--text); color: white; border: none; padding: 0.8rem 1.8rem; border-radius: 50px; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.3s; }
+        .btn-outline { background: transparent; border: 1px solid #ddd; padding: 0.6rem 1.2rem; border-radius: 50px; cursor: pointer; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
 
-        .btn-outline { background: transparent; color: var(--text); border: 1px solid #ddd; padding: 0.6rem 1.2rem; border-radius: 50px; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 1px; cursor: pointer; transition: 0.3s; }
-        .btn-outline:hover { border-color: var(--text); background: var(--text); color: #fff; }
-        .btn-del { color: #dc2626; border-color: #fecaca; }
-        .btn-del:hover { background: #dc2626; border-color: #dc2626; color: #fff; }
-
-        main { max-width: 1400px; margin: 8rem auto 0; padding: 0 5vw; }
-        @media (max-width: 767px) { main { margin-top: 7rem; } }
-
-        .section-header { display: flex; flex-direction: column; gap: 1rem; align-items: flex-start; margin: 4rem 0 1.5rem 0; padding-bottom: 1rem; border-bottom: 2px solid var(--text); }
-        @media (min-width: 768px) { .section-header { flex-direction: row; justify-content: space-between; align-items: center; } }
-        .section-header h2 { font-family: 'Playfair Display'; font-size: 2rem; }
-
-        /* LISTÁK */
-        .admin-list { background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.03); overflow: hidden; margin-bottom: 3rem; }
-        .list-head { display: none; }
-        .list-item { display: flex; flex-direction: column; gap: 1rem; padding: 1.5rem; border-bottom: 1px solid var(--border); transition: 0.2s; }
-        .list-item:hover { background: #fafafa; }
+        main { max-width: 1400px; margin: 10rem auto 0; padding: 0 5vw; }
         
-        @media (min-width: 992px) {
-            .list-head { display: grid; padding: 1rem 2.5rem; background: #fcfcfc; border-bottom: 1px solid var(--border); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; color: #999; }
-            .list-item { display: grid; padding: 1.5rem 2.5rem; align-items: center; }
-            .grid-apt { grid-template-columns: 2fr 1fr 3.5fr 1.5fr; gap: 1rem; }
-            .grid-owner { grid-template-columns: 2fr 2fr 1.5fr; gap: 1rem; }
-            .grid-booking { grid-template-columns: 2fr 1.5fr 1fr 1fr 1fr; gap: 1rem; }
-        }
+        .section { background: white; border-radius: 12px; padding: 2.5rem; margin-bottom: 3rem; box-shadow: 0 10px 40px rgba(0,0,0,0.03); position: relative; overflow: hidden; }
+        .section::before { content: ''; position: absolute; left: 0; top: 0; width: 6px; height: 100%; background: var(--border); }
+        .section.s-booking::before { background: var(--booking); }
+        .section.s-breakfast::before { background: var(--breakfast); }
+        .section.s-rent::before { background: var(--rent); }
 
-        .item-name-box strong { display: flex; align-items: center; font-family: 'Playfair Display'; font-size: 1.25rem; color: var(--text); margin-bottom: 4px; flex-wrap: wrap; gap: 8px; }
-        .item-name-box span { font-size: 0.75rem; color: #666; font-weight: 600; line-height: 1.4; display: block; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+        .section-header h2 { font-family: 'Playfair Display'; font-size: 1.8rem; }
 
-        .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-        .badge-essence { background: rgba(231, 111, 81, 0.15); color: #E76F51; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 1rem; font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 1px; border-bottom: 2px solid var(--border); }
+        td { padding: 1.2rem 1rem; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
+        
+        .badge { padding: 4px 10px; border-radius: 4px; font-size: 0.65rem; font-weight: 800; text-transform: uppercase; }
+        .bg-booking { background: rgba(0, 53, 128, 0.1); color: var(--booking); }
+        .bg-szallas { background: rgba(230, 46, 46, 0.1); color: var(--szallas); }
+        .bg-essence { background: rgba(92, 122, 77, 0.1); color: var(--essence); }
 
-        /* STATS (FÉLKÖRÖK) */
-        .stats-wrapper { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
-        @media (min-width: 992px) { .stats-wrapper { justify-content: center; flex-wrap: nowrap; } }
-        .chart-box { display: flex; flex-direction: column; align-items: center; width: 80px; }
-        .chart-container { position: relative; width: 60px; height: 32px; margin-bottom: 8px; }
-        .chart-svg { width: 60px; height: 60px; transform: rotate(-180deg); }
-        .chart-bg { fill: none; stroke: #f0f0f0; stroke-width: 6; }
-        .chart-val { fill: none; stroke-width: 6; stroke-linecap: round; transition: stroke-dashoffset 1s ease-in-out; }
-        .chart-label { font-size: 0.65rem; font-weight: 800; color: var(--text); margin-bottom: 2px; }
-        .chart-source-name { font-size: 0.55rem; font-weight: 700; color: #bbb; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stats-wrapper { display: flex; gap: 10px; }
+        .chart-box { text-align: center; width: 55px; }
+        .chart-svg { width: 45px; height: 25px; transform: rotate(-180deg); }
 
         /* MODALOK */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(15px); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .custom-modal { background: #fff; width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; overflow-y: auto; }
-        @media (min-width: 768px) { .custom-modal { width: 90%; height: 85vh; border-radius: 8px; flex-direction: row; overflow: hidden; } }
-
-        .close-x { position: absolute; top: 1rem; right: 1rem; font-size: 1.5rem; cursor: pointer; z-index: 100; background: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .modal-visual { height: 25vh; background-color: #06111C; background-size: cover; background-position: center; position: relative; flex-shrink: 0; transition: 0.5s; }
-        @media (min-width: 768px) { .modal-visual { flex: 1.2; height: 100%; } }
-        .modal-body { flex: 1; padding: 2rem 1.5rem; overflow-y: auto; display: flex; flex-direction: column; }
-        @media (min-width: 768px) { .modal-body { padding: 4rem 5rem; } }
-
-        .form-group { margin-bottom: 1.5rem; }
-        label { display: block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; margin-bottom: 0.5rem; color: #888; letter-spacing: 1px; }
-        input, select, textarea { width: 100%; border: none; border-bottom: 2px solid #eee; padding: 0.8rem 0; outline: none; font-family: 'Montserrat'; font-size: 1.1rem; background: transparent; transition: 0.3s; }
-        input:focus, select:focus, textarea:focus { border-bottom-color: var(--accent); }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); z-index: 2000; display: none; align-items: center; justify-content: center; }
+        .custom-modal { background: white; width: 95%; height: 90vh; display: flex; border-radius: 12px; overflow: hidden; position: relative; }
+        .modal-visual { flex: 0.8; background-size: cover; background-position: center; background-color: #06111C; }
+        .modal-body { flex: 1.2; padding: 4rem; overflow-y: auto; }
         
-        .gallery-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
-        .gallery-thumb-wrapper { position: relative; display: inline-block; }
-        .gallery-thumb { width: 80px; height: 80px; object-fit: cover; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        .gallery-remove-btn { position: absolute; top: -5px; right: -5px; background: #dc2626; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-
-        /* NAPTÁR */
-        .mini-calendar { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; text-align: center; margin-top: 1rem; width: 100%; }
-        .cal-day { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; border-radius: 4px; transition: 0.2s; }
-        .cal-day.booked { background: #fee2e2; color: #b91c1c; font-weight: bold; }
-        .cal-day:not(.booked):hover { background: var(--selection); }
+        .form-group { margin-bottom: 1.2rem; }
+        input, select, textarea { width: 100%; border: none; border-bottom: 2px solid #eee; padding: 0.8rem 0; outline: none; font-family: 'Montserrat'; }
+        .gallery-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
+        .thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-<div id="toast-container"></div>
-
 <header>
-    <div class="logo" onclick="window.location.href='index.html'">Balaton<span>.</span>Essence ADMIN</div>
+    <div class="logo">Balaton<span>.</span>Essence ADMIN</div>
     <div style="display:flex; gap:10px;">
-        <button onclick="window.location.href='index.html'" class="btn-outline">Vissza a Portálra</button>
-        <button onclick="sessionStorage.clear(); window.location.href='index.html'" class="btn-outline" style="border-color: #dc2626; color: #dc2626;">Kijelentkezés</button>
+        <button class="btn-outline" onclick="syncCalendars()">🔄 Szinkronizálás</button>
+        <button class="btn-outline" onclick="location.href='index.html'">Kilépés</button>
     </div>
 </header>
 
 <main>
-    <div class="section-header"><h2>Beérkezett Foglalások és Rendelések</h2></div>
-    <div class="admin-list">
-        <div class="list-head grid-booking">
-            <div>Vendég / Részletek</div>
-            <div>Dátum(ok)</div>
-            <div>Mennyiség</div>
-            <div>Összeg</div>
-            <div style="text-align: right;">Művelet</div>
-        </div>
-        <div id="bookings-container"></div>
+    <div class="section s-booking">
+        <div class="section-header"><h2>Apartman Foglalások</h2></div>
+        <table>
+            <thead><tr><th>Ingatlan</th><th>Vendég</th><th>Dátum</th><th>Forrás</th><th>Művelet</th></tr></thead>
+            <tbody id="booking-table-body"></tbody>
+        </table>
     </div>
 
-    <div class="section-header">
-        <h2>Ingatlanok & Kihasználtság</h2>
-        <button class="btn-cta" onclick="openAptModal(null)">+ Új Apartman</button>
+    <div class="section s-breakfast">
+        <div class="section-header"><h2>Reggeli Tál Rendelések</h2></div>
+        <table>
+            <thead><tr><th>Apartman / Vendég</th><th>Dátum</th><th>Megjegyzés</th><th>Művelet</th></tr></thead>
+            <tbody id="breakfast-table-body"></tbody>
+        </table>
     </div>
-    <div class="admin-list">
-        <div class="list-head grid-apt">
-            <div>Ingatlan / Település</div>
-            <div>Tulajdonos</div>
-            <div style="text-align: center;">Statisztika (Booking / Szállás / Saját)</div>
-            <div style="text-align: right;">Műveletek</div>
+
+    <div class="section s-rent">
+        <div class="section-header"><h2>SUP & Bérlések</h2></div>
+        <table>
+            <thead><tr><th>Eszköz</th><th>Vendég</th><th>Időpont</th><th>Művelet</th></tr></thead>
+            <tbody id="rent-table-body"></tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>Ingatlanok</h2>
+            <button class="btn-cta" onclick="openAptModal(null)">+ Új Apartman</button>
         </div>
         <div id="apt-list-container"></div>
     </div>
 
-    <div class="section-header">
-        <h2>Partnerek & Tulajdonosok</h2>
-        <button class="btn-cta" onclick="openOwnerModal(null)">+ Új Partner</button>
-    </div>
-    <div class="admin-list">
-        <div class="list-head grid-owner">
-            <div>Név</div>
-            <div>Belépési Kód</div>
-            <div style="text-align: right;">Műveletek</div>
+    <div class="section">
+        <div class="section-header">
+            <h2>Partnerek & Tulajdonosok</h2>
+            <button class="btn-cta" onclick="openOwnerModal(null)">+ Új Partner</button>
         </div>
-        <div id="owner-list-container"></div>
+        <table>
+            <thead><tr><th>Név</th><th>Belépési Kód</th><th>Ingatlanok száma</th><th>Művelet</th></tr></thead>
+            <tbody id="owner-table-body"></tbody>
+        </table>
     </div>
 </main>
 
-<div id="apt-modal" class="modal-overlay" onclick="closeModals()">
-    <div class="custom-modal" onclick="event.stopPropagation()">
-        <div class="close-x" onclick="closeModals()">✕</div>
-        <div class="modal-visual" id="apt-modal-visual"></div>
+<div id="apt-modal" class="modal-overlay">
+    <div class="custom-modal">
+        <div class="modal-visual" id="apt-visual"></div>
         <div class="modal-body">
-            <h2 id="apt-modal-title" style="font-family:'Playfair Display'; font-size: 2.5rem; margin-bottom:2rem;">Ingatlan</h2>
-            <div class="form-group"><label>Név</label><input type="text" id="a-name" placeholder="Pl. Liget Residence"></div>
-            <div class="form-group"><label>Helyszín</label><input type="text" id="a-loc" placeholder="Pl. Fonyód"></div>
-            <div class="form-group"><label>Alapár / éj (Ft)</label><input type="number" id="a-price" placeholder="45000"></div>
-            <div class="form-group"><label>Tulajdonos</label><select id="a-owner-select"></select></div>
-            <div class="form-group"><label>Fő Borítókép (WebP-vé alakítjuk)</label><input type="file" accept="image/*" onchange="previewMainImage(event)"></div>
-            <div class="form-group">
-                <label>Galéria képek (WebP-vé alakítjuk)</label>
-                <input type="file" id="gallery-img-input" accept="image/*" multiple onchange="handleGalleryUpload(event)">
-                <div id="gallery-preview-container" class="gallery-preview"></div>
+            <h2 id="modal-title" style="font-family:'Playfair Display'; margin-bottom:1.5rem;">Ingatlan Szerkesztése</h2>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                <div class="form-group"><label>Név</label><input type="text" id="a-name"></div>
+                <div class="form-group"><label>Helyszín</label><input type="text" id="a-loc"></div>
             </div>
-            <button id="save-apt-btn" class="btn-cta" style="width:100%; margin-top:auto;" onclick="saveApt()">Adatok Mentése</button>
+            <div class="form-group"><label>Ár / éj (Ft)</label><input type="number" id="a-price"></div>
+            <div class="form-group"><label>Tulajdonos</label><select id="a-owner-select"></select></div>
+            <div style="background:#f9f9f9; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem;">
+                <p style="font-size:0.6rem; font-weight:700; margin-bottom:1rem;">SZINKRON LINKEK</p>
+                <input type="text" id="a-ical-b" placeholder="Booking.com iCal URL">
+                <input type="text" id="a-ical-sz" placeholder="Szállás.hu iCal URL">
+            </div>
+            <div class="form-group"><label>Fő Borító</label><input type="file" onchange="procMain(event)"></div>
+            <div class="form-group"><label>Galéria</label><input type="file" multiple onchange="procGal(event)"><div id="gal-prev" class="gallery-preview"></div></div>
+            <button class="btn-cta" style="width:100%;" onclick="saveApt()">Mentés</button>
+            <button class="btn-outline" style="width:100%; margin-top:10px; border:none; color:red;" onclick="closeModal()">Mégse</button>
         </div>
     </div>
 </div>
 
-<div id="owner-modal" class="modal-overlay" onclick="closeModals()">
-    <div class="custom-modal" style="max-width: 450px; height: auto; flex-direction: column; padding: 4rem 2rem; margin: auto; border-radius: 8px;" onclick="event.stopPropagation()">
-        <div class="close-x" style="top:10px; right:10px; width:30px; height:30px;" onclick="closeModals()">✕</div>
-        <h2 style="font-family:'Playfair Display'; font-size: 2rem; margin-bottom:2rem; text-align:center;">Partner</h2>
-        <div class="form-group"><label>Név</label><input type="text" id="o-name"></div>
-        <div class="form-group"><label>Belépési Kód</label><input type="text" id="o-code"></div>
-        <button class="btn-cta" style="width:100%; margin-top:1.5rem;" onclick="saveOwner()">Mentés</button>
-    </div>
-</div>
-
-<div id="calendar-modal" class="modal-overlay" onclick="closeModals()">
-    <div class="custom-modal" style="max-width: 600px; height: auto; flex-direction: column; padding: 3rem 2rem; margin: auto; border-radius: 8px;" onclick="event.stopPropagation()">
-        <div class="close-x" style="top:10px; right:10px; width:30px; height:30px;" onclick="closeModals()">✕</div>
-        <h2 style="font-family:'Playfair Display'; font-size: 2rem; margin-bottom:1rem; text-align:center;">Naptár Zárolása</h2>
-        <div style="display:flex; justify-content:space-between; align-items:center; margin:1.5rem 0;">
-            <button onclick="changeMonth(-1)" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">←</button>
-            <strong id="cal-month" style="font-family:'Playfair Display'; font-size:1.2rem;"></strong>
-            <button onclick="changeMonth(1)" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">→</button>
-        </div>
-        <div class="mini-calendar" id="admin-cal-grid"></div>
-        <button class="btn-cta" style="width:100%; margin-top:2rem;" onclick="saveBlocks()">Zárolás Mentése</button>
+<div id="owner-modal" class="modal-overlay">
+    <div class="custom-modal" style="width:400px; height:auto; flex-direction:column; padding:3rem; margin:auto;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:1.5rem;">Partner Kezelése</h2>
+        <div class="form-group"><label>Partner Neve</label><input type="text" id="o-name"></div>
+        <div class="form-group"><label>Egyedi Belépési Kód</label><input type="text" id="o-code"></div>
+        <button class="btn-cta" style="width:100%;" onclick="saveOwner()">Partner Mentése</button>
+        <button class="btn-outline" style="width:100%; margin-top:10px; border:none;" onclick="closeModal()">Mégse</button>
     </div>
 </div>
 
 <script>
-    let activeAptId = null, activeOwnerId = null, selDates = [], vDate = new Date(); vDate.setDate(1);
-    let currentGallery = [], tempMainImg = null;
+    let activeId = null, activeOId = null, curGal = [], tmpMain = null;
 
-    function showToast(m) { 
-        const c = document.getElementById('toast-container'); const t = document.createElement('div');
-        t.className = 'toast show'; t.innerText = m; c.appendChild(t); 
-        setTimeout(() => { t.classList.remove('show'); setTimeout(()=>t.remove(), 400); }, 3000); 
+    function drawChart(p, c, l) {
+        const r=24, circ=Math.PI*r, off=circ-(p/100)*circ;
+        return `<div class="chart-box"><div style="font-size:0.5rem; font-weight:700;">${p}%</div><svg class="chart-svg"><path d="M6,30 A24,24 0 0,1 54,30" fill="none" stroke="#eee" stroke-width="5"/><path d="M6,30 A24,24 0 0,1 54,30" fill="none" stroke="${c}" stroke-width="5" style="stroke-dasharray:${circ}; stroke-dashoffset:${off}"/></svg><div style="font-size:0.45rem; color:#999;">${l}</div></div>`;
     }
 
-    function createHalfChart(percent, color, label) {
-        const r = 24; const circ = Math.PI * r; const offset = circ - (percent / 100) * circ;
-        return `
-            <div class="chart-box">
-                <div class="chart-label">${percent}%</div>
-                <div class="chart-container">
-                    <svg class="chart-svg" viewBox="0 0 60 32">
-                        <path class="chart-bg" d="M6,30 A24,24 0 0,1 54,30" stroke="#f2f2f2" stroke-width="6" fill="none" />
-                        <path class="chart-val" stroke="${color}" stroke-width="6" fill="none" d="M6,30 A24,24 0 0,1 54,30" 
-                              style="stroke-dasharray: ${circ}; stroke-dashoffset: ${offset};" />
-                    </svg>
-                </div>
-                <div class="chart-source-name">${label}</div>
-            </div>`;
+    async function syncCalendars() {
+        const res = await fetch(`${API_URL}/api/sync`, {method:'POST'});
+        if(res.ok) { await initDatabase(); renderAll(); alert("Kész!"); }
     }
 
-    function render() {
-        // Ingatlanok renderelése
-        const aCont = document.getElementById('apt-list-container'); aCont.innerHTML = "";
-        db.apartments.forEach(apt => {
-            const o = db.owners.find(x => x.id === apt.ownerId);
-            aCont.innerHTML += `
-                <div class="list-item grid-apt">
-                    <div class="item-name-box">
-                        <strong>${apt.name}</strong>
-                        <span>${apt.location} | ${apt.gallery?apt.gallery.length:0} galéria kép</span>
-                    </div>
-                    <div style="font-weight:600;">${o ? o.name : '—'}</div>
-                    <div class="stats-wrapper">
-                        ${createHalfChart(20, 'var(--booking)', 'Booking')}
-                        ${createHalfChart(15, 'var(--szallas)', 'Szállás')}
-                        ${createHalfChart(10, 'var(--text)', 'Saját')}
-                    </div>
-                    <div style="text-align:right;">
-                        <button class="btn-outline" onclick="openAptModal(${apt.id})">Szerk.</button> 
-                        <button class="btn-outline" onclick="openCalendar(${apt.id})">Naptár</button> 
-                        <button class="btn-outline btn-del" onclick="delApt(${apt.id})">X</button>
-                    </div>
-                </div>`;
-        });
+    function renderAll() {
+        // 1. Foglalások
+        const bBody = document.getElementById('booking-table-body');
+        bBody.innerHTML = (db.bookings || []).map(b => `<tr><td><strong>${b.aptName}</strong></td><td>${b.guestName}</td><td>${b.checkIn}</td><td><span class="badge ${b.source === 'booking' ? 'bg-booking' : (b.source === 'szallas' ? 'bg-szallas' : 'bg-essence')}">${b.source}</span></td><td><button onclick="delBooking('${b.id}')">X</button></td></tr>`).join('');
 
-        // Partnerek renderelése
-        const oCont = document.getElementById('owner-list-container'); oCont.innerHTML = "";
-        db.owners.forEach(o => {
-            oCont.innerHTML += `
-                <div class="list-item grid-owner">
-                    <div style="font-weight:700;">${o.name}</div>
-                    <div style="font-family:monospace;">KÓD: ${o.accessCode}</div>
-                    <div style="text-align:right;">
-                        <button class="btn-outline" onclick="openOwnerModal('${o.id}')">Szerk.</button> 
-                        <button class="btn-outline btn-del" onclick="delOwner('${o.id}')">X</button>
-                    </div>
-                </div>`;
-        });
+        // 2. Reggeli
+        document.getElementById('breakfast-table-body').innerHTML = (db.extras || []).filter(e => e.type === 'BREAKFAST').map(e => `<tr><td><strong>${e.aptName}</strong><br>${e.guest}</td><td>${e.date}</td><td>${e.note || '-'}</td><td><button onclick="completeOrder(${e.id})">KÉSZ</button></td></tr>`).join('');
 
-        // Foglalások renderelése
-        const bCont = document.getElementById('bookings-container'); 
-        bCont.innerHTML = db.bookings.length ? "" : "<p style='padding:2rem; text-align:center; color:#999;'>Nincs rögzített foglalás.</p>";
-        db.bookings.slice(-15).reverse().forEach(b => {
-            bCont.innerHTML += `
-                <div class="list-item grid-booking">
-                    <div class="item-name-box"><strong>${b.guestName}</strong><span>${b.aptName || 'Szállás'}</span></div>
-                    <div>${b.checkIn}</div>
-                    <div>${b.guests} fő</div>
-                    <strong>${(b.totalPrice||0).toLocaleString()} Ft</strong>
-                    <div style="text-align:right;"><button class="btn-outline btn-del" onclick="delBooking(${b.id})">X</button></div>
-                </div>`;
-        });
+        // 3. SUP
+        document.getElementById('rent-table-body').innerHTML = (db.extras || []).filter(e => e.type === 'SUP' || e.type === 'SUN').map(e => `<tr><td><span class="badge" style="background:#eee">${e.type}</span></td><td>${e.guest}</td><td>${e.date}</td><td><button onclick="completeOrder(${e.id})">KÉSZ</button></td></tr>`).join('');
+
+        // 4. Ingatlanok
+        document.getElementById('apt-list-container').innerHTML = db.apartments.map(a => `<div style="display:grid; grid-template-columns: 2fr 3fr 1fr; padding:1rem; border-bottom:1px solid #eee; align-items:center;"><div><strong>${a.name}</strong><br><small>${a.location}</small></div><div class="stats-wrapper">${drawChart(20,'var(--booking)','B.')}${drawChart(15,'var(--szallas)','SZ.')}${drawChart(10,'var(--essence)','S.')}</div><button class="btn-outline" onclick="openAptModal(${a.id})">Szerk.</button></div>`).join('');
+
+        // 5. Partnerek
+        document.getElementById('owner-table-body').innerHTML = db.owners.map(o => {
+            const count = db.apartments.filter(a => a.ownerId == o.id).length;
+            return `<tr><td><strong>${o.name}</strong></td><td><code>${o.accessCode}</code></td><td>${count} db</td><td><button onclick="openOwnerModal('${o.id}')">Szerk.</button> <button onclick="delOwner('${o.id}')" style="color:red">X</button></td></tr>`;
+        }).join('');
     }
 
-    // --- KÉPKEZELÉS (WebP + Tömörítés) ---
-
-    async function previewMainImage(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const btn = document.getElementById('save-apt-btn');
-            btn.disabled = true; btn.innerText = "WebP optimalizálás...";
-            tempMainImg = await compressImage(file, 1200, 0.7);
-            document.getElementById('apt-modal-visual').style.backgroundImage = `url(${tempMainImg})`;
-            btn.disabled = false; btn.innerText = "Adatok Mentése";
-        }
-    }
-
-    async function handleGalleryUpload(event) {
-        const files = event.target.files;
-        const btn = document.getElementById('save-apt-btn');
-        btn.disabled = true; btn.innerText = "Képek feldolgozása...";
-        for (let file of files) {
-            const webp = await compressImage(file, 1000, 0.6);
-            currentGallery.push(webp);
-        }
-        renderGalleryPreview();
-        document.getElementById('gallery-img-input').value = "";
-        btn.disabled = false; btn.innerText = "Adatok Mentése";
-    }
-
-    function renderGalleryPreview() {
-        const cont = document.getElementById('gallery-preview-container'); cont.innerHTML = "";
-        currentGallery.forEach((img, idx) => {
-            cont.innerHTML += `<div class="gallery-thumb-wrapper"><img src="${img}" class="gallery-thumb"><button class="gallery-remove-btn" onclick="currentGallery.splice(${idx},1);renderGalleryPreview()">✕</button></div>`;
-        });
-    }
-
-    // --- MODALOK ÉS MENTÉS ---
-
+    async function completeOrder(id) { db.extras = db.extras.filter(e => e.id !== id); await saveDb(); renderAll(); }
+    function openOwnerModal(id) { activeOId = id; if(id) { const o = db.owners.find(x => x.id == id); document.getElementById('o-name').value = o.name; document.getElementById('o-code').value = o.accessCode; } else { document.getElementById('o-name').value = ""; document.getElementById('o-code').value = ""; } document.getElementById('owner-modal').style.display='flex'; }
+    async function saveOwner() { const n = document.getElementById('o-name').value, c = document.getElementById('o-code').value; if(activeOId) { const o = db.owners.find(x => x.id == activeOId); o.name = n; o.accessCode = c; } else db.owners.push({id: Date.now(), name: n, accessCode: c}); await saveDb(); closeModal(); renderAll(); }
+    
     function openAptModal(id) {
-        activeAptId = id;
-        const s = document.getElementById('a-owner-select'); s.innerHTML = "";
-        db.owners.forEach(o => s.innerHTML += `<option value="${o.id}">${o.name}</option>`);
-        
+        activeId = id; const s = document.getElementById('a-owner-select'); s.innerHTML = db.owners.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
         if(id) {
-            const a = db.apartments.find(x => x.id === id);
-            document.getElementById('a-name').value = a.name; 
-            document.getElementById('a-loc').value = a.location; 
-            document.getElementById('a-price').value = a.price;
-            document.getElementById('a-owner-select').value = a.ownerId;
-            currentGallery = [...(a.gallery || [])]; tempMainImg = a.mainImage;
-            document.getElementById('apt-modal-visual').style.backgroundImage = `url(${a.mainImage})`;
-            document.getElementById('apt-modal-title').innerText = "Ingatlan Szerkesztése";
-        } else {
-            document.getElementById('a-name').value = ""; document.getElementById('a-loc').value = ""; document.getElementById('a-price').value = "45000";
-            tempMainImg = null; currentGallery = [];
-            document.getElementById('apt-modal-visual').style.backgroundImage = "none";
-            document.getElementById('apt-modal-title').innerText = "Új Ingatlan";
-        }
-        renderGalleryPreview();
-        document.getElementById('apt-modal').style.display='flex'; setTimeout(()=>document.getElementById('apt-modal').classList.add('active'),10);
+            const a = db.apartments.find(x => x.id == id);
+            document.getElementById('a-name').value = a.name; document.getElementById('a-loc').value = a.location; document.getElementById('a-price').value = a.price; document.getElementById('a-owner-select').value = a.ownerId;
+            document.getElementById('a-ical-b').value = a.icalBooking || ""; document.getElementById('a-ical-sz').value = a.icalSzallas || "";
+            tmpMain = a.mainImage; curGal = [...(a.gallery || [])]; document.getElementById('apt-visual').style.backgroundImage = `url(${a.mainImage})`;
+        } else { document.getElementById('a-name').value = ""; tmpMain = null; curGal = []; document.getElementById('apt-visual').style.backgroundImage = ""; }
+        renderG(); document.getElementById('apt-modal').style.display = 'flex';
     }
 
     async function saveApt() {
-        const name = document.getElementById('a-name').value;
-        if(!name) return showToast("Név kötelező!");
-        
-        let apt = activeAptId ? db.apartments.find(x => x.id === activeAptId) : { id: Date.now(), bookedDates: [], status: "active" };
-        
-        apt.name = name;
-        apt.location = document.getElementById('a-loc').value;
-        apt.price = parseInt(document.getElementById('a-price').value);
-        apt.ownerId = document.getElementById('a-owner-select').value;
-        if(tempMainImg) apt.mainImage = tempMainImg;
-        apt.gallery = currentGallery;
-
-        if(!activeAptId) db.apartments.push(apt);
-        
-        await saveDb(); render(); closeModals(); showToast("Ingatlan mentve!");
+        let a = activeId ? db.apartments.find(x => x.id == activeId) : { id: Date.now(), bookedDates: [] };
+        a.name = document.getElementById('a-name').value; a.location = document.getElementById('a-loc').value; a.price = parseInt(document.getElementById('a-price').value); a.ownerId = document.getElementById('a-owner-select').value;
+        a.icalBooking = document.getElementById('a-ical-b').value; a.icalSzallas = document.getElementById('a-ical-sz').value; a.mainImage = tmpMain; a.gallery = curGal;
+        if(!activeId) db.apartments.push(a); await saveDb(); closeModal(); renderAll();
     }
 
-    function openOwnerModal(id) {
-        activeOwnerId = id;
-        if(id) { const o = db.owners.find(x => x.id === id); document.getElementById('o-name').value = o.name; document.getElementById('o-code').value = o.accessCode; }
-        else { document.getElementById('o-name').value = ""; document.getElementById('o-code').value = ""; }
-        document.getElementById('owner-modal').style.display='flex'; setTimeout(()=>document.getElementById('owner-modal').classList.add('active'),10);
-    }
+    async function procMain(e) { tmpMain = await compressImage(e.target.files[0], 1200); document.getElementById('apt-visual').style.backgroundImage = `url(${tmpMain})`; }
+    async function procGal(e) { for(let f of e.target.files) curGal.push(await compressImage(f, 900)); renderG(); }
+    function renderG() { document.getElementById('gal-prev').innerHTML = curGal.map((img, i) => `<div style="position:relative"><img src="${img}" class="thumb"><button onclick="curGal.splice(${i},1);renderG()" style="position:absolute;top:0;right:0;background:red;color:white;border:none;width:15px;height:15px;font-size:8px;">X</button></div>`).join(''); }
+    function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+    function delOwner(id) { if(confirm("Törli a partnert?")) { db.owners = db.owners.filter(o => o.id != id); saveDb(); renderAll(); } }
 
-    async function saveOwner() {
-        const n = document.getElementById('o-name').value, c = document.getElementById('o-code').value;
-        if(!n) return;
-        if(activeOwnerId) { const o = db.owners.find(x => x.id === activeOwnerId); o.name = n; o.accessCode = c; }
-        else db.owners.push({id: "O"+Date.now(), name: n, accessCode: c});
-        await saveDb(); render(); closeModals(); showToast("Partner mentve!");
-    }
-
-    function openCalendar(id) { activeAptId = id; const a = db.apartments.find(x => x.id === id); selDates = a.bookedDates || []; document.getElementById('calendar-modal').style.display='flex'; renderAdminCal(); setTimeout(()=>document.getElementById('calendar-modal').classList.add('active'),10); }
-
-    function renderAdminCal() {
-        const grid = document.getElementById('admin-cal-grid'); grid.innerHTML = "";
-        const mNames = ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"];
-        document.getElementById('cal-month').innerText = `${vDate.getFullYear()} ${mNames[vDate.getMonth()]}`;
-        const days = new Date(vDate.getFullYear(), vDate.getMonth() + 1, 0).getDate();
-        for(let d=1; d<=days; d++) {
-            const s = `${vDate.getFullYear()}-${(vDate.getMonth()+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
-            const el = document.createElement('div'); el.className = `cal-day ${selDates.includes(s)?'booked':''}`; el.innerText = d;
-            el.onclick = () => { if(selDates.includes(s)) selDates = selDates.filter(x=>x!==s); else selDates.push(s); renderAdminCal(); };
-            grid.appendChild(el);
-        }
-    }
-
-    async function saveBlocks() { db.apartments.find(x => x.id === activeAptId).bookedDates = selDates; await saveDb(); closeModals(); showToast("Naptár mentve!"); }
-    function changeMonth(dir) { vDate.setMonth(vDate.getMonth()+dir); renderAdminCal(); }
-    function delBooking(id) { if(confirm("Törli?")) { db.bookings = db.bookings.filter(x=>x.id!==id); saveDb(); render(); } }
-    function delApt(id) { if(confirm("Törli?")) { db.apartments = db.apartments.filter(x=>x.id!==id); saveDb(); render(); } }
-    function delOwner(id) { if(confirm("Törli?")) { db.owners = db.owners.filter(o=>o.id!==id); saveDb(); render(); } }
-    function closeModals() { document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active')); setTimeout(()=>document.querySelectorAll('.modal-overlay').forEach(m=>m.style.display='none'), 400); }
-
-    initDatabase(render);
+    initDatabase(renderAll);
 </script>
 </body>
 </html>
