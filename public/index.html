@@ -9,15 +9,23 @@
         :root { 
             --bg: #FCFBF9; --bg-alt: #F4F2EC; --text: #2C3325; --text-light: #6A7063;  
             --accent: #5C7A4D; --accent-hover: #48613A; --border: #E3E0D8; --shadow: rgba(44, 51, 37, 0.05);
+            --warning: #B0413E;
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
+        /* FEJLESZTÉSI BANNER */
+        .dev-banner {
+            background: var(--warning); color: white; text-align: center; padding: 12px 5vw;
+            font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; position: fixed;
+            top: 0; left: 0; width: 100%; z-index: 2000; line-height: 1.4;
+        }
+
         /* HEADER */
-        header { position: fixed; top: 0; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(252, 251, 249, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); transition: 0.3s; }
-        .logo-container { display: flex; flex-direction: column; align-items: center; text-decoration: none; }
-        .logo-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: var(--text); letter-spacing: 2px; line-height: 1; }
+        header { position: fixed; top: 40px; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(252, 251, 249, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); transition: 0.3s; }
+        .logo-container { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: inherit; }
+        .logo-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; letter-spacing: 2px; line-height: 1; }
         .logo-sub { font-size: 0.6rem; font-weight: 500; letter-spacing: 4px; color: var(--text-light); text-transform: uppercase; margin-top: 4px; }
         
         nav { display: flex; gap: 2rem; align-items: center; }
@@ -26,40 +34,41 @@
         .btn-primary { background: var(--accent); color: white; border: 1px solid var(--accent); padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.4s; text-decoration: none; }
         .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2); }
 
-        /* HERO */
+        /* HERO - Visszaállítva a 100vh magasság */
         .hero { height: 100vh; display: flex; align-items: center; padding: 0 5vw; background: linear-gradient(to right, rgba(252,251,249, 1) 0%, rgba(252,251,249, 0.85) 45%, rgba(252,251,249, 0) 100%), url('https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat; }
         .hero-content { max-width: 650px; margin-top: 5rem; }
         .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 1.5rem; color: var(--text); }
 
         /* PILLARS */
-        .pillars-section { padding: 5rem 5vw 8rem 5vw; background: var(--bg); max-width: 1600px; margin: 0 auto; }
-        .section-header { text-align: center; margin-bottom: 4rem; }
-        .section-header h2 { font-family: 'Playfair Display'; font-size: 2.5rem; color: var(--text); }
+        .pillars-section { padding: 8rem 5vw; background: var(--bg); max-width: 1600px; margin: 0 auto; }
+        .section-header { text-align: center; margin-bottom: 5rem; }
+        .section-header h2 { font-family: 'Playfair Display'; font-size: 3rem; color: var(--text); font-style: italic; }
 
-        .pillars-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; }
+        .pillars-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 4rem; }
         .pillar-card { background: white; border: 1px solid var(--border); box-shadow: 0 15px 40px var(--shadow); transition: 0.4s; text-align: center; overflow: hidden; display: flex; flex-direction: column; }
         .pillar-card:hover { transform: translateY(-10px); }
-        .pillar-header { padding: 3rem 2rem; flex-grow: 1; }
-        .pillar-img { width: 100%; aspect-ratio: 4/3; background-size: cover; background-position: center; }
+        .pillar-header { padding: 4rem 2rem; flex-grow: 1; }
+        .pillar-img { width: 100%; height: 350px; background-size: cover; background-position: center; }
 
-        /* DINAMIKUS APARTMAN GRID */
-        .apt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 3rem; padding: 0 5vw; max-width: 1600px; margin: 0 auto 8rem; }
-        .apt-card { background: white; border: 1px solid var(--border); text-decoration: none; color: inherit; transition: 0.4s; display: flex; flex-direction: column; }
-        .apt-card:hover { transform: translateY(-10px); box-shadow: 0 20px 40px var(--shadow); }
+        /* APT GRID */
+        .apt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 4rem; margin-top: 2rem; }
 
-        /* LOGIN MODAL */
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 51, 37, 0.7); backdrop-filter: blur(8px); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
+        /* MODAL */
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 51, 37, 0.7); backdrop-filter: blur(8px); z-index: 3000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
         .login-overlay.active { display: flex; opacity: 1; }
-        .login-modal { background: var(--bg); width: 90%; max-width: 400px; padding: 4rem 3rem; position: relative; border-radius: 4px; box-shadow: 0 30px 60px rgba(0,0,0,0.2); text-align: center; }
-        .login-modal h2 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 2rem; color: var(--text); }
-        .login-input { width: 100%; border: none; border-bottom: 2px solid var(--border); padding: 1rem 0; margin-bottom: 2rem; outline: none; font-family: 'Montserrat'; font-size: 1.2rem; text-align: center; background: transparent; transition: 0.3s; }
-        .login-input:focus { border-bottom-color: var(--accent); }
-        .close-login { position: absolute; top: 1rem; right: 1rem; cursor: pointer; font-size: 1.5rem; color: var(--text-light); }
+        .login-modal { background: var(--bg); width: 90%; max-width: 400px; padding: 4rem 3rem; text-align: center; border-radius: 4px; position: relative; }
+        .login-input { width: 100%; border: none; border-bottom: 2px solid var(--border); padding: 1rem 0; margin-bottom: 2rem; outline: none; font-family: 'Montserrat'; font-size: 1.2rem; text-align: center; background: transparent; }
 
-        footer { background: var(--accent); padding: 4rem 5vw; color: white; text-align: center; }
+        footer { background: var(--accent); padding: 6rem 5vw; color: white; text-align: center; }
     </style>
 </head>
 <body>
+
+<div class="dev-banner">
+    HU: Az oldal fejlesztés alatt áll, foglalás jelenleg nem lehetséges. | 
+    EN: Site under development, booking currently not possible. | 
+    DE: Seite in Entwicklung, Buchung derzeit nicht möglich.
+</div>
 
 <header>
     <a href="index.html" class="logo-container">
@@ -87,105 +96,86 @@
     <div class="pillars-grid">
         <div class="pillar-card">
             <div class="pillar-header">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 1rem;">SUP & SUN</h3>
-                <p style="font-style: italic; color: var(--text-light); margin-bottom: 1.5rem;">Vízparti élmények.</p>
-                <button class="btn-primary">Kínálatunk</button>
+                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">SUP & SUN</h3>
+                <p style="font-style: italic; color: var(--text-light); margin-bottom: 2rem;">Vízparti élmények.</p>
+                <button class="btn-primary" onclick="alert('Fejlesztés alatt...')">Kínálatunk</button>
             </div>
             <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80');"></div>
         </div>
         <div class="pillar-card">
             <div class="pillar-header">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 1rem;">SLOW MORNING</h3>
-                <p style="font-style: italic; color: var(--text-light); margin-bottom: 1.5rem;">Lassú reggelek.</p>
-                <button class="btn-primary">Rendelés</button>
+                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">SLOW MORNING</h3>
+                <p style="font-style: italic; color: var(--text-light); margin-bottom: 2rem;">Lassú reggelek.</p>
+                <button class="btn-primary" onclick="alert('Fejlesztés alatt...')">Rendelés</button>
             </div>
             <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80');"></div>
         </div>
     </div>
 </section>
 
-<section id="apartments" class="pillars-section" style="padding-top: 0;">
-    <div class="section-header">
+<section id="apartments" class="pillars-section" style="padding-top: 0; background: var(--bg-alt);">
+    <div class="section-header" style="padding-top: 8rem;">
         <h2>Prémium Apartmanok</h2>
     </div>
     <div id="apartment-grid" class="apt-grid">
-        <p style="text-align: center; grid-column: 1/-1; color: #999;">Apartmanok betöltése...</p>
-    </div>
+        </div>
 </section>
 
 <div id="login-overlay" class="login-overlay" onclick="closeLoginModal()">
     <div class="login-modal" onclick="event.stopPropagation()">
-        <div class="close-login" onclick="closeLoginModal()">✕</div>
-        <h2>Admin belépés</h2>
-        <p style="color: var(--text-light); font-size: 0.8rem; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 1px;">Kérjük adja meg a kódot</p>
+        <h2 style="font-family: 'Playfair Display'; font-size: 2rem; margin-bottom: 2rem;">Admin belépés</h2>
         <input type="password" id="admin-password" class="login-input" placeholder="••••••••" onkeyup="if(event.key === 'Enter') attemptLogin()">
-        <button class="btn-primary" style="width: 100%; padding: 1rem;" onclick="attemptLogin()">Belépés</button>
+        <button class="btn-primary" style="width: 100%; padding: 1.2rem;" onclick="attemptLogin()">Belépés</button>
     </div>
 </div>
 
 <footer>
-    <p>© 2026 Balaton Essence - Ederics</p>
+    <div class="logo-title" style="color: white; font-size: 2rem; margin-bottom: 1rem;">BALATON ESSENCE</div>
+    <p style="font-size: 0.8rem; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase;">Élmény, amit megérzel.</p>
+    <p style="margin-top: 4rem; font-size: 0.7rem; opacity: 0.5;">© 2026 Balaton Essence - Ederics</p>
 </footer>
 
-<script src="database.js?v=4.0"></script>
+<script src="database.js?v=6.1"></script>
 <script>
-    // Inicializálás és betöltés
-    document.addEventListener('DOMContentLoaded', () => {
-        initDatabase(renderIndexApartments);
-    });
+    document.addEventListener('DOMContentLoaded', () => initDatabase(renderIndexApartments));
 
     function renderIndexApartments() {
         const grid = document.getElementById('apartment-grid');
-        
-        if (!db.apartments || db.apartments.length === 0) {
-            grid.innerHTML = "<p style='text-align: center; grid-column: 1/-1;'>Jelenleg nincs elérhető apartman.</p>";
-            return;
-        }
-
-        grid.innerHTML = ""; // Betöltés szöveg törlése
-
+        if (!db.apartments || db.apartments.length === 0) return;
+        grid.innerHTML = "";
         db.apartments.forEach(apt => {
-            const mainImg = apt.mainImage || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80';
-            
+            const mainImg = apt.mainImage || '';
             grid.innerHTML += `
-                <a href="apartman.html?id=${apt.id}" class="apt-card">
+                <a href="apartman.html?id=${apt.id}" class="pillar-card" style="text-decoration: none; color: inherit;">
                     <div class="pillar-header">
-                        <h3 style="font-family: 'Playfair Display'; font-size: 1.5rem; margin-bottom: 0.5rem;">${apt.name}</h3>
+                        <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">${apt.name}</h3>
                         <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">${apt.location}</p>
-                        <p style="font-weight: 700; color: var(--accent); margin-bottom: 1.5rem;">${(apt.price || 0).toLocaleString()} Ft / éj-től</p>
-                        <span class="btn-primary" style="font-size: 0.6rem; padding: 0.5rem 1.2rem;">Megnézem</span>
+                        <p style="font-weight: 700; color: var(--accent); letter-spacing: 1px; margin-bottom: 2rem;">${(apt.price || 0).toLocaleString()} Ft / ÉJ-TŐL</p>
+                        <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem;">Felfedezés</span>
                     </div>
-                    <div class="pillar-img" style="background-image: url('${mainImg}')"></div>
-                </a>
-            `;
+                    <div class="pillar-img" style="background-image: url('${mainImg}');"></div>
+                </a>`;
         });
     }
 
     function openLoginModal() {
-        const overlay = document.getElementById('login-overlay');
-        overlay.style.display = 'flex';
-        setTimeout(() => overlay.classList.add('active'), 10);
+        const o = document.getElementById('login-overlay');
+        o.style.display = 'flex';
+        setTimeout(() => o.classList.add('active'), 10);
         document.getElementById('admin-password').focus();
     }
 
     function closeLoginModal() {
-        const overlay = document.getElementById('login-overlay');
-        overlay.classList.remove('active');
-        setTimeout(() => overlay.style.display = 'none', 400);
-        document.getElementById('admin-password').value = '';
+        const o = document.getElementById('login-overlay');
+        o.classList.remove('active');
+        setTimeout(() => o.style.display = 'none', 400);
     }
 
     function attemptLogin() {
-        const passInput = document.getElementById('admin-password').value;
-        const correctCode = db.adminCode || "admin123";
-
-        if (passInput === correctCode) {
+        if (document.getElementById('admin-password').value === db.adminCode) {
             sessionStorage.setItem('adminLoggedIn', 'true');
             window.location.href = "admin.html";
-        } else {
-            alert("Hibás kód!");
-            document.getElementById('admin-password').value = '';
-        }
+        } else { alert("Hibás kód!"); }
     }
 </script>
 </body>

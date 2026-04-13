@@ -340,6 +340,12 @@
         }
     }
 
+    // Az apartman.html foglalási függvényében:
+    function startBooking() {
+        alert("HU: Az oldal fejlesztés alatt áll, foglalás jelenleg nem lehetséges.\nEN: Site under development, booking is currently not possible.\nDE: Seite in Entwicklung, Buchung derzeit nicht möglich.");
+        return; // Megállítja a folyamatot
+    }
+
     async function saveBlocks() { db.apartments.find(x => x.id === activeAptId).bookedDates = selDates; await saveDb(); closeModals(); showToast("Naptár mentve!"); }
     function changeMonth(dir) { vDate.setMonth(vDate.getMonth()+dir); renderAdminCal(); }
     function delBooking(id) { if(confirm("Törli?")) { db.bookings = db.bookings.filter(x=>x.id!==id); saveDb(); render(); } }
