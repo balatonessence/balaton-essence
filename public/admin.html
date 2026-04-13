@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Központi Vezérlőpult | Balaton Essence</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <script src="database.js?v=45"></script>
+    <script src="database.js?v=60"></script>
     <script>
         (async function() {
             await initDatabase();
@@ -32,7 +32,8 @@
         .logo span { color: var(--accent); }
 
         .btn-cta { background: var(--text); color: white; border: none; padding: 0.8rem 1.8rem; border-radius: 50px; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.3s; }
-        .btn-outline { background: transparent; border: 1px solid #ddd; padding: 0.6rem 1.2rem; border-radius: 50px; cursor: pointer; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; }
+        .btn-outline { background: transparent; border: 1px solid #ddd; padding: 0.6rem 1.2rem; border-radius: 50px; cursor: pointer; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; transition: 0.3s; }
+        .btn-outline:hover { background: #eee; }
 
         main { max-width: 1400px; margin: 10rem auto 0; padding: 0 5vw; }
         
@@ -58,7 +59,6 @@
         .chart-box { text-align: center; width: 55px; }
         .chart-svg { width: 45px; height: 25px; transform: rotate(-180deg); }
 
-        /* MODALOK */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px); z-index: 2000; display: none; align-items: center; justify-content: center; }
         .custom-modal { background: white; width: 95%; height: 90vh; display: flex; border-radius: 12px; overflow: hidden; position: relative; }
         .modal-visual { flex: 0.8; background-size: cover; background-position: center; background-color: #06111C; }
@@ -68,6 +68,9 @@
         input, select, textarea { width: 100%; border: none; border-bottom: 2px solid #eee; padding: 0.8rem 0; outline: none; font-family: 'Montserrat'; }
         .gallery-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
         .thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
+        
+        /* ÚJ STÍLUS A TULAJDONOSNAK */
+        .owner-tag { color: var(--essence); font-weight: 700; text-transform: uppercase; font-size: 0.65rem; background: rgba(92, 122, 77, 0.1); padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
     </style>
 </head>
 <body>
@@ -119,7 +122,7 @@
             <button class="btn-cta" onclick="openOwnerModal(null)">+ Új Partner</button>
         </div>
         <table>
-            <thead><tr><th>Név</th><th>Belépési Kód</th><th>Ingatlanok száma</th><th>Művelet</th></tr></thead>
+            <thead><tr><th>Név</th><th>Belépési Kód</th><th>Ingatlanok</th><th>Művelet</th></tr></thead>
             <tbody id="owner-table-body"></tbody>
         </table>
     </div>
@@ -138,7 +141,7 @@
             <div class="form-group"><label>Tulajdonos</label><select id="a-owner-select"></select></div>
             <div style="background:#f9f9f9; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem;">
                 <p style="font-size:0.6rem; font-weight:700; margin-bottom:1rem;">SZINKRON LINKEK</p>
-                <input type="text" id="a-ical-b" placeholder="Booking.com iCal URL">
+                <input type="text" id="a-ical-b" placeholder="Booking.com iCal URL" style="margin-bottom:10px;">
                 <input type="text" id="a-ical-sz" placeholder="Szállás.hu iCal URL">
             </div>
             <div class="form-group"><label>Fő Borító</label><input type="file" onchange="procMain(event)"></div>
@@ -169,31 +172,50 @@
 
     async function syncCalendars() {
         const res = await fetch(`${API_URL}/api/sync`, {method:'POST'});
-        if(res.ok) { await initDatabase(); renderAll(); alert("Kész!"); }
+        if(res.ok) { await initDatabase(); renderAll(); alert("Szinkron kész!"); }
     }
 
     function renderAll() {
         // 1. Foglalások
-        const bBody = document.getElementById('booking-table-body');
-        bBody.innerHTML = (db.bookings || []).map(b => `<tr><td><strong>${b.aptName}</strong></td><td>${b.guestName}</td><td>${b.checkIn}</td><td><span class="badge ${b.source === 'booking' ? 'bg-booking' : (b.source === 'szallas' ? 'bg-szallas' : 'bg-essence')}">${b.source}</span></td><td><button onclick="delBooking('${b.id}')">X</button></td></tr>`).join('');
+        document.getElementById('booking-table-body').innerHTML = (db.bookings || []).map(b => `<tr><td><strong>${b.aptName}</strong></td><td>${b.guestName}</td><td>${b.checkIn}</td><td><span class="badge ${b.source === 'booking' ? 'bg-booking' : (b.source === 'szallas' ? 'bg-szallas' : 'bg-essence')}">${b.source}</span></td><td><button class="btn-outline" style="color:red; border:none; padding:5px;" onclick="delBooking('${b.id}')">Törlés</button></td></tr>`).join('');
 
         // 2. Reggeli
-        document.getElementById('breakfast-table-body').innerHTML = (db.extras || []).filter(e => e.type === 'BREAKFAST').map(e => `<tr><td><strong>${e.aptName}</strong><br>${e.guest}</td><td>${e.date}</td><td>${e.note || '-'}</td><td><button onclick="completeOrder(${e.id})">KÉSZ</button></td></tr>`).join('');
+        document.getElementById('breakfast-table-body').innerHTML = (db.extras || []).filter(e => e.type === 'BREAKFAST').map(e => `<tr><td><strong>${e.aptName}</strong><br>${e.guest}</td><td>${e.date}</td><td>${e.note || '-'}</td><td><button class="btn-outline" onclick="completeOrder(${e.id})">KÉSZ</button></td></tr>`).join('');
 
         // 3. SUP
-        document.getElementById('rent-table-body').innerHTML = (db.extras || []).filter(e => e.type === 'SUP' || e.type === 'SUN').map(e => `<tr><td><span class="badge" style="background:#eee">${e.type}</span></td><td>${e.guest}</td><td>${e.date}</td><td><button onclick="completeOrder(${e.id})">KÉSZ</button></td></tr>`).join('');
+        document.getElementById('rent-table-body').innerHTML = (db.extras || []).filter(e => e.type === 'SUP' || e.type === 'SUN').map(e => `<tr><td><span class="badge" style="background:#eee">${e.type}</span></td><td>${e.guest}</td><td>${e.date}</td><td><button class="btn-outline" onclick="completeOrder(${e.id})">KÉSZ</button></td></tr>`).join('');
 
-        // 4. Ingatlanok
-        document.getElementById('apt-list-container').innerHTML = db.apartments.map(a => `<div style="display:grid; grid-template-columns: 2fr 3fr 1fr; padding:1rem; border-bottom:1px solid #eee; align-items:center;"><div><strong>${a.name}</strong><br><small>${a.location}</small></div><div class="stats-wrapper">${drawChart(20,'var(--booking)','B.')}${drawChart(15,'var(--szallas)','SZ.')}${drawChart(10,'var(--essence)','S.')}</div><button class="btn-outline" onclick="openAptModal(${a.id})">Szerk.</button></div>`).join('');
+        // 4. Ingatlanok - ITT VAN A JAVÍTÁS
+        document.getElementById('apt-list-container').innerHTML = db.apartments.map(a => {
+            // Megkeressük a tulajdonost (laza típusellenőrzéssel == )
+            const owner = db.owners.find(o => o.id == a.ownerId);
+            const ownerDisplayName = owner ? owner.name : 'Nincs tulajdonos';
+            
+            return `<div style="display:grid; grid-template-columns: 2fr 3fr 1.5fr; padding:1.2rem; border-bottom:1px solid #eee; align-items:center;">
+                <div>
+                    <strong>${a.name}</strong><br>
+                    <small>${a.location} <span class="owner-tag">${ownerDisplayName}</span></small>
+                </div>
+                <div class="stats-wrapper">${drawChart(20,'var(--booking)','B.')}${drawChart(15,'var(--szallas)','SZ.')}${drawChart(10,'var(--essence)','S.')}</div>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-outline" style="padding:5px 10px;" onclick="openAptModal(${a.id})">Szerk.</button>
+                    <button class="btn-outline" style="padding:5px 10px; color:red;" onclick="delApt(${a.id})">Törlés</button>
+                </div>
+            </div>`;
+        }).join('');
 
         // 5. Partnerek
         document.getElementById('owner-table-body').innerHTML = db.owners.map(o => {
             const count = db.apartments.filter(a => a.ownerId == o.id).length;
-            return `<tr><td><strong>${o.name}</strong></td><td><code>${o.accessCode}</code></td><td>${count} db</td><td><button onclick="openOwnerModal('${o.id}')">Szerk.</button> <button onclick="delOwner('${o.id}')" style="color:red">X</button></td></tr>`;
+            return `<tr><td><strong>${o.name}</strong></td><td><code>${o.accessCode}</code></td><td>${count} db</td><td><button class="btn-outline" style="padding:5px 10px;" onclick="openOwnerModal('${o.id}')">Szerk.</button> <button class="btn-outline" style="padding:5px 10px; color:red;" onclick="delOwner('${o.id}')">X</button></td></tr>`;
         }).join('');
     }
 
+    async function delApt(id) { if(confirm("Biztosan törlöd?")) { db.apartments = db.apartments.filter(a => a.id != id); await saveDb(); renderAll(); } }
+    async function delBooking(id) { if(confirm("Törlöd?")) { db.bookings = db.bookings.filter(b => b.id !== id); await saveDb(); renderAll(); } }
+    async function delOwner(id) { if(confirm("Törlöd?")) { db.owners = db.owners.filter(o => o.id != id); await saveDb(); renderAll(); } }
     async function completeOrder(id) { db.extras = db.extras.filter(e => e.id !== id); await saveDb(); renderAll(); }
+
     function openOwnerModal(id) { activeOId = id; if(id) { const o = db.owners.find(x => x.id == id); document.getElementById('o-name').value = o.name; document.getElementById('o-code').value = o.accessCode; } else { document.getElementById('o-name').value = ""; document.getElementById('o-code').value = ""; } document.getElementById('owner-modal').style.display='flex'; }
     async function saveOwner() { const n = document.getElementById('o-name').value, c = document.getElementById('o-code').value; if(activeOId) { const o = db.owners.find(x => x.id == activeOId); o.name = n; o.accessCode = c; } else db.owners.push({id: Date.now(), name: n, accessCode: c}); await saveDb(); closeModal(); renderAll(); }
     
@@ -209,7 +231,7 @@
     }
 
     async function saveApt() {
-        let a = activeId ? db.apartments.find(x => x.id == activeId) : { id: Date.now(), bookedDates: [] };
+        let a = activeId ? db.apartments.find(x => x.id == activeId) : { id: Date.now(), bookedDates: [], manualBlocks: [] };
         a.name = document.getElementById('a-name').value; a.location = document.getElementById('a-loc').value; a.price = parseInt(document.getElementById('a-price').value); a.ownerId = document.getElementById('a-owner-select').value;
         a.icalBooking = document.getElementById('a-ical-b').value; a.icalSzallas = document.getElementById('a-ical-sz').value; a.mainImage = tmpMain; a.gallery = curGal;
         if(!activeId) db.apartments.push(a); await saveDb(); closeModal(); renderAll();
@@ -219,7 +241,6 @@
     async function procGal(e) { for(let f of e.target.files) curGal.push(await compressImage(f, 900)); renderG(); }
     function renderG() { document.getElementById('gal-prev').innerHTML = curGal.map((img, i) => `<div style="position:relative"><img src="${img}" class="thumb"><button onclick="curGal.splice(${i},1);renderG()" style="position:absolute;top:0;right:0;background:red;color:white;border:none;width:15px;height:15px;font-size:8px;">X</button></div>`).join(''); }
     function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
-    function delOwner(id) { if(confirm("Törli a partnert?")) { db.owners = db.owners.filter(o => o.id != id); saveDb(); renderAll(); } }
 
     initDatabase(renderAll);
 </script>
