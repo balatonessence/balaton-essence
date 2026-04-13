@@ -7,6 +7,7 @@ const { Pool } = require('pg');
 const app = express();
 const PORT = process.env.PORT || 8080;
 
+// Golyóálló CORS beállítás
 app.use(cors({
     origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
@@ -14,8 +15,9 @@ app.use(cors({
 }));
 app.options('*', cors());
 
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ limit: '10mb', extended: true }));
+// --- ADATMÉRET LIMIT EMELÉSE (A képek miatt 50MB) ---
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
@@ -42,9 +44,6 @@ async function initDb() {
 }
 initDb();
 
-// --- API VÉGPONTOK ---
-
-// Teszt végpont, hogy tudd ellenőrizni a frissítést
 app.get('/api/ping', (req, res) => res.send('PONG - A szerver frissítve és fut!'));
 
 app.get('/api/data', async (req, res) => {
@@ -62,14 +61,13 @@ app.post('/api/data', async (req, res) => {
         await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [newData]);
         res.json({ message: "Sikeres mentés!" });
     } catch (err) {
+        console.error("❌ Mentési hiba:", err);
         res.status(500).json({ error: "Mentési hiba" });
     }
 });
 
-// Statikus mappa
 app.use(express.static(path.join(__dirname, 'public')));
 
-// SPA Fallback
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });

@@ -494,6 +494,60 @@
         render(); 
         showToast("Naptár frissítve!"); 
     }
+
+    // ... az admin.html script részében cseréld le a fájlkezelőket ezekre:
+
+        async function previewMainImage(event) {
+            const file = event.target.files[0];
+            if (file) {
+                // Tömörítjük a képet mentés előtt
+                const compressed = await compressImage(file, 1200, 0.7);
+                document.getElementById('apt-modal-visual').style.backgroundImage = `url(${compressed})`;
+                // Ideiglenesen elmentjük egy globális változóba vagy közvetlenül a db-be
+                window.tempMainImg = compressed;
+            }
+        }
+
+        async function handleGalleryUpload(event) {
+            const files = event.target.files;
+            for (let i = 0; i < files.length; i++) {
+                // Galéria képek tömörítése (kisebb méret is elég ide)
+                const compressed = await compressImage(files[i], 1000, 0.6);
+                currentGallery.push(compressed);
+            }
+            renderGalleryPreview();
+            document.getElementById('gallery-img-input').value = ""; 
+        }
+
+        async function saveApt() {
+            const name = document.getElementById('a-name').value;
+            const loc = document.getElementById('a-loc').value;
+            const price = parseInt(document.getElementById('a-price').value);
+            
+            if(!name || !loc) return showToast("Adatok megadása kötelező!");
+
+            let aptData;
+            if(activeAptId) {
+                aptData = db.apartments.find(x => x.id === activeAptId);
+            } else {
+                aptData = { id: Date.now(), bookedDates: [], status: "active" };
+                db.apartments.push(aptData);
+            }
+
+            aptData.name = name;
+            aptData.location = loc;
+            aptData.price = price;
+            aptData.ownerId = document.getElementById('a-owner-select').value;
+            aptData.gallery = [...currentGallery];
+            
+            if(window.tempMainImg) aptData.mainImage = window.tempMainImg;
+
+            await saveDb();
+            render();
+            closeModals();
+            showToast("Ingatlan mentve!");
+            window.tempMainImg = null;
+        }
     
     function changeMonth(dir) { vDate.setMonth(vDate.getMonth()+dir); renderAdminCal(); }
     function delBooking(id) { if(confirm("Törli a foglalást/rendelést?")) { db.bookings = db.bookings.filter(x=>x.id!==id); saveDb(); render(); } }
