@@ -135,10 +135,15 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`===========================================`);
-    console.log(`ESSENCE SZERVER ELINDULT | PORT: ${PORT}`);
-    console.log(`Adatbázis: ${DB_PATH}`);
-    console.log(`===========================================`);
+// A Railway (és minden felhő szerver) a PORT környezeti változót használja.
+// Ha nincs ilyen (pl. otthon teszteled), akkor legyen a 8080 az alapértelmezett.
+const PORT = process.env.PORT || 8080;
+
+// A "0.0.0.0" cím megadása kötelező Railway-en, hogy kívülről is elérhető legyen!
+app.listen(PORT, "0.0.0.0", () => {
+    console.log(`-----------------------------------------`);
+    console.log(`Szerver sikeresen elindult!`);
+    console.log(`Port: ${PORT}`);
+    console.log(`Cím: 0.0.0.0`);
+    console.log(`-----------------------------------------`);
 });
