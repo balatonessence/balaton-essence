@@ -8,7 +8,9 @@ const app = express();
 // KRITIKUS: Ezt ne vedd lejjebb, mert a Base64 képek megölik a szervert
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
-app.use(express.static('.'));
+
+// JAVÍTÁS 1: Statikus fájlok kiszolgálása pontos útvonallal
+app.use(express.static(__dirname));
 
 const DB_PATH = path.join(__dirname, 'database.js');
 
@@ -109,7 +111,6 @@ app.post('/api/sync', async (req, res) => {
             }
         }
         
-        // Összefésülés a manuális blokkolásokkal, ha vannak
         const manualBlocks = apt.manualBlocks || [];
         const combinedDates = [...new Set([...externalDates, ...manualBlocks])].sort();
 
@@ -130,20 +131,24 @@ app.post('/api/sync', async (req, res) => {
 // 5. EGÉSZSÉGÜGYI VÉGPONT (Railway-nek)
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
-// Statikus kiszolgálás
-app.get('*', (req, res) => {
+// JAVÍTÁS 2: Főoldal kiszolgálása és hibakezelés
+app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// A Railway (és minden felhő szerver) a PORT környezeti változót használja.
-// Ha nincs ilyen (pl. otthon teszteled), akkor legyen a 8080 az alapértelmezett.
+app.get('*', (req, res) => {
+    const filePath = path.join(__dirname, 'index.html');
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        res.status(404).send("Az index.html nem található a szerveren!");
+    }
+});
+
 const PORT = process.env.PORT || 8080;
 
-// A "0.0.0.0" cím megadása kötelező Railway-en, hogy kívülről is elérhető legyen!
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`-----------------------------------------`);
-    console.log(`Szerver sikeresen elindult!`);
-    console.log(`Port: ${PORT}`);
-    console.log(`Cím: 0.0.0.0`);
+    console.log(`Szerver sikeresen elindult! Port: ${PORT}`);
     console.log(`-----------------------------------------`);
 });
