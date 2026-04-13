@@ -3,98 +3,105 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const ical = require('ical');
-const app = express();
+const { Pool } = require('pg'); // Postgres kliens
 
-// KRITIKUS: Ezt ne vedd lejjebb, mert a Base64 képek megölik a szervert
+const app = express();
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
-
-// JAVÍTÁS: A statikus fájlokat a 'public' mappából szolgáljuk ki
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Az adatbázis a gyökérben van a képed alapján
-const DB_PATH = path.join(__dirname, 'database.js');
+// 1. POSTGRES CSATLAKOZÁS
+const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false }
+});
 
-// Adatbázis mentés - Konzerválja a struktúrát a Kliens és Szerver között
-function saveDatabase(data) {
-    try {
-        const content = `const db = ${JSON.stringify(data, null, 4)};\n\nif (typeof module !== 'undefined') module.exports = db;`;
-        fs.writeFileSync(DB_PATH, content);
-        return true;
-    } catch (err) {
-        console.error("Adatbázis írási hiba:", err);
-        return false;
+// 2. ADATBÁZIS INICIALIZÁLÁS (Létrehozza a táblát, ha üres)
+async function initDb() {
+    await pool.query(`
+        CREATE TABLE IF NOT EXISTS essence_data (
+            id serial PRIMARY KEY,
+            key text UNIQUE,
+            content jsonb
+        )
+    `);
+    // Ha még nincs adat, betöltjük az alap database.js-t a Postgres-be
+    const res = await pool.query("SELECT * FROM essence_data WHERE key = 'main_db'");
+    if (res.rowCount === 0) {
+        const initialDb = require('./database.js');
+        await pool.query("INSERT INTO essence_data (key, content) VALUES ('main_db', $1)", [initialDb]);
+        console.log("Alapadatok feltöltve a Postgres-be.");
     }
 }
+initDb();
 
-// 1. ADMIN MENTÉS (Ingatlanok, Képek, Tulajdonosok)
-app.post('/api/save-db', (req, res) => {
-    if (saveDatabase(req.body)) {
+// Segédfüggvények az adatok eléréséhez
+async function getDb() {
+    const res = await pool.query("SELECT content FROM essence_data WHERE key = 'main_db'");
+    return res.rows[0].content;
+}
+
+async function saveDb(data) {
+    await pool.query("UPDATE essence_data SET content = $1 WHERE key = 'main_db'", [data]);
+}
+
+// --- API ÚTVONALAK (Ugyanazok, mint eddig, de Postgres-szel) ---
+
+// 1. ADMIN MENTÉS
+app.post('/api/save-db', async (req, res) => {
+    try {
+        await saveDb(req.body);
         res.json({ success: true });
-    } else {
-        res.status(500).json({ error: "Hiba történt a mentéskor." });
-    }
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// 2. RENDELÉSEK (Morning & Sun aloldalakról)
-app.post('/api/order', (req, res) => {
-    delete require.cache[require.resolve('./database.js')];
-    const db = require('./database.js');
-    
-    const newOrder = {
-        id: "order_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
-        ...req.body,
-        createdAt: new Date().toISOString()
-    };
-    
-    if (!db.extras) db.extras = [];
-    db.extras.push(newOrder);
-    
-    if (saveDatabase(db)) {
+// 2. RENDELÉSEK (Morning & Sun)
+app.post('/api/order', async (req, res) => {
+    try {
+        const db = await getDb();
+        const newOrder = {
+            id: "order_" + Date.now(),
+            ...req.body,
+            createdAt: new Date().toISOString()
+        };
+        if (!db.extras) db.extras = [];
+        db.extras.push(newOrder);
+        await saveDb(db);
         res.json({ success: true, id: newOrder.id });
-    } else {
-        res.status(500).json({ error: "Rendelés mentési hiba." });
-    }
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// 3. TÖRLÉSI VÉGPONTOK (Az admin felületről hívható)
-app.delete('/api/extras/:id', (req, res) => {
-    delete require.cache[require.resolve('./database.js')];
-    const db = require('./database.js');
-    if (db.extras) {
-        db.extras = db.extras.filter(item => item.id !== req.params.id);
-        saveDatabase(db);
-    }
-    res.json({ success: true });
+// 3. TÖRLÉSEK
+app.delete('/api/extras/:id', async (req, res) => {
+    try {
+        const db = await getDb();
+        db.extras = (db.extras || []).filter(item => item.id !== req.params.id);
+        await saveDb(db);
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-app.delete('/api/bookings/:id', (req, res) => {
-    delete require.cache[require.resolve('./database.js')];
-    const db = require('./database.js');
-    if (db.bookings) {
-        db.bookings = db.bookings.filter(item => item.id !== req.params.id);
-        saveDatabase(db);
-    }
-    res.json({ success: true });
+app.delete('/api/bookings/:id', async (req, res) => {
+    try {
+        const db = await getDb();
+        db.bookings = (db.bookings || []).filter(item => item.id !== req.params.id);
+        await saveDb(db);
+        res.json({ success: true });
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// 4. ICAL SZINKRONIZÁCIÓ (Booking.com, Szallas.hu + Manuális blokkok megőrzése)
+// 4. ICAL SZINKRONIZÁCIÓ
 app.post('/api/sync', async (req, res) => {
-    delete require.cache[require.resolve('./database.js')];
-    const db = require('./database.js');
-    let hasChange = false;
+    try {
+        const db = await getDb();
+        let hasChange = false;
 
-    for (let apt of db.apartments) {
-        let externalDates = [];
-        const syncSources = [
-            { url: apt.icalBooking, name: 'Booking' },
-            { url: apt.icalSzallas, name: 'Szallas' }
-        ];
-
-        for (let source of syncSources) {
-            if (source.url && source.url.startsWith('http')) {
+        for (let apt of db.apartments) {
+            let externalDates = [];
+            const urls = [apt.icalBooking, apt.icalSzallas].filter(u => u && u.startsWith('http'));
+            for (let url of urls) {
                 try {
-                    const response = await axios.get(source.url, { timeout: 10000 });
+                    const response = await axios.get(url, { timeout: 8000 });
                     const data = ical.parseICS(response.data);
                     for (let k in data) {
                         if (data[k].type === 'VEVENT') {
@@ -106,51 +113,31 @@ app.post('/api/sync', async (req, res) => {
                             }
                         }
                     }
-                } catch (e) {
-                    console.error(`Hiba a ${source.name} szinkronizálásakor (${apt.name}):`, e.message);
-                }
+                } catch (err) { console.error("Sync hiba:", url); }
+            }
+            const combined = [...new Set([...externalDates, ...(apt.manualBlocks || [])])].sort();
+            if (JSON.stringify(apt.bookedDates) !== JSON.stringify(combined)) {
+                apt.bookedDates = combined;
+                hasChange = true;
             }
         }
-        
-        const manualBlocks = apt.manualBlocks || [];
-        const combinedDates = [...new Set([...externalDates, ...manualBlocks])].sort();
-
-        if (JSON.stringify(apt.bookedDates) !== JSON.stringify(combinedDates)) {
-            apt.bookedDates = combinedDates;
-            hasChange = true;
-        }
-    }
-
-    if (hasChange) {
-        saveDatabase(db);
-        res.json({ success: true, status: "Adatok frissítve." });
-    } else {
-        res.json({ success: true, status: "Nincs szükség frissítésre." });
-    }
+        if (hasChange) await saveDb(db);
+        res.json({ success: true, status: hasChange ? "Mentve" : "Nincs változás" });
+    } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-// 5. EGÉSZSÉGÜGYI VÉGPONT (Railway-nek)
+// 5. RENDERING & STARTUP
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
-// JAVÍTÁS: Főoldal kiszolgálása a 'public' mappából
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Minden más kérést is a public/index.html-re irányítunk (SPA-szerű működés)
 app.get('*', (req, res) => {
-    const filePath = path.join(__dirname, 'public', 'index.html');
-    if (fs.existsSync(filePath)) {
-        res.sendFile(filePath);
-    } else {
-        res.status(404).send("Hiba: Az index.html nem található a public mappában!");
-    }
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 const PORT = process.env.PORT || 8080;
-
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`-----------------------------------------`);
-    console.log(`Szerver sikeresen elindult! Port: ${PORT}`);
-    console.log(`-----------------------------------------`);
+    console.log(`ESSENCE SZERVER ELINDULT (POSTGRES MODE) | Port: ${PORT}`);
 });
