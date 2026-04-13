@@ -9,9 +9,10 @@ const app = express();
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
-// JAVÍTÁS 1: Statikus fájlok kiszolgálása pontos útvonallal
-app.use(express.static(__dirname));
+// JAVÍTÁS: A statikus fájlokat a 'public' mappából szolgáljuk ki
+app.use(express.static(path.join(__dirname, 'public')));
 
+// Az adatbázis a gyökérben van a képed alapján
 const DB_PATH = path.join(__dirname, 'database.js');
 
 // Adatbázis mentés - Konzerválja a struktúrát a Kliens és Szerver között
@@ -131,17 +132,18 @@ app.post('/api/sync', async (req, res) => {
 // 5. EGÉSZSÉGÜGYI VÉGPONT (Railway-nek)
 app.get('/health', (req, res) => res.status(200).send('OK'));
 
-// JAVÍTÁS 2: Főoldal kiszolgálása és hibakezelés
+// JAVÍTÁS: Főoldal kiszolgálása a 'public' mappából
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Minden más kérést is a public/index.html-re irányítunk (SPA-szerű működés)
 app.get('*', (req, res) => {
-    const filePath = path.join(__dirname, 'index.html');
+    const filePath = path.join(__dirname, 'public', 'index.html');
     if (fs.existsSync(filePath)) {
         res.sendFile(filePath);
     } else {
-        res.status(404).send("Az index.html nem található a szerveren!");
+        res.status(404).send("Hiba: Az index.html nem található a public mappában!");
     }
 });
 
