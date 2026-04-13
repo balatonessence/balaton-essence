@@ -1,160 +1,144 @@
-require('dotenv').config();
 const express = require('express');
-const cors = require('cors');
-const { Pool } = require('pg');
-const ical = require('node-ical');
+const fs = require('fs');
 const path = require('path');
-
+const axios = require('axios');
+const ical = require('ical');
 const app = express();
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
 
-// FONTOS: Megmondjuk a szervernek, hogy a 'public' mappából szolgálja ki a fájlokat
-app.use(express.static(path.join(__dirname, 'public')));
+// Megnövelt limit a nagyfelbontású képek (Base64) mentéséhez
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
+app.use(express.static('.'));
 
-const pool = new Pool({
-    connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false }
-});
+const DB_PATH = path.join(__dirname, 'database.js');
 
-// Segédfüggvény dátumtartományhoz
-function getDaysArray(start, end) {
-    let arr = [];
-    let dt = new Date(start);
-    const stop = new Date(end);
-    while (dt <= stop) {
-        arr.push(new Date(dt).toISOString().split('T')[0]);
-        dt.setDate(dt.getDate() + 1);
+// Biztonságos mentés: nem csak felülír, hanem megőrzi a JS struktúrát
+function saveDatabase(data) {
+    try {
+        const content = `const db = ${JSON.stringify(data, null, 4)};\n\nif (typeof module !== 'undefined') module.exports = db;`;
+        fs.writeFileSync(DB_PATH, content);
+        return true;
+    } catch (err) {
+        console.error("Hiba az adatbázis mentésekor:", err);
+        return false;
     }
-    return arr;
 }
 
-// --- AUTOMATIKUS SZINKRONIZÁCIÓ LOGIKA ---
-async function performSync() {
-    console.log("🔄 Szinkronizáció indítása...");
-    try {
-        const result = await pool.query('SELECT data FROM app_state WHERE id = 1');
-        let db = result.rows[0].data;
-        db.bookings = db.bookings || [];
-
-        for (let apt of db.apartments) {
-            let externalDates = [];
-            
-            if (apt.icalBooking) {
-                try {
-                    const events = await ical.fromURL(apt.icalBooking);
-                    Object.values(events).forEach(ev => {
-                        if (ev.type === 'VEVENT') {
-                            const dates = getDaysArray(ev.start, ev.end);
-                            externalDates.push(...dates);
-                            const bookingId = `B-${ev.uid || ev.start.getTime()}`;
-                            if (!db.bookings.find(b => b.id === bookingId)) {
-                                db.bookings.push({
-                                    id: bookingId,
-                                    aptName: apt.name,
-                                    guestName: "Booking.com Vendég",
-                                    checkIn: dates[0],
-                                    checkOut: dates[dates.length-1],
-                                    source: "booking",
-                                    status: "confirmed"
-                                });
-                            }
-                        }
-                    });
-                } catch (e) { console.error("Booking hiba:", apt.name); }
-            }
-
-            if (apt.icalSzallas) {
-                try {
-                    const events = await ical.fromURL(apt.icalSzallas);
-                    Object.values(events).forEach(ev => {
-                        if (ev.type === 'VEVENT') {
-                            const dates = getDaysArray(ev.start, ev.end);
-                            externalDates.push(...dates);
-                            const bookingId = `SZ-${ev.uid || ev.start.getTime()}`;
-                            if (!db.bookings.find(b => b.id === bookingId)) {
-                                db.bookings.push({
-                                    id: bookingId,
-                                    aptName: apt.name,
-                                    guestName: "Szállás.hu Vendég",
-                                    checkIn: dates[0],
-                                    checkOut: dates[dates.length-1],
-                                    source: "szallas",
-                                    status: "confirmed"
-                                });
-                            }
-                        }
-                    });
-                } catch (e) { console.error("Szállás hiba:", apt.name); }
-            }
-
-            const manual = apt.manualBlocks || [];
-            apt.bookedDates = [...new Set([...manual, ...externalDates])];
-        }
-
-        await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [db]);
-        console.log("✅ Szinkron kész.");
-    } catch (err) { console.error("Szinkron hiba:", err.message); }
-}
-
-setInterval(performSync, 1800000);
-
-// --- API VÉGPONTOK ---
-
-app.post('/api/order', async (req, res) => {
-    try {
-        const { type, guest, date, note, aptName } = req.body;
-        const result = await pool.query('SELECT data FROM app_state WHERE id = 1');
-        let db = result.rows[0].data;
-
-        db.extras = db.extras || [];
-        db.extras.push({
-            id: Date.now(),
-            type, guest, aptName, date, note,
-            status: 'pending',
-            createdAt: new Date().toISOString()
-        });
-
-        await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [db]);
-        res.json({ success: true, message: "Rendelés rögzítve!" });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+// 1. TELJES ADATBÁZIS MENTÉS (Admin: Apartmanok, Tulajok, Kódok módosítása)
+app.post('/api/save-db', (req, res) => {
+    if (saveDatabase(req.body)) {
+        res.json({ success: true });
+    } else {
+        res.status(500).json({ error: "Mentési hiba történt a szerveren." });
+    }
 });
 
-app.get('/api/data', async (req, res) => {
-    try {
-        const result = await pool.query('SELECT data FROM app_state WHERE id = 1');
-        res.json(result.rows[0].data);
-    } catch (err) { res.status(500).json({ error: err.message }); }
+// 2. RENDELÉSEK KEZELÉSE (Morning, Sun aloldalakról)
+app.post('/api/order', (req, res) => {
+    // Friss adatbázis betöltése a memóriába
+    delete require.cache[require.resolve('./database.js')];
+    const db = require('./database.js');
+    
+    const newOrder = {
+        id: "order_" + Date.now() + "_" + Math.floor(Math.random() * 1000),
+        ...req.body,
+        createdAt: new Date().toISOString()
+    };
+    
+    if (!db.extras) db.extras = [];
+    db.extras.push(newOrder);
+    
+    if (saveDatabase(db)) {
+        res.json({ success: true, orderId: newOrder.id });
+    } else {
+        res.status(500).json({ error: "Rendelés mentési hiba." });
+    }
 });
 
-app.post('/api/data', async (req, res) => {
-    try {
-        await pool.query('UPDATE app_state SET data = $1 WHERE id = 1', [req.body]);
-        res.json({ message: "OK" });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+// 3. TÖRLÉSI VÉGPONTOK (Admin törlés gombokhoz)
+// Bérlések és reggelik törlése
+app.delete('/api/extras/:id', (req, res) => {
+    delete require.cache[require.resolve('./database.js')];
+    const db = require('./database.js');
+    
+    const initialLength = db.extras ? db.extras.length : 0;
+    db.extras = db.extras.filter(item => item.id !== req.params.id);
+    
+    saveDatabase(db);
+    res.json({ success: true, deleted: db.extras.length < initialLength });
 });
 
-app.post('/api/sync', async (req, res) => {
-    await performSync();
+// Apartman foglalások törlése
+app.delete('/api/bookings/:id', (req, res) => {
+    delete require.cache[require.resolve('./database.js')];
+    const db = require('./database.js');
+    
+    db.bookings = db.bookings.filter(item => item.id !== req.params.id);
+    saveDatabase(db);
     res.json({ success: true });
 });
 
-// Főoldal betöltése a public mappából
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// 4. ICAL NAPTÁR SZINKRONIZÁCIÓ (Booking.com, Szallas.hu)
+app.post('/api/sync', async (req, res) => {
+    delete require.cache[require.resolve('./database.js')];
+    const db = require('./database.js');
+    let hasChange = false;
 
-// Admin és egyéb oldalak direkt elérése
-app.get('/:page', (req, res) => {
-    const page = req.params.page;
-    if (page.endsWith('.html')) {
-        res.sendFile(path.join(__dirname, 'public', page));
+    for (let apt of db.apartments) {
+        let allDates = [];
+        const syncUrls = [
+            { url: apt.icalBooking, source: 'Booking' },
+            { url: apt.icalSzallas, source: 'Szallas' }
+        ];
+
+        for (let sync of syncUrls) {
+            if (sync.url && sync.url.startsWith('http')) {
+                try {
+                    const response = await axios.get(sync.url, { timeout: 10000 });
+                    const data = ical.parseICS(response.data);
+                    for (let k in data) {
+                        if (data[k].type === 'VEVENT') {
+                            let start = new Date(data[k].start);
+                            let end = new Date(data[k].end);
+                            // Napok kiszámolása a két dátum között
+                            while (start < end) {
+                                allDates.push(start.toISOString().split('T')[0]);
+                                start.setDate(start.getDate() + 1);
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error(`Sync hiba: ${sync.source} - ${apt.name}`, e.message);
+                }
+            }
+        }
+        
+        // Csak az egyedi dátumok megtartása
+        const uniqueDates = [...new Set(allDates)].sort();
+        // Ellenőrizzük, történt-e valódi változás
+        if (JSON.stringify(apt.bookedDates) !== JSON.stringify(uniqueDates)) {
+            apt.bookedDates = uniqueDates;
+            hasChange = true;
+        }
+    }
+
+    if (hasChange) {
+        saveDatabase(db);
+        res.json({ success: true, status: "Változások mentve." });
     } else {
-        res.sendFile(path.join(__dirname, 'public', `${page}.html`));
+        res.json({ success: true, status: "Minden naptár naprakész." });
     }
 });
 
-const PORT = process.env.PORT || 8080;
+// 5. EGÉSZSÉGÜGYI ELLENŐRZÉS (Railway/Szerver figyeléshez)
+app.get('/health', (req, res) => {
+    res.status(200).send('OK');
+});
+
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`🚀 Szerver fut a ${PORT} porton...`);
+    console.log(`-------------------------------------------`);
+    console.log(`Balaton Essence Server aktív! Port: ${PORT}`);
+    console.log(`Adatbázis elérési út: ${DB_PATH}`);
+    console.log(`-------------------------------------------`);
 });

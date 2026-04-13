@@ -31,7 +31,7 @@
         nav { display: flex; gap: 2rem; align-items: center; }
         .nav-link { font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--text); text-decoration: none; transition: 0.3s; }
         
-        .btn-primary { background: var(--accent); color: white; border: 1px solid var(--accent); padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.4s; text-decoration: none; }
+        .btn-primary { background: var(--accent); color: white; border: 1px solid var(--accent); padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.4s; text-decoration: none; display: inline-block; }
         .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2); }
 
         /* HERO */
@@ -98,7 +98,7 @@
             <div class="pillar-header">
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">SUP & SUN</h3>
                 <p style="font-style: italic; color: var(--text-light); margin-bottom: 2rem;">Vízparti élmények.</p>
-                <button class="btn-primary" onclick="alert('Fejlesztés alatt...')">Kínálatunk</button>
+                <a href="sun.html" class="btn-primary">Kínálatunk</a>
             </div>
             <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80');"></div>
         </div>
@@ -106,7 +106,7 @@
             <div class="pillar-header">
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">SLOW MORNING</h3>
                 <p style="font-style: italic; color: var(--text-light); margin-bottom: 2rem;">Lassú reggelek.</p>
-                <button class="btn-primary" onclick="alert('Fejlesztés alatt...')">Rendelés</button>
+                <a href="morning.html" class="btn-primary">Rendelés</a>
             </div>
             <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80');"></div>
         </div>
@@ -117,8 +117,7 @@
     <div class="section-header" style="padding-top: 8rem;">
         <h2>Prémium Apartmanok</h2>
     </div>
-    <div id="apartment-grid" class="apt-grid">
-        </div>
+    <div id="apartment-grid" class="apt-grid"></div>
 </section>
 
 <div id="login-overlay" class="login-overlay" onclick="closeLoginModal()">
