@@ -3,167 +3,232 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balaton | Essence • Sun • Morning</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    <title>Balaton Essence | Élmény, amit megérzel.</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
     <style>
-        :root { --accent-essence: #E76F51; --accent-sun: #E9C46A; --accent-morning: #2A9D8F; --text: #1A1A1A; }
+        :root { 
+            --bg: #FCFBF9;          
+            --bg-alt: #F4F2EC;      
+            --text: #2C3325;        
+            --text-light: #6A7063;  
+            --accent: #5C7A4D;      
+            --accent-hover: #48613A;
+            --border: #E3E0D8;      
+            --selection: rgba(92, 122, 77, 0.15); 
+            --shadow: rgba(44, 51, 37, 0.05);
+        }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Montserrat', sans-serif; background: #000; overflow: hidden; height: 100vh; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
-        .portal-container {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            width: 100vw;
+        header { position: fixed; top: 0; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(252, 251, 249, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); transition: 0.3s; }
+        
+        .logo-container { display: flex; flex-direction: column; align-items: center; text-decoration: none; }
+        .logo-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; color: var(--text); letter-spacing: 2px; line-height: 1; }
+        .logo-sub { font-size: 0.6rem; font-weight: 500; letter-spacing: 4px; color: var(--text-light); text-transform: uppercase; margin-top: 4px; }
+        
+        nav { display: flex; gap: 2rem; align-items: center; }
+        .nav-link { font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--text); text-decoration: none; transition: 0.3s; }
+        .nav-link:hover { color: var(--accent); }
+        
+        .btn-primary { background: var(--accent); color: white; border: 1px solid var(--accent); padding: 0.8rem 2rem; border-radius: 50px; font-family: 'Montserrat', sans-serif; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.4s; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; }
+        .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2); }
+        
+        .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--text); padding: 0.8rem 2rem; border-radius: 50px; font-family: 'Montserrat', sans-serif; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.4s; text-decoration: none; display: inline-flex; justify-content: center; align-items: center; }
+        .btn-secondary:hover { background: var(--text); color: var(--bg); }
+
+        .hero { 
+            height: 100vh; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 5vw; 
+            background: linear-gradient(to right, rgba(252,251,249, 1) 0%, rgba(252,251,249, 0.85) 45%, rgba(252,251,249, 0) 100%), url('https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=2000&q=80') center/cover no-repeat;
+        }
+        .hero-content { max-width: 650px; margin-top: 5rem; }
+        .kicker { font-size: 0.75rem; font-weight: 600; letter-spacing: 2px; color: var(--text-light); text-transform: uppercase; margin-bottom: 1.5rem; display: block; }
+        .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 1.5rem; color: var(--text); }
+        .hero-title i { font-style: italic; font-weight: 400; color: var(--text); }
+        .hero-desc { font-size: 1.1rem; line-height: 1.6; margin-bottom: 2.5rem; color: var(--text-light); max-width: 80%; }
+
+        .pillars-section { padding: 5rem 5vw 8rem 5vw; background: var(--bg); max-width: 1600px; margin: 0 auto; }
+        .pillars-grid { display: grid; grid-template-columns: repeat(1, 1fr); gap: 2rem; }
+        @media (min-width: 992px) { .pillars-grid { grid-template-columns: repeat(3, 1fr); gap: 3rem; } }
+        
+        .pillar-card { background: white; display: flex; flex-direction: column; align-items: center; text-align: center; border: 1px solid var(--border); box-shadow: 0 15px 40px var(--shadow); transition: 0.4s; overflow: hidden; height: 100%; }
+        .pillar-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px rgba(44, 51, 37, 0.1); }
+        
+        .pillar-header { padding: 3rem 2rem 2rem 2rem; }
+        .pillar-brand { font-size: 0.65rem; font-weight: 600; letter-spacing: 3px; color: var(--text-light); text-transform: uppercase; display: block; margin-bottom: 1rem; }
+        .pillar-title { font-family: 'Playfair Display', serif; font-size: 1.5rem; letter-spacing: 1px; margin-bottom: 1.5rem; color: var(--text); }
+        .pillar-desc { font-style: italic; font-family: 'Playfair Display', serif; font-size: 1.2rem; color: var(--text-light); margin-bottom: 2rem; line-height: 1.4; }
+        
+        .pillar-img { width: 100%; height: 250px; background-size: cover; background-position: center; margin-top: 2rem; }
+        
+        .pillar-features { display: flex; width: 100%; border-top: 1px solid var(--border); background: var(--bg-alt); }
+        .p-feat-item { flex: 1; padding: 1.5rem 0; display: flex; flex-direction: column; align-items: center; border-right: 1px solid var(--border); }
+        .p-feat-item:last-child { border-right: none; }
+        .p-feat-icon { font-size: 1.5rem; margin-bottom: 0.5rem; color: var(--accent); }
+        .p-feat-text { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; color: var(--text); }
+
+        /* LISTA SZEKCIÓ */
+        .apartments-section { padding: 8rem 5vw; max-width: 1600px; margin: 0 auto; border-top: 1px solid var(--border); }
+        .section-title { font-family: 'Playfair Display', serif; font-size: 2.5rem; color: var(--text); margin-bottom: 4rem; line-height: 1.2; text-align: center; }
+        .section-title i { font-style: italic; font-weight: 400; }
+        
+        .apt-card { display: flex; flex-direction: column; gap: 3rem; margin-bottom: 8rem; align-items: center; }
+        @media (min-width: 992px) {
+            .apt-card { flex-direction: row; height: 550px; }
+            .apt-card:nth-child(even) { flex-direction: row-reverse; }
+            .apt-visual { flex: 1.2; height: 100%; }
+            .apt-info { flex: 1; padding: 0 5rem; text-align: left; }
         }
 
-        @media (min-width: 768px) {
-            .portal-container { flex-direction: row; }
-        }
+        .apt-visual { width: 100%; height: 400px; overflow: hidden; }
+        .apt-img { width: 100%; height: 100%; background-size: cover; background-position: center; transition: 1.5s ease; }
+        .apt-card:hover .apt-img { transform: scale(1.03); }
 
-        .portal-card {
-            flex: 1;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-decoration: none;
-            overflow: hidden;
-            transition: flex 0.6s cubic-bezier(0.25, 1, 0.5, 1);
-            cursor: pointer;
-        }
+        .location-tag { font-size: 0.7rem; font-weight: 600; text-transform: uppercase; letter-spacing: 3px; color: var(--text-light); display: inline-block; margin-bottom: 1rem; border-bottom: 1px solid var(--accent); padding-bottom: 0.5rem; }
+        .apt-name { font-family: 'Playfair Display', serif; font-size: clamp(2rem, 4vw, 3.5rem); line-height: 1.1; margin-bottom: 1.5rem; color: var(--text); }
+        .apt-desc-short { font-size: 1rem; line-height: 1.6; color: var(--text-light); margin-bottom: 2.5rem; }
 
-        /* Asztali nézeten kinyíló effekt */
-        @media (min-width: 768px) {
-            .portal-card:hover { flex: 1.6; }
-        }
+        .apt-info { text-align: center; }
+        .btn-group { display: flex; gap: 1.5rem; justify-content: flex-start; align-items: center; flex-wrap: wrap; }
+        @media (max-width: 991px) { .btn-group { justify-content: center; } }
 
-        .bg-img {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-size: cover;
-            background-position: center;
-            transition: transform 0.8s ease;
-            z-index: 1;
-        }
-
-        .portal-card:hover .bg-img {
-            transform: scale(1.05);
-        }
-
-        .overlay {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            transition: background 0.4s ease;
-            z-index: 2;
-        }
-
-        .portal-card:hover .overlay {
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .content {
-            position: relative;
-            z-index: 3;
-            text-align: center;
-            color: white;
-            padding: 2rem;
-            transform: translateY(20px);
-            transition: transform 0.4s ease;
-        }
-
-        .portal-card:hover .content {
-            transform: translateY(0);
-        }
-
-        h2 {
-            font-family: 'Playfair Display';
-            font-size: clamp(2rem, 4vw, 4rem);
-            line-height: 1.1;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-
-        .subtitle {
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            opacity: 0.8;
-            margin-bottom: 1.5rem;
-        }
-
-        .btn-enter {
-            display: inline-block;
-            border: 1px solid white;
-            padding: 0.8rem 2rem;
-            border-radius: 50px;
-            font-size: 0.7rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            color: white;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.4s ease;
-            transition-delay: 0.1s;
-        }
-
-        .portal-card:hover .btn-enter {
-            opacity: 1;
-            transform: translateY(0);
-            background: white;
-            color: var(--text);
-        }
-
-        /* Egyedi színek és képek */
-        #essence .bg-img { background-image: url('https://images.unsplash.com/photo-1499793983690-e29da59ef1c2?auto=format&fit=crop&w=1200&q=80'); }
-        #essence h2 span { color: var(--accent-essence); }
-
-        #sun .bg-img { background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80'); }
-        #sun h2 span { color: var(--accent-sun); }
-
-        #morning .bg-img { background-image: url('https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=1200&q=80'); }
-        #morning h2 span { color: var(--accent-morning); }
-
+        footer { background: var(--accent); padding: 4rem 5vw; color: white; display: flex; flex-direction: column; align-items: center; text-align: center; }
+        .footer-tagline { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 2rem; font-style: italic; }
+        .footer-links { font-size: 0.8rem; letter-spacing: 1px; margin-bottom: 2rem; opacity: 0.8; }
+        
+        #toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--text); color: var(--bg); padding: 1rem 2rem; border-radius: 4px; font-size: 0.8rem; transform: translateX(150%); transition: 0.4s; box-shadow: 0 10px 20px var(--shadow); }
+        .toast.show { transform: translateX(0); }
     </style>
 </head>
 <body>
 
-<div class="portal-container">
+<div id="toast-container"></div>
 
-    <a href="essence.html" class="portal-card" id="essence">
-        <div class="bg-img"></div>
-        <div class="overlay"></div>
-        <div class="content">
-            <h2>Balaton<span>.</span>Essence</h2>
-            <div class="subtitle">Exkluzív Szállások</div>
-            <div class="btn-enter">Felfedezés</div>
-        </div>
+<header>
+    <a href="index.html" class="logo-container">
+        <span class="logo-title">BALATON</span>
+        <span class="logo-sub">Essence</span>
     </a>
+    <nav>
+        <a href="#apartments" class="nav-link">Apartmanok</a>
+        <a href="#pillars" class="nav-link">Élmények</a>
+        <button class="btn-primary" style="padding: 0.6rem 1.5rem;" onclick="window.location.href='admin.html'">Admin</button>
+    </nav>
+</header>
 
-    <a href="sun.html" class="portal-card" id="sun">
-        <div class="bg-img"></div>
-        <div class="overlay"></div>
-        <div class="content">
-            <h2>Balaton<span>.</span>Sun</h2>
-            <div class="subtitle">SUP & Napágy Bérlés</div>
-            <div class="btn-enter">Felfedezés</div>
+<section class="hero">
+    <div class="hero-content">
+        <span class="kicker">Kevesebb zaj. Több Balaton.</span>
+        <h1 class="hero-title">A Balaton esszenciája — <br>élmény, amit <i>megérzel</i>.</h1>
+        <p class="hero-desc">Apartmanok, élmények és lassú reggelek — minden, amiért a Balatonhoz visszavágysz.</p>
+        <div class="hero-btns">
+            <a href="#pillars" class="btn-primary">Kínálatunk Felfedezése</a>
         </div>
-    </a>
+    </div>
+</section>
 
-    <a href="morning.html" class="portal-card" id="morning">
-        <div class="bg-img"></div>
-        <div class="overlay"></div>
-        <div class="content">
-            <h2>Balaton<span>.</span>Morning</h2>
-            <div class="subtitle">Prémium Reggelik</div>
-            <div class="btn-enter">Felfedezés</div>
+<section id="pillars" class="pillars-section">
+    <div class="pillars-grid">
+        <div class="pillar-card">
+            <div class="pillar-header">
+                <span class="pillar-brand">BALATON ESSENCE</span>
+                <h3 class="pillar-title">SUP & SUN</h3>
+                <p class="pillar-desc">Éld át a Balaton igazi arcát a vízen, és napozz stílusosan.</p>
+                <button class="btn-primary" onclick="showToast('Hamarosan indul!')">Kínálatunk</button>
+            </div>
+            <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="pillar-features">
+                <div class="p-feat-item"><span class="p-feat-icon">🌊</span><span class="p-feat-text">Túrák</span></div>
+                <div class="p-feat-item"><span class="p-feat-icon">🏄</span><span class="p-feat-text">Bérlés</span></div>
+            </div>
         </div>
-    </a>
 
-</div>
+        <div class="pillar-card">
+            <div class="pillar-header">
+                <span class="pillar-brand">BALATON ESSENCE</span>
+                <h3 class="pillar-title">APARTMENTS</h3>
+                <p class="pillar-desc">Prémium apartmanok, ahol a harmónia vár.</p>
+                <a href="#apartments" class="btn-primary">Apartmanok</a>
+            </div>
+            <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="pillar-features">
+                <div class="p-feat-item"><span class="p-feat-icon">🌿</span><span class="p-feat-text">Design</span></div>
+                <div class="p-feat-item"><span class="p-feat-icon">✨</span><span class="p-feat-text">Kényelem</span></div>
+            </div>
+        </div>
 
+        <div class="pillar-card">
+            <div class="pillar-header">
+                <span class="pillar-brand">BALATON ESSENCE</span>
+                <h3 class="pillar-title">SLOW MORNING</h3>
+                <p class="pillar-desc">Indítsd a napot egy ráérős, mediterrán reggelivel.</p>
+                <button class="btn-primary" onclick="showToast('Hamarosan indul!')">Rendelés</button>
+            </div>
+            <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80');"></div>
+            <div class="pillar-features">
+                <div class="p-feat-item"><span class="p-feat-icon">☕</span><span class="p-feat-text">Kávé</span></div>
+                <div class="p-feat-item"><span class="p-feat-icon">🥐</span><span class="p-feat-text">Péksütemény</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="apartments" class="apartments-section">
+    <h2 class="section-title">Apartmanok, ahol az otthon érzése<br><i>nyaralássá</i> válik.</h2>
+    <main id="apt-list"></main>
+</section>
+
+<footer>
+    <h3 class="footer-tagline">Balaton Essence — ahol a nyaralás érzéssé válik.</h3>
+    <div class="footer-links">Balatonakarattya - Ederics | +36 30 123 4567 | hello@balatonessence.hu</div>
+    <button class="btn-secondary" style="border-color: white; color: white;" onclick="window.scrollTo(0,0)">Ugrás a tetejére</button>
+</footer>
+
+<script src="database.js"></script>
+<script>
+    function showToast(m) {
+        const t = document.createElement('div'); t.className = 'toast show'; t.innerText = m;
+        document.getElementById('toast-container').appendChild(t);
+        setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
+    }
+
+    function render() {
+        const cont = document.getElementById('apt-list'); cont.innerHTML = "";
+        db.apartments.forEach(apt => {
+            const img = apt.mainImage || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80';
+            const shortDesc = apt.desc ? apt.desc.substring(0, 120) + '...' : "Letisztult terek, természetes anyagok. Itt minden a te kényelmedről szól, harmóniában a környezettel.";
+            
+            cont.innerHTML += `
+                <div class="apt-card">
+                    <div class="apt-visual"><div class="apt-img" style="background-image: url(${img})"></div></div>
+                    <div class="apt-info">
+                        <span class="location-tag">${apt.location}</span>
+                        <h2 class="apt-name">${apt.name}</h2>
+                        <p class="apt-desc-short">${shortDesc}</p>
+                        <div class="btn-group">
+                            <a href="apartman.html?id=${apt.id}" class="btn-primary">Részletek & Foglalás</a>
+                        </div>
+                    </div>
+                </div>`;
+        });
+    }
+
+    window.addEventListener('scroll', () => {
+        const header = document.querySelector('header');
+        if (window.scrollY > 50) {
+            header.style.background = 'rgba(252, 251, 249, 1)';
+            header.style.boxShadow = '0 5px 20px rgba(0,0,0,0.05)';
+        } else {
+            header.style.background = 'rgba(252, 251, 249, 0.95)';
+            header.style.boxShadow = 'none';
+        }
+    });
+
+    initDatabase(render);
+</script>
 </body>
 </html>

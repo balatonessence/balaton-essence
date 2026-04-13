@@ -3,126 +3,351 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apartman Részletek | Balaton Exclusive</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+    <title>Apartman Részletek | Balaton Essence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --color-bg: #F9F9F7;
-            --color-text: #1A1A1A;
-            --color-accent: #E76F51;
+        :root { 
+            --bg: #FCFBF9;          
+            --bg-alt: #F4F2EC;      
+            --text: #2C3325;        
+            --text-light: #6A7063;  
+            --accent: #5C7A4D;      
+            --accent-hover: #48613A;
+            --border: #E3E0D8;      
+            --selection: rgba(92, 122, 77, 0.15); 
+            --shadow: rgba(44, 51, 37, 0.05);
         }
+        
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--color-bg); color: var(--color-text); line-height: 1.7; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); line-height: 1.7; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
-        header { padding: 2rem 5vw; display: flex; justify-content: space-between; align-items: center; }
-        .back-link { text-decoration: none; color: var(--color-text); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+        /* HEADER */
+        header { position: fixed; top: 0; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(252, 251, 249, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+        .back-link { text-decoration: none; color: var(--text); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 600; transition: 0.3s; }
+        .back-link:hover { color: var(--accent); }
+        
+        .logo-container { display: flex; flex-direction: column; align-items: center; text-decoration: none; }
+        .logo-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; color: var(--text); letter-spacing: 2px; line-height: 1; }
+        .logo-sub { font-size: 0.5rem; font-weight: 500; letter-spacing: 3px; color: var(--text-light); text-transform: uppercase; margin-top: 2px; }
 
-        .hero-image {
-            width: 100%; height: 70vh;
-            background-size: cover; background-position: center;
-            display: flex; align-items: flex-end; padding: 5vw;
-        }
+        /* HERO */
+        .hero-image { width: 100%; height: 70vh; background-size: cover; background-position: center; display: flex; align-items: flex-end; padding: 5vw; position: relative; }
+        .hero-image::before { content: ''; position: absolute; top:0; left:0; width:100%; height:100%; background: linear-gradient(to top, rgba(44,51,37,0.8), rgba(0,0,0,0)); }
+        
+        .hero-content { position: relative; z-index: 10; color: white; }
+        .hero-tag { font-size: 0.75rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; margin-bottom: 1rem; display: inline-block; color: #E3E0D8; }
+        .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 6vw, 5rem); line-height: 1.1; text-shadow: 0 5px 15px rgba(0,0,0,0.3); }
 
-        .hero-title {
-            font-family: 'Playfair Display', serif; font-size: clamp(3rem, 8vw, 6rem);
-            color: #fff; text-shadow: 0 10px 30px rgba(0,0,0,0.3); line-height: 1;
-        }
+        /* MAIN CONTENT */
+        main { max-width: 1400px; margin: 0 auto; padding: 5rem 5vw; display: grid; grid-template-columns: 2fr 1fr; gap: 5rem; }
+        @media (max-width: 991px) { main { grid-template-columns: 1fr; gap: 3rem; } .hero-image { height: 50vh; } }
 
-        main { max-width: 1200px; margin: 0 auto; padding: 5rem 5vw; display: grid; grid-template-columns: 2fr 1fr; gap: 4rem; }
+        .description h2 { font-family: 'Playfair Display', serif; font-size: 2.2rem; margin-bottom: 2rem; color: var(--text); }
+        .description h2 i { font-style: italic; font-weight: 400; }
+        .description p { margin-bottom: 1.5rem; color: var(--text-light); font-size: 1.05rem; }
 
-        .description h2 { font-family: 'Playfair Display', serif; font-size: 2.5rem; margin-bottom: 2rem; }
-        .description p { margin-bottom: 1.5rem; color: #444; font-size: 1.1rem; }
+        /* GALÉRIA GRID */
+        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem; margin-top: 4rem; }
+        .gallery-item { height: 250px; background-size: cover; background-position: center; border-radius: 4px; transition: 0.4s; cursor: pointer; }
+        .gallery-item:hover { transform: scale(1.02); box-shadow: 0 10px 20px var(--shadow); }
 
-        .gallery {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 4rem;
-        }
-        .gallery-item { height: 300px; background: #eee; border-radius: 2px; }
+        /* STICKY BOX */
+        .sticky-box { position: sticky; top: 120px; background: white; padding: 3rem 2.5rem; border: 1px solid var(--border); box-shadow: 0 20px 40px var(--shadow); text-align: center; height: fit-content; }
+        .sticky-box .price-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: var(--text-light); font-weight: 600; display: block; margin-bottom: 0.5rem; }
+        .sticky-box .price { font-size: 2.5rem; font-family: 'Playfair Display', serif; margin-bottom: 1.5rem; display: block; color: var(--accent); }
+        
+        .btn-primary { width: 100%; background: var(--accent); color: white; border: 1px solid var(--accent); padding: 1.2rem; border-radius: 50px; font-family: 'Montserrat', sans-serif; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.4s; }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2); }
+        .btn-primary:disabled { background: #ccc; border-color: #ccc; cursor: not-allowed; transform: none; box-shadow: none; }
 
-        /* Sticky foglalási kártya */
-        .sticky-box {
-            position: sticky; top: 120px;
-            background: #fff; padding: 2.5rem; border: 1px solid #eee;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.05); text-align: center;
-            height: fit-content;
-        }
-        .sticky-box .price { font-size: 2rem; font-family: 'Playfair Display', serif; margin-bottom: 1rem; display: block; }
-        .btn-book-now {
-            width: 100%; background: var(--color-text); color: #fff; border: none;
-            padding: 1.2rem; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; cursor: pointer; transition: 0.3s;
-        }
-        .btn-book-now:hover { background: var(--color-accent); }
+        /* MODALOK ÁLTALÁNOS (A foglaláshoz) */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 51, 37, 0.7); backdrop-filter: blur(5px); z-index: 2000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .custom-modal { background: var(--bg); width: 100%; height: 100%; position: relative; display: flex; flex-direction: column; overflow-y: auto; }
+        @media (min-width: 768px) { .custom-modal { width: 90%; height: 85vh; flex-direction: row; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,0.15); } }
 
-        @media (max-width: 900px) {
-            main { grid-template-columns: 1fr; }
-            .hero-image { height: 50vh; }
-            .sticky-box { position: relative; top: 0; margin-top: 2rem; }
-        }
+        .close-x { position: absolute; top: 1.5rem; right: 1.5rem; font-size: 1.2rem; color: var(--text); cursor: pointer; z-index: 100; background: var(--bg); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px var(--shadow); transition: 0.3s; }
+        .close-x:hover { background: var(--text); color: var(--bg); }
+
+        .modal-visual { height: 35vh; background-color: var(--border); position: relative; flex-shrink: 0; }
+        @media (min-width: 768px) { .modal-visual { flex: 1.3; height: 100%; } }
+        
+        .modal-body { flex: 1; padding: 2rem; overflow-y: auto; display: flex; flex-direction: column; background: var(--bg); }
+        @media (min-width: 768px) { .modal-body { padding: 4rem 5rem; } }
+
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; margin-top: 1rem; width: 100%; }
+        .day { height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.85rem; cursor: pointer; border-radius: 4px; transition: 0.2s; color: var(--text); }
+        @media (min-width: 768px) { .day { height: 50px; font-size: 0.9rem; } }
+        .day:hover:not(.disabled) { background: var(--border); }
+        .day.selected { background: var(--accent) !important; color: #fff !important; }
+        .day.in-range { background: var(--selection); }
+        .day.disabled { color: #ccc !important; cursor: not-allowed !important; text-decoration: line-through; opacity: 0.5; }
+
+        input[type="text"], input[type="email"] { background: transparent; color: var(--text); }
+        input::placeholder { color: #A8A49C; }
+
+        #toast-container { position: fixed; bottom: 2rem; right: 2rem; z-index: 3000; display: flex; flex-direction: column; gap: 10px; }
+        .toast { background: var(--text); color: var(--bg); padding: 1rem 2rem; border-radius: 4px; font-size: 0.8rem; transform: translateX(150%); transition: 0.4s; box-shadow: 0 10px 20px var(--shadow); }
+        .toast.show { transform: translateX(0); }
+
+        /* Lightbox (Képnézegető) */
+        #lightbox { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); z-index: 3000; display: none; justify-content: center; align-items: center; }
+        #lightbox img { max-width: 90%; max-height: 90vh; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .lb-close { position: absolute; top: 2rem; right: 2rem; color: white; font-size: 2rem; cursor: pointer; }
     </style>
 </head>
 <body>
 
+    <div id="toast-container"></div>
+
     <header>
-        <a href="index.html" class="back-link">← Vissza a kínálathoz</a>
-        <div style="font-family: 'Playfair Display'; font-weight: 700; font-size: 1.2rem;">Balaton<span>.</span></div>
-    </header>
+        <a href="apartmanok.html" class="back-link">← Vissza az apartmanokhoz</a>
+        <a href="index.html" class="logo-container">
+            <span class="logo-title">BALATON</span>
+            <span class="logo-sub">Essence</span>
+        </a>
+        <div style="width: 150px;"></div> </header>
 
     <div id="hero" class="hero-image">
-        <h1 id="title" class="hero-title">Apartman Neve</h1>
+        <div class="hero-content">
+            <span class="hero-tag" id="hero-location"></span>
+            <h1 id="title" class="hero-title">Betöltés...</h1>
+        </div>
     </div>
 
     <main>
         <div class="description">
-            <h2 id="subtitle">Érezze magát otthon a vízparton</h2>
-            <p id="desc-text">Betöltés alatt...</p>
+            <h2>Terek, ahol jó <i>megérkezni</i>.</h2>
+            <p id="desc-text">Az apartman adatainak betöltése folyamatban...</p>
             
-            <div class="gallery">
-                <div class="gallery-item" style="background: #ddd;"></div>
-                <div class="gallery-item" style="background: #ccc;"></div>
-                <div class="gallery-item" style="background: #bbb;"></div>
-                <div class="gallery-item" style="background: #aaa;"></div>
-            </div>
+            <div class="gallery" id="apt-gallery">
+                </div>
         </div>
 
         <aside>
             <div class="sticky-box">
+                <span class="price-label">Kezdőár / Éj</span>
                 <span class="price" id="price-display">0 Ft</span>
-                <p style="margin-bottom: 2rem; color: #888; font-size: 0.9rem;">Ár éjszakánként, az egész apartmanra vonatkozik.</p>
-                <button class="btn-book-now" onclick="startBooking()">Foglalás indítása</button>
+                <p style="margin-bottom: 2rem; color: var(--text-light); font-size: 0.85rem; line-height: 1.5;">A megadott ár a teljes apartmanra vonatkozik, maximum 2 fő részére. További vendégek esetén felár fizetendő.</p>
+                <button class="btn-primary" onclick="openBooking()">Foglalás indítása</button>
             </div>
         </aside>
     </main>
 
+    <div id="booking-modal" class="modal-overlay" onclick="closeBooking()">
+        <div class="custom-modal" style="max-width: 1100px;" onclick="event.stopPropagation()">
+            <div class="close-x" onclick="closeBooking()">✕</div>
+            <div class="modal-visual" id="book-visual" style="background-color: var(--text); color: white; display:flex; flex-direction:column; justify-content:flex-end; padding: 3rem;">
+                <h3 id="book-name-tag" style="font-family:'Playfair Display', serif; font-size:2.5rem; line-height:1.1; text-shadow: 0 2px 10px rgba(0,0,0,0.5);"></h3>
+            </div>
+            <div class="modal-body">
+                <div id="step-1" style="height: 100%; display: flex; flex-direction: column;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <button onclick="changeMonth(-1)" style="border:none; background:none; font-size:1.5rem; cursor:pointer; color:var(--text);">←</button>
+                        <h4 id="cal-month-year" style="font-family:'Playfair Display', serif; font-size:1.5rem; color:var(--text);"></h4>
+                        <button onclick="changeMonth(1)" style="border:none; background:none; font-size:1.5rem; cursor:pointer; color:var(--text);">→</button>
+                    </div>
+                    <div class="calendar-grid" id="calendar-grid"></div>
+                    
+                    <div style="margin:2rem 0; padding:1.5rem 0; border-top:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                        <span style="font-size:0.8rem; font-weight:700; color:var(--text-light);">VENDÉGEK:</span>
+                        <div style="display:flex; align-items:center; gap:1rem;">
+                            <button onclick="updateGuests(-1)" style="border:1px solid var(--border); background:transparent; padding:0.5rem 1rem; cursor:pointer; color:var(--text); transition:0.3s;" onmouseover="this.style.background='var(--bg-alt)'" onmouseout="this.style.background='transparent'">-</button>
+                            <span id="val-guests" style="font-weight:700; color:var(--text);">2</span>
+                            <button onclick="updateGuests(1)" style="border:1px solid var(--border); background:transparent; padding:0.5rem 1rem; cursor:pointer; color:var(--text); transition:0.3s;" onmouseover="this.style.background='var(--bg-alt)'" onmouseout="this.style.background='transparent'">+</button>
+                        </div>
+                    </div>
+                    
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:auto;">
+                        <span id="total-price" style="font-family:'Playfair Display', serif; font-size:2.2rem; color:var(--text); font-weight:700;">0 Ft</span>
+                        <button class="btn-primary" style="width: auto;" id="confirm-btn" disabled onclick="goToStep2()">Tovább</button>
+                    </div>
+                </div>
+
+                <div id="step-2" style="display:none; height:100%; flex-direction:column;">
+                    <h2 style="font-family:'Playfair Display', serif; font-size:2.5rem; margin-bottom:2rem; color:var(--text);">Kapcsolat</h2>
+                    <input type="text" id="g-name" style="width:100%; border:none; border-bottom:2px solid var(--border); padding:1rem 0; margin-bottom:1.5rem; outline:none; font-family:'Montserrat'; font-size:1.1rem;" placeholder="Teljes név *">
+                    <input type="email" id="g-email" style="width:100%; border:none; border-bottom:2px solid var(--border); padding:1rem 0; margin-bottom:2rem; outline:none; font-family:'Montserrat'; font-size:1.1rem;" placeholder="E-mail cím *">
+                    <div style="margin-top:auto;">
+                        <button class="btn-primary" id="submit-booking-btn" onclick="finalSubmit()">Foglalás véglegesítése</button>
+                    </div>
+                </div>
+
+                <div id="success-msg" style="display:none; text-align:center; padding-top:4rem; height:100%;">
+                    <h2 style="font-family:'Playfair Display', serif; font-size:3rem; color:var(--accent);">Sikeres!</h2>
+                    <p style="margin-top:1rem; color:var(--text-light);">Foglalását rögzítettük, hamarosan felvesszük Önnel a kapcsolatot.</p>
+                    <button class="btn-primary" style="margin-top:3rem;" onclick="closeBooking()">Rendben</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightbox" onclick="this.style.display='none'">
+        <div class="lb-close">✕</div>
+        <img id="lb-img" src="" alt="Nagyított kép" onclick="event.stopPropagation()">
+    </div>
+
+    <script src="database.js"></script>
     <script>
-        // Ez a JS olvassa ki az URL-ből az ID-t: apartman.html?id=1
-        const urlParams = new URLSearchParams(window.location.search);
-        const aptId = parseInt(urlParams.get('id'));
+        let curApt = null, inD = null, outD = null, guests = 2, view = new Date();
+        view.setDate(1);
 
-        const db = {
-            apartments: [
-                { id: 1, name: "Aranypart Panoráma", location: "Siófok", price: 35000, color: "#E76F51", desc: "Siófok legszebb részén, közvetlenül az Aranyparton található ez a modern, minden igényt kielégítő apartman. Hatalmas teraszáról zavartalan kilátás nyílik a tóra, így a naplemente minden este egy privát moziélmény." },
-                { id: 2, name: "Tihanyi Búvóhely", location: "Tihany", price: 42000, color: "#0077B6", desc: "A félsziget szívében, a történelmi apátság árnyékában bújik meg ez az exkluzív lakás. A belső tér a minimalista design és a természetes anyagok ötvözete, tökéletes választás a csendre vágyóknak." },
-                { id: 3, name: "Füredi Vitorlás", location: "Balatonfüred", price: 38000, color: "#2A9D8F", desc: "Balatonfüred nyüzsgő sétányától pár percre, mégis nyugodt környezetben várja vendégeit ez a vitorlás stílusú apartman. Prémium anyaghasználat, tágas terek és saját parkoló biztosítja a kényelmet." }
-            ]
-        };
-
-        const apt = db.apartments.find(a => a.id === aptId);
-
-        if(apt) {
-            document.getElementById('title').innerText = apt.name;
-            document.getElementById('price-display').innerText = apt.price.toLocaleString('hu-HU') + " Ft";
-            document.getElementById('desc-text').innerText = apt.desc;
-            document.getElementById('hero').style.background = `linear-gradient(to bottom, rgba(0,0,0,0), rgba(0,0,0,0.6)), linear-gradient(45deg, ${apt.color}, #06111C)`;
-            document.title = `${apt.name} | Balaton Exclusive`;
-        } else {
-            window.location.href = 'index.html';
+        function showToast(m) {
+            const t = document.createElement('div'); t.className = 'toast show'; t.innerText = m;
+            document.getElementById('toast-container').appendChild(t);
+            setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, 3000);
         }
 
-        function startBooking() {
-            // Egy egyszerűbb megoldás a demóhoz: visszaküldjük a főoldalra és ott nyitjuk meg a modalt
-            // (Profi megoldásnál a modal kódja egy külön JS modulban lenne, amit mindkét oldal betölt)
-            alert("A foglaláshoz kérjük, használja a főoldali gyorsfoglalót!");
-            window.location.href = 'index.html';
+        // Az oldal inicializálása az adatbázis betöltése után
+        function renderApartmentDetails() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const aptId = parseInt(urlParams.get('id'));
+            
+            // Keresés a globális db objektumban
+            curApt = db.apartments.find(a => a.id === aptId);
+
+            if(curApt) {
+                document.getElementById('title').innerText = curApt.name;
+                document.getElementById('hero-location').innerText = curApt.location;
+                document.getElementById('price-display').innerText = curApt.price.toLocaleString('hu-HU') + " Ft";
+                document.getElementById('desc-text').innerText = curApt.desc || "Letisztult terek, természetes anyagok. Privát kert vagy panoráma. Itt minden a te kényelmedről szól, hogy az otthon érzése nyaralássá váljon.";
+                
+                const mainImg = curApt.mainImage || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1600&q=80';
+                document.getElementById('hero').style.backgroundImage = `url('${mainImg}')`;
+                document.title = `${curApt.name} | Balaton Essence`;
+
+                // Galéria betöltése
+                const galleryContainer = document.getElementById('apt-gallery');
+                galleryContainer.innerHTML = '';
+                let images = [];
+                if(curApt.mainImage) images.push(curApt.mainImage);
+                if(curApt.gallery) images = images.concat(curApt.gallery);
+                
+                images.forEach(imgSrc => {
+                    const div = document.createElement('div');
+                    div.className = 'gallery-item';
+                    div.style.backgroundImage = `url('${imgSrc}')`;
+                    div.onclick = () => {
+                        document.getElementById('lb-img').src = imgSrc;
+                        document.getElementById('lightbox').style.display = 'flex';
+                    };
+                    galleryContainer.appendChild(div);
+                });
+            } else {
+                // Ha rossz az ID, visszaküldjük a listára
+                window.location.href = 'apartmanok.html';
+            }
         }
+
+        // FOGLALÁSI LOGIKA
+        function openBooking() {
+            document.getElementById('book-name-tag').innerText = curApt.name;
+            const mainImg = curApt.mainImage || 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80';
+            document.getElementById('book-visual').style.backgroundImage = `linear-gradient(to top, rgba(44,51,37, 0.8), rgba(44,51,37, 0.2)), url('${mainImg}')`;
+            document.getElementById('book-visual').style.backgroundSize = 'cover';
+            document.getElementById('book-visual').style.backgroundPosition = 'center';
+            
+            inD = null; outD = null; guests = 2; document.getElementById('val-guests').innerText = 2;
+            document.getElementById('step-1').style.display='flex'; 
+            document.getElementById('step-2').style.display='none'; 
+            document.getElementById('success-msg').style.display='none';
+            
+            document.getElementById('booking-modal').style.display='flex'; 
+            renderCal(); 
+            setTimeout(()=>document.getElementById('booking-modal').classList.add('active'),10);
+        }
+
+        function closeBooking() { 
+            document.getElementById('booking-modal').classList.remove('active'); 
+            setTimeout(()=>document.getElementById('booking-modal').style.display='none',400); 
+        }
+        
+        function updateGuests(c) { 
+            guests = Math.max(1, guests + c); 
+            document.getElementById('val-guests').innerText = guests; 
+            updateSum(); 
+        }
+        
+        function renderCal() {
+            const grid = document.getElementById('calendar-grid'); grid.innerHTML = "";
+            const mNames = ["Január", "Február", "Március", "Április", "Május", "Június", "Július", "Augusztus", "Szeptember", "Október", "November", "December"];
+            document.getElementById('cal-month-year').innerText = `${view.getFullYear()} ${mNames[view.getMonth()]}`;
+            
+            ["Hé", "Ke", "Sze", "Cs", "Pé", "Szo", "Va"].forEach(d => grid.innerHTML += `<div style="font-size:0.6rem; font-weight:700; color:var(--text-light); margin-bottom:10px;">${d}</div>`);
+            
+            const first = new Date(view.getFullYear(), view.getMonth(), 1).getDay();
+            const days = new Date(view.getFullYear(), view.getMonth() + 1, 0).getDate();
+            const offset = (first === 0 ? 7 : first) - 1;
+            
+            for(let i=0; i<offset; i++) grid.innerHTML += `<div></div>`;
+            const today = new Date(); today.setHours(0,0,0,0);
+            
+            for(let d=1; d<=days; d++) {
+                const date = new Date(view.getFullYear(), view.getMonth(), d);
+                const dStr = `${view.getFullYear()}-${(view.getMonth()+1).toString().padStart(2,'0')}-${d.toString().padStart(2,'0')}`;
+                const isPast = date < today; 
+                const isBooked = curApt.bookedDates && curApt.bookedDates.includes(dStr);
+                const isS = (inD && date.getTime()===inD.getTime()) || (outD && date.getTime()===outD.getTime());
+                const inR = inD && outD && date > inD && date < outD;
+                
+                const el = document.createElement('div'); 
+                el.className = `day ${isS?'selected':''} ${inR?'in-range':''} ${(isPast || isBooked)?'disabled':''}`; 
+                el.innerText = d;
+                
+                if(!isPast && !isBooked) {
+                    el.onclick = () => { 
+                        if(!inD || (inD && outD)) { inD=date; outD=null; } 
+                        else if(date > inD) outD=date; 
+                        else inD=date; 
+                        renderCal(); 
+                    };
+                }
+                grid.appendChild(el);
+            }
+            updateSum();
+        }
+
+        function updateSum() {
+            if(inD && outD) {
+                const diff = Math.ceil((outD - inD) / (1000*60*60*24));
+                const total = (diff * curApt.price) + (Math.max(0, guests-2) * 5000 * diff);
+                document.getElementById('total-price').innerText = `${total.toLocaleString()} Ft`; 
+                document.getElementById('confirm-btn').disabled = false;
+            } else { 
+                document.getElementById('total-price').innerText = "0 Ft"; 
+                document.getElementById('confirm-btn').disabled = true; 
+            }
+        }
+
+        function changeMonth(dir) { view.setMonth(view.getMonth()+dir); renderCal(); }
+        function goToStep2() { document.getElementById('step-1').style.display='none'; document.getElementById('step-2').style.display='flex'; }
+        
+        async function finalSubmit() {
+            const n = document.getElementById('g-name').value, e = document.getElementById('g-email').value;
+            if(!n || !e) return showToast("Minden adat megadása kötelező!");
+            
+            document.getElementById('submit-booking-btn').disabled = true; 
+            document.getElementById('submit-booking-btn').innerText = "Feldolgozás...";
+            
+            await new Promise(r => setTimeout(r, 1500));
+            
+            db.bookings.push({ id: Date.now(), aptName: curApt.name, guestName: n, checkIn: inD.toISOString().split('T')[0], checkOut: outD.toISOString().split('T')[0], guests, totalPrice: parseInt(document.getElementById('total-price').innerText.replace(/\D/g,'')), source: 'direct' });
+            
+            let t = new Date(inD); 
+            while(t <= outD) { 
+                const s = t.toISOString().split('T')[0]; 
+                if(!curApt.bookedDates.includes(s)) curApt.bookedDates.push(s); 
+                t.setDate(t.getDate()+1); 
+            }
+            saveDb(); 
+            document.getElementById('step-2').style.display='none'; 
+            document.getElementById('success-msg').style.display='block'; 
+            showToast("Foglalás rögzítve!");
+        }
+
+        // Hívjuk meg az inicializálást a database.js betöltése után
+        initDatabase(renderApartmentDetails);
+
     </script>
 </body>
 </html>
