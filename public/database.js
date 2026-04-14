@@ -1,13 +1,14 @@
-// public/database.js
 let db = { apartments: [], owners: [], bookings: [], extras: [] };
 
-async function initDatabase() {
+async function initDatabase(callback) {
     try {
-        // Itt elkérjük a szervertől a Postgres-ben tárolt adatokat
-        const res = await fetch('/api/get-db-content'); // Ehhez kell egy új GET végpont a szerverbe
+        const res = await fetch('/api/get-db-content');
         if (res.ok) {
             const data = await res.json();
-            db = data;
+            if (data) db = data; // Frissítjük a memóriát a Postgres adataival
+            if (callback) callback(); // Szólunk az admin.html-nek, hogy rajzolja ki
         }
-    } catch (e) { console.error("Hiba az adatok betöltésekor", e); }
+    } catch (e) {
+        console.error("Hiba az adatok betöltésekor", e);
+    }
 }

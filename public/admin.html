@@ -164,20 +164,10 @@
 <script>
     let activeId = null;
     let activeOId = null;
-    let db = { apartments: [], owners: [], bookings: [], extras: [] };
 
-    // 1. ADATOK BETÖLTÉSE A POSTGRES-BŐL
-    async function initDatabase() {
-        try {
-            const res = await fetch('/api/get-db-content');
-            if (res.ok) {
-                db = await res.json();
-                renderAll();
-            }
-        } catch (e) { console.error("Hiba a betöltéskor:", e); }
-    }
+    // A 'db' változót és az 'initDatabase' függvényt a külső database.js adja!
 
-    // 2. ADATBÁZIS MENTÉSE
+    // ADATBÁZIS MENTÉSE
     async function saveDb() {
         await fetch('/api/save-db', {
             method: 'POST',
@@ -187,21 +177,14 @@
         renderAll();
     }
 
-    // 3. PARTNER (TULAJDONOS) MENTÉSE - EZ HIÁNYZOTT!
+    // PARTNER MENTÉSE
     async function saveOwner() {
         const name = document.getElementById('o-name').value;
         const code = document.getElementById('o-code').value;
 
         if (activeOId === null) {
-            // Új partner
-            const newOwner = {
-                id: Date.now(),
-                name: name,
-                accessCode: code
-            };
-            db.owners.push(newOwner);
+            db.owners.push({ id: Date.now(), name: name, accessCode: code });
         } else {
-            // Szerkesztés
             const idx = db.owners.findIndex(o => o.id === activeOId);
             if (idx !== -1) {
                 db.owners[idx].name = name;
@@ -212,7 +195,7 @@
         closeModal();
     }
 
-    // 4. APARTMAN MENTÉSE
+    // APARTMAN MENTÉSE
     async function saveApt() {
         const aptData = {
             id: activeId || Date.now(),
@@ -251,7 +234,6 @@
 
     function openAptModal(id) {
         activeId = id;
-        // Tulajdonos lista frissítése a lenyílóban
         const select = document.getElementById('a-owner-select');
         select.innerHTML = db.owners.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
 
@@ -277,10 +259,68 @@
         document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
     }
 
-    // További függvények (sync, delete, drawChart, renderAll) maradnak az előzőek szerint...
-    // (Ha kellenek azok is teljesen, szólj!)
+    // MEGJELENÍTÉS (Renderelés)
+    function renderAll() {
+        if (!db.apartments) return; // Biztonsági ellenőrzés
 
-    window.onload = initDatabase;
+        document.getElementById('booking-table-body').innerHTML = (db.bookings || []).map(b => `<tr><td><strong>${b.aptName}</strong></td><td>${b.guestName}</td><td>${b.checkIn}</td><td><span class="badge ${b.source === 'booking' ? 'bg-booking' : 'bg-essence'}">${b.source}</span></td><td><button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">Törlés</button></td></tr>`).join('');
+
+        document.getElementById('breakfast-table-body').innerHTML = (db.extras || []).filter(e => e.type === 'BREAKFAST').map(e => `<tr><td><strong>${e.aptName}</strong><br>${e.guest}</td><td>${e.date}</td><td>${e.note}</td><td><button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">Törlés</button></td></tr>`).join('');
+
+        document.getElementById('rent-table-body').innerHTML = (db.extras || []).filter(e => e.type !== 'BREAKFAST').map(e => `<tr><td><strong>${e.type}</strong></td><td>${e.guest}</td><td>${e.date}</td><td><small>${e.note}</small></td><td><button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">Törlés</button></td></tr>`).join('');
+
+        document.getElementById('apt-list-container').innerHTML = (db.apartments || []).map(a => {
+            const owner = (db.owners || []).find(o => o.id == a.ownerId);
+            return `<div style="display:grid; grid-template-columns: 2fr 3fr 1.5fr; padding:1.2rem; border-bottom:1px solid #eee; align-items:center;">
+                <div><strong>${a.name}</strong><br><small>${a.location} <span class="owner-tag">${owner ? owner.name : 'Nincs'}</span></small></div>
+                <div class="stats-wrapper">${drawChart(30,'#003580','B.')}${drawChart(20,'#e62e2e','SZ.')}${drawChart(10,'#5C7A4D','S.')}</div>
+                <div style="display:flex; gap:5px;">
+                    <button class="btn-outline" onclick="openAptModal(${a.id})">Szerk.</button>
+                    <button class="btn-outline btn-del" onclick="deleteApt(${a.id})">X</button>
+                </div>
+            </div>`;
+        }).join('');
+
+        document.getElementById('owner-table-body').innerHTML = (db.owners || []).map(o => `<tr><td><strong>${o.name}</strong></td><td><code>${o.accessCode}</code></td><td>${(db.apartments || []).filter(a => a.ownerId == o.id).length} db</td><td><button class="btn-outline" onclick="openOwnerModal(${o.id})">Szerk.</button> <button class="btn-outline btn-del" onclick="deleteOwner(${o.id})">X</button></td></tr>`).join('');
+    }
+
+    function drawChart(p, c, l) {
+        const r=24, circ=Math.PI*r, off=circ-(p/100)*circ;
+        return `<div class="chart-box"><div style="font-size:0.5rem; font-weight:700;">${p}%</div><svg class="chart-svg"><path d="M6,30 A24,24 0 0,1 54,30" fill="none" stroke="#eee" stroke-width="5"/><path d="M6,30 A24,24 0 0,1 54,30" fill="none" stroke="${c}" stroke-width="5" style="stroke-dasharray:${circ}; stroke-dashoffset:${off}"/></svg><div style="font-size:0.45rem; color:#999;">${l}</div></div>`;
+    }
+
+    // TÖRLÉSEK ÉS SZINKRON
+    async function syncCalendars() {
+        const res = await fetch('/api/sync', {method:'POST'});
+        if(res.ok) { await initDatabase(renderAll); alert("Kész!"); }
+    }
+
+    async function deleteItem(type, id) {
+        if(!confirm("Biztosan törlöd?")) return;
+        const res = await fetch(`/api/${type}/${id}`, { method: 'DELETE' });
+        if(res.ok) { await initDatabase(renderAll); }
+    }
+
+    async function deleteApt(id) {
+        if(!confirm("Apartman törlése?")) return;
+        db.apartments = db.apartments.filter(a => a.id != id);
+        await saveDb();
+    }
+
+    async function deleteOwner(id) {
+        if(!confirm("Tulajdonos törlése?")) return;
+        db.owners = db.owners.filter(o => o.id != id);
+        await saveDb();
+    }
+
+    // Oldal betöltésekor lehúzzuk az adatokat a Postgres-ből
+    window.onload = () => {
+        if (typeof initDatabase === "function") {
+            initDatabase(renderAll);
+        } else {
+            console.error("A database.js nem töltődött be rendesen!");
+        }
+    };
 </script>
 </body>
 </html>
