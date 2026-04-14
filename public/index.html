@@ -146,31 +146,36 @@
     });
 
     function renderIndexApartments() {
-        const grid = document.getElementById('apartment-grid');
-        if (!grid) return;
-        
-        if (!db.apartments || db.apartments.length === 0) {
-            grid.innerHTML = "<p style='text-align:center; padding: 2rem;'>Jelenleg nincsenek feltöltött apartmanok.</p>";
-            return;
+    const grid = document.getElementById('apartment-grid');
+    if (!grid || !db.apartments) return;
+    grid.innerHTML = "";
+
+    db.apartments.forEach(apt => {
+        const info = getAptStatusAndPrice(apt, new Date()); // Mai állapot lekérése
+        let priceDisplay = "";
+
+        if (info.status === 'OPEN') {
+            priceDisplay = `${info.price.toLocaleString()} FT / ÉJ`;
+        } else {
+            // Ha zárva van, keressük meg a legolcsóbb szezonárat kedvcsinálónak
+            const minSeasonPrice = apt.seasons && apt.seasons.length > 0 
+                ? Math.min(...apt.seasons.map(s => s.price)) 
+                : apt.price;
+            priceDisplay = `NYITÁS ÁPRILISBAN: ${minSeasonPrice.toLocaleString()} FT-TÓL`;
         }
-        
-        grid.innerHTML = "";
-        db.apartments.forEach(apt => {
-            // JAVÍTÁS: apt.mainImage helyett apt.coverImage, mert így menti az admin!
-            const mainImg = apt.coverImage || ''; 
-            
-            grid.innerHTML += `
-                <a href="apartman.html?id=${apt.id}" class="pillar-card" style="text-decoration: none; color: inherit;">
-                    <div class="pillar-header">
-                        <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">${apt.name}</h3>
-                        <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">${apt.location}</p>
-                        <p style="font-weight: 700; color: var(--accent); letter-spacing: 1px; margin-bottom: 2rem;">${(apt.price || 0).toLocaleString()} FT / ÉJ-TŐL</p>
-                        <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem;">Felfedezés</span>
-                    </div>
-                    <div class="pillar-img" style="background-image: url('${mainImg}');"></div>
-                </a>`;
-        });
-    }
+
+        grid.innerHTML += `
+            <a href="apartman.html?id=${apt.id}" class="pillar-card">
+                <div class="pillar-header">
+                    <h3>${apt.name}</h3>
+                    <p>${apt.location}</p>
+                    <p style="font-weight: 700; color: var(--accent);">${priceDisplay}</p>
+                    <span class="btn-primary">Felfedezés</span>
+                </div>
+                <div class="pillar-img" style="background-image: url('${apt.coverImage || ''}');"></div>
+            </a>`;
+    });
+}
 
     function openLoginModal() {
         const o = document.getElementById('login-overlay');

@@ -142,10 +142,10 @@
             <div class="main-image-wrapper">
                 <img id="apt-main-img" src="" class="gallery-img" onclick="openLightbox(0)" onload="this.classList.add('loaded')">
             </div>
-            
-            <div id="apt-desc" style="margin-top: 1.5rem; font-size: 1.1rem; line-height: 1.6; color: #555; font-family: 'Inter', sans-serif;"></div>
 
             <div id="apt-gallery" class="gallery-grid"></div>
+
+            <div id="apt-desc" style="margin-top: 1.5rem; font-size: 1.1rem; line-height: 1.6; color: #555; font-family: 'Inter', sans-serif;"></div>
         </div>
 
         <div>
@@ -194,62 +194,32 @@
     });
 
     function renderDetails() {
-        // Név és helyszín
-        document.getElementById('apt-name').innerText = currentApt.name || "Ismeretlen Apartman";
-        document.getElementById('apt-loc').innerText = currentApt.location || "";
-        
-        // JAVÍTÁS 1: A leírás megjelenítése (Ha létezik ez a div a HTML-edben)
-        // Keresünk egy elemet, ahova a leírás mehet. Ha van 'apt-desc' ID-d, abba beletesszük.
-        const descEl = document.getElementById('apt-desc');
-        if (descEl) {
-            descEl.innerText = currentApt.description || "Nincs megadva leírás az apartmanhoz.";
-        }
-        
-        // Ár formázása elegánsan
-        const priceNum = (currentApt.price || 0).toLocaleString();
-        document.getElementById('apt-price').innerHTML = `<span class="price-num">${priceNum} Ft</span> / éjszakától`;
-        
-        // JAVÍTÁS 2: Képek kulcsainak frissítése (coverImage és galleryImages)
-        const cImg = currentApt.coverImage || ''; 
-        const gImgs = currentApt.galleryImages || [];
-        
-        // Összerakjuk a lightboxhoz a tömböt (Borító + Galéria)
-        allImages = cImg ? [cImg, ...gImgs] : [...gImgs];
-        
-        // Főkép megjelenítése
-        const mainImg = document.getElementById('apt-main-img');
-        if (cImg) {
-            mainImg.src = cImg;
-            mainImg.style.display = 'block';
-        } else if (gImgs.length > 0) {
-            // Ha nincs borítókép, de van galéria, berakjuk az elsőt főnek
-            mainImg.src = gImgs[0];
-            mainImg.style.display = 'block';
-        } else {
-            // Ha egyáltalán nincs kép
-            mainImg.style.display = 'none'; 
-        }
+    const today = new Date();
+    const info = getAptStatusAndPrice(currentApt, today);
+    
+    document.getElementById('apt-name').innerText = currentApt.name;
+    document.getElementById('apt-loc').innerText = currentApt.location;
+    
+    const priceTag = document.getElementById('apt-price');
+    const bookingBtn = document.querySelector('.btn-booking');
+    const statusMsg = document.querySelector('.dev-status span:last-child');
 
-        // Galéria megjelenítése
-        const gal = document.getElementById('apt-gallery');
-        gal.innerHTML = "";
-        
-        if (gImgs && gImgs.length > 0) {
-            gImgs.forEach((img, idx) => {
-                // A lightbox indexe: Ha van borítókép, a galéria az 1-es indextől indul (idx+1)
-                const lbIndex = cImg ? idx + 1 : idx;
-                
-                gal.innerHTML += `
-                    <div class="img-container">
-                        <img src="${img}" 
-                             class="gallery-img" 
-                             loading="lazy" 
-                             onclick="openLightbox(${lbIndex})" 
-                             onload="this.classList.add('loaded')"
-                             style="transition-delay: ${idx * 0.1}s"> </div>`;
-            });
-        }
+    if (info.status === 'OPEN') {
+        priceTag.innerHTML = `<span class="price-num">${info.price.toLocaleString()} Ft</span> / éjszaka`;
+        bookingBtn.innerText = "Ajánlatkérés";
+        bookingBtn.style.background = "var(--accent)";
+        bookingBtn.style.color = "white";
+        bookingBtn.style.cursor = "pointer";
+        statusMsg.innerText = `Jelenleg a ${info.label} tart, minimum foglalás: ${info.minNights} éj.`;
+    } else {
+        priceTag.innerHTML = `<span style="color:var(--warning)">Szezonon kívül</span>`;
+        bookingBtn.innerText = "Jelenleg zárva";
+        bookingBtn.disabled = true;
+        statusMsg.innerText = "Az apartman április 1. és szeptember 30. között fogad vendégeket.";
     }
+    
+    // Képek és leírás betöltése marad a régi...
+}
 
     // --- LIGHTBOX LOGIKA ---
 
