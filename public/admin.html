@@ -136,18 +136,25 @@
             <h2 id="modal-title" style="font-family:'Playfair Display'; margin-bottom:1.5rem;">Apartman Szerkesztése</h2>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                <div class="form-group"><label>Név</label><input type="text" id="a-name" placeholder="Pl.: Sunset Villa"></div>
+                <div class="form-group"><label>Név</label><input type="text" id="a-name" placeholder="Pl.: Liget Residence"></div>
                 <div class="form-group"><label>Helyszín</label><input type="text" id="a-loc" placeholder="Pl.: Fonyód"></div>
             </div>
             
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                <div class="form-group"><label>Ár / éj (Ft)</label><input type="number" id="a-price"></div>
+                <div class="form-group"><label>Alapár / éj (Ft) - Szezonon kívül</label><input type="number" id="a-price"></div>
                 <div class="form-group"><label>Tulajdonos</label><select id="a-owner-select"></select></div>
             </div>
 
-            <div class="form-group">
-                <label>Leírás</label>
-                <textarea id="a-desc" rows="3" placeholder="Rövid leírás az apartmanról..."></textarea>
+            <div class="form-group" style="background:#f4f4f4; padding:1.5rem; border-radius:8px; border:1px solid #ddd; margin-top:10px;">
+                <label style="color:var(--text); font-weight:bold; margin-bottom:10px; display:block;">Szezonális Árak és Szabályok</label>
+                <div id="seasons-container">
+                    </div>
+                <button type="button" class="btn-outline" style="font-size:0.8rem; padding:0.5rem 1rem; margin-top:10px;" onclick="addSeasonRow()">+ Új szezon hozzáadása</button>
+            </div>
+
+            <div class="form-group" style="margin-top:1.5rem;">
+                <label>Leírás (Felszereltség, infók)</label>
+                <textarea id="a-desc" rows="4" placeholder="Az apartman az épület legfelső emeletén helyezkedik el..."></textarea>
             </div>
 
             <div class="form-group" style="background:#f0f5ec; padding:1rem; border-radius:8px; border: 1px solid #d4e0c8;">
