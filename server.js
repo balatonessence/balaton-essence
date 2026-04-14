@@ -53,8 +53,22 @@ async function getDb() {
     return res.rows[0].content;
 }
 
+// server.js - Stabilizált mentés
 async function saveDb(data) {
-    await pool.query("UPDATE essence_data SET content = $1 WHERE key = 'main_db'", [data]);
+    const query = `
+        INSERT INTO essence_data (key, content) 
+        VALUES ('main_db', $1) 
+        ON CONFLICT (key) 
+        DO UPDATE SET content = $1;
+    `;
+    try {
+        await pool.query(query, [data]);
+        console.log("Adatok sikeresen mentve a Postgres-be.");
+        return true;
+    } catch (err) {
+        console.error("Adatbázis hiba mentéskor:", err);
+        throw err;
+    }
 }
 
 // --- API ÚTVONALAK ---
