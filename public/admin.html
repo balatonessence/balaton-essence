@@ -140,9 +140,8 @@
                 <div class="form-group"><label>Helyszín</label><input type="text" id="a-loc" placeholder="Pl.: Fonyód"></div>
             </div>
             
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                <div class="form-group"><label>Alapár / éj (Ft) - Szezonon kívül</label><input type="number" id="a-price"></div>
-                <div class="form-group"><label>Tulajdonos</label><select id="a-owner-select"></select></div>
+            <div class="form-group">
+                <label>Tulajdonos</label><select id="a-owner-select"></select>
             </div>
 
             <div class="form-group" style="background:#f4f4f4; padding:1.5rem; border-radius:8px; border:1px solid #ddd; margin-top:10px;">
@@ -297,9 +296,8 @@
         container.insertAdjacentHTML('beforeend', rowHtml);
     }
 
-    // APARTMAN MENTÉSE
+    // APARTMAN MENTÉSE (Javítva: Alapár kivéve)
     async function saveApt() {
-        // Összegyűjtjük a szezonokat a felületről
         const seasonElements = document.querySelectorAll('.season-row');
         const seasonsData = [];
         seasonElements.forEach(row => {
@@ -316,8 +314,8 @@
             id: activeId || Date.now(),
             name: document.getElementById('a-name').value,
             location: document.getElementById('a-loc').value,
-            price: Number(document.getElementById('a-price').value), // Ez marad az "Alapár"
-            seasons: seasonsData, // <--- AZ ÚJ SZEZONÁLIS ADATOK
+            // A fix 'price' mezőt kivettük, innentől csak a 'seasons' árai számítanak!
+            seasons: seasonsData, 
             ownerId: document.getElementById('a-owner-select').value,
             description: document.getElementById('a-desc').value,
             coverImage: currentCoverImage, 
@@ -333,20 +331,19 @@
         await saveDb(); closeModal();
     }
 
-    // MODALOK NYITÁSA
+    // MODAL NYITÁSA (Javítva: Alapár kivéve)
     function openAptModal(id) {
         activeId = id;
         const select = document.getElementById('a-owner-select');
         select.innerHTML = db.owners.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
         
         const seasonsContainer = document.getElementById('seasons-container');
-        seasonsContainer.innerHTML = ''; // Nullázzuk a szezonokat nyitáskor
+        seasonsContainer.innerHTML = ''; 
 
         if (id) {
             const a = db.apartments.find(apt => apt.id === id);
             document.getElementById('a-name').value = a.name;
             document.getElementById('a-loc').value = a.location;
-            document.getElementById('a-price').value = a.price || 0;
             document.getElementById('a-owner-select').value = a.ownerId;
             document.getElementById('a-desc').value = a.description || '';
             document.getElementById('a-ical-b').value = a.icalBooking || '';
@@ -355,14 +352,12 @@
             currentCoverImage = a.coverImage || null;
             currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
             
-            // Betöltjük a meglévő szezonokat
             if (a.seasons && a.seasons.length > 0) {
                 a.seasons.forEach(s => addSeasonRow(s.name, s.start, s.end, s.price, s.minNights));
             }
         } else {
             document.getElementById('a-name').value = '';
             document.getElementById('a-loc').value = '';
-            document.getElementById('a-price').value = 0;
             document.getElementById('a-desc').value = '';
             document.getElementById('a-ical-b').value = '';
             document.getElementById('a-ical-sz').value = '';
