@@ -89,6 +89,11 @@
         .login-input { width: 100%; border: none; border-bottom: 2px solid var(--border); padding: 1rem 0; margin-bottom: 2rem; outline: none; font-family: 'Montserrat'; font-size: 1.2rem; text-align: center; background: transparent; }
 
         footer { background: var(--accent); padding: 6rem 5vw; color: white; text-align: center; }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -157,6 +162,15 @@
         <h2 style="font-family: 'Playfair Display'; font-size: 2rem; margin-bottom: 2rem;">Admin belépés</h2>
         <input type="password" id="admin-password" class="login-input" placeholder="••••••••" onkeyup="if(event.key === 'Enter') attemptLogin()">
         <button class="btn-primary" style="width: 100%; padding: 1.2rem;" onclick="attemptLogin()">Belépés</button>
+    </div>
+</div>
+
+<div id="apt-list-container" style="min-height: 60vh; margin-top: 120px;">
+    <div style="text-align: center; padding: 10rem 5vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div class="loader-spinner" style="width: 40px; height: 40px; border: 3px solid #eee; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
+        <p style="font-family: 'Montserrat', sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #999;">
+            Apartmanok betöltése...
+        </p>
     </div>
 </div>
 
