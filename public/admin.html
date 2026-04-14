@@ -8,31 +8,16 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="database.js"></script> 
     <script>
-       async function initDatabase(callback) {
+      async function initDatabase(callback) {
     try {
-        const timestamp = new Date().getTime();
-        const res = await fetch('/api/get-db-content?t=' + timestamp, { cache: 'no-store' });
-        
+        const res = await fetch('/api/get-db-content?t=' + Date.now());
         if (res.ok) {
-            const rawText = await res.text(); // Szövegként kapjuk meg
-
-            // MEGOLDÁS: Megkeressük az első '{' és az utolsó '}' jelet.
-            // Így teljesen mindegy, mi van előtte (komment vagy var db)
-            const firstBrace = rawText.indexOf('{');
-            const lastBrace = rawText.lastIndexOf('}') + 1;
-            
-            if (firstBrace !== -1 && lastBrace !== -1) {
-                const cleanJson = rawText.substring(firstBrace, lastBrace);
-                db = JSON.parse(cleanJson);
-                console.log("Adatbázis sikeresen megtisztítva és betöltve! ✅");
-                if (callback) callback();
-            } else {
-                throw new Error("Nem található érvényes adat (JSON) a fájlban.");
-            }
+            db = await res.json(); // Itt nincs több SyntaxError, mert tiszta a JSON!
+            console.log("Adatok betöltve! ✅");
+            if (callback) callback();
         }
-    } catch (e) { 
+    } catch (e) {
         console.error("Beolvasási hiba:", e);
-        alert("Hiba az adatok feldolgozásakor. Nézd meg a konzolt!");
     }
 }
     </script>
