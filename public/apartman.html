@@ -121,9 +121,32 @@
         .lightbox-nav:hover { opacity: 1; background: rgba(255,255,255,0.05); }
         .nav-prev { left: 0; } .nav-next { right: 0; }
 
-        .cal-day:hover { background: var(--bg); color: var(--accent); }
-        .selected-start, .selected-end { background: var(--accent) !important; color: white !important; font-weight: bold; }
-        .selected-range { background: rgba(92, 122, 77, 0.1) !important; color: var(--accent); }
+        .cal-day {
+            padding: 12px 0;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            transition: 0.2s;
+            border: 1px solid transparent;
+        }
+        .cal-day:hover:not(.empty):not(.past) {
+            background: #f0f5ec;
+            color: var(--accent);
+        }
+        .cal-day.past {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+        .selected-start, .selected-end {
+            background: var(--accent) !important;
+            color: white !important;
+            font-weight: bold;
+        }
+        .selected-range {
+            background: rgba(92, 122, 77, 0.1) !important;
+            color: var(--accent);
+        }
 
         /* Tiltott gomb stílusa */
         .btn-booking:disabled {
@@ -559,42 +582,106 @@ let calDate = new Date(); // A naptár aktuális nézete
 let selectedStart = null;
 let selectedEnd = null;
 
+// MODAL NYITÁSA
+function openBookingModal() {
+    const modal = document.getElementById('booking-modal');
+    document.getElementById('modal-apt-name').innerText = currentApt.name;
+    
+    // Alaphelyzetbe állítás nyitáskor
+    selectedStart = null;
+    selectedEnd = null;
+    document.getElementById('book-start').value = "";
+    document.getElementById('book-end').value = "";
+    document.getElementById('display-start').innerText = "-";
+    document.getElementById('display-end').innerText = "-";
+    
+    // Vendég lista dinamikus feltöltése a kapacitás alapján
+    const guestSelect = document.getElementById('book-guests');
+    const today = new Date();
+    const info = getAptStatusAndPrice(currentApt, today);
+    const maxAllowed = info.maxGuests || 2;
+    
+    guestSelect.innerHTML = "";
+    for (let i = 2; i <= maxAllowed; i++) {
+        guestSelect.innerHTML += `<option value="${i}">${i === 2 ? '1-2 Fő' : i + ' Fő'}</option>`;
+    }
+
+    // Megjelenítés
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('active'), 10);
+    document.body.style.overflow = 'hidden';
+    
+    calDate = new Date(); // Visszaállunk a jelenlegi hónapra
+    renderCalendar();
+    calculateStay(); // Nullázza az árat és a gombot
+}
+
+// MODAL BEZÁRÁSA
+function closeBookingModal() {
+    const modal = document.getElementById('booking-modal');
+    modal.classList.remove('active');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto';
+    }, 400);
+}
+
+// KATTINTÁS A MODAL MELLÉ (Bezárás)
+window.onclick = function(event) {
+    const modal = document.getElementById('booking-modal');
+    if (event.target == modal) {
+        closeBookingModal();
+    }
+}
+
+// NAPTÁR KIRAJZOLÁSA
 function renderCalendar() {
     const daysContainer = document.getElementById('calendar-days');
     const monthYearLabel = document.getElementById('calendar-month-year');
     
+    if (!daysContainer) return;
     daysContainer.innerHTML = "";
+    
     const year = calDate.getFullYear();
     const month = calDate.getMonth();
     
-    monthYearLabel.innerText = new Intl.DateTimeFormat('hu-HU', { month: 'long', year: 'numeric' }).format(calDate);
+    // Magyar hónapnév formázása
+    const monthName = new Intl.DateTimeFormat('hu-HU', { month: 'long' }).format(calDate);
+    monthYearLabel.innerText = `${monthName} ${year}`;
 
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     
-    // Kezdő üres helyek (hogy hétfővel kezdődjön)
+    // Hétfőre korrigálás (JS-ben a Vasárnap a 0)
     const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+
+    // Üres helyek a hónap előtt
     for (let i = 0; i < startOffset; i++) {
-        daysContainer.innerHTML += `<div></div>`;
+        daysContainer.innerHTML += `<div class="cal-day empty"></div>`;
     }
+
+    // Napok generálása
+    const todayStr = new Date().toISOString().split('T')[0];
 
     for (let d = 1; d <= daysInMonth; d++) {
         const currentLoopDate = new Date(year, month, d);
-        const dateStr = currentLoopDate.toISOString().split('T')[0];
+        // Korrekció az időzóna eltolódás miatt az ISO stringnél
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         
-        let style = "padding: 8px 0; cursor: pointer; border-radius: 2px; font-size: 0.85rem; transition: 0.3s; text-align: center;";
         let className = "cal-day";
-
-        // Kijelölési stílusok
+        if (dateStr < todayStr) className += " past"; // Múltbéli napok (opcionális stílus)
         if (selectedStart && dateStr === selectedStart) className += " selected-start";
         if (selectedEnd && dateStr === selectedEnd) className += " selected-end";
         if (selectedStart && selectedEnd && dateStr > selectedStart && dateStr < selectedEnd) className += " selected-range";
 
-        daysContainer.innerHTML += `<div class="${className}" style="${style}" onclick="selectDate('${dateStr}')">${d}</div>`;
+        daysContainer.innerHTML += `<div class="${className}" onclick="selectDate('${dateStr}')">${d}</div>`;
     }
 }
 
 function selectDate(dateStr) {
+    const todayStr = new Date().toISOString().split('T')[0];
+    if (dateStr < todayStr) return; // Ne lehessen múltbéli dátumot választani
+
     if (!selectedStart || (selectedStart && selectedEnd)) {
         selectedStart = dateStr;
         selectedEnd = null;
@@ -611,7 +698,7 @@ function selectDate(dateStr) {
     document.getElementById('display-end').innerText = selectedEnd || "-";
     
     renderCalendar();
-    if (selectedStart && selectedEnd) calculateStay();
+    calculateStay();
 }
 
 function changeMonth(dir) {
