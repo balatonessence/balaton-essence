@@ -168,13 +168,26 @@
     // A 'db' változót és az 'initDatabase' függvényt a külső database.js adja!
 
     // ADATBÁZIS MENTÉSE
+    // admin.html - Script rész
     async function saveDb() {
-        await fetch('/api/save-db', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(db)
-        });
-        renderAll();
+        try {
+            const res = await fetch('/api/save-db', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(db)
+            });
+            
+            if (res.ok) {
+                console.log("Szerver visszaigazolta a mentést.");
+                renderAll();
+            } else {
+                const errorData = await res.json();
+                alert("Hiba a mentésnél: " + (errorData.error || "Ismeretlen hiba"));
+            }
+        } catch (e) {
+            alert("Nem sikerült elérni a szervert! Ellenőrizd az internetet vagy a Railway-t.");
+            console.error(e);
+        }
     }
 
     // PARTNER MENTÉSE
