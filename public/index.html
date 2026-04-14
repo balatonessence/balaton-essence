@@ -249,33 +249,43 @@
 <script src="database.js?v=16.0"></script>
 <script>
     // Biztonságos betöltés: megvárjuk az adatbázist, aztán rajzolunk
-    document.addEventListener('DOMContentLoaded', () => {
-        if (typeof initDatabase === "function") {
-            initDatabase(renderIndexApartments);
-        } else {
-            console.error("A database.js nem töltődött be!");
-        }
-    });
+document.addEventListener('DOMContentLoaded', () => {
+    if (typeof initDatabase === "function") {
+        initDatabase(renderIndexApartments);
+    } else {
+        console.error("A database.js nem töltődött be!");
+    }
+});
 
-    function renderIndexApartments() {
+function renderIndexApartments() {
+    // 1. Megkeressük a rácsot ÉS a betöltő konténert is
     const grid = document.getElementById('apartment-grid');
+    const loaderContainer = document.getElementById('apt-list-container');
+    
     if (!grid || !db.apartments) return;
+
+    // 2. Ha az adatok megérkeztek, ELTÜNTETJÜK a teljes betöltő konténert (karikástul)
+    if (loaderContainer) {
+        loaderContainer.style.display = 'none';
+    }
+
+    // 3. Kiürítjük a rácsot (biztonság kedvéért)
     grid.innerHTML = "";
 
     db.apartments.forEach(apt => {
-        const info = getAptStatusAndPrice(apt, new Date()); // Mai állapot lekérése
+        const info = getAptStatusAndPrice(apt, new Date()); 
         let priceDisplay = "";
 
         if (info.status === 'OPEN') {
             priceDisplay = `${info.price.toLocaleString()} FT / ÉJ`;
         } else {
-            // Ha zárva van, keressük meg a legolcsóbb szezonárat kedvcsinálónak
             const minSeasonPrice = apt.seasons && apt.seasons.length > 0 
                 ? Math.min(...apt.seasons.map(s => s.price)) 
                 : apt.price;
             priceDisplay = `NYITÁS ÁPRILISBAN: ${minSeasonPrice.toLocaleString()} FT-TÓL`;
         }
 
+        // 4. Kirajzoljuk az apartmanokat
         grid.innerHTML += `
             <a href="apartman.html?id=${apt.id}" class="pillar-card" style="text-decoration: none; color: inherit;">
                 <div class="pillar-header">
