@@ -39,4 +39,19 @@ function getAptStatusAndPrice(apt, targetDate = new Date()) {
 
     // 3. Fallback: Ha nyitvatartási időben vagyunk, de nincs külön szezon definiálva
     return { status: 'OPEN', price: apt.price, label: 'Alapár', minNights: 2 };
+
+    // Keresd meg a getAptStatusAndPrice függvény végét, és egészítsd ki így:
+    if (apt.seasons && apt.seasons.length > 0) {
+        for (let s of apt.seasons) {
+            if (dateStr >= s.start && dateStr <= s.end) {
+                return { 
+                    status: 'OPEN', 
+                    price: s.price, 
+                    label: s.name, 
+                    minNights: s.minNights, 
+                    maxGuests: s.maxGuests || 2 // <--- Ezt add hozzá
+                };
+            }
+        }
+    }
 }

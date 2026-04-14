@@ -279,24 +279,26 @@
     }
 
     // --- ÚJ: SZEZONOK KEZELÉSE ---
-    function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2') {
+    // 1. A sor hozzáadása függvény bővítése (Max fő mezővel)
+    function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2', maxGuests = '2') {
         const container = document.getElementById('seasons-container');
         const rowId = 'season-' + Date.now() + Math.floor(Math.random() * 1000);
         
         const rowHtml = `
-            <div id="${rowId}" class="season-row" style="display:grid; grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px; background:white; padding:10px; border-radius:6px; border:1px solid #eee;">
-                <div><label style="font-size:0.7rem;">Szezon neve</label><input type="text" class="s-name" value="${name}" placeholder="Pl. Tavaszi szezon" style="padding:0.5rem;"></div>
+            <div id="${rowId}" class="season-row" style="display:grid; grid-template-columns: 2fr 1.2fr 1.2fr 1.2fr 0.8fr 0.8fr auto; gap:10px; align-items:end; margin-bottom:10px; background:white; padding:10px; border-radius:6px; border:1px solid #eee;">
+                <div><label style="font-size:0.7rem;">Szezon neve</label><input type="text" class="s-name" value="${name}" placeholder="Pl. Nyári főszezon" style="padding:0.5rem;"></div>
                 <div><label style="font-size:0.7rem;">Kezdete</label><input type="date" class="s-start" value="${start}" style="padding:0.5rem;"></div>
                 <div><label style="font-size:0.7rem;">Vége</label><input type="date" class="s-end" value="${end}" style="padding:0.5rem;"></div>
                 <div><label style="font-size:0.7rem;">Ár (Ft/éj)</label><input type="number" class="s-price" value="${price}" style="padding:0.5rem;"></div>
                 <div><label style="font-size:0.7rem;">Min. éj</label><input type="number" class="s-min" value="${minNights}" style="padding:0.5rem;"></div>
+                <div><label style="font-size:0.7rem;">Max fő</label><input type="number" class="s-max" value="${maxGuests}" style="padding:0.5rem;"></div>
                 <button type="button" class="btn-del" style="padding:0.5rem; background:#ff4d4d; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="document.getElementById('${rowId}').remove()">X</button>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', rowHtml);
     }
 
-    // APARTMAN MENTÉSE (Javítva: Alapár kivéve)
+    // 2. Mentés függvény (Hogy elmentse a Max fő adatot is)
     async function saveApt() {
         const seasonElements = document.querySelectorAll('.season-row');
         const seasonsData = [];
@@ -306,7 +308,8 @@
                 start: row.querySelector('.s-start').value,
                 end: row.querySelector('.s-end').value,
                 price: Number(row.querySelector('.s-price').value),
-                minNights: Number(row.querySelector('.s-min').value)
+                minNights: Number(row.querySelector('.s-min').value),
+                maxGuests: Number(row.querySelector('.s-max').value) // <--- Új adat
             });
         });
 
@@ -314,7 +317,6 @@
             id: activeId || Date.now(),
             name: document.getElementById('a-name').value,
             location: document.getElementById('a-loc').value,
-            // A fix 'price' mezőt kivettük, innentől csak a 'seasons' árai számítanak!
             seasons: seasonsData, 
             ownerId: document.getElementById('a-owner-select').value,
             description: document.getElementById('a-desc').value,
@@ -331,7 +333,7 @@
         await saveDb(); closeModal();
     }
 
-    // MODAL NYITÁSA (Javítva: Alapár kivéve)
+    // 3. Modal nyitása (Hogy betöltse a Max fő adatot)
     function openAptModal(id) {
         activeId = id;
         const select = document.getElementById('a-owner-select');
@@ -353,7 +355,8 @@
             currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
             
             if (a.seasons && a.seasons.length > 0) {
-                a.seasons.forEach(s => addSeasonRow(s.name, s.start, s.end, s.price, s.minNights));
+                // Itt adjuk át a Max főt a megjelenítéshez
+                a.seasons.forEach(s => addSeasonRow(s.name, s.start, s.end, s.price, s.minNights, s.maxGuests || 2));
             }
         } else {
             document.getElementById('a-name').value = '';
