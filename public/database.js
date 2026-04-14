@@ -13,34 +13,28 @@ async function initDatabase(callback) {
     } catch (e) { console.error("Hiba az adatok betöltésekor:", e); }
 }
 
-// --- AZ ÚJ ÁRMOTOR ---
+// --- JAVÍTOTT ÁRMOTOR ---
 function getAptStatusAndPrice(apt, targetDate = new Date()) {
     const dateStr = targetDate.toISOString().split('T')[0];
     const month = targetDate.getMonth() + 1; // 1-12
     const day = targetDate.getDate();
 
     // 1. Foglalási ablak ellenőrzése (Április 1 - Szeptember 30)
-    // Megnézzük, hogy a hónap 4 és 9 közé esik-e
     const isInsideGlobalWindow = (month > 4 || (month === 4 && day >= 1)) && 
                                  (month < 9 || (month === 9 && day <= 30));
 
+    // Ha szezonon kívül vagyunk
     if (!isInsideGlobalWindow) {
-        return { status: 'CLOSED', price: null, label: 'Jelenleg zárva' };
+        return { 
+            status: 'CLOSED', 
+            price: null, 
+            label: 'Jelenleg zárva', 
+            minNights: 0, 
+            maxGuests: 2 
+        };
     }
 
     // 2. Szezon keresése az adott napra
-    if (apt.seasons && apt.seasons.length > 0) {
-        for (let s of apt.seasons) {
-            if (dateStr >= s.start && dateStr <= s.end) {
-                return { status: 'OPEN', price: s.price, label: s.name, minNights: s.minNights };
-            }
-        }
-    }
-
-    // 3. Fallback: Ha nyitvatartási időben vagyunk, de nincs külön szezon definiálva
-    return { status: 'OPEN', price: apt.price, label: 'Alapár', minNights: 2 };
-
-    // Keresd meg a getAptStatusAndPrice függvény végét, és egészítsd ki így:
     if (apt.seasons && apt.seasons.length > 0) {
         for (let s of apt.seasons) {
             if (dateStr >= s.start && dateStr <= s.end) {
@@ -48,10 +42,19 @@ function getAptStatusAndPrice(apt, targetDate = new Date()) {
                     status: 'OPEN', 
                     price: s.price, 
                     label: s.name, 
-                    minNights: s.minNights, 
-                    maxGuests: s.maxGuests || 2 // <--- Ezt add hozzá
+                    minNights: s.minNights || 2, 
+                    maxGuests: s.maxGuests || 2 // Itt a javítás: ha nincs kitöltve, akkor 2
                 };
             }
         }
     }
+
+    // 3. Fallback: Ha nyitvatartási időben vagyunk, de nincs külön szezon definiálva
+    return { 
+        status: 'OPEN', 
+        price: apt.price || 0, 
+        label: 'Alapár', 
+        minNights: 2, 
+        maxGuests: 2 
+    };
 }
