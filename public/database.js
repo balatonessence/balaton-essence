@@ -14,47 +14,36 @@ async function initDatabase(callback) {
 }
 
 // --- JAVÍTOTT ÁRMOTOR ---
-function getAptStatusAndPrice(apt, targetDate = new Date()) {
+function getAptStatusAndPrice(apt, targetDate = new Date(), guestCount = 2) {
     const dateStr = targetDate.toISOString().split('T')[0];
-    const month = targetDate.getMonth() + 1; // 1-12
+    const month = targetDate.getMonth() + 1;
     const day = targetDate.getDate();
 
-    // 1. Foglalási ablak ellenőrzése (Április 1 - Szeptember 30)
     const isInsideGlobalWindow = (month > 4 || (month === 4 && day >= 1)) && 
                                  (month < 9 || (month === 9 && day <= 30));
 
-    // Ha szezonon kívül vagyunk
     if (!isInsideGlobalWindow) {
-        return { 
-            status: 'CLOSED', 
-            price: null, 
-            label: 'Jelenleg zárva', 
-            minNights: 0, 
-            maxGuests: 2 
-        };
+        return { status: 'CLOSED', price: null, label: 'Zárva', maxGuests: 4 };
     }
 
-    // 2. Szezon keresése az adott napra
     if (apt.seasons && apt.seasons.length > 0) {
         for (let s of apt.seasons) {
             if (dateStr >= s.start && dateStr <= s.end) {
+                // ÁR LOGIKA A VENDÉGSZÁM ALAPJÁN
+                let finalPrice = s.price; // Alapár (1-2 fő)
+                if (guestCount == 3 && s.price3) finalPrice = s.price3;
+                if (guestCount >= 4 && s.price4) finalPrice = s.price4;
+
                 return { 
                     status: 'OPEN', 
-                    price: s.price, 
+                    price: finalPrice, 
                     label: s.name, 
                     minNights: s.minNights || 2, 
-                    maxGuests: s.maxGuests || 2 // Itt a javítás: ha nincs kitöltve, akkor 2
+                    maxGuests: s.maxGuests || 4 
                 };
             }
         }
     }
 
-    // 3. Fallback: Ha nyitvatartási időben vagyunk, de nincs külön szezon definiálva
-    return { 
-        status: 'OPEN', 
-        price: apt.price || 0, 
-        label: 'Alapár', 
-        minNights: 2, 
-        maxGuests: 2 
-    };
+    return { status: 'OPEN', price: apt.price || 0, label: 'Alapár', minNights: 2, maxGuests: 2 };
 }

@@ -280,19 +280,21 @@
 
     // --- ÚJ: SZEZONOK KEZELÉSE ---
     // 1. A sor hozzáadása függvény bővítése (Max fő mezővel)
-    function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2', maxGuests = '2') {
+    function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2', maxGuests = '4', price3 = '', price4 = '') {
         const container = document.getElementById('seasons-container');
         const rowId = 'season-' + Date.now() + Math.floor(Math.random() * 1000);
         
         const rowHtml = `
-            <div id="${rowId}" class="season-row" style="display:grid; grid-template-columns: 2fr 1.2fr 1.2fr 1.2fr 0.8fr 0.8fr auto; gap:10px; align-items:end; margin-bottom:10px; background:white; padding:10px; border-radius:6px; border:1px solid #eee;">
-                <div><label style="font-size:0.7rem;">Szezon neve</label><input type="text" class="s-name" value="${name}" placeholder="Pl. Nyári főszezon" style="padding:0.5rem;"></div>
-                <div><label style="font-size:0.7rem;">Kezdete</label><input type="date" class="s-start" value="${start}" style="padding:0.5rem;"></div>
-                <div><label style="font-size:0.7rem;">Vége</label><input type="date" class="s-end" value="${end}" style="padding:0.5rem;"></div>
-                <div><label style="font-size:0.7rem;">Ár (Ft/éj)</label><input type="number" class="s-price" value="${price}" style="padding:0.5rem;"></div>
-                <div><label style="font-size:0.7rem;">Min. éj</label><input type="number" class="s-min" value="${minNights}" style="padding:0.5rem;"></div>
-                <div><label style="font-size:0.7rem;">Max fő</label><input type="number" class="s-max" value="${maxGuests}" style="padding:0.5rem;"></div>
-                <button type="button" class="btn-del" style="padding:0.5rem; background:#ff4d4d; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="document.getElementById('${rowId}').remove()">X</button>
+            <div id="${rowId}" class="season-row" style="display:grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 0.8fr 0.8fr 1fr 1fr auto; gap:8px; align-items:end; margin-bottom:10px; background:white; padding:10px; border-radius:6px; border:1px solid #eee; font-size: 0.8rem;">
+                <div><label>Szezon</label><input type="text" class="s-name" value="${name}"></div>
+                <div><label>Kezdet</label><input type="date" class="s-start" value="${start}"></div>
+                <div><label>Vége</label><input type="date" class="s-end" value="${end}"></div>
+                <div><label>Ár (1-2 fő)</label><input type="number" class="s-price" value="${price}"></div>
+                <div><label>Min. éj</label><input type="number" class="s-min" value="${minNights}"></div>
+                <div><label>Max fő</label><input type="number" class="s-max" value="${maxGuests}"></div>
+                <div><label>Ár (3 fő)</label><input type="number" class="s-price3" value="${price3}" placeholder="Opcionális"></div>
+                <div><label>Ár (4 fő)</label><input type="number" class="s-price4" value="${price4}" placeholder="Opcionális"></div>
+                <button type="button" class="btn-del" style="background:#ff4d4d; color:white; border:none; border-radius:4px; cursor:pointer; height:35px;" onclick="document.getElementById('${rowId}').remove()">X</button>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', rowHtml);

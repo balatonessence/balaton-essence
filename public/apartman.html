@@ -168,6 +168,59 @@
     </div>
 </main>
 
+<div id="booking-modal" class="lightbox" style="background: rgba(252, 251, 249, 0.98); color: var(--text);">
+    <div style="background: white; width: 95%; max-width: 600px; padding: 3rem; border: 1px solid var(--border); position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 50px 100px rgba(0,0,0,0.1);">
+        <span class="lightbox-close" onclick="closeBookingModal()" style="color: var(--text);">✕</span>
+        
+        <h2 style="font-family: 'Playfair Display'; font-size: 2.2rem; margin-bottom: 0.5rem;">Foglalási adatok</h2>
+        <p id="modal-apt-name" style="color: var(--accent); font-weight: 600; letter-spacing: 1px; margin-bottom: 2.5rem; text-transform: uppercase; font-size: 0.8rem;"></p>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 2rem;">
+            <div class="form-group">
+                <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 8px;">Érkezés</label>
+                <input type="date" id="book-start" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 2px;" onchange="calculateStay()">
+            </div>
+            <div class="form-group">
+                <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 8px;">Távozás</label>
+                <input type="date" id="book-end" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 2px;" onchange="calculateStay()">
+            </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 2rem;">
+            <div class="form-group">
+                <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 8px;">Vendégek száma</label>
+                <select id="book-guests" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 2px;" onchange="calculateStay()">
+                    <option value="2">1-2 Fő</option>
+                    <option value="3">3 Fő</option>
+                    <option value="4">4 Fő</option>
+                </select>
+            </div>
+            <div id="stay-info" style="display: flex; align-items: center; font-size: 0.9rem; color: var(--accent); font-weight: 600;">
+                Válassz dátumot...
+            </div>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 2rem 0;">
+
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <input type="text" id="book-name" placeholder="Teljes név" style="width: 100%; padding: 1.2rem; border: 1px solid var(--border); border-radius: 2px;">
+        </div>
+        <div class="form-group" style="margin-bottom: 1.5rem;">
+            <input type="email" id="book-email" placeholder="E-mail cím" style="width: 100%; padding: 1.2rem; border: 1px solid var(--border); border-radius: 2px;">
+        </div>
+        <div class="form-group" style="margin-bottom: 2.5rem;">
+            <textarea id="book-msg" placeholder="Megjegyzés (opcionális)" rows="3" style="width: 100%; padding: 1.2rem; border: 1px solid var(--border); border-radius: 2px; font-family: inherit;"></textarea>
+        </div>
+
+        <div id="total-price-box" style="background: var(--bg); padding: 1.5rem; text-align: right; margin-bottom: 2rem; border-radius: 2px;">
+            <span style="font-size: 0.8rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px;">Összesen:</span>
+            <div id="grand-total" style="font-size: 2rem; font-weight: 700; font-family: 'Playfair Display';">0 Ft</div>
+        </div>
+
+        <button onclick="sendBookingRequest()" class="btn-booking" style="background: var(--accent); color: white; cursor: pointer; opacity: 1;">Ajánlatkérés elküldése</button>
+    </div>
+</div>
+
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
     <span class="lightbox-close">✕</span>
     <span class="lightbox-nav nav-prev" onclick="event.stopPropagation(); changeImage(-1)">‹</span>
@@ -218,10 +271,11 @@
 
         if (info.status === 'OPEN') {
             priceTag.innerHTML = `<span class="price-num">${info.price.toLocaleString()} Ft</span> / éjszaka`;
-            bookingBtn.innerText = "Ajánlatkérés";
+            bookingBtn.innerText = "Foglalás";
             bookingBtn.disabled = false;
             bookingBtn.style.opacity = "1";
             bookingBtn.style.cursor = "pointer";
+            bookingBtn.onclick = openBookingModal;
 
             // MEGJELENÍTÉS: Szezon neve + Max fő + Min éj
             statusMsg.innerHTML = `
@@ -295,6 +349,104 @@
             if (e.key === "Escape") closeLightbox();
         }
     });
+
+    function openBookingModal() {
+        const modal = document.getElementById('booking-modal');
+        document.getElementById('modal-apt-name').innerText = currentApt.name;
+        
+        // Alapértelmezett dátumok (holnap és holnapután)
+        const today = new Date();
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const dayAfter = new Date(tomorrow);
+        dayAfter.setDate(dayAfter.getDate() + 2);
+
+        document.getElementById('book-start').value = tomorrow.toISOString().split('T')[0];
+        document.getElementById('book-end').value = dayAfter.toISOString().split('T')[0];
+        
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('active'), 10);
+        document.body.style.overflow = 'hidden';
+        calculateStay();
+    }
+
+    function closeBookingModal() {
+        const modal = document.getElementById('booking-modal');
+        modal.classList.remove('active');
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }, 500);
+    }
+
+    function calculateStay() {
+        const start = new Date(document.getElementById('book-start').value);
+        const end = new Date(document.getElementById('book-end').value);
+        const guests = parseInt(document.getElementById('book-guests').value);
+        
+        if (isNaN(start) || isNaN(end) || end <= start) {
+            document.getElementById('stay-info').innerText = "Hibás dátumok";
+            document.getElementById('grand-total').innerText = "0 Ft";
+            return;
+        }
+
+        const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        let total = 0;
+        let minNightsRequired = 2;
+
+        // Árszámítás éjszakánként (mert lehet, hogy a szezon átfedésben van)
+        for (let i = 0; i < nights; i++) {
+            let currentDay = new Date(start);
+            currentDay.setDate(currentDay.getDate() + i);
+            const info = getAptStatusAndPrice(currentApt, currentDay, guests);
+            
+            if (info.status === 'OPEN') {
+                total += info.price;
+                minNightsRequired = info.minNights; // Az utolsó érvényes szezon szabályát vesszük
+            } else {
+                document.getElementById('stay-info').innerHTML = "<span style='color:var(--warning)'>Zárva tartás a választott napokon!</span>";
+                document.getElementById('grand-total').innerText = "Zárva";
+                return;
+            }
+        }
+
+        document.getElementById('stay-info').innerHTML = `${nights} éjszaka <br> <small>(Min. ${minNightsRequired} éj szükséges)</small>`;
+        document.getElementById('grand-total').innerText = total.toLocaleString() + " Ft";
+        
+        // Gomb tiltása, ha nem éri el a min. éjszakát
+        const btn = document.querySelector('#booking-modal .btn-booking');
+        if (nights < minNightsRequired) {
+            btn.style.opacity = "0.5";
+            btn.disabled = true;
+            btn.innerText = `Min. ${minNightsRequired} éjszaka kell`;
+        } else {
+            btn.style.opacity = "1";
+            btn.disabled = false;
+            btn.innerText = "Ajánlatkérés elküldése";
+        }
+    }
+
+    async function sendBookingRequest() {
+        const data = {
+            aptId: currentApt.id,
+            aptName: currentApt.name,
+            name: document.getElementById('book-name').value,
+            email: document.getElementById('book-email').value,
+            start: document.getElementById('book-start').value,
+            end: document.getElementById('book-end').value,
+            guests: document.getElementById('book-guests').value,
+            total: document.getElementById('grand-total').innerText,
+            msg: document.getElementById('book-msg').value
+        };
+
+        if (!data.name || !data.email) {
+            alert("Kérlek töltsd ki a nevedet és az e-mailedet!");
+            return;
+        }
+
+        alert(`Köszönjük, ${data.name}! Az ajánlatkérést rögzítettük a(z) ${data.aptName} apartmanra. Hamarosan keresünk!`);
+        closeBookingModal();
+    }
 </script>
 </body>
 </html>
