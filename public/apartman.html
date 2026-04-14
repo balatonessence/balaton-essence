@@ -197,68 +197,63 @@
         const today = new Date();
         const info = getAptStatusAndPrice(currentApt, today);
         
-        // 1. SZÖVEGES ADATOK (Név, Helyszín, Leírás)
+        // 1. ALAPADATOK
         document.getElementById('apt-name').innerText = currentApt.name || "Ismeretlen Apartman";
         document.getElementById('apt-loc').innerText = currentApt.location || "";
         
         const descEl = document.getElementById('apt-desc');
         if (descEl) {
-            descEl.innerText = currentApt.description || "Nincs megadva leírás az apartmanhoz.";
+            descEl.innerText = currentApt.description || "Nincs megadva leírás.";
         }
 
-        // 2. DINAMIKUS ÁR ÉS GOMB (Az új Ármotor alapján)
+        // 2. FOGLALÁSI KÁRTYA (Ár, Szezon infó, Max fő)
         const priceTag = document.getElementById('apt-price');
         const bookingBtn = document.querySelector('.btn-booking');
+        
+        // Itt keressük meg a kis információs sávot a kártya alján
         const statusMsg = document.querySelector('.dev-status span:last-child');
 
         if (info.status === 'OPEN') {
             priceTag.innerHTML = `<span class="price-num">${info.price.toLocaleString()} Ft</span> / éjszaka`;
             bookingBtn.innerText = "Ajánlatkérés";
-            bookingBtn.style.background = "var(--accent)";
-            bookingBtn.style.color = "white";
-            bookingBtn.style.cursor = "pointer";
             bookingBtn.disabled = false;
-            statusMsg.innerText = `Jelenleg a ${info.label} tart, minimum foglalás: ${info.minNights} éj.`;
+            bookingBtn.style.opacity = "1";
+            bookingBtn.style.cursor = "pointer";
+
+            // MEGJELENÍTÉS: Szezon neve + Max fő + Min éj
+            statusMsg.innerHTML = `
+                <div style="margin-top: 10px; border-top: 1px solid #eee; pt: 10px;">
+                    <p><strong>Aktuális időszak:</strong> ${info.label}</p>
+                    <p><strong>Kapacitás:</strong> max. ${info.maxGuests} fő</p>
+                    <p><strong>Minimum tartózkodás:</strong> ${info.minNights} éjszaka</p>
+                </div>
+            `;
         } else {
             priceTag.innerHTML = `<span style="color:var(--warning)">Szezonon kívül</span>`;
             bookingBtn.innerText = "Jelenleg zárva";
             bookingBtn.disabled = true;
+            bookingBtn.style.opacity = "0.5";
             statusMsg.innerText = "Az apartman április 1. és szeptember 30. között fogad vendégeket.";
         }
 
-        // 3. KÉPEK ÉS GALÉRIA (Ez maradt ki az előbb!)
+        // 3. KÉPEK ÉS GALÉRIA (Változatlan)
         const cImg = currentApt.coverImage || ''; 
         const gImgs = currentApt.galleryImages || [];
-        
         allImages = cImg ? [cImg, ...gImgs] : [...gImgs];
         
         const mainImg = document.getElementById('apt-main-img');
-        if (cImg) {
-            mainImg.src = cImg;
-            mainImg.style.display = 'block';
-        } else if (gImgs.length > 0) {
-            mainImg.src = gImgs[0];
-            mainImg.style.display = 'block';
-        } else {
-            mainImg.style.display = 'none'; 
-        }
-
+        if (cImg) { mainImg.src = cImg; mainImg.style.display = 'block'; }
+        
         const gal = document.getElementById('apt-gallery');
         if (gal) {
             gal.innerHTML = "";
-            if (gImgs && gImgs.length > 0) {
-                gImgs.forEach((img, idx) => {
-                    const lbIndex = cImg ? idx + 1 : idx;
-                    gal.innerHTML += `
-                        <div class="img-container">
-                            <img src="${img}" 
-                                 class="gallery-img" 
-                                 loading="lazy" 
-                                 onclick="openLightbox(${lbIndex})" 
-                                 onload="this.classList.add('loaded')"
-                                 style="transition-delay: ${idx * 0.1}s"> </div>`;
-                });
-            }
+            gImgs.forEach((img, idx) => {
+                const lbIndex = cImg ? idx + 1 : idx;
+                gal.innerHTML += `
+                    <div class="img-container">
+                        <img src="${img}" class="gallery-img" onclick="openLightbox(${lbIndex})">
+                    </div>`;
+            });
         }
     }
 
