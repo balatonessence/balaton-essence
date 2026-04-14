@@ -84,6 +84,34 @@ app.post('/api/save-db', async (req, res) => {
     catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// Új foglalás mentése
+app.post('/api/new-booking', async (req, res) => {
+    try {
+        const booking = { 
+            id: Date.now().toString(),
+            ...req.body, 
+            createdAt: new Date().toISOString() 
+        };
+        
+        // Hozzáadjuk a központi adatbázishoz
+        if (!db.bookings) db.bookings = [];
+        db.bookings.push(booking);
+
+        // Opcionális: A naptárba is beírjuk, hogy foglalt legyen (Statisztikához)
+        const apt = db.apartments.find(a => a.id == booking.aptId);
+        if (apt) {
+            if (!apt.bookedDates) apt.bookedDates = [];
+            // Itt egyszerűsítve csak elmentjük a kezdő és végdátumot
+            apt.bookedDates.push({ start: booking.start, end: booking.end });
+        }
+
+        await saveDbToPostgres(); // Mentés az adatbázisba
+        res.json({ success: true });
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.post('/api/order', async (req, res) => {
     try {
         const db = await getDb();

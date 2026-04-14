@@ -427,26 +427,40 @@
     }
 
     async function sendBookingRequest() {
-        const data = {
-            aptId: currentApt.id,
-            aptName: currentApt.name,
-            name: document.getElementById('book-name').value,
-            email: document.getElementById('book-email').value,
-            start: document.getElementById('book-start').value,
-            end: document.getElementById('book-end').value,
-            guests: document.getElementById('book-guests').value,
-            total: document.getElementById('grand-total').innerText,
-            msg: document.getElementById('book-msg').value
-        };
+    const data = {
+        aptId: currentApt.id,
+        aptName: currentApt.name,
+        guestName: document.getElementById('book-name').value, // Admin táblázathoz 'guestName' kell
+        email: document.getElementById('book-email').value,
+        checkIn: document.getElementById('book-start').value, // Admin táblázathoz 'checkIn' kell
+        end: document.getElementById('book-end').value,
+        guests: document.getElementById('book-guests').value,
+        total: document.getElementById('grand-total').innerText,
+        msg: document.getElementById('book-msg').value,
+        source: 'Weboldal' // Hogy lásd az adminban, honnan jött
+    };
 
-        if (!data.name || !data.email) {
-            alert("Kérlek töltsd ki a nevedet és az e-mailedet!");
-            return;
-        }
-
-        alert(`Köszönjük, ${data.name}! Az ajánlatkérést rögzítettük a(z) ${data.aptName} apartmanra. Hamarosan keresünk!`);
-        closeBookingModal();
+    if (!data.guestName || !data.email) {
+        alert("Kérlek töltsd ki a nevedet és az e-mailedet!");
+        return;
     }
+
+    try {
+        const res = await fetch('/api/new-booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            alert(`Köszönjük, ${data.guestName}! Az ajánlatkérést rögzítettük. Hamarosan keresünk!`);
+            closeBookingModal();
+            window.location.reload(); // Frissítés, hogy látszódjon a változás
+        }
+    } catch (e) {
+        alert("Hiba történt a küldés során. Kérlek próbáld újra!");
+    }
+}
 </script>
 </body>
 </html>
