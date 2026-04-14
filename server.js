@@ -100,20 +100,15 @@ async function saveDb(data) {
 app.get('/api/get-db-content', (req, res) => {
     const fs = require('fs');
     const path = require('path');
+    // Ellenőrizd, hogy a database.js a 'public' mappában van-e!
     const filePath = path.join(__dirname, 'public', 'database.js');
 
     fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) return res.status(500).send("Fájl beolvasási hiba");
-
-        try {
-            // Megkeressük a 'var db = ' utáni részt és levágjuk a felesleget
-            const jsonPart = data.split('var db =')[1].split(';')[0].trim();
-            const jsonData = JSON.parse(jsonPart);
-            res.json(jsonData); // Itt már tiszta JSON-t küldünk, kommentek nélkül!
-        } catch (e) {
-            console.error("Hiba a szerver oldali feldolgozásnál:", e);
-            res.status(500).send("Adatfeldolgozási hiba");
+        if (err) {
+            console.error("Fájl olvasási hiba:", err);
+            return res.status(500).send("Hiba a fájl beolvasásakor");
         }
+        res.send(data); // Elküldjük a nyers szöveget (kommentestül, mindenestül)
     });
 });
 
