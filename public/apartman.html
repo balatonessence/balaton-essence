@@ -143,6 +143,8 @@
                 <img id="apt-main-img" src="" class="gallery-img" onclick="openLightbox(0)" onload="this.classList.add('loaded')">
             </div>
             
+            <div id="apt-desc" style="margin-top: 1.5rem; font-size: 1.1rem; line-height: 1.6; color: #555; font-family: 'Inter', sans-serif;"></div>
+
             <div id="apt-gallery" class="gallery-grid"></div>
         </div>
 
@@ -192,44 +194,72 @@
     });
 
     function renderDetails() {
-        document.getElementById('apt-name').innerText = currentApt.name;
-        document.getElementById('apt-loc').innerText = currentApt.location;
+        // Név és helyszín
+        document.getElementById('apt-name').innerText = currentApt.name || "Ismeretlen Apartman";
+        document.getElementById('apt-loc').innerText = currentApt.location || "";
+        
+        // JAVÍTÁS 1: A leírás megjelenítése (Ha létezik ez a div a HTML-edben)
+        // Keresünk egy elemet, ahova a leírás mehet. Ha van 'apt-desc' ID-d, abba beletesszük.
+        const descEl = document.getElementById('apt-desc');
+        if (descEl) {
+            descEl.innerText = currentApt.description || "Nincs megadva leírás az apartmanhoz.";
+        }
         
         // Ár formázása elegánsan
         const priceNum = (currentApt.price || 0).toLocaleString();
         document.getElementById('apt-price').innerHTML = `<span class="price-num">${priceNum} Ft</span> / éjszakától`;
         
-        allImages = [currentApt.mainImage, ...(currentApt.gallery || [])];
+        // JAVÍTÁS 2: Képek kulcsainak frissítése (coverImage és galleryImages)
+        const cImg = currentApt.coverImage || ''; 
+        const gImgs = currentApt.galleryImages || [];
         
-        // Főkép
+        // Összerakjuk a lightboxhoz a tömböt (Borító + Galéria)
+        allImages = cImg ? [cImg, ...gImgs] : [...gImgs];
+        
+        // Főkép megjelenítése
         const mainImg = document.getElementById('apt-main-img');
-        mainImg.src = currentApt.mainImage;
+        if (cImg) {
+            mainImg.src = cImg;
+            mainImg.style.display = 'block';
+        } else if (gImgs.length > 0) {
+            // Ha nincs borítókép, de van galéria, berakjuk az elsőt főnek
+            mainImg.src = gImgs[0];
+            mainImg.style.display = 'block';
+        } else {
+            // Ha egyáltalán nincs kép
+            mainImg.style.display = 'none'; 
+        }
 
-        // Galéria
+        // Galéria megjelenítése
         const gal = document.getElementById('apt-gallery');
         gal.innerHTML = "";
-        if (currentApt.gallery) {
-            currentApt.gallery.forEach((img, idx) => {
+        
+        if (gImgs && gImgs.length > 0) {
+            gImgs.forEach((img, idx) => {
+                // A lightbox indexe: Ha van borítókép, a galéria az 1-es indextől indul (idx+1)
+                const lbIndex = cImg ? idx + 1 : idx;
+                
                 gal.innerHTML += `
                     <div class="img-container">
                         <img src="${img}" 
                              class="gallery-img" 
                              loading="lazy" 
-                             onclick="openLightbox(${idx + 1})" 
+                             onclick="openLightbox(${lbIndex})" 
                              onload="this.classList.add('loaded')"
                              style="transition-delay: ${idx * 0.1}s"> </div>`;
             });
         }
     }
 
-    // --- LIGHTBOX LOGIKA JAVÍTVA ---
+    // --- LIGHTBOX LOGIKA ---
 
     function openLightbox(index) {
+        if (!allImages || allImages.length === 0) return; // Biztonsági csekk
         currentIndex = index;
         document.getElementById('lightbox-img').src = allImages[currentIndex];
         const lb = document.getElementById('lightbox');
         lb.style.display = 'flex';
-        setTimeout(() => lb.classList.add('active'), 10); // Finom opacitás animáció
+        setTimeout(() => lb.classList.add('active'), 10); 
         document.body.style.overflow = 'hidden';
     }
 
@@ -243,13 +273,14 @@
     }
 
     function changeImage(dir) {
+        if (!allImages || allImages.length === 0) return;
         currentIndex = (currentIndex + dir + allImages.length) % allImages.length;
         document.getElementById('lightbox-img').src = allImages[currentIndex];
     }
 
     document.addEventListener('keydown', (e) => {
         const lb = document.getElementById('lightbox');
-        if (lb.style.display === 'flex' || lb.classList.contains('active')) {
+        if (lb && (lb.style.display === 'flex' || lb.classList.contains('active'))) {
             if (e.key === "ArrowLeft") changeImage(-1);
             if (e.key === "ArrowRight") changeImage(1);
             if (e.key === "Escape") closeLightbox();
