@@ -572,6 +572,32 @@ function saveAptOrder() {
     }
 }
 
+// EZ HIÁNYZIK A KÓDODBÓL: A tényleges mentés a szerverre
+async function saveDatabase() {
+    try {
+        // Mivel Railway backend-ed van, egy POST kérést küldünk a szervernek
+        // Ez írja majd bele az új sorrendet a data.json-ba vagy az adatbázisba
+        const response = await fetch('/api/save', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(db) // A teljes DB-t küldjük az új sorrenddel
+        });
+
+        if (!response.ok) {
+            throw new Error('Hiba történt a mentés során a szerveren.');
+        }
+
+        console.log("Adatbázis sikeresen szinkronizálva a Railway szerverrel.");
+    } catch (error) {
+        console.error("Mentési hiba:", error);
+        // Ha a szerver nem elérhető, elmentjük legalább helyben
+        localStorage.setItem('balaton_essence_db', JSON.stringify(db));
+        alert("A szerverre nem sikerült menteni, de a böngésződ megjegyezte a sorrendet!");
+    }
+}
+
 // Kis felugró üzenet, hogy lásd, a háttérben megtörtént a mentés
 function showSaveToast() {
     let toast = document.getElementById('sort-toast');
