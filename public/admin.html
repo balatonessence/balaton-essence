@@ -575,27 +575,31 @@ function saveAptOrder() {
 // EZ HIÁNYZIK A KÓDODBÓL: A tényleges mentés a szerverre
 async function saveDatabase() {
     try {
-        // Mivel Railway backend-ed van, egy POST kérést küldünk a szervernek
-        // Ez írja majd bele az új sorrendet a data.json-ba vagy az adatbázisba
-        const response = await fetch('/api/save', {
+        // 1. Mentés a szerverre (Railway) a te útvonalad alapján
+        // A deleteItem kódodból látszik, hogy az /api/ útvonalat használod
+        const res = await fetch('/api/save', { 
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(db) // A teljes DB-t küldjük az új sorrenddel
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(db)
         });
 
-        if (!response.ok) {
-            throw new Error('Hiba történt a mentés során a szerveren.');
+        if (res.ok) {
+            console.log("Szerver szinkronizálva! ✅");
+            showSaveToast(); // A kis buborék üzenet
+        } else {
+            throw new Error("Szerver hiba");
         }
-
-        console.log("Adatbázis sikeresen szinkronizálva a Railway szerverrel.");
-    } catch (error) {
-        console.error("Mentési hiba:", error);
-        // Ha a szerver nem elérhető, elmentjük legalább helyben
+    } catch (err) {
+        console.error("Mentési hiba:", err);
+        // Biztonsági mentés helyileg, ha a szerver nem elérhető
         localStorage.setItem('balaton_essence_db', JSON.stringify(db));
         alert("A szerverre nem sikerült menteni, de a böngésződ megjegyezte a sorrendet!");
     }
+}
+
+// Hogy a kódod ne dobjon hibát, ha véletlenül máshol saveDb()-t hívsz:
+async function saveDb() {
+    return await saveDatabase();
 }
 
 // Kis felugró üzenet, hogy lásd, a háttérben megtörtént a mentés
