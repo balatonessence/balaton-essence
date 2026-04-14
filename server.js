@@ -97,9 +97,12 @@ async function saveDb(data) {
 // --- API ÚTVONALAK ---
 
 // Ez kell a frontendnek az adatok eléréséhez!
-app.get('/api/get-db-content', async (req, res) => {
-    try { res.json(await getDb()); } 
-    catch (e) { res.status(500).send(e.message); }
+app.get('/api/get-db-content', (req, res) => {
+    const filePath = path.join(__dirname, 'public', 'database.js');
+    fs.readFile(filePath, 'utf8', (err, data) => {
+        if (err) return res.status(500).send("Hiba");
+        res.send(data); // Elküldi a database.js tartalmát szövegként
+    });
 });
 
 app.post('/api/save-db', async (req, res) => {

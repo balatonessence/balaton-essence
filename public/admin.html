@@ -6,36 +6,38 @@
     <title>Központi Vezérlőpult | Balaton Essence</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <script src="database.js?v=1.1"></script>
+    <script src="database.js"></script> 
     <script>
         async function initDatabase(callback) {
     try {
-        // Megpróbáljuk betölteni a database.js-t, de tiszta adatként
-        // Ha a database.js a 'public' mappában van, akkor 'database.js' elég
-        const response = await fetch('database.js?t=' + new Date().getTime());
+        const timestamp = new Date().getTime();
+        // Meghívjuk a szerver API-t
+        const res = await fetch('/api/get-db-content?t=' + timestamp, { cache: 'no-store' });
         
-        if (!response.ok) {
-            throw new Error("A database.js nem található a szerveren (404)");
+        if (res.ok) {
+            const text = await res.text(); // Előbb szövegként olvassuk be
+
+            // HA A SZERVER A TELJES database.js TARTALMÁT KÜLDI:
+            // Le kell vágnunk a "// public/database.js" részt és a "var db =" részt
+            try {
+                // Megkeressük az első kapcsos zárójelet { és az utolsó } karaktert
+                const jsonStart = text.indexOf('{');
+                const jsonEnd = text.lastIndexOf('}') + 1;
+                const jsonRaw = text.substring(jsonStart, jsonEnd);
+                
+                const data = JSON.parse(jsonRaw);
+                if (data) db = data; // Frissítjük a globális db változót
+                
+                console.log("Adatbázis sikeresen inicializálva!");
+                if (callback) callback();
+            } catch (jsonErr) {
+                // Ha a szerver már eleve tiszta JSON-t küldött, akkor csak simán parse-oljuk
+                db = JSON.parse(text);
+                if (callback) callback();
+            }
         }
-
-        const text = await response.text();
-        
-        // Ellenőrizzük, hogy véletlenül nem HTML-t kaptunk-e
-        if (text.trim().startsWith('<!DOCTYPE')) {
-            console.error("HIBA: A szerver HTML-t küldött JSON helyett! Valószínűleg rossz az útvonal.");
-            return;
-        }
-
-        // Mivel a database.js-ben benne van a "const db =" rész, 
-        // azt le kell vágnunk, hogy tiszta JSON-t kapjunk:
-        const jsonString = text.replace(/const\s+db\s*=\s*/, '').replace(/;$/, '').trim();
-        
-        db = JSON.parse(jsonString);
-        console.log("Adatbázis sikeresen beolvasva!");
-
-        if (callback) callback();
-    } catch (error) {
-        console.error("Adatbázis hiba:", error);
+    } catch (e) { 
+        console.error("Hiba az adatok betöltésekor:", e); 
     }
 }
     </script>
