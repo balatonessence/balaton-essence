@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Központi Vezérlőpult | Balaton Essence</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="database.js?v=99"></script>
     <script>
         (async function() {
@@ -76,6 +77,21 @@
         .gallery-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
         .thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
         .owner-tag { color: var(--essence); font-weight: 700; text-transform: uppercase; font-size: 0.65rem; background: rgba(92, 122, 77, 0.1); padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+
+        /* Amelyik sort épp húzod, az kicsit átlátszó lesz */
+        .sortable-ghost {
+            opacity: 0.4;
+            background-color: #f9f9f9;
+        }
+
+        /* Jelezzük a kurzorral, hogy ez húzható */
+        .apt-item-row {
+            cursor: grab;
+        }
+
+        .apt-item-row:active {
+            cursor: grabbing;
+        }
     </style>
 </head>
 <body>
@@ -391,7 +407,7 @@
 
     // MEGJELENÍTÉS (Renderelés)
 function renderAll() {
-    if (!db.apartments) return; 
+    if (!db.apartments) return;
 
     // 1. FOGLALÁSOK TÁBLÁZAT FRISSÍTÉSE
     const bookingTableBody = document.getElementById('booking-table-body');
@@ -417,9 +433,6 @@ function renderAll() {
                     </td>
                     <td>
                         <span class="badge ${badgeClass}">${b.source}</span>
-                        <div style="font-size: 0.7rem; color: #999; margin-top: 5px; max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${b.msg || ''}">
-                            ${b.msg ? '💬 ' + b.msg : ''}
-                        </div>
                     </td>
                     <td>
                         <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">Törlés</button>
@@ -428,12 +441,14 @@ function renderAll() {
         }).join('');
     }
 
-    // 2. APARTMAN LISTA ÉS STATISZTIKA
+    // 2. APARTMAN LISTA (SORRENDEZHETŐ)
     const aptListContainer = document.getElementById('apt-list-container');
     if (aptListContainer) {
         aptListContainer.innerHTML = (db.apartments || []).map(a => {
             const owner = (db.owners || []).find(o => o.id == a.ownerId);
             const aptBookings = (db.bookings || []).filter(b => b.aptId == a.id);
+            
+            // Statisztika számítása
             const webCount = aptBookings.filter(b => b.source === 'Weboldal').length;
             const bookingCount = aptBookings.filter(b => b.source === 'booking').length;
             const szallasCount = aptBookings.filter(b => b.source === 'szallas').length;
@@ -446,13 +461,14 @@ function renderAll() {
                 `<img src="${a.coverImage}" style="width:45px; height:45px; border-radius:8px; object-fit:cover; margin-right:15px; border: 1px solid #eee;">` : 
                 `<div style="width:45px; height:45px; border-radius:8px; background:#f5f5f5; margin-right:15px; display:flex; align-items:center; justify-content:center; color:#ccc;">?</div>`;
             
+            // Itt a div kapott egy "apt-row" osztályt és "data-id"-t a sorrendezéshez
             return `
-                <div style="display:grid; grid-template-columns: 2fr 3.5fr 1.2fr; padding:1.2rem; border-bottom:1px solid #f0f0f0; align-items:center;">
+                <div class="apt-row" data-id="${a.id}" style="display:grid; grid-template-columns: 2fr 3.5fr 1.2fr; padding:1.2rem; border-bottom:1px solid #f0f0f0; align-items:center; background: white; cursor: grab;">
                     <div style="display:flex; align-items:center;">
                         ${thumb}
                         <div>
                             <div style="font-weight: 700; font-size: 1rem;">${a.name}</div>
-                            <div style="font-size: 0.8rem; color: #777;">${a.location} • <span style="color: var(--accent); font-weight: 500;">${owner ? owner.name : 'Nincs tulaj'}</span></div>
+                            <div style="font-size: 0.8rem; color: #777;">${a.location} • <span style="color: var(--accent);">${owner ? owner.name : 'Nincs tulaj'}</span></div>
                         </div>
                     </div>
                     <div class="stats-wrapper" style="display: flex; gap: 15px;">
@@ -466,9 +482,12 @@ function renderAll() {
                     </div>
                 </div>`;
         }).join('');
+
+        // Sorrendezés inicializálása a rajzolás után
+        initAptSorting();
     }
 
-    // 3. TULAJDONOSOK / PARTNEREK LISTÁZÁSA (EZT KÉRDEZTED MOST)
+    // 3. TULAJDONOSOK TÁBLÁZATA
     const ownerTableBody = document.getElementById('owner-table-body');
     if (ownerTableBody) {
         ownerTableBody.innerHTML = (db.owners || []).map(o => {
@@ -476,10 +495,10 @@ function renderAll() {
             return `
                 <tr>
                     <td style="padding: 1.2rem 1rem;">
-                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text);">${o.name}</div>
+                        <div style="font-weight: 700; font-size: 0.95rem;">${o.name}</div>
                     </td>
                     <td style="padding: 1.2rem 1rem;">
-                        <code style="background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">#${o.id.toString().slice(-4)}</code>
+                        <code style="background: #eee; padding: 2px 6px; border-radius: 4px;">#${o.id.toString().slice(-4)}</code>
                     </td>
                     <td style="padding: 1.2rem 1rem;">
                         <span style="font-weight: 600; color: var(--accent);">${aptCount}</span> ingatlan
@@ -492,6 +511,45 @@ function renderAll() {
                     </td>
                 </tr>`;
         }).join('');
+    }
+}
+
+// --- SORRENDEZÉSÉRT FELELŐS SEGÉDFÜGGVÉNYEK ---
+
+function initAptSorting() {
+    const el = document.getElementById('apt-list-container');
+    if (!el || typeof Sortable === 'undefined') return;
+
+    // Ha már volt rajta Sortable, elpusztítjuk, hogy ne duplikálódjon
+    if (window.aptSortable) window.aptSortable.destroy();
+
+    window.aptSortable = new Sortable(el, {
+        animation: 150,
+        ghostClass: 'sortable-ghost',
+        onEnd: function() {
+            saveAptOrder();
+        }
+    });
+}
+
+function saveAptOrder() {
+    const el = document.getElementById('apt-list-container');
+    const rows = el.querySelectorAll('.apt-row');
+    
+    let newOrderIds = [];
+    rows.forEach(row => {
+        newOrderIds.push(row.getAttribute('data-id'));
+    });
+
+    // Adatbázis tömb újrarendezése az ID-k alapján
+    db.apartments.sort((a, b) => {
+        return newOrderIds.indexOf(a.id.toString()) - newOrderIds.indexOf(b.id.toString());
+    });
+
+    // Mentés az adatbázisba
+    if (typeof saveDatabase === 'function') {
+        saveDatabase();
+        console.log("Új sorrend elmentve és szinkronizálva.");
     }
 }
 
