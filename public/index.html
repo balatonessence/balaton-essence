@@ -165,12 +165,12 @@
         }
 
         grid.innerHTML += `
-            <a href="apartman.html?id=${apt.id}" class="pillar-card">
+            <a href="apartman.html?id=${apt.id}" class="pillar-card" style="text-decoration: none; color: inherit;">
                 <div class="pillar-header">
-                    <h3>${apt.name}</h3>
-                    <p>${apt.location}</p>
-                    <p style="font-weight: 700; color: var(--accent);">${priceDisplay}</p>
-                    <span class="btn-primary">Felfedezés</span>
+                    <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">${apt.name}</h3>
+                    <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">${apt.location}</p>
+                    <p style="font-weight: 700; color: var(--accent); letter-spacing: 1px; margin-bottom: 2rem;">${priceDisplay}</p>
+                    <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem; display: inline-block;">Felfedezés</span>
                 </div>
                 <div class="pillar-img" style="background-image: url('${apt.coverImage || ''}');"></div>
             </a>`;
