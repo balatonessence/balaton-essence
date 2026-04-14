@@ -354,7 +354,6 @@
         const modal = document.getElementById('booking-modal');
         document.getElementById('modal-apt-name').innerText = currentApt.name;
         
-        // Alapértelmezett dátumok (holnap és holnapután)
         const today = new Date();
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
@@ -364,25 +363,44 @@
         document.getElementById('book-start').value = tomorrow.toISOString().split('T')[0];
         document.getElementById('book-end').value = dayAfter.toISOString().split('T')[0];
         
+        // --- DINAMIKUS VENDÉG LISTA GENERÁLÁSA ---
+        const info = getAptStatusAndPrice(currentApt, tomorrow); // Megnézzük a holnapi kapacitást
+        const guestSelect = document.getElementById('book-guests');
+        const maxAllowed = info.maxGuests || 2; // Ha nincs megadva, alapból 2
+        
+        guestSelect.innerHTML = ""; // Kiürítjük a régi listát
+        for (let i = 1; i <= maxAllowed; i++) {
+            // 1-2 főt egyben kezeljük, ahogy a táblázatodban volt
+            if (i === 1) continue; 
+            if (i === 2) {
+                guestSelect.innerHTML += `<option value="2">1-2 Fő</option>`;
+            } else {
+                guestSelect.innerHTML += `<option value="${i}">${i} Fő</option>`;
+            }
+        }
+        // ------------------------------------------
+
         modal.style.display = 'flex';
         setTimeout(() => modal.classList.add('active'), 10);
         document.body.style.overflow = 'hidden';
         calculateStay();
     }
 
-    function closeBookingModal() {
-        const modal = document.getElementById('booking-modal');
-        modal.classList.remove('active');
-        setTimeout(() => {
-            modal.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }, 500);
-    }
-
     function calculateStay() {
         const start = new Date(document.getElementById('book-start').value);
         const end = new Date(document.getElementById('book-end').value);
-        const guests = parseInt(document.getElementById('book-guests').value);
+        const guestSelect = document.getElementById('book-guests');
+        const guests = parseInt(guestSelect.value);
+        
+        // Ellenőrizzük az aktuális napra vonatkozó max létszámot
+        const checkInfo = getAptStatusAndPrice(currentApt, start, guests);
+        if (guests > checkInfo.maxGuests) {
+            alert(`Sajnos ebben az időszakban az apartman maximum ${checkInfo.maxGuests} főt fogadhat!`);
+            guestSelect.value = checkInfo.maxGuests; // Visszaállítjuk a maximumra
+            calculateStay(); // Újraszámoljuk
+            return;
+        }
+        
         
         if (isNaN(start) || isNaN(end) || end <= start) {
             document.getElementById('stay-info').innerText = "Hibás dátumok";
@@ -402,7 +420,7 @@
             
             if (info.status === 'OPEN') {
                 total += info.price;
-                minNightsRequired = info.minNights; // Az utolsó érvényes szezon szabályát vesszük
+                if (info.minNights > minNightsRequired) minNightsRequired = info.minNights;
             } else {
                 document.getElementById('stay-info').innerHTML = "<span style='color:var(--warning)'>Zárva tartás a választott napokon!</span>";
                 document.getElementById('grand-total').innerText = "Zárva";
