@@ -11,30 +11,17 @@
         async function initDatabase(callback) {
     try {
         const timestamp = new Date().getTime();
-        // Meghívjuk a szerver API-t
         const res = await fetch('/api/get-db-content?t=' + timestamp, { cache: 'no-store' });
         
         if (res.ok) {
-            const text = await res.text(); // Előbb szövegként olvassuk be
-
-            // HA A SZERVER A TELJES database.js TARTALMÁT KÜLDI:
-            // Le kell vágnunk a "// public/database.js" részt és a "var db =" részt
-            try {
-                // Megkeressük az első kapcsos zárójelet { és az utolsó } karaktert
-                const jsonStart = text.indexOf('{');
-                const jsonEnd = text.lastIndexOf('}') + 1;
-                const jsonRaw = text.substring(jsonStart, jsonEnd);
-                
-                const data = JSON.parse(jsonRaw);
-                if (data) db = data; // Frissítjük a globális db változót
-                
-                console.log("Adatbázis sikeresen inicializálva!");
-                if (callback) callback();
-            } catch (jsonErr) {
-                // Ha a szerver már eleve tiszta JSON-t küldött, akkor csak simán parse-oljuk
-                db = JSON.parse(text);
-                if (callback) callback();
+            const data = await res.json(); // Most már nem fog elszállni a '//' miatt
+            if (data) {
+                db = data;
+                console.log("Adatbázis sikeresen betöltve! ✅");
             }
+            if (callback) callback();
+        } else {
+            console.error("Szerver hiba a letöltésnél:", res.status);
         }
     } catch (e) { 
         console.error("Hiba az adatok betöltésekor:", e); 
@@ -599,15 +586,11 @@ async function saveDatabase() {
         });
 
         if (res.ok) {
-            console.log("Sorrend elmentve a database.js-be! ✅");
-            showSaveToast();
-        } else {
-            throw new Error("Szerver hiba");
+            console.log("Mentés sikeres! ✨");
+            if (typeof showSaveToast === 'function') showSaveToast();
         }
     } catch (err) {
-        console.error("Mentési hiba:", err);
-        // Ha a szerver nem elérhető, legalább a te gépeden maradjon meg
-        localStorage.setItem('balaton_essence_db', JSON.stringify(db));
+        console.error("Hálózati hiba a mentésnél:", err);
     }
 }
 
