@@ -201,9 +201,6 @@
     </div>
 
     <div style="max-width: 1400px; margin: 4rem auto 0; padding-top: 2rem; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-        <div style="font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 1px;">
-            &copy; 2026 Essence Balaton. Minden jog fenntartva.
-        </div>
         <div style="display: flex; gap: 20px;">
             <a href="#" style="text-decoration: none; color: #1A1A1A; font-size: 0.8rem; font-weight: 600;">FB</a>
             <a href="#" style="text-decoration: none; color: #1A1A1A; font-size: 0.8rem; font-weight: 600;">IG</a>
@@ -212,10 +209,28 @@
 </section>
 
 <footer>
-    <div class="logo-title" style="color: white; font-size: 2rem; margin-bottom: 1rem;">BALATON ESSENCE</div>
+    <div class="logo-container" onclick="openAdminLogin()" style="cursor: pointer; display: flex; flex-direction: column; line-height: 1.1;">
+    <span class="logo-title" style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: 2px;">BALATON ESSENCE</span>
+    <span class="logo-sub" style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+    </div>
     <p style="font-size: 0.8rem; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase;">Élmény, amit megérzel.</p>
-    <p style="margin-top: 4rem; font-size: 0.7rem; opacity: 0.5;">© 2026 Balaton Essence</p>
+    <p style="margin-top: 4rem; font-size: 0.7rem; opacity: 0.5;">&copy; 2026 Essence Balaton. Minden jog fenntartva.</p>
 </footer>
+
+<div id="admin-login-modal" class="lightbox" style="display: none; align-items: center; justify-content: center; background: rgba(26,26,26,0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; backdrop-filter: blur(10px);">
+    <div style="background: white; padding: 3.5rem 2.5rem; border-radius: 4px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 40px 100px rgba(0,0,0,0.5);">
+        <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">Admin Panel</h3>
+        <p style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 2.5rem;">Biztonsági kód szükséges</p>
+        
+        <input type="password" id="admin-pass-input" placeholder="••••" maxlength="4" style="width: 100%; padding: 1.2rem; border: 1px solid #eee; border-radius: 2px; text-align: center; font-size: 1.5rem; letter-spacing: 10px; margin-bottom: 2rem; font-family: 'Montserrat'; outline: none; background: #f9f9f9;">
+        
+        <div style="display: flex; gap: 15px;">
+            <button onclick="closeAdminLogin()" style="flex: 1; padding: 1.2rem; border: 1px solid #eee; background: none; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Mégse</button>
+            <button onclick="validateAdminCode()" style="flex: 1; padding: 1.2rem; border: none; background: #1A1A1A; color: white; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Belépés</button>
+        </div>
+        <p id="login-error" style="color: #b0413e; font-size: 0.75rem; margin-top: 1.5rem; font-weight: 600; display: none;">Helytelen kód!</p>
+    </div>
+</div>
 
 <script src="database.js?v=16.0"></script>
 <script>
@@ -260,31 +275,45 @@
     });
 }
 
-    function openLoginModal() {
-        const o = document.getElementById('login-overlay');
-        o.style.display = 'flex';
-        setTimeout(() => o.classList.add('active'), 10);
-        document.getElementById('admin-password').focus();
-    }
 
-    function closeLoginModal() {
-        const o = document.getElementById('login-overlay');
-        o.classList.remove('active');
-        setTimeout(() => o.style.display = 'none', 400);
-        document.getElementById('admin-password').value = '';
-    }
+    function openAdminLogin() {
+    const modal = document.getElementById('admin-login-modal');
+    modal.style.display = 'flex';
+    // Kis késleltetés, hogy a focus biztosan működjön
+    setTimeout(() => {
+        document.getElementById('admin-pass-input').focus();
+    }, 100);
+}
 
-    function attemptLogin() {
-        const pass = document.getElementById('admin-password').value;
-        const correctCode = db.adminCode || "admin123";
-        if (pass === correctCode || pass === "admin123") {
-            sessionStorage.setItem('adminLoggedIn', 'true');
-            window.location.href = "admin.html";
-        } else {
-            alert("Hibás kód!");
-            document.getElementById('admin-password').value = '';
-        }
+function closeAdminLogin() {
+    document.getElementById('admin-login-modal').style.display = 'none';
+    document.getElementById('admin-pass-input').value = "";
+    document.getElementById('login-error').style.display = 'none';
+}
+
+function validateAdminCode() {
+    const codeInput = document.getElementById('admin-pass-input');
+    const secretCode = "1234"; // Itt a te kódod legyen!
+
+    if (codeInput.value === secretCode) {
+        // EZ A SOR A KULCS: Ez helyezi el a "pecsétet" a böngészőben
+        sessionStorage.setItem('adminLoggedIn', 'true'); 
+        
+        window.location.href = 'admin.html';
+    } else {
+        document.getElementById('login-error').style.display = 'block';
+        codeInput.value = "";
     }
+}
+
+// Billentyűzet figyelése (Enter = Belépés, Esc = Mégse)
+document.addEventListener('keydown', function(e) {
+    const modal = document.getElementById('admin-login-modal');
+    if (modal.style.display === 'flex') {
+        if (e.key === 'Enter') validateAdminCode();
+        if (e.key === 'Escape') closeAdminLogin();
+    }
+});
 </script>
 </body>
 </html>

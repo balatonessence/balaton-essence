@@ -8,15 +8,19 @@
     <script src="database.js?v=99"></script>
     <script>
         (async function() {
+            // 1. Adatbázis betöltése
             await initDatabase();
+
+            // 2. Ellenőrzés: Belépett-e a felhasználó a főoldali popupban?
             if (sessionStorage.getItem('adminLoggedIn') !== 'true') {
-                const c = prompt("Admin hozzáférés:");
-                if (c === (db.adminCode || "admin123") || c === "admin123") {
-                    sessionStorage.setItem('adminLoggedIn', 'true');
-                } else {
-                    window.location.href = "index.html";
-                }
+                // Ha nincs belépve, nincs kérdés, nincs prompt, csak visszairányítás
+                alert("Hozzáférés megtagadva! Kérjük, jelentkezzen be a főoldalon.");
+                window.location.href = "index.html";
+                return; // Megállítjuk a további futást
             }
+
+            // 3. Ha minden rendben, jöhet a tartalom kirajzolása
+            renderAll();
         })();
     </script>
     <style>
