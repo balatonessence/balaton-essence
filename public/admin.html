@@ -575,25 +575,23 @@ function saveAptOrder() {
 // EZ HIÁNYZIK A KÓDODBÓL: A tényleges mentés a szerverre
 async function saveDatabase() {
     try {
-        // 1. Mentés a szerverre (Railway) a te útvonalad alapján
-        // A deleteItem kódodból látszik, hogy az /api/ útvonalat használod
-        const res = await fetch('/api/save', { 
+        const res = await fetch('/api/save', { // Ennek egyeznie kell a szerver oldallal!
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(db)
         });
 
+        if (res.status === 404) {
+            console.error("Hiba: A szerveren nem létezik az /api/save útvonal!");
+            return;
+        }
+
         if (res.ok) {
             console.log("Szerver szinkronizálva! ✅");
-            showSaveToast(); // A kis buborék üzenet
-        } else {
-            throw new Error("Szerver hiba");
+            if (typeof showSaveToast === 'function') showSaveToast();
         }
     } catch (err) {
-        console.error("Mentési hiba:", err);
-        // Biztonsági mentés helyileg, ha a szerver nem elérhető
-        localStorage.setItem('balaton_essence_db', JSON.stringify(db));
-        alert("A szerverre nem sikerült menteni, de a böngésződ megjegyezte a sorrendet!");
+        console.error("Hálózati hiba:", err);
     }
 }
 

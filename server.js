@@ -112,6 +112,28 @@ app.post('/api/new-booking', async (req, res) => {
     }
 });
 
+// ÚTVONAL LÉTREHOZÁSA A MENTÉSHEZ
+app.post('/api/save', (req, res) => {
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Az adatok, amiket az admin.html-ből küldtél
+    const updatedDb = req.body; 
+
+    // A fájl útvonala (győződj meg róla, hogy a data.json a szerver mellett van)
+    const filePath = path.join(__dirname, 'data.json');
+
+    // Fájl felülírása az új sorrenddel
+    fs.writeFile(filePath, JSON.stringify(updatedDb, null, 2), (err) => {
+        if (err) {
+            console.error("Hiba a mentésnél:", err);
+            return res.status(500).json({ error: "Nem sikerült a fájlba írás" });
+        }
+        console.log("Adatbázis (data.json) sikeresen frissítve!");
+        res.status(200).json({ message: "Sikeres mentés" });
+    });
+});
+
 app.post('/api/order', async (req, res) => {
     try {
         const db = await getDb();
