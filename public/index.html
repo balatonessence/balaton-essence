@@ -24,9 +24,38 @@
 
         /* HEADER */
         header { position: fixed; top: 40px; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(252, 251, 249, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); transition: 0.3s; }
-        .logo-container { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: inherit; }
-        .logo-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; font-weight: 600; letter-spacing: 2px; line-height: 1; }
-        .logo-sub { font-size: 0.6rem; font-weight: 500; letter-spacing: 4px; color: var(--text-light); text-transform: uppercase; margin-top: 4px; }
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+            text-decoration: none;
+        }
+
+        .logo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 2px;
+        }
+
+        .logo-sub {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 6px; /* Kicsit több térköz a prémium érzetért */
+            margin-top: 4px;
+        }
+
+        .nav-links a {
+            transition: 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--accent) !important;
+        }
         
         nav { display: flex; gap: 2rem; align-items: center; }
         .nav-link { font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--text); text-decoration: none; transition: 0.3s; }
@@ -64,23 +93,26 @@
 </head>
 <body>
 
-<div class="dev-banner">
+<div style="background: #b0413e; color: white; padding: 10px 5vw; text-align: center; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.5px; position: fixed; top: 0; left: 0; width: 100%; z-index: 1001; line-height: 1.4;">
     HU: Az oldal fejlesztés alatt áll, foglalás jelenleg nem lehetséges. | 
     EN: Site under development, booking is currently not possible. | 
     DE: Seite in Entwicklung, Buchung derzeit nicht möglich.
 </div>
 
-<header>
-    <a href="index.html" class="logo-container">
-        <span class="logo-title">BALATON</span>
-        <span class="logo-sub">Essence</span>
+<header style="position: fixed; top: 38px; left: 0; width: 100%; padding: 1rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);">
+    
+    <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1;">
+        <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
+        <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
     </a>
-    <nav>
-        <a href="#apartments" class="nav-link">Apartmanok</a>
-        <a href="#pillars" class="nav-link">Élmények</a>
-        <button class="btn-primary" style="padding: 0.6rem 1.5rem;" onclick="openLoginModal()">Admin</button>
+
+    <nav class="nav-links" style="display: flex; gap: 2rem;">
+        <a href="index.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Apartmanok</a>
+        <a href="rolunk.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Rólunk</a>
     </nav>
 </header>
+
+<div style="height: 110px;"></div>
 
 <section class="hero">
     <div class="hero-content">
@@ -127,6 +159,57 @@
         <button class="btn-primary" style="width: 100%; padding: 1.2rem;" onclick="attemptLogin()">Belépés</button>
     </div>
 </div>
+
+<section id="contact" style="background: white; padding: 5rem 5vw; border-top: 1px solid var(--border); margin-top: 5rem;">
+    <div style="max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4rem;">
+        
+        <div>
+            <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1; margin-bottom: 1.5rem;">
+                <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
+                <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+            </a>
+            <p style="font-size: 0.85rem; color: #666; line-height: 1.8; margin-top: 1rem;">
+                Prémium apartmanok és felejthetetlen élmények a Balaton északi és déli partján. Gondoskodunk a kényelméről, hogy Önnek csak a pihenésre kelljen koncentrálnia.
+            </p>
+        </div>
+
+        <div>
+            <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Kapcsolat</h4>
+            <ul style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 2;">
+                <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <span style="color: var(--accent);">📍</span> 8640 Fonyód
+                </li>
+                <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <span style="color: var(--accent);">📞</span> +36 30 123 4567
+                </li>
+                <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
+                    <span style="color: var(--accent);">✉️</span> hello@essencebalaton.hu
+                </li>
+            </ul>
+        </div>
+
+        <div>
+            <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Navigáció</h4>
+            <ul style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 2;">
+                <li><a href="index.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Apartmanok</a></li>
+                <li><a href="rolunk.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Rólunk</a></li>
+                <li><a href="#contact" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Kapcsolat</a></li>
+                <li><a href="#" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Általános Szerződési Feltételek</a></li>
+            </ul>
+        </div>
+
+    </div>
+
+    <div style="max-width: 1400px; margin: 4rem auto 0; padding-top: 2rem; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+        <div style="font-size: 0.7rem; color: #999; text-transform: uppercase; letter-spacing: 1px;">
+            &copy; 2026 Essence Balaton. Minden jog fenntartva.
+        </div>
+        <div style="display: flex; gap: 20px;">
+            <a href="#" style="text-decoration: none; color: #1A1A1A; font-size: 0.8rem; font-weight: 600;">FB</a>
+            <a href="#" style="text-decoration: none; color: #1A1A1A; font-size: 0.8rem; font-weight: 600;">IG</a>
+        </div>
+    </div>
+</section>
 
 <footer>
     <div class="logo-title" style="color: white; font-size: 2rem; margin-bottom: 1rem;">BALATON ESSENCE</div>

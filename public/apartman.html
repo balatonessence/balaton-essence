@@ -188,7 +188,7 @@
 
         <div>
             <div class="booking-card">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; font-style: italic;">Ajánlatkérés</h3>
+                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; font-style: italic;">Foglalás</h3>
                 <p id="apt-price" class="price-tag"></p>
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0;">
                 
@@ -500,7 +500,7 @@
         btn.disabled = false;
         btn.style.opacity = "1";
         btn.style.background = "var(--accent)"; // Normál zöld
-        btn.innerText = "Ajánlatkérés elküldése";
+        btn.innerText = "Foglalás elküldése";
     }
 }
 
@@ -534,7 +534,7 @@
             });
 
             if (res.ok) {
-                alert(`Köszönjük, ${data.guestName}! Az ajánlatkérést rögzítettük. Hamarosan keresünk a megadott telefonszámon!`);
+                alert(`Köszönjük, ${data.guestName}! A foglalását rögzítettük. `);
                 closeBookingModal();
                 window.location.reload();
             }
