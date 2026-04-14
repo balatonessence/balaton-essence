@@ -136,15 +136,29 @@
 
 <script src="database.js?v=12.0"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', () => initDatabase(renderIndexApartments));
+    // Biztonságos betöltés: megvárjuk az adatbázist, aztán rajzolunk
+    document.addEventListener('DOMContentLoaded', () => {
+        if (typeof initDatabase === "function") {
+            initDatabase(renderIndexApartments);
+        } else {
+            console.error("A database.js nem töltődött be!");
+        }
+    });
 
     function renderIndexApartments() {
         const grid = document.getElementById('apartment-grid');
-        if (!db.apartments || db.apartments.length === 0) return;
+        if (!grid) return;
+        
+        if (!db.apartments || db.apartments.length === 0) {
+            grid.innerHTML = "<p style='text-align:center; padding: 2rem;'>Jelenleg nincsenek feltöltött apartmanok.</p>";
+            return;
+        }
         
         grid.innerHTML = "";
         db.apartments.forEach(apt => {
-            const mainImg = apt.mainImage || '';
+            // JAVÍTÁS: apt.mainImage helyett apt.coverImage, mert így menti az admin!
+            const mainImg = apt.coverImage || ''; 
+            
             grid.innerHTML += `
                 <a href="apartman.html?id=${apt.id}" class="pillar-card" style="text-decoration: none; color: inherit;">
                     <div class="pillar-header">
