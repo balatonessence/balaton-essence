@@ -9,22 +9,35 @@
     <script src="database.js?v=1.1"></script>
     <script>
         async function initDatabase(callback) {
-            try {
-                // A végére tettünk egy időbélyeget (?t=...), így a böngésző 
-                // kénytelen lesz a legfrissebb data.json-t letölteni a szerverről,
-                // nem pedig a saját memóriájából (cache) dolgozni.
-                const response = await fetch('/data.json?t=' + new Date().getTime());
-                
-                if (!response.ok) throw new Error("Nem sikerült betölteni az adatbázist");
-                
-                db = await response.json();
-                console.log("Adatbázis frissítve a szerverről.");
-
-                if (callback) callback();
-            } catch (error) {
-                console.error("Adatbázis hiba:", error);
-            }
+    try {
+        // Megpróbáljuk betölteni a database.js-t, de tiszta adatként
+        // Ha a database.js a 'public' mappában van, akkor 'database.js' elég
+        const response = await fetch('database.js?t=' + new Date().getTime());
+        
+        if (!response.ok) {
+            throw new Error("A database.js nem található a szerveren (404)");
         }
+
+        const text = await response.text();
+        
+        // Ellenőrizzük, hogy véletlenül nem HTML-t kaptunk-e
+        if (text.trim().startsWith('<!DOCTYPE')) {
+            console.error("HIBA: A szerver HTML-t küldött JSON helyett! Valószínűleg rossz az útvonal.");
+            return;
+        }
+
+        // Mivel a database.js-ben benne van a "const db =" rész, 
+        // azt le kell vágnunk, hogy tiszta JSON-t kapjunk:
+        const jsonString = text.replace(/const\s+db\s*=\s*/, '').replace(/;$/, '').trim();
+        
+        db = JSON.parse(jsonString);
+        console.log("Adatbázis sikeresen beolvasva!");
+
+        if (callback) callback();
+    } catch (error) {
+        console.error("Adatbázis hiba:", error);
+    }
+}
     </script>
     <style>
         :root { 
