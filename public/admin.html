@@ -150,13 +150,19 @@
                 <textarea id="a-desc" rows="3" placeholder="Rövid leírás az apartmanról..."></textarea>
             </div>
 
-            <div class="form-group">
-                <label>Képek feltöltése (Többet is kijelölhetsz)</label>
-                <input type="file" id="a-images" multiple accept="image/*" onchange="handleImageUpload(event)">
-                <div id="a-gallery-preview" class="gallery-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;"></div>
+            <div class="form-group" style="background:#f0f5ec; padding:1rem; border-radius:8px; border: 1px solid #d4e0c8;">
+                <label style="color:var(--essence); font-weight:bold;">Borítókép (Fő kép, 1 db)</label>
+                <input type="file" id="a-cover-image" accept="image/*" onchange="handleCoverUpload(event)">
+                <div id="a-cover-preview" style="margin-top: 10px;"></div>
             </div>
 
-            <div style="background:#f9f9f9; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; margin-top:1rem;">
+            <div class="form-group" style="margin-top:1.5rem;">
+                <label>További képek (Galéria, többet is kijelölhetsz)</label>
+                <input type="file" id="a-gallery-images" multiple accept="image/*" onchange="handleGalleryUpload(event)">
+                <div id="a-gallery-preview" class="gallery-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;"></div>
+            </div>
+
+            <div style="background:#f9f9f9; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; margin-top:1.5rem;">
                 <p style="font-size:0.6rem; font-weight:700; margin-bottom:1rem;">ICAL SZINKRON</p>
                 <input type="text" id="a-ical-b" placeholder="Booking.com iCal URL" style="margin-bottom:10px;">
                 <input type="text" id="a-ical-sz" placeholder="Szállás.hu iCal URL">
@@ -181,7 +187,8 @@
 <script>
     let activeId = null;
     let activeOId = null;
-    let currentAptImages = []; // ÚJ: Itt tároljuk az épp szerkesztett apartman képeit
+    let currentCoverImage = null; // Külön változó a borítóképnek
+    let currentGalleryImages = []; // Külön tömb a többinek
 
     // ADATBÁZIS MENTÉSE
     async function saveDb() {
@@ -210,7 +217,7 @@
         await saveDb(); closeModal();
     }
 
-    // --- ÚJ: KÉPKEZELÉS ÉS TÖMÖRÍTÉS ---
+    // --- KÉPKEZELÉS ÉS TÖMÖRÍTÉS (WebP) ---
     function compressImage(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -220,54 +227,83 @@
                 img.src = e.target.result;
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    const MAX_WIDTH = 800; // Lényeges: Lekicsinyítjük, hogy ne haljon meg a szerver
+                    const MAX_WIDTH = 800;
                     const scaleSize = MAX_WIDTH / img.width;
                     canvas.width = MAX_WIDTH;
                     canvas.height = img.height * scaleSize;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/webp', 0.8)); // 80% minőségű WebP
+                    resolve(canvas.toDataURL('image/webp', 0.8)); // WebP 80% minőség
                 };
             };
         });
     }
 
-    async function handleImageUpload(event) {
-        const files = event.target.files;
-        for (let i = 0; i < files.length; i++) {
-            const base64 = await compressImage(files[i]);
-            currentAptImages.push(base64);
+    // Borítókép feltöltése
+    async function handleCoverUpload(event) {
+        const file = event.target.files[0];
+        if (file) {
+            currentCoverImage = await compressImage(file);
+            renderImagePreviews();
         }
-        renderGalleryPreview();
-        // Nullázzuk az inputot, hogy újra ki lehessen választani ugyanazt a képet ha kell
         event.target.value = ''; 
     }
 
-    function removeImage(index) {
-        currentAptImages.splice(index, 1);
-        renderGalleryPreview();
+    // Galéria feltöltése
+    async function handleGalleryUpload(event) {
+        const files = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const base64 = await compressImage(files[i]);
+            currentGalleryImages.push(base64);
+        }
+        renderImagePreviews();
+        event.target.value = ''; 
     }
 
-    function renderGalleryPreview() {
-        const container = document.getElementById('a-gallery-preview');
-        container.innerHTML = currentAptImages.map((img, idx) => `
+    function removeCoverImage() {
+        currentCoverImage = null;
+        renderImagePreviews();
+    }
+
+    function removeGalleryImage(index) {
+        currentGalleryImages.splice(index, 1);
+        renderImagePreviews();
+    }
+
+    function renderImagePreviews() {
+        // Borítókép kirajzolása
+        const coverContainer = document.getElementById('a-cover-preview');
+        if (currentCoverImage) {
+            coverContainer.innerHTML = `
+                <div style="position:relative; display:inline-block;">
+                    <img src="${currentCoverImage}" style="width:120px; height:80px; object-fit:cover; border-radius:8px; border:3px solid var(--essence); box-shadow:0 4px 10px rgba(0,0,0,0.15);">
+                    <div onclick="removeCoverImage()" style="position:absolute; top:-10px; right:-10px; background:var(--danger); color:white; width:24px; height:24px; border-radius:50%; text-align:center; cursor:pointer; line-height:24px; font-size:12px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">X</div>
+                </div>`;
+        } else {
+            coverContainer.innerHTML = '';
+        }
+
+        // Galéria kirajzolása
+        const galleryContainer = document.getElementById('a-gallery-preview');
+        galleryContainer.innerHTML = currentGalleryImages.map((img, idx) => `
             <div style="position:relative; display:inline-block;">
-                <img src="${img}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #eee; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
-                <div onclick="removeImage(${idx})" style="position:absolute; top:-8px; right:-8px; background:var(--danger); color:white; width:22px; height:22px; border-radius:50%; text-align:center; cursor:pointer; line-height:22px; font-size:12px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">X</div>
+                <img src="${img}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #eee;">
+                <div onclick="removeGalleryImage(${idx})" style="position:absolute; top:-8px; right:-8px; background:var(--danger); color:white; width:22px; height:22px; border-radius:50%; text-align:center; cursor:pointer; line-height:22px; font-size:12px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">X</div>
             </div>
         `).join('');
         
-        // Háttérkép cseréje a modal bal oldalán az első képre
+        // Háttérkép cseréje a modal bal oldalán (elsődlegesen a borítókép)
         const visual = document.getElementById('apt-visual');
-        if (currentAptImages.length > 0) {
-            visual.style.backgroundImage = `url(${currentAptImages[0]})`;
+        if (currentCoverImage) {
+            visual.style.backgroundImage = `url(${currentCoverImage})`;
+        } else if (currentGalleryImages.length > 0) {
+            visual.style.backgroundImage = `url(${currentGalleryImages[0]})`;
         } else {
             visual.style.backgroundImage = `none`;
         }
     }
-    // ------------------------------------
 
-    // APARTMAN MENTÉSE (Bővítve leírással és képekkel)
+    // APARTMAN MENTÉSE
     async function saveApt() {
         const aptData = {
             id: activeId || Date.now(),
@@ -275,8 +311,9 @@
             location: document.getElementById('a-loc').value,
             price: document.getElementById('a-price').value,
             ownerId: document.getElementById('a-owner-select').value,
-            description: document.getElementById('a-desc').value, // <--- Bekerült
-            images: currentAptImages, // <--- Bekerült
+            description: document.getElementById('a-desc').value,
+            coverImage: currentCoverImage, // <--- Külön mentve
+            galleryImages: currentGalleryImages, // <--- Külön mentve
             icalBooking: document.getElementById('a-ical-b').value,
             icalSzallas: document.getElementById('a-ical-sz').value,
             bookedDates: activeId ? db.apartments.find(a => a.id === activeId).bookedDates : []
@@ -313,22 +350,24 @@
             document.getElementById('a-loc').value = a.location;
             document.getElementById('a-price').value = a.price;
             document.getElementById('a-owner-select').value = a.ownerId;
-            document.getElementById('a-desc').value = a.description || ''; // <--- Bekerült
+            document.getElementById('a-desc').value = a.description || '';
             document.getElementById('a-ical-b').value = a.icalBooking || '';
             document.getElementById('a-ical-sz').value = a.icalSzallas || '';
             
             // Képek betöltése
-            currentAptImages = a.images ? [...a.images] : [];
+            currentCoverImage = a.coverImage || null;
+            currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
         } else {
             document.getElementById('a-name').value = '';
             document.getElementById('a-loc').value = '';
             document.getElementById('a-price').value = 0;
-            document.getElementById('a-desc').value = ''; // <--- Bekerült
+            document.getElementById('a-desc').value = '';
             document.getElementById('a-ical-b').value = '';
             document.getElementById('a-ical-sz').value = '';
-            currentAptImages = [];
+            currentCoverImage = null;
+            currentGalleryImages = [];
         }
-        renderGalleryPreview(); // Frissíti a képeket a modalban
+        renderImagePreviews();
         document.getElementById('apt-modal').style.display = 'flex';
     }
 
@@ -344,8 +383,8 @@
 
         document.getElementById('apt-list-container').innerHTML = (db.apartments || []).map(a => {
             const owner = (db.owners || []).find(o => o.id == a.ownerId);
-            // Kicsi bélyegkép a listában is!
-            const thumb = (a.images && a.images.length > 0) ? `<img src="${a.images[0]}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; margin-right:15px;">` : `<div style="width:40px; height:40px; border-radius:6px; background:#eee; margin-right:15px;"></div>`;
+            // Listában a Borítókép jelenik meg
+            const thumb = a.coverImage ? `<img src="${a.coverImage}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; margin-right:15px;">` : `<div style="width:40px; height:40px; border-radius:6px; background:#eee; margin-right:15px;"></div>`;
             
             return `<div style="display:grid; grid-template-columns: 2fr 3fr 1.5fr; padding:1.2rem; border-bottom:1px solid #eee; align-items:center;">
                 <div style="display:flex; align-items:center;">
