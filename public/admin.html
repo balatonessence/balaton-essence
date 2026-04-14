@@ -386,52 +386,78 @@
     function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
     // MEGJELENÍTÉS (Renderelés)
-    function renderAll() {
+function renderAll() {
     if (!db.apartments) return; 
 
-    // Foglalások táblázat frissítése
-    document.getElementById('booking-table-body').innerHTML = (db.bookings || []).map(b => `
-        <tr>
-            <td><strong>${b.aptName}</strong></td>
-            <td>${b.guestName}</td>
-            <td>${b.checkIn}</td>
-            <td><span class="badge ${b.source === 'booking' ? 'bg-booking' : 'bg-essence'}">${b.source}</span></td>
-            <td><button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">Törlés</button></td>
-        </tr>`).join('');
+    // 1. FOGLALÁSOK TÁBLÁZAT FRISSÍTÉSE (Minden adat megjelenítése)
+    const bookingTableBody = document.getElementById('booking-table-body');
+    if (bookingTableBody) {
+        bookingTableBody.innerHTML = (db.bookings || []).map(b => `
+            <tr>
+                <td>
+                    <div style="font-weight: 700; color: var(--text);">${b.aptName}</div>
+                    <div style="font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.5px;">${b.total || 'N/A'}</div>
+                </td>
+                <td>
+                    <div style="font-weight: 600;">${b.guestName}</div>
+                    <div style="font-size: 0.8rem; color: var(--accent);">${b.phone || 'Nincs tel.'}</div>
+                    <div style="font-size: 0.75rem; color: #777;">${b.email || ''}</div>
+                </td>
+                <td>
+                    <div style="font-size: 0.85rem;"><strong>${b.checkIn}</strong> &rarr; <strong>${b.end || '...'}</strong></div>
+                    <div style="font-size: 0.75rem; color: #777;">${b.guests || '2'} vendég</div>
+                </td>
+                <td>
+                    <span class="badge ${b.source === 'booking' ? 'bg-booking' : 'bg-essence'}" style="margin-bottom: 5px;">${b.source}</span>
+                    <div style="font-size: 0.7rem; color: #999; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${b.msg || ''}">
+                        ${b.msg ? '💬 ' + b.msg : ''}
+                    </div>
+                </td>
+                <td>
+                    <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')" style="padding: 5px 10px; font-size: 0.75rem;">Törlés</button>
+                </td>
+            </tr>`).join('');
+    }
 
-    // Apartman lista és STATISZTIKA
-    document.getElementById('apt-list-container').innerHTML = (db.apartments || []).map(a => {
-        const owner = (db.owners || []).find(o => o.id == a.ownerId);
-        
-        // STATISZTIKA SZÁMÍTÁSA: Hány foglalás van az adott apartmanhoz?
-        const aptBookings = (db.bookings || []).filter(b => b.aptId == a.id);
-        const webCount = aptBookings.filter(b => b.source === 'Weboldal').length;
-        const bookingCount = aptBookings.filter(b => b.source === 'booking').length;
-        
-        // Százalékosítás (példa: ha 10 foglalás a max, akkor 1 foglalás 10%)
-        const webPerc = Math.min(webCount * 10, 100); 
-        const bookingPerc = Math.min(bookingCount * 10, 100);
+    // 2. APARTMAN LISTA ÉS STATISZTIKA
+    const aptListContainer = document.getElementById('apt-list-container');
+    if (aptListContainer) {
+        aptListContainer.innerHTML = (db.apartments || []).map(a => {
+            const owner = (db.owners || []).find(o => o.id == a.ownerId);
+            
+            // STATISZTIKA: Valós adatok alapján
+            const aptBookings = (db.bookings || []).filter(b => b.aptId == a.id);
+            const webCount = aptBookings.filter(b => b.source === 'Weboldal').length;
+            const bookingCount = aptBookings.filter(b => b.source === 'booking').length;
+            
+            // Skálázás: 10 foglalás felett már teli kör (igazítsd az igényeidhez)
+            const webPerc = Math.min(webCount * 10, 100); 
+            const bookingPerc = Math.min(bookingCount * 10, 100);
 
-        const thumb = a.coverImage ? `<img src="${a.coverImage}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; margin-right:15px;">` : `<div style="width:40px; height:40px; border-radius:6px; background:#eee; margin-right:15px;"></div>`;
-        
-        return `
-            <div style="display:grid; grid-template-columns: 2fr 3fr 1.5fr; padding:1.2rem; border-bottom:1px solid #eee; align-items:center;">
-                <div style="display:flex; align-items:center;">
-                    ${thumb}
-                    <div><strong>${a.name}</strong><br><small>${a.location} <span class="owner-tag">${owner ? owner.name : 'Nincs'}</span></small></div>
-                </div>
-                <div class="stats-wrapper">
-                    ${drawChart(bookingPerc, '#003580', 'Booking')}
-                    ${drawChart(webPerc, '#5C7A4D', 'Web')}
-                </div>
-                <div style="display:flex; gap:5px;">
-                    <button class="btn-outline" onclick="openAptModal(${a.id})">Szerk.</button>
-                    <button class="btn-outline btn-del" onclick="deleteApt(${a.id})">X</button>
-                </div>
-            </div>`;
-    }).join('');
-    
-    // ... többi rész (reggeli, tulajdonosok) marad ...
+            const thumb = a.coverImage ? 
+                `<img src="${a.coverImage}" style="width:45px; height:45px; border-radius:8px; object-fit:cover; margin-right:15px; border: 1px solid #eee;">` : 
+                `<div style="width:45px; height:45px; border-radius:8px; background:#f5f5f5; margin-right:15px; display:flex; align-items:center; justify-content:center; color:#ccc;">?</div>`;
+            
+            return `
+                <div style="display:grid; grid-template-columns: 2fr 3fr 1.5fr; padding:1.2rem; border-bottom:1px solid #f0f0f0; align-items:center;">
+                    <div style="display:flex; align-items:center;">
+                        ${thumb}
+                        <div>
+                            <div style="font-weight: 700; font-size: 1rem;">${a.name}</div>
+                            <div style="font-size: 0.8rem; color: #777;">${a.location} • <span style="color: var(--accent); font-weight: 500;">${owner ? owner.name : 'Nincs tulaj'}</span></div>
+                        </div>
+                    </div>
+                    <div class="stats-wrapper" style="display: flex; gap: 20px;">
+                        ${drawChart(bookingPerc, '#003580', 'Booking')}
+                        ${drawChart(webPerc, '#5C7A4D', 'Web')}
+                    </div>
+                    <div style="display:flex; gap:8px; justify-content: flex-end;">
+                        <button class="btn-outline" onclick="openAptModal(${a.id})" style="padding: 8px 15px;">Szerkesztés</button>
+                        <button class="btn-outline btn-del" onclick="deleteApt(${a.id})" style="padding: 8px 12px;">✕</button>
+                    </div>
+                </div>`;
+        }).join('');
+    }
 }
 
     function drawChart(p, c, l) {

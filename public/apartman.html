@@ -289,6 +289,14 @@
         <div class="form-group" style="margin-bottom: 1.5rem;">
             <input type="email" id="book-email" placeholder="E-mail cím" style="width: 100%; padding: 1.2rem; border: 1px solid var(--border); border-radius: 2px;">
         </div>
+        <div style="display: grid; gap: 15px;">
+            <input type="text" id="book-name" placeholder="Teljes név" style="width: 100%; padding: 1.2rem; border: 1px solid var(--border); border-radius: 2px; font-family: 'Montserrat';">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <input type="email" id="book-email" placeholder="E-mail cím" style="width: 100%; padding: 1.2rem; border: 1px solid var(--border); border-radius: 2px; font-family: 'Montserrat';">
+                <input type="tel" id="book-phone" placeholder="Telefonszám (pl. +36 30...)" style="width: 100%; padding: 1.2rem; border: 1px solid var(--border); border-radius: 2px; font-family: 'Montserrat';">
+            </div>
+            <textarea id="book-msg" placeholder="Megjegyzés (opcionális)" rows="2" style="width: 100%; padding: 1.2rem; border: 1px solid var(--border); border-radius: 2px; font-family: 'Montserrat'; resize: none;"></textarea>
+        </div>
         <div class="form-group" style="margin-bottom: 2.5rem;">
             <textarea id="book-msg" placeholder="Megjegyzés (opcionális)" rows="3" style="width: 100%; padding: 1.2rem; border: 1px solid var(--border); border-radius: 2px; font-family: inherit;"></textarea>
         </div>
@@ -543,40 +551,42 @@
 
 
     async function sendBookingRequest() {
-    const data = {
-        aptId: currentApt.id,
-        aptName: currentApt.name,
-        guestName: document.getElementById('book-name').value, // Admin táblázathoz 'guestName' kell
-        email: document.getElementById('book-email').value,
-        checkIn: document.getElementById('book-start').value, // Admin táblázathoz 'checkIn' kell
-        end: document.getElementById('book-end').value,
-        guests: document.getElementById('book-guests').value,
-        total: document.getElementById('grand-total').innerText,
-        msg: document.getElementById('book-msg').value,
-        source: 'Weboldal' // Hogy lásd az adminban, honnan jött
-    };
+        const data = {
+            aptId: currentApt.id,
+            aptName: currentApt.name,
+            guestName: document.getElementById('book-name').value,
+            email: document.getElementById('book-email').value,
+            phone: document.getElementById('book-phone').value, // Új mező
+            checkIn: document.getElementById('book-start').value,
+            end: document.getElementById('book-end').value,
+            guests: document.getElementById('book-guests').value,
+            total: document.getElementById('grand-total').innerText,
+            msg: document.getElementById('book-msg').value,
+            source: 'Weboldal'
+        };
 
-    if (!data.guestName || !data.email) {
-        alert("Kérlek töltsd ki a nevedet és az e-mailedet!");
-        return;
-    }
-
-    try {
-        const res = await fetch('/api/new-booking', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-
-        if (res.ok) {
-            alert(`Köszönjük, ${data.guestName}! Az ajánlatkérést rögzítettük. Hamarosan keresünk!`);
-            closeBookingModal();
-            window.location.reload(); // Frissítés, hogy látszódjon a változás
+        // Ellenőrzés: név, email és telefon is kötelező legyen
+        if (!data.guestName || !data.email || !data.phone) {
+            alert("Kérlek töltsd ki a nevedet, az e-mail címedet és a telefonszámodat is!");
+            return;
         }
-    } catch (e) {
-        alert("Hiba történt a küldés során. Kérlek próbáld újra!");
+
+        try {
+            const res = await fetch('/api/new-booking', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (res.ok) {
+                alert(`Köszönjük, ${data.guestName}! Az ajánlatkérést rögzítettük. Hamarosan keresünk a megadott telefonszámon!`);
+                closeBookingModal();
+                window.location.reload();
+            }
+        } catch (e) {
+            alert("Hiba történt a küldés során. Kérlek próbáld újra!");
+        }
     }
-}
 
 let calDate = new Date(); // A naptár aktuális nézete
 let selectedStart = null;
