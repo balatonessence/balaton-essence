@@ -6,7 +6,7 @@
     <title>Központi Vezérlőpult | Balaton Essence</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-    <script src="database.js?v=99"></script>
+    <script src="database.js?v=1.1"></script>
     <script>
         async function initDatabase(callback) {
             try {
@@ -577,23 +577,22 @@ function saveAptOrder() {
 // EZ HIÁNYZIK A KÓDODBÓL: A tényleges mentés a szerverre
 async function saveDatabase() {
     try {
-        const res = await fetch('/api/save', { // Ennek egyeznie kell a szerver oldallal!
+        const res = await fetch('/api/save', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(db)
         });
 
-        if (res.status === 404) {
-            console.error("Hiba: A szerveren nem létezik az /api/save útvonal!");
-            return;
-        }
-
         if (res.ok) {
-            console.log("Szerver szinkronizálva! ✅");
-            if (typeof showSaveToast === 'function') showSaveToast();
+            console.log("Sorrend elmentve a database.js-be! ✅");
+            showSaveToast();
+        } else {
+            throw new Error("Szerver hiba");
         }
     } catch (err) {
-        console.error("Hálózati hiba:", err);
+        console.error("Mentési hiba:", err);
+        // Ha a szerver nem elérhető, legalább a te gépeden maradjon meg
+        localStorage.setItem('balaton_essence_db', JSON.stringify(db));
     }
 }
 

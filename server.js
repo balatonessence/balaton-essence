@@ -11,15 +11,23 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/api/save', (req, res) => {
-    const fs = require('fs');
-    const path = require('path');
     const newData = req.body;
-    const filePath = path.join(__dirname, 'data.json');
+    
+    // FONTOS: Itt a database.js fájlt célozzuk meg!
+    // Mivel a 11. sorban látszik, hogy van 'public' mappád, 
+    // valószínűleg ott van a fájl:
+    const filePath = path.join(__dirname, 'public', 'database.js');
 
-    fs.writeFile(filePath, JSON.stringify(newData, null, 2), (err) => {
-        if (err) return res.status(500).send("Hiba");
+    // Itt adjuk hozzá a JS változót az adatok elé
+    const fileContent = `const db = ${JSON.stringify(newData, null, 2)};`;
+
+    fs.writeFile(filePath, fileContent, (err) => {
+        if (err) {
+            console.error("Hiba a mentésnél:", err);
+            return res.status(500).send("Hiba a fájl írásakor");
+        }
         
-        // Ez mondja meg a böngészőnek, hogy NE tárolja a régi verziót
+        console.log("A database.js sikeresen frissítve az új sorrenddel! ✅");
         res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.status(200).json({ message: "Sikeres mentés" });
     });
