@@ -514,18 +514,25 @@ function renderAll() {
     }
 }
 
+
+
 // --- SORRENDEZÉSÉRT FELELŐS SEGÉDFÜGGVÉNYEK ---
 
 function initAptSorting() {
     const el = document.getElementById('apt-list-container');
-    if (!el || typeof Sortable === 'undefined') return;
+    // Ellenőrizzük, hogy létezik-e a konténer és a Sortable könyvtár
+    if (!el || typeof Sortable === 'undefined') {
+        console.warn("Sortable nem inicializálható: hiányzó elem vagy könyvtár.");
+        return;
+    }
 
-    // Ha már volt rajta Sortable, elpusztítjuk, hogy ne duplikálódjon
+    // Ha már volt rajta Sortable, elpusztítjuk, hogy ne legyen duplikáció
     if (window.aptSortable) window.aptSortable.destroy();
 
     window.aptSortable = new Sortable(el, {
         animation: 150,
         ghostClass: 'sortable-ghost',
+        handle: '.apt-row', // Biztosítjuk, hogy a sor fogható legyen
         onEnd: function() {
             saveAptOrder();
         }
@@ -536,21 +543,47 @@ function saveAptOrder() {
     const el = document.getElementById('apt-list-container');
     const rows = el.querySelectorAll('.apt-row');
     
+    // 1. Kiszedjük az ID-kat az ÚJ sorrendben a HTML-ből
     let newOrderIds = [];
     rows.forEach(row => {
-        newOrderIds.push(row.getAttribute('data-id'));
+        const id = row.getAttribute('data-id');
+        if (id) newOrderIds.push(id.toString());
     });
 
-    // Adatbázis tömb újrarendezése az ID-k alapján
-    db.apartments.sort((a, b) => {
-        return newOrderIds.indexOf(a.id.toString()) - newOrderIds.indexOf(b.id.toString());
-    });
+    if (newOrderIds.length === 0) return;
 
-    // Mentés az adatbázisba
+    // 2. Újraépítjük a db.apartments tömböt az ID-k alapján (ez stabilabb, mint a .sort)
+    const newOrderedArray = newOrderIds.map(id => {
+        return db.apartments.find(a => a.id.toString() === id);
+    }).filter(a => a !== undefined);
+
+    // 3. Frissítjük a globális változót
+    db.apartments = newOrderedArray;
+
+    // 4. Mentés az adatbázisba / LocalStorage-ba
     if (typeof saveDatabase === 'function') {
         saveDatabase();
-        console.log("Új sorrend elmentve és szinkronizálva.");
+        console.log("Új sorrend elmentve:", newOrderIds);
+        
+        // Vizuális visszajelzés neked, hogy lásd, működik
+        showSaveToast();
+    } else {
+        console.error("Hiba: saveDatabase függvény nem található!");
     }
+}
+
+// Kis felugró üzenet, hogy lásd, a háttérben megtörtént a mentés
+function showSaveToast() {
+    let toast = document.getElementById('sort-toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'sort-toast';
+        toast.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:10px 20px; border-radius:30px; font-size:12px; z-index:9999; pointer-events:none; opacity:0; transition:opacity 0.3s;";
+        document.body.appendChild(toast);
+    }
+    toast.innerHTML = "Sorrend frissítve! ✨";
+    toast.style.opacity = "1";
+    setTimeout(() => { toast.style.opacity = "0"; }, 1500);
 }
 
     function drawChart(p, c, l) {
