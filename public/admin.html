@@ -389,12 +389,11 @@
 function renderAll() {
     if (!db.apartments) return; 
 
-    // 1. FOGLALÁSOK TÁBLÁZAT FRISSÍTÉSE (Badge színekkel és minden adattal)
+    // 1. FOGLALÁSOK TÁBLÁZAT FRISSÍTÉSE
     const bookingTableBody = document.getElementById('booking-table-body');
     if (bookingTableBody) {
         bookingTableBody.innerHTML = (db.bookings || []).map(b => {
-            // Megkeressük a megfelelő CSS osztályt a forrás alapján
-            let badgeClass = 'bg-essence'; // Alapértelmezett (Weboldal)
+            let badgeClass = 'bg-essence';
             if (b.source === 'booking') badgeClass = 'bg-booking';
             if (b.source === 'szallas') badgeClass = 'bg-szallas';
 
@@ -425,19 +424,16 @@ function renderAll() {
         }).join('');
     }
 
-    // 2. APARTMAN LISTA ÉS STATISZTIKA (3 kördiagrammal)
+    // 2. APARTMAN LISTA ÉS STATISZTIKA
     const aptListContainer = document.getElementById('apt-list-container');
     if (aptListContainer) {
         aptListContainer.innerHTML = (db.apartments || []).map(a => {
             const owner = (db.owners || []).find(o => o.id == a.ownerId);
-            
-            // STATISZTIKA SZÁMÍTÁSA
             const aptBookings = (db.bookings || []).filter(b => b.aptId == a.id);
             const webCount = aptBookings.filter(b => b.source === 'Weboldal').length;
             const bookingCount = aptBookings.filter(b => b.source === 'booking').length;
             const szallasCount = aptBookings.filter(b => b.source === 'szallas').length;
             
-            // Százalékosítás (10 foglalásnál teli kör)
             const webPerc = Math.min(webCount * 10, 100); 
             const bookingPerc = Math.min(bookingCount * 10, 100);
             const szallasPerc = Math.min(szallasCount * 10, 100);
@@ -465,6 +461,32 @@ function renderAll() {
                         <button class="btn-outline btn-del" onclick="deleteApt(${a.id})">✕</button>
                     </div>
                 </div>`;
+        }).join('');
+    }
+
+    // 3. TULAJDONOSOK / PARTNEREK LISTÁZÁSA (EZT KÉRDEZTED MOST)
+    const ownerTableBody = document.getElementById('owner-table-body');
+    if (ownerTableBody) {
+        ownerTableBody.innerHTML = (db.owners || []).map(o => {
+            const aptCount = (db.apartments || []).filter(a => a.ownerId == o.id).length;
+            return `
+                <tr>
+                    <td style="padding: 1.2rem 1rem;">
+                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text);">${o.name}</div>
+                    </td>
+                    <td style="padding: 1.2rem 1rem;">
+                        <code style="background: #eee; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">#${o.id.toString().slice(-4)}</code>
+                    </td>
+                    <td style="padding: 1.2rem 1rem;">
+                        <span style="font-weight: 600; color: var(--accent);">${aptCount}</span> ingatlan
+                    </td>
+                    <td style="padding: 1.2rem 1rem; text-align: right;">
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <button class="btn-outline" onclick="openOwnerModal('${o.id}')">Szerkesztés</button>
+                            <button class="btn-outline btn-del" onclick="deleteItem('owners', '${o.id}')">✕</button>
+                        </div>
+                    </td>
+                </tr>`;
         }).join('');
     }
 }
