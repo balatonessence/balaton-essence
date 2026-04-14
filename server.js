@@ -97,24 +97,25 @@ async function saveDb(data) {
 // --- API ÚTVONALAK ---
 
 // Ez kell a frontendnek az adatok eléréséhez!
+// Adatok lekérése
 app.get('/api/get-db-content', (req, res) => {
-    const fs = require('fs');
-    const path = require('path');
-    // Ellenőrizd, hogy a database.js a 'public' mappában van-e!
-    const filePath = path.join(__dirname, 'public', 'database.js');
-
+    const filePath = path.join(__dirname, 'public', 'data.json');
     fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) {
-            console.error("Fájl olvasási hiba:", err);
-            return res.status(500).send("Hiba a fájl beolvasásakor");
-        }
-        res.send(data); // Elküldjük a nyers szöveget (kommentestül, mindenestül)
+        if (err) return res.status(500).send("Hiba");
+        res.setHeader('Content-Type', 'application/json');
+        res.send(data);
     });
 });
 
-app.post('/api/save-db', async (req, res) => {
-    try { await saveDb(req.body); res.json({ success: true }); } 
-    catch (e) { res.status(500).json({ error: e.message }); }
+// Adatok mentése
+app.post('/api/save', (req, res) => {
+    const filePath = path.join(__dirname, 'public', 'data.json');
+    const newData = JSON.stringify(req.body, null, 2);
+    
+    fs.writeFile(filePath, newData, (err) => {
+        if (err) return res.status(500).send("Hiba");
+        res.send({ message: "Sikeres mentés" });
+    });
 });
 
 // Új foglalás mentése
