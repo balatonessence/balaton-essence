@@ -10,6 +10,21 @@ app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
+app.post('/api/save', (req, res) => {
+    const fs = require('fs');
+    const path = require('path');
+    const newData = req.body;
+    const filePath = path.join(__dirname, 'data.json');
+
+    fs.writeFile(filePath, JSON.stringify(newData, null, 2), (err) => {
+        if (err) return res.status(500).send("Hiba");
+        
+        // Ez mondja meg a böngészőnek, hogy NE tárolja a régi verziót
+        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+        res.status(200).json({ message: "Sikeres mentés" });
+    });
+});
+
 // 1. POSTGRES CSATLAKOZÁS
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,

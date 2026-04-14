@@ -8,21 +8,23 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
     <script src="database.js?v=99"></script>
     <script>
-        (async function() {
-            // 1. Adatbázis betöltése
-            await initDatabase();
+        async function initDatabase(callback) {
+            try {
+                // A végére tettünk egy időbélyeget (?t=...), így a böngésző 
+                // kénytelen lesz a legfrissebb data.json-t letölteni a szerverről,
+                // nem pedig a saját memóriájából (cache) dolgozni.
+                const response = await fetch('/data.json?t=' + new Date().getTime());
+                
+                if (!response.ok) throw new Error("Nem sikerült betölteni az adatbázist");
+                
+                db = await response.json();
+                console.log("Adatbázis frissítve a szerverről.");
 
-            // 2. Ellenőrzés: Belépett-e a felhasználó a főoldali popupban?
-            if (sessionStorage.getItem('adminLoggedIn') !== 'true') {
-                // Ha nincs belépve, nincs kérdés, nincs prompt, csak visszairányítás
-                alert("Hozzáférés megtagadva! Kérjük, jelentkezzen be a főoldalon.");
-                window.location.href = "index.html";
-                return; // Megállítjuk a további futást
+                if (callback) callback();
+            } catch (error) {
+                console.error("Adatbázis hiba:", error);
             }
-
-            // 3. Ha minden rendben, jöhet a tartalom kirajzolása
-            renderAll();
-        })();
+        }
     </script>
     <style>
         :root { 
