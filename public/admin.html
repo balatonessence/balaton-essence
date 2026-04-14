@@ -187,8 +187,8 @@
 <script>
     let activeId = null;
     let activeOId = null;
-    let currentCoverImage = null; // Külön változó a borítóképnek
-    let currentGalleryImages = []; // Külön tömb a többinek
+    let currentCoverImage = null; 
+    let currentGalleryImages = []; 
 
     // ADATBÁZIS MENTÉSE
     async function saveDb() {
@@ -217,7 +217,7 @@
         await saveDb(); closeModal();
     }
 
-    // --- KÉPKEZELÉS ÉS TÖMÖRÍTÉS (WebP) ---
+    // KÉPKEZELÉS (WebP)
     function compressImage(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -233,87 +233,88 @@
                     canvas.height = img.height * scaleSize;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    resolve(canvas.toDataURL('image/webp', 0.8)); // WebP 80% minőség
+                    resolve(canvas.toDataURL('image/webp', 0.8));
                 };
             };
         });
     }
 
-    // Borítókép feltöltése
     async function handleCoverUpload(event) {
         const file = event.target.files[0];
-        if (file) {
-            currentCoverImage = await compressImage(file);
-            renderImagePreviews();
-        }
+        if (file) { currentCoverImage = await compressImage(file); renderImagePreviews(); }
         event.target.value = ''; 
     }
 
-    // Galéria feltöltése
     async function handleGalleryUpload(event) {
         const files = event.target.files;
         for (let i = 0; i < files.length; i++) {
             const base64 = await compressImage(files[i]);
             currentGalleryImages.push(base64);
         }
-        renderImagePreviews();
-        event.target.value = ''; 
+        renderImagePreviews(); event.target.value = ''; 
     }
 
-    function removeCoverImage() {
-        currentCoverImage = null;
-        renderImagePreviews();
-    }
-
-    function removeGalleryImage(index) {
-        currentGalleryImages.splice(index, 1);
-        renderImagePreviews();
-    }
+    function removeCoverImage() { currentCoverImage = null; renderImagePreviews(); }
+    function removeGalleryImage(index) { currentGalleryImages.splice(index, 1); renderImagePreviews(); }
 
     function renderImagePreviews() {
-        // Borítókép kirajzolása
         const coverContainer = document.getElementById('a-cover-preview');
         if (currentCoverImage) {
-            coverContainer.innerHTML = `
-                <div style="position:relative; display:inline-block;">
-                    <img src="${currentCoverImage}" style="width:120px; height:80px; object-fit:cover; border-radius:8px; border:3px solid var(--essence); box-shadow:0 4px 10px rgba(0,0,0,0.15);">
-                    <div onclick="removeCoverImage()" style="position:absolute; top:-10px; right:-10px; background:var(--danger); color:white; width:24px; height:24px; border-radius:50%; text-align:center; cursor:pointer; line-height:24px; font-size:12px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">X</div>
-                </div>`;
-        } else {
-            coverContainer.innerHTML = '';
-        }
+            coverContainer.innerHTML = `<div style="position:relative; display:inline-block;"><img src="${currentCoverImage}" style="width:120px; height:80px; object-fit:cover; border-radius:8px; border:3px solid var(--essence);"><div onclick="removeCoverImage()" style="position:absolute; top:-10px; right:-10px; background:var(--danger); color:white; width:24px; height:24px; border-radius:50%; text-align:center; cursor:pointer; line-height:24px; font-size:12px; font-weight:bold;">X</div></div>`;
+        } else { coverContainer.innerHTML = ''; }
 
-        // Galéria kirajzolása
         const galleryContainer = document.getElementById('a-gallery-preview');
-        galleryContainer.innerHTML = currentGalleryImages.map((img, idx) => `
-            <div style="position:relative; display:inline-block;">
-                <img src="${img}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #eee;">
-                <div onclick="removeGalleryImage(${idx})" style="position:absolute; top:-8px; right:-8px; background:var(--danger); color:white; width:22px; height:22px; border-radius:50%; text-align:center; cursor:pointer; line-height:22px; font-size:12px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">X</div>
-            </div>
-        `).join('');
+        galleryContainer.innerHTML = currentGalleryImages.map((img, idx) => `<div style="position:relative; display:inline-block;"><img src="${img}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #eee;"><div onclick="removeGalleryImage(${idx})" style="position:absolute; top:-8px; right:-8px; background:var(--danger); color:white; width:22px; height:22px; border-radius:50%; text-align:center; cursor:pointer; line-height:22px; font-size:12px; font-weight:bold;">X</div></div>`).join('');
         
-        // Háttérkép cseréje a modal bal oldalán (elsődlegesen a borítókép)
         const visual = document.getElementById('apt-visual');
-        if (currentCoverImage) {
-            visual.style.backgroundImage = `url(${currentCoverImage})`;
-        } else if (currentGalleryImages.length > 0) {
-            visual.style.backgroundImage = `url(${currentGalleryImages[0]})`;
-        } else {
-            visual.style.backgroundImage = `none`;
-        }
+        if (currentCoverImage) visual.style.backgroundImage = `url(${currentCoverImage})`;
+        else if (currentGalleryImages.length > 0) visual.style.backgroundImage = `url(${currentGalleryImages[0]})`;
+        else visual.style.backgroundImage = `none`;
+    }
+
+    // --- ÚJ: SZEZONOK KEZELÉSE ---
+    function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2') {
+        const container = document.getElementById('seasons-container');
+        const rowId = 'season-' + Date.now() + Math.floor(Math.random() * 1000);
+        
+        const rowHtml = `
+            <div id="${rowId}" class="season-row" style="display:grid; grid-template-columns: 2fr 1.5fr 1.5fr 1.5fr 1fr auto; gap:10px; align-items:end; margin-bottom:10px; background:white; padding:10px; border-radius:6px; border:1px solid #eee;">
+                <div><label style="font-size:0.7rem;">Szezon neve</label><input type="text" class="s-name" value="${name}" placeholder="Pl. Tavaszi szezon" style="padding:0.5rem;"></div>
+                <div><label style="font-size:0.7rem;">Kezdete</label><input type="date" class="s-start" value="${start}" style="padding:0.5rem;"></div>
+                <div><label style="font-size:0.7rem;">Vége</label><input type="date" class="s-end" value="${end}" style="padding:0.5rem;"></div>
+                <div><label style="font-size:0.7rem;">Ár (Ft/éj)</label><input type="number" class="s-price" value="${price}" style="padding:0.5rem;"></div>
+                <div><label style="font-size:0.7rem;">Min. éj</label><input type="number" class="s-min" value="${minNights}" style="padding:0.5rem;"></div>
+                <button type="button" class="btn-del" style="padding:0.5rem; background:#ff4d4d; color:white; border:none; border-radius:4px; cursor:pointer;" onclick="document.getElementById('${rowId}').remove()">X</button>
+            </div>
+        `;
+        container.insertAdjacentHTML('beforeend', rowHtml);
     }
 
     // APARTMAN MENTÉSE
     async function saveApt() {
+        // Összegyűjtjük a szezonokat a felületről
+        const seasonElements = document.querySelectorAll('.season-row');
+        const seasonsData = [];
+        seasonElements.forEach(row => {
+            seasonsData.push({
+                name: row.querySelector('.s-name').value,
+                start: row.querySelector('.s-start').value,
+                end: row.querySelector('.s-end').value,
+                price: Number(row.querySelector('.s-price').value),
+                minNights: Number(row.querySelector('.s-min').value)
+            });
+        });
+
         const aptData = {
             id: activeId || Date.now(),
             name: document.getElementById('a-name').value,
             location: document.getElementById('a-loc').value,
-            price: document.getElementById('a-price').value,
+            price: Number(document.getElementById('a-price').value), // Ez marad az "Alapár"
+            seasons: seasonsData, // <--- AZ ÚJ SZEZONÁLIS ADATOK
             ownerId: document.getElementById('a-owner-select').value,
             description: document.getElementById('a-desc').value,
-            coverImage: currentCoverImage, // <--- Külön mentve
-            galleryImages: currentGalleryImages, // <--- Külön mentve
+            coverImage: currentCoverImage, 
+            galleryImages: currentGalleryImages, 
             icalBooking: document.getElementById('a-ical-b').value,
             icalSzallas: document.getElementById('a-ical-sz').value,
             bookedDates: activeId ? db.apartments.find(a => a.id === activeId).bookedDates : []
@@ -326,37 +327,31 @@
     }
 
     // MODALOK NYITÁSA
-    function openOwnerModal(id) {
-        activeOId = id;
-        if (id) {
-            const o = db.owners.find(owner => owner.id === id);
-            document.getElementById('o-name').value = o.name;
-            document.getElementById('o-code').value = o.accessCode;
-        } else {
-            document.getElementById('o-name').value = '';
-            document.getElementById('o-code').value = '';
-        }
-        document.getElementById('owner-modal').style.display = 'flex';
-    }
-
     function openAptModal(id) {
         activeId = id;
         const select = document.getElementById('a-owner-select');
         select.innerHTML = db.owners.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+        
+        const seasonsContainer = document.getElementById('seasons-container');
+        seasonsContainer.innerHTML = ''; // Nullázzuk a szezonokat nyitáskor
 
         if (id) {
             const a = db.apartments.find(apt => apt.id === id);
             document.getElementById('a-name').value = a.name;
             document.getElementById('a-loc').value = a.location;
-            document.getElementById('a-price').value = a.price;
+            document.getElementById('a-price').value = a.price || 0;
             document.getElementById('a-owner-select').value = a.ownerId;
             document.getElementById('a-desc').value = a.description || '';
             document.getElementById('a-ical-b').value = a.icalBooking || '';
             document.getElementById('a-ical-sz').value = a.icalSzallas || '';
             
-            // Képek betöltése
             currentCoverImage = a.coverImage || null;
             currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
+            
+            // Betöltjük a meglévő szezonokat
+            if (a.seasons && a.seasons.length > 0) {
+                a.seasons.forEach(s => addSeasonRow(s.name, s.start, s.end, s.price, s.minNights));
+            }
         } else {
             document.getElementById('a-name').value = '';
             document.getElementById('a-loc').value = '';
@@ -371,6 +366,16 @@
         document.getElementById('apt-modal').style.display = 'flex';
     }
 
+    function openOwnerModal(id) {
+        activeOId = id;
+        if (id) {
+            const o = db.owners.find(owner => owner.id === id);
+            document.getElementById('o-name').value = o.name;
+            document.getElementById('o-code').value = o.accessCode;
+        } else { document.getElementById('o-name').value = ''; document.getElementById('o-code').value = ''; }
+        document.getElementById('owner-modal').style.display = 'flex';
+    }
+
     function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
     // MEGJELENÍTÉS (Renderelés)
@@ -383,19 +388,11 @@
 
         document.getElementById('apt-list-container').innerHTML = (db.apartments || []).map(a => {
             const owner = (db.owners || []).find(o => o.id == a.ownerId);
-            // Listában a Borítókép jelenik meg
             const thumb = a.coverImage ? `<img src="${a.coverImage}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; margin-right:15px;">` : `<div style="width:40px; height:40px; border-radius:6px; background:#eee; margin-right:15px;"></div>`;
-            
             return `<div style="display:grid; grid-template-columns: 2fr 3fr 1.5fr; padding:1.2rem; border-bottom:1px solid #eee; align-items:center;">
-                <div style="display:flex; align-items:center;">
-                    ${thumb}
-                    <div><strong>${a.name}</strong><br><small>${a.location} <span class="owner-tag">${owner ? owner.name : 'Nincs'}</span></small></div>
-                </div>
+                <div style="display:flex; align-items:center;">${thumb}<div><strong>${a.name}</strong><br><small>${a.location} <span class="owner-tag">${owner ? owner.name : 'Nincs'}</span></small></div></div>
                 <div class="stats-wrapper">${drawChart(30,'#003580','B.')}${drawChart(20,'#e62e2e','SZ.')}${drawChart(10,'#5C7A4D','S.')}</div>
-                <div style="display:flex; gap:5px;">
-                    <button class="btn-outline" onclick="openAptModal(${a.id})">Szerk.</button>
-                    <button class="btn-outline btn-del" onclick="deleteApt(${a.id})">X</button>
-                </div>
+                <div style="display:flex; gap:5px;"><button class="btn-outline" onclick="openAptModal(${a.id})">Szerk.</button><button class="btn-outline btn-del" onclick="deleteApt(${a.id})">X</button></div>
             </div>`;
         }).join('');
 
