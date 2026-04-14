@@ -133,18 +133,35 @@
     <div class="custom-modal">
         <div class="modal-visual" id="apt-visual"></div>
         <div class="modal-body">
-            <h2 id="modal-title" style="font-family:'Playfair Display'; margin-bottom:1.5rem;">Szerkesztés</h2>
+            <h2 id="modal-title" style="font-family:'Playfair Display'; margin-bottom:1.5rem;">Apartman Szerkesztése</h2>
+            
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                <div class="form-group"><label>Név</label><input type="text" id="a-name"></div>
-                <div class="form-group"><label>Helyszín</label><input type="text" id="a-loc"></div>
+                <div class="form-group"><label>Név</label><input type="text" id="a-name" placeholder="Pl.: Sunset Villa"></div>
+                <div class="form-group"><label>Helyszín</label><input type="text" id="a-loc" placeholder="Pl.: Fonyód"></div>
             </div>
-            <div class="form-group"><label>Ár / éj (Ft)</label><input type="number" id="a-price"></div>
-            <div class="form-group"><label>Tulajdonos</label><select id="a-owner-select"></select></div>
-            <div style="background:#f9f9f9; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem;">
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
+                <div class="form-group"><label>Ár / éj (Ft)</label><input type="number" id="a-price"></div>
+                <div class="form-group"><label>Tulajdonos</label><select id="a-owner-select"></select></div>
+            </div>
+
+            <div class="form-group">
+                <label>Leírás</label>
+                <textarea id="a-desc" rows="3" placeholder="Rövid leírás az apartmanról..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>Képek feltöltése (Többet is kijelölhetsz)</label>
+                <input type="file" id="a-images" multiple accept="image/*" onchange="handleImageUpload(event)">
+                <div id="a-gallery-preview" class="gallery-preview" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;"></div>
+            </div>
+
+            <div style="background:#f9f9f9; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; margin-top:1rem;">
                 <p style="font-size:0.6rem; font-weight:700; margin-bottom:1rem;">ICAL SZINKRON</p>
                 <input type="text" id="a-ical-b" placeholder="Booking.com iCal URL" style="margin-bottom:10px;">
                 <input type="text" id="a-ical-sz" placeholder="Szállás.hu iCal URL">
             </div>
+            
             <button class="btn-cta" style="width:100%;" onclick="saveApt()">Mentés</button>
             <button class="btn-outline" style="width:100%; margin-top:10px; border:none;" onclick="closeModal()">Mégse</button>
         </div>
@@ -164,11 +181,9 @@
 <script>
     let activeId = null;
     let activeOId = null;
-
-    // A 'db' változót és az 'initDatabase' függvényt a külső database.js adja!
+    let currentAptImages = []; // ÚJ: Itt tároljuk az épp szerkesztett apartman képeit
 
     // ADATBÁZIS MENTÉSE
-    // admin.html - Script rész
     async function saveDb() {
         try {
             const res = await fetch('/api/save-db', {
@@ -176,21 +191,12 @@
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(db)
             });
-            
-            if (res.ok) {
-                console.log("Szerver visszaigazolta a mentést.");
-                renderAll();
-            } else {
-                const errorData = await res.json();
-                alert("Hiba a mentésnél: " + (errorData.error || "Ismeretlen hiba"));
-            }
-        } catch (e) {
-            alert("Nem sikerült elérni a szervert! Ellenőrizd az internetet vagy a Railway-t.");
-            console.error(e);
-        }
+            if (res.ok) { console.log("Sikeres mentés!"); renderAll(); } 
+            else { alert("Hiba a mentésnél!"); }
+        } catch (e) { alert("Nem sikerült elérni a szervert!"); console.error(e); }
     }
 
-    // PARTNER MENTÉSE
+    // TULAJDONOS MENTÉSE
     async function saveOwner() {
         const name = document.getElementById('o-name').value;
         const code = document.getElementById('o-code').value;
@@ -199,16 +205,69 @@
             db.owners.push({ id: Date.now(), name: name, accessCode: code });
         } else {
             const idx = db.owners.findIndex(o => o.id === activeOId);
-            if (idx !== -1) {
-                db.owners[idx].name = name;
-                db.owners[idx].accessCode = code;
-            }
+            if (idx !== -1) { db.owners[idx].name = name; db.owners[idx].accessCode = code; }
         }
-        await saveDb();
-        closeModal();
+        await saveDb(); closeModal();
     }
 
-    // APARTMAN MENTÉSE
+    // --- ÚJ: KÉPKEZELÉS ÉS TÖMÖRÍTÉS ---
+    function compressImage(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e) => {
+                const img = new Image();
+                img.src = e.target.result;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800; // Lényeges: Lekicsinyítjük, hogy ne haljon meg a szerver
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    resolve(canvas.toDataURL('image/webp', 0.8)); // 80% minőségű WebP
+                };
+            };
+        });
+    }
+
+    async function handleImageUpload(event) {
+        const files = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const base64 = await compressImage(files[i]);
+            currentAptImages.push(base64);
+        }
+        renderGalleryPreview();
+        // Nullázzuk az inputot, hogy újra ki lehessen választani ugyanazt a képet ha kell
+        event.target.value = ''; 
+    }
+
+    function removeImage(index) {
+        currentAptImages.splice(index, 1);
+        renderGalleryPreview();
+    }
+
+    function renderGalleryPreview() {
+        const container = document.getElementById('a-gallery-preview');
+        container.innerHTML = currentAptImages.map((img, idx) => `
+            <div style="position:relative; display:inline-block;">
+                <img src="${img}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #eee; box-shadow:0 2px 5px rgba(0,0,0,0.1);">
+                <div onclick="removeImage(${idx})" style="position:absolute; top:-8px; right:-8px; background:var(--danger); color:white; width:22px; height:22px; border-radius:50%; text-align:center; cursor:pointer; line-height:22px; font-size:12px; font-weight:bold; box-shadow:0 2px 5px rgba(0,0,0,0.2);">X</div>
+            </div>
+        `).join('');
+        
+        // Háttérkép cseréje a modal bal oldalán az első képre
+        const visual = document.getElementById('apt-visual');
+        if (currentAptImages.length > 0) {
+            visual.style.backgroundImage = `url(${currentAptImages[0]})`;
+        } else {
+            visual.style.backgroundImage = `none`;
+        }
+    }
+    // ------------------------------------
+
+    // APARTMAN MENTÉSE (Bővítve leírással és képekkel)
     async function saveApt() {
         const aptData = {
             id: activeId || Date.now(),
@@ -216,19 +275,17 @@
             location: document.getElementById('a-loc').value,
             price: document.getElementById('a-price').value,
             ownerId: document.getElementById('a-owner-select').value,
+            description: document.getElementById('a-desc').value, // <--- Bekerült
+            images: currentAptImages, // <--- Bekerült
             icalBooking: document.getElementById('a-ical-b').value,
             icalSzallas: document.getElementById('a-ical-sz').value,
             bookedDates: activeId ? db.apartments.find(a => a.id === activeId).bookedDates : []
         };
 
-        if (activeId === null) {
-            db.apartments.push(aptData);
-        } else {
-            const idx = db.apartments.findIndex(a => a.id === activeId);
-            db.apartments[idx] = aptData;
-        }
-        await saveDb();
-        closeModal();
+        if (activeId === null) { db.apartments.push(aptData); } 
+        else { const idx = db.apartments.findIndex(a => a.id === activeId); db.apartments[idx] = aptData; }
+        
+        await saveDb(); closeModal();
     }
 
     // MODALOK NYITÁSA
@@ -256,36 +313,45 @@
             document.getElementById('a-loc').value = a.location;
             document.getElementById('a-price').value = a.price;
             document.getElementById('a-owner-select').value = a.ownerId;
+            document.getElementById('a-desc').value = a.description || ''; // <--- Bekerült
             document.getElementById('a-ical-b').value = a.icalBooking || '';
             document.getElementById('a-ical-sz').value = a.icalSzallas || '';
+            
+            // Képek betöltése
+            currentAptImages = a.images ? [...a.images] : [];
         } else {
             document.getElementById('a-name').value = '';
             document.getElementById('a-loc').value = '';
             document.getElementById('a-price').value = 0;
+            document.getElementById('a-desc').value = ''; // <--- Bekerült
             document.getElementById('a-ical-b').value = '';
             document.getElementById('a-ical-sz').value = '';
+            currentAptImages = [];
         }
+        renderGalleryPreview(); // Frissíti a képeket a modalban
         document.getElementById('apt-modal').style.display = 'flex';
     }
 
-    function closeModal() {
-        document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none');
-    }
+    function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
     // MEGJELENÍTÉS (Renderelés)
     function renderAll() {
-        if (!db.apartments) return; // Biztonsági ellenőrzés
+        if (!db.apartments) return; 
 
         document.getElementById('booking-table-body').innerHTML = (db.bookings || []).map(b => `<tr><td><strong>${b.aptName}</strong></td><td>${b.guestName}</td><td>${b.checkIn}</td><td><span class="badge ${b.source === 'booking' ? 'bg-booking' : 'bg-essence'}">${b.source}</span></td><td><button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">Törlés</button></td></tr>`).join('');
-
         document.getElementById('breakfast-table-body').innerHTML = (db.extras || []).filter(e => e.type === 'BREAKFAST').map(e => `<tr><td><strong>${e.aptName}</strong><br>${e.guest}</td><td>${e.date}</td><td>${e.note}</td><td><button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">Törlés</button></td></tr>`).join('');
-
         document.getElementById('rent-table-body').innerHTML = (db.extras || []).filter(e => e.type !== 'BREAKFAST').map(e => `<tr><td><strong>${e.type}</strong></td><td>${e.guest}</td><td>${e.date}</td><td><small>${e.note}</small></td><td><button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">Törlés</button></td></tr>`).join('');
 
         document.getElementById('apt-list-container').innerHTML = (db.apartments || []).map(a => {
             const owner = (db.owners || []).find(o => o.id == a.ownerId);
+            // Kicsi bélyegkép a listában is!
+            const thumb = (a.images && a.images.length > 0) ? `<img src="${a.images[0]}" style="width:40px; height:40px; border-radius:6px; object-fit:cover; margin-right:15px;">` : `<div style="width:40px; height:40px; border-radius:6px; background:#eee; margin-right:15px;"></div>`;
+            
             return `<div style="display:grid; grid-template-columns: 2fr 3fr 1.5fr; padding:1.2rem; border-bottom:1px solid #eee; align-items:center;">
-                <div><strong>${a.name}</strong><br><small>${a.location} <span class="owner-tag">${owner ? owner.name : 'Nincs'}</span></small></div>
+                <div style="display:flex; align-items:center;">
+                    ${thumb}
+                    <div><strong>${a.name}</strong><br><small>${a.location} <span class="owner-tag">${owner ? owner.name : 'Nincs'}</span></small></div>
+                </div>
                 <div class="stats-wrapper">${drawChart(30,'#003580','B.')}${drawChart(20,'#e62e2e','SZ.')}${drawChart(10,'#5C7A4D','S.')}</div>
                 <div style="display:flex; gap:5px;">
                     <button class="btn-outline" onclick="openAptModal(${a.id})">Szerk.</button>
@@ -302,38 +368,12 @@
         return `<div class="chart-box"><div style="font-size:0.5rem; font-weight:700;">${p}%</div><svg class="chart-svg"><path d="M6,30 A24,24 0 0,1 54,30" fill="none" stroke="#eee" stroke-width="5"/><path d="M6,30 A24,24 0 0,1 54,30" fill="none" stroke="${c}" stroke-width="5" style="stroke-dasharray:${circ}; stroke-dashoffset:${off}"/></svg><div style="font-size:0.45rem; color:#999;">${l}</div></div>`;
     }
 
-    // TÖRLÉSEK ÉS SZINKRON
-    async function syncCalendars() {
-        const res = await fetch('/api/sync', {method:'POST'});
-        if(res.ok) { await initDatabase(renderAll); alert("Kész!"); }
-    }
+    async function syncCalendars() { const res = await fetch('/api/sync', {method:'POST'}); if(res.ok) { window.location.reload(); } }
+    async function deleteItem(type, id) { if(!confirm("Biztosan törlöd?")) return; const res = await fetch(`/api/${type}/${id}`, { method: 'DELETE' }); if(res.ok) { window.location.reload(); } }
+    async function deleteApt(id) { if(!confirm("Apartman törlése?")) return; db.apartments = db.apartments.filter(a => a.id != id); await saveDb(); }
+    async function deleteOwner(id) { if(!confirm("Tulajdonos törlése?")) return; db.owners = db.owners.filter(o => o.id != id); await saveDb(); }
 
-    async function deleteItem(type, id) {
-        if(!confirm("Biztosan törlöd?")) return;
-        const res = await fetch(`/api/${type}/${id}`, { method: 'DELETE' });
-        if(res.ok) { await initDatabase(renderAll); }
-    }
-
-    async function deleteApt(id) {
-        if(!confirm("Apartman törlése?")) return;
-        db.apartments = db.apartments.filter(a => a.id != id);
-        await saveDb();
-    }
-
-    async function deleteOwner(id) {
-        if(!confirm("Tulajdonos törlése?")) return;
-        db.owners = db.owners.filter(o => o.id != id);
-        await saveDb();
-    }
-
-    // Oldal betöltésekor lehúzzuk az adatokat a Postgres-ből
-    window.onload = () => {
-        if (typeof initDatabase === "function") {
-            initDatabase(renderAll);
-        } else {
-            console.error("A database.js nem töltődött be rendesen!");
-        }
-    };
+    window.onload = () => { if (typeof initDatabase === "function") { initDatabase(renderAll); } };
 </script>
 </body>
 </html>
