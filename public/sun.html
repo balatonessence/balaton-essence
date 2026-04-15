@@ -55,6 +55,217 @@
             background: transparent; font-family: 'Montserrat'; outline: none; color: var(--text); font-size: 0.95rem;
         }
 
+
+/* 3 KÁRTYÁS GRID STÍLUSOK */
+.sun-cards-section {
+    padding: 0 1rem 6rem 1rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.sun-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.5rem;
+}
+
+.sun-item-card {
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+    border: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.sun-item-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 45px rgba(0,0,0,0.08);
+}
+
+/* ÚJ: Kép garantált kitöltése */
+.sun-card-img {
+    width: 100%;
+    height: 400px; /* Ezt növelheted/csökkentheted, ha más arányt akarsz */
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.sun-card-content {
+    padding: 2.5rem 1.5rem;
+    text-align: center;
+    background-color: #faf9f6;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sun-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.8rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    letter-spacing: 1px;
+}
+
+.sun-card-price {
+    font-size: 1.1rem;
+    color: #5a6b5a;
+    font-weight: 700;
+}
+
+.sun-card-price small {
+    font-size: 0.85rem;
+    color: #888;
+    font-weight: 400;
+}
+
+/* Mobilnézet */
+@media (max-width: 950px) {
+    .sun-cards-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 650px) {
+    .sun-cards-grid {
+        grid-template-columns: 1fr;
+    }
+    .sun-card-img {
+        height: 300px;
+    }
+}
+
+img {
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+}
+        /* Mennyiségválasztó (Plusz/Mínusz gombok) stílusa */
+.qty-selector {
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 2px 4px;
+}
+
+.qty-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.2rem;
+    color: #666;
+    cursor: pointer;
+    padding: 0 8px;
+    transition: color 0.2s ease;
+}
+
+.qty-btn:hover {
+    color: #000;
+}
+
+.qty-val {
+    font-weight: 600;
+    font-size: 1rem;
+    color: #333;
+    min-width: 24px;
+    text-align: center;
+    user-select: none; /* Ne lehessen véletlenül kijelölni a számot kattintáskor */
+}
+
+/* Mobilnézet */
+@media (max-width: 768px) {
+    .sun-price-tags {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    .price-separator {
+        display: none; /* Mobilon nem kell a vonal az egymás alatti árakhoz */
+    }
+}
+
+/* ELEGÁNS EGYEDI CHECKBOX STÍLUS */
+
+/* Elrejtjük az eredeti inputot */
+.modal-overlay input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+}
+
+/* A container label */
+.extras-item-label {
+    display: flex;
+    align-items: center;
+    position: relative;
+    cursor: pointer;
+    gap: 12px; /* Távolság a checkbox és a szöveg között */
+    user-select: none;
+    flex-grow: 1; /* Kitölti a teret a +/- gombokig */
+}
+
+/* Az egyedi checkbox alapállapota */
+.custom-checkmark {
+    position: relative;
+    height: 22px;
+    width: 22px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border-radius: 4px; /* Enyhe kerekítés */
+    transition: all 0.3s ease;
+}
+
+/* Stílus, ha a kurzor fölé megy */
+.extras-item-label:hover input ~ .custom-checkmark {
+    border-color: #5a6b5a; /* A te zölded */
+}
+
+/* Stílus, ha be van jelölve */
+.modal-overlay input:checked ~ .custom-checkmark {
+    background-color: #5a6b5a; /* A te zölded */
+    border-color: #5a6b5a;
+}
+
+/* A pipa jele (checkmark - elrejtve alapból) */
+.custom-checkmark:after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 7px;
+    top: 3px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+/* Megjelenítjük a pipát, ha be van jelölve */
+.modal-overlay input:checked ~ .custom-checkmark:after {
+    display: block;
+}
+
+/* Szöveg stílusa a checkbox mellett */
+.item-text-main {
+    font-size: 1rem;
+    color: #333;
+}
+
+.item-text-price {
+    font-size: 0.85rem;
+    color: #777;
+    margin-left: 5px;
+}
         /* SZÁMLÁLÓ */
         .essence-counter { display: flex; align-items: center; justify-content: space-between; padding: 1rem 0; border-bottom: 1px solid var(--border); }
         .counter-controls { display: flex; align-items: center; gap: 1.5rem; }
@@ -83,58 +294,121 @@
     </a>
 </header>
 
-<div class="section-header">
-    <h1>SUP & SUN</h1>
-    <p>Élményfoglalás</p>
-</div>
 
 <main>
-    <div class="rent-grid">
-        <div class="pillar-card" onclick="openRentModal('SUP Bérlés')">
-            <div class="pillar-header"><h3>SUP</h3><span class="price-tag">4.500 FT / NAP</span></div>
-            <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1688318647342-72e61b7dee0f?q=80&w=735&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');"></div>
-        </div>
-        <div class="pillar-card" onclick="openRentModal('Napágy')">
-            <div class="pillar-header"><h3>NAPÁGY</h3><span class="price-tag">2.500 FT / NAP</span></div>
-            <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1724050167221-da9a5633cfeb?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');"></div>
-        </div>
+    <div class="section-header" style="text-align: center; margin-top: 4rem; margin-bottom: 3rem;">
+        <h1 style="font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 400; letter-spacing: 4px; color: #333; margin-bottom: 0.5rem;">SUP & SUN</h1>
+        <p style="font-size: 0.9rem; color: #777; letter-spacing: 2px; text-transform: uppercase;">Élményfoglalás</p>
     </div>
-</main>
 
-<div id="rent-modal" class="modal-overlay" onclick="closeRentModal()">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <span class="close-modal" onclick="closeRentModal()">✕</span>
-        <h2 id="m-title" class="modal-title">Rendelés</h2>
-        
-        <div class="form-group">
-            <label class="form-label">Teljes név</label>
-            <input type="text" id="m-name" class="essence-input" placeholder="Kovács János">
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Telefonszám</label>
-            <input type="tel" id="m-phone" class="essence-input" placeholder="+36 30 000 0000">
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Mikorra kéri?</label>
-            <input type="text" id="m-date" class="essence-input" placeholder="Válasszon dátumot...">
-        </div>
-
-        <div class="form-group">
-            <label class="form-label">Mennyiség</label>
-            <div class="essence-counter">
-                <span style="font-size: 0.9rem;">Darabszám</span>
-                <div class="counter-controls">
-                    <button class="c-btn" onclick="updateQty(-1)">−</button>
-                    <span id="qty-num" style="font-weight:600; min-width:20px; text-align:center;">1</span>
-                    <button class="c-btn" onclick="updateQty(1)">+</button>
+    <section class="sun-cards-section">
+        <div class="sun-cards-grid">
+            
+            <div class="sun-item-card" onclick="openRentModal('Strandfelszerelés')">
+                <div class="sun-card-img" style="background-image: url('img/sup.png');"></div>
+                <div class="sun-card-content">
+                    <h3 class="sun-card-title">SUP</h3>
+                    <p class="sun-card-price">4.500 Ft <small>/ nap</small></p>
                 </div>
             </div>
-        </div>
+            
+            <div class="sun-item-card" onclick="openRentModal('Strandfelszerelés')">
+                <div class="sun-card-img" style="background-image: url('img/napozoszek.png');"></div>
+                <div class="sun-card-content">
+                    <h3 class="sun-card-title">Napozószék</h3>
+                    <p class="sun-card-price">1.500 Ft <small>/ nap</small></p>
+                </div>
+            </div>
 
-        <input type="hidden" id="m-item-type">
-        <button class="btn-submit" onclick="submitRent()">Igénylés elküldése</button>
+            <div class="sun-item-card" onclick="openRentModal('Strandfelszerelés')">
+                <div class="sun-card-img" style="background-image: url('img/napernyo.png');"></div>
+                <div class="sun-card-content">
+                    <h3 class="sun-card-title">Napernyő</h3>
+                    <p class="sun-card-price">1.000 Ft <small>/ nap</small></p>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<div id="rent-modal" class="modal-overlay" onclick="closeRentModal()" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
+    <div class="modal-content" onclick="event.stopPropagation()" style="background: white; padding: 2rem; border-radius: 8px; max-width: 500px; width: 90%; position: relative;">
+        <span class="close-modal" onclick="closeRentModal()" style="position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</span>
+        
+        <h2 id="m-title" style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem; text-align: center;">Felszerelés Igénylése</h2>
+        
+        <form id="rent-form" onsubmit="submitRentForm(event)">
+    
+            <div style="margin-bottom: 1.5rem; text-align: left; background: #fbfbfb; padding: 20px; border-radius: 8px; border: 1px solid #eee;">
+                <label style="font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; display: block; margin-bottom: 20px; color: #333; border-bottom: 1px solid #eaeaea; padding-bottom: 10px;">Válaszd ki a felszereléseket:</label>
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <label class="extras-item-label">
+                        <input type="checkbox" id="item-sup" value="SUP"> 
+                        <span class="custom-checkmark"></span> <div>
+                            <span class="item-text-main">SUP</span>
+                            <span class="item-text-price">(4.500 Ft/nap)</span>
+                        </div>
+                    </label>
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-sup', -1)">−</button>
+                        <span id="qty-sup" class="qty-val">1</span>
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-sup', 1)">+</button>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                    <label class="extras-item-label">
+                        <input type="checkbox" id="item-sunbed" value="Napozószék"> 
+                        <span class="custom-checkmark"></span>
+                        <div>
+                            <span class="item-text-main">Napozószék</span>
+                            <span class="item-text-price">(1.500 Ft/nap)</span>
+                        </div>
+                    </label>
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-sunbed', -1)">−</button>
+                        <span id="qty-sunbed" class="qty-val">1</span>
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-sunbed', 1)">+</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <label class="extras-item-label">
+                        <input type="checkbox" id="item-umbrella" value="Napernyő"> 
+                        <span class="custom-checkmark"></span>
+                        <div>
+                            <span class="item-text-main">Napernyő</span>
+                            <span class="item-text-price">(1.000 Ft/nap)</span>
+                        </div>
+                    </label>
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-umbrella', -1)">−</button>
+                        <span id="qty-umbrella" class="qty-val">1</span>
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-umbrella', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label style="font-size: 0.8rem; color: #777; text-transform: uppercase; letter-spacing: 1px;">Kezdés</label>
+                    <input type="date" id="r-start" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+                <div>
+                    <label style="font-size: 0.8rem; color: #777; text-transform: uppercase; letter-spacing: 1px;">Befejezés</label>
+                    <input type="date" id="r-end" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                </div>
+            </div>
+
+            <input type="text" id="r-name" placeholder="Teljes neved" required style="width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 1rem;">
+            <input type="tel" id="r-phone" placeholder="Telefonszámod (pl: 06201234567)" required style="width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 1rem;">
+            
+            <input type="text" id="r-apt" placeholder="Apartmanod neve / vagy 'KÜLSŐS'" required style="width: 100%; padding: 14px; margin-bottom: 25px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 1rem;">
+
+            <button type="submit" class="btn-book-extras" style="width: 100%; margin: 0; padding: 1.2rem;">Igénylés leadása</button>
+        </form>
     </div>
 </div>
 
@@ -142,70 +416,145 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hu.js"></script>
 
 <script>
-    let currentQty = 1;
-    let calendar;
-
-    // Naptár inicializálása elegáns stílusban
+    // Naptárak inicializálása elegáns stílusban
     document.addEventListener('DOMContentLoaded', function() {
-        calendar = flatpickr("#m-date", {
-            locale: "hu",
-            dateFormat: "Y. m. d.",
-            minDate: "today",
-            disableMobile: "true" // Kényszerítjük a saját naptárat mobilra is
-        });
+        if (typeof flatpickr !== 'undefined') {
+            flatpickr("#r-start", {
+                locale: "hu",
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                disableMobile: "true"
+            });
+            flatpickr("#r-end", {
+                locale: "hu",
+                dateFormat: "Y-m-d",
+                minDate: "today",
+                disableMobile: "true"
+            });
+        }
     });
 
-    function openRentModal(itemName) {
-        currentQty = 1;
-        document.getElementById('qty-num').innerText = currentQty;
-        document.getElementById('m-item-type').value = itemName;
-        document.getElementById('m-title').innerText = itemName;
-        
+    // Modal nyitása animációval
+    function openRentModal(title) {
+        document.getElementById('m-title').innerText = title || "Felszerelés Igénylése";
         const modal = document.getElementById('rent-modal');
         modal.style.display = 'flex';
         setTimeout(() => modal.classList.add('active'), 10);
     }
 
+    // Modal zárása animációval és űrlap törléssel
     function closeRentModal() {
         const modal = document.getElementById('rent-modal');
         modal.classList.remove('active');
-        setTimeout(() => modal.style.display = 'none', 400);
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.getElementById('rent-form').reset();
+            // Töröljük az egyedi db számokat is vissza 1-re
+            document.getElementById('qty-sup').innerText = "1";
+            document.getElementById('qty-sunbed').innerText = "1";
+            document.getElementById('qty-umbrella').innerText = "1";
+        }, 400);
     }
 
-    function updateQty(val) {
-        currentQty = Math.max(1, currentQty + val);
-        document.getElementById('qty-num').innerText = currentQty;
+    // Mennyiség növelése/csökkentése segédfüggvény
+    function changeQty(id, delta) {
+        const el = document.getElementById(id);
+        let currentVal = parseInt(el.innerText) || 1;
+        let newVal = currentVal + delta;
+        if (newVal < 1) newVal = 1;
+        el.innerText = newVal;
     }
 
-    async function submitRent() {
-        const phone = document.getElementById('m-phone').value;
-        const name = document.getElementById('m-name').value;
-        const date = document.getElementById('m-date').value;
-        const type = document.getElementById('m-item-type').value;
+    // A fő küldő és számoló függvény (Multi-Item logic)
+    async function submitRentForm(e) {
+        e.preventDefault();
 
-        if(!name || !date || !phone) return alert("Kérjük, töltsön ki minden mezőt!");
+        const items = [];
+        let dailyTotal = 0;
 
-        const payload = {
-            type: type,
-            guest: name,
-            date: date,
-            aptName: "KÜLSŐS FOGLALÁS",
-            note: `TEL: ${phone} | DB: ${currentQty}`
+        // 1. SUP ellenőrzése
+        if (document.getElementById('item-sup').checked) {
+            // Fontos: innerText-et olvasunk a +/- gombok mellől!
+            const qty = parseInt(document.getElementById('qty-sup').innerText) || 1;
+            items.push(`${qty}x SUP`);
+            dailyTotal += qty * 4500;
+        }
+        
+        // 2. Napozószék ellenőrzése
+        if (document.getElementById('item-sunbed').checked) {
+            const qty = parseInt(document.getElementById('qty-sunbed').innerText) || 1;
+            items.push(`${qty}x Napozószék`);
+            dailyTotal += qty * 1500; 
+        }
+
+        // 3. Napernyő ellenőrzése
+        if (document.getElementById('item-umbrella').checked) {
+            const qty = parseInt(document.getElementById('qty-umbrella').innerText) || 1;
+            items.push(`${qty}x Napernyő`);
+            dailyTotal += qty * 1000; 
+        }
+
+        // 4. Ha semmit sem választott ki
+        if (items.length === 0) {
+            alert("Kérjük, válasszon legalább egy felszerelést a pipák segítségével!");
+            return;
+        }
+
+        // 5. Dátumok és napok számítása
+        const startDateStr = document.getElementById('r-start').value;
+        const endDateStr = document.getElementById('r-end').value;
+        
+        if (!startDateStr || !endDateStr) {
+            alert("Kérjük, adja meg a bérlés kezdő és befejező dátumát!");
+            return;
+        }
+
+        const start = new Date(startDateStr);
+        const end = new Date(endDateStr);
+        
+        if (end < start) {
+            alert("A befejezés dátuma nem lehet korábban, mint a kezdés!");
+            return;
+        }
+
+        let diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) diffDays = 1;
+
+        const finalTotal = dailyTotal * diffDays;
+
+        // 6. Adatcsomag összeállítása az Adminnak (az apartman mezőt is olvassa)
+        const orderData = {
+            type: "Strandfelszerelés",
+            items: items.join(" + "), 
+            guestName: document.getElementById('r-name').value,
+            phone: document.getElementById('r-phone').value,
+            apartment: document.getElementById('r-apt').value, // Külsős esetén is ezt olvassa
+            start: startDateStr,
+            end: endDateStr,
+            days: diffDays,
+            totalPrice: finalTotal,
+            status: "Új"
         };
 
+        // 7. Küldés a szerverre
         try {
             const res = await fetch('/api/order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(orderData)
             });
-            if(res.ok) {
-                alert("Köszönjük! Hamarosan keressük.");
+
+            if (res.ok) {
+                alert(`Sikeres igénylés!\n\nKiválasztott tételek: ${orderData.items}\nFizetendő: ${finalTotal.toLocaleString()} Ft\n\nHamarosan felvesszük Önnel a kapcsolatot.`);
                 closeRentModal();
+            } else {
+                alert("Hiba történt a szerverrel való kommunikáció során.");
             }
-        } catch (e) { alert("Hiba!"); }
+        } catch (error) {
+            console.error(error);
+            alert("Hálózati hiba történt.");
+        }
     }
 </script>
-
 </body>
 </html>
