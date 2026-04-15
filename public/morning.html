@@ -62,6 +62,75 @@
             letter-spacing: 2px; cursor: pointer; width: 100%; margin-top: 1rem; 
         }
 
+        /* Custom Alert Modal Alapstílus */
+            .custom-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.6); /* Sötétített háttér */
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 9999;
+            }
+
+            /* A fehér kártya */
+            .custom-modal .modal-content {
+                background: white;
+                padding: 40px;
+                border-radius: 20px;
+                text-align: center;
+                max-width: 400px;
+                width: 90%;
+                box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+            }
+
+            /* Az ikon köre */
+            .success-icon {
+                width: 80px;
+                height: 80px;
+                background: #27ae60;
+                color: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 40px;
+                margin: 0 auto 20px;
+            }
+
+            /* A cím és üzenet */
+            #alert-title {
+                font-family: 'Playfair Display', serif;
+                margin-bottom: 10px;
+                color: #333;
+            }
+
+            #alert-msg {
+                color: #666;
+                margin-bottom: 30px;
+                line-height: 1.5;
+            }
+
+            /* A gomb */
+            .btn-main {
+                background: #27ae60;
+                color: white;
+                border: none;
+                padding: 12px 0;
+                width: 100%;
+                border-radius: 10px;
+                font-weight: bold;
+                cursor: pointer;
+                transition: 0.3s;
+            }
+
+            .btn-main:hover {
+                filter: brightness(0.9);
+            }
+
         .flatpickr-calendar { background: var(--bg); border: 1px solid var(--border); }
         .flatpickr-day.selected { background: var(--accent) !important; border-color: var(--accent) !important; }
 
