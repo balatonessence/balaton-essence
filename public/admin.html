@@ -143,22 +143,24 @@
         <div id="apt-list-container"></div>
     </div>
 
-        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center; margin-top: 40px; margin-bottom: 20px;">
-            <h2 style="font-family: 'Playfair Display', serif;">Partnerek & Tulajdonosok</h2>
-            <button class="btn-cta" onclick="openOwnerModal()">+ ÚJ PARTNER</button>
+        <div class="admin-card" style="background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); padding: 20px; margin-top: 30px; border-left: 5px solid #298538; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: #1a1a1a;">Partnerek & Tulajdonosok</h2>
+                <button class="btn-cta" onclick="openOwnerModal()">+ ÚJ PARTNER</button>
+            </div>
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="text-align: left; color: #aaa; font-size: 0.8rem; text-transform: uppercase;">
+                        <th style="padding: 10px;">Név</th>
+                        <th style="padding: 10px;">Kód</th>
+                        <th style="padding: 10px;">Ingatlanok</th>
+                        <th style="padding: 10px; text-align: right;">Művelet</th>
+                    </tr>
+                </thead>
+                <tbody id="owners-table-body">
+                    </tbody>
+            </table>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>NÉV</th>
-                    <th>KÓD</th>
-                    <th>INGATLANOK</th>
-                    <th style="text-align: center; width: 120px;">MŰVELET</th>
-                </tr>
-            </thead>
-            <tbody id="owners-table-body"></tbody>
-        </table>
-    </div>
 </main>
 
 <div id="apt-modal" class="modal-overlay">
