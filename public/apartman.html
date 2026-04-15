@@ -155,6 +155,57 @@
             opacity: 0.6;
         }
         
+
+        .custom-modal {
+            position: fixed;
+            top: 0; left: 0; 
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex; align-items: center; justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px); /* Modern elmosódott háttér */
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            animation: popupAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            background: #27ae60;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 15px;
+        }
+
+        .btn-main {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        @keyframes popupAnim {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
         /* Gördülékeny animáció az oldal betöltésekor */
         #main-content { animation: fadeInPage 1s ease forwards; }
         @keyframes fadeInPage { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -270,6 +321,15 @@
         <button onclick="sendBookingRequest()" id="submit-booking-btn" class="btn-booking" style="width: 100%; padding: 1.2rem; border-radius: 50px; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; transition: 0.3s; opacity: 0.5;" disabled>
             Válassz dátumot!
         </button>
+    </div>
+</div>
+
+<div id="custom-alert" class="custom-modal" style="display:none;">
+    <div class="modal-content">
+        <div class="success-icon">✓</div>
+        <h2 id="alert-title">Sikeres művelet!</h2>
+        <p id="alert-msg">A foglalást rögzítettük a rendszerben.</p>
+        <button class="btn-main" onclick="closeCustomAlert()">Rendben</button>
     </div>
 </div>
 
@@ -514,42 +574,45 @@
 
 
     async function sendBookingRequest() {
-        const data = {
-            aptId: currentApt.id,
-            aptName: currentApt.name,
-            guestName: document.getElementById('book-name').value,
-            email: document.getElementById('book-email').value,
-            phone: document.getElementById('book-phone').value, // Új mező
-            checkIn: document.getElementById('book-start').value,
-            end: document.getElementById('book-end').value,
-            guests: document.getElementById('book-guests').value,
-            total: document.getElementById('grand-total').innerText,
-            msg: document.getElementById('book-msg').value,
-            source: 'Weboldal'
-        };
+    // Kinyerjük az összeget és csak a számokat hagyjuk meg
+    const rawTotal = document.getElementById('grand-total').innerText;
+    const cleanTotal = parseInt(rawTotal.replace(/[^0-9]/g, '')) || 0;
 
-        // Ellenőrzés: név, email és telefon is kötelező legyen
-        if (!data.guestName || !data.email || !data.phone) {
-            alert("Kérlek töltsd ki a nevedet, az e-mail címedet és a telefonszámodat is!");
-            return;
-        }
+    const data = {
+        aptId: currentApt.id,
+        aptName: currentApt.name,
+        guestName: document.getElementById('book-name').value,
+        email: document.getElementById('book-email').value,
+        phone: document.getElementById('book-phone').value,
+        checkIn: document.getElementById('book-start').value,
+        checkOut: document.getElementById('book-end').value, // Átnevezve 'end'-ről a konzisztencia miatt
+        guests: document.getElementById('book-guests').value,
+        totalPrice: cleanTotal, // 'total' helyett 'totalPrice', hogy egyezzen a renderAll-al
+        msg: document.getElementById('book-msg').value,
+        source: 'Weboldal'
+    };
 
-        try {
-            const res = await fetch('/api/new-booking', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            if (res.ok) {
-                alert(`Köszönjük, ${data.guestName}! A foglalását rögzítettük. `);
-                closeBookingModal();
-                window.location.reload();
-            }
-        } catch (e) {
-            alert("Hiba történt a küldés során. Kérlek próbáld újra!");
-        }
+    if (!data.guestName || !data.email || !data.phone) {
+        alert("Kérlek töltsd ki a nevedet, az e-mail címedet és a telefonszámodat is!");
+        return;
     }
+
+    try {
+        const res = await fetch('/api/new-booking', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+
+        if (res.ok) {
+            alert(`Köszönjük, ${data.guestName}! A foglalását rögzítettük.`);
+            closeBookingModal();
+            window.location.reload();
+        }
+    } catch (e) {
+        alert("Hiba történt a küldés során. Kérlek próbáld újra!");
+    }
+}
 
 let calDate = new Date(); // A naptár aktuális nézete
 let selectedStart = null;
@@ -677,6 +740,21 @@ function selectDate(dateStr) {
 function changeMonth(dir) {
     calDate.setMonth(calDate.getMonth() + dir);
     renderCalendar();
+}
+
+function showSuccess(title, message, callback) {
+    document.getElementById('alert-title').innerText = title;
+    document.getElementById('alert-msg').innerText = message;
+    document.getElementById('custom-alert').style.display = 'flex';
+    window.alertCallback = callback;
+}
+
+function closeCustomAlert() {
+    document.getElementById('custom-alert').style.display = 'none';
+    if (window.alertCallback) {
+        window.alertCallback();
+        window.alertCallback = null;
+    }
 }
 
 </script>
