@@ -422,14 +422,15 @@
             bookingTableBody.innerHTML = db.bookings.map(b => {
                 const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
                 
-                // Dátumok és összeg kezelése
-                const checkInDate = b.checkIn || b.start || 'Nincs adat';
-                const checkOutDate = b.checkOut || b.end || 'Nincs adat';
+                // Dátumok kezelése
+                const cIn = b.checkIn || 'Nincs adat';
+                const cOut = b.checkOut || b.end || 'Nincs adat';
                 
-                // Pénznem formázása (ha nincs megadva ár, akkor 0 Ft)
-                const priceDisplay = b.totalPrice 
-                    ? `${Number(b.totalPrice).toLocaleString()} Ft` 
-                    : 'Nincs ár megadva';
+                // Ár kezelése: megnézzük mindkét lehetséges kulcsot
+                const price = b.totalPrice || b.total || 0;
+                const priceFormatted = price > 0 
+                    ? `${Number(price).toLocaleString()} Ft` 
+                    : '<span style="color:#ccc">Nincs ár</span>';
 
                 const source = (b.source || 'web').toLowerCase();
                 
@@ -438,11 +439,9 @@
                         <td><strong>${apt ? apt.name : 'Ismeretlen'}</strong></td>
                         <td>
                             <div style="font-weight: 600;">${b.guestName || 'Névtelen vendég'}</div>
-                            <div style="font-size: 0.75rem; color: var(--accent); font-weight: 700;">${priceDisplay}</div>
+                            <div style="font-size: 0.75rem; color: var(--accent); font-weight: 700;">${priceFormatted}</div>
                         </td>
-                        <td>
-                            <div style="font-size: 0.9rem;">${checkInDate} &rarr; ${checkOutDate}</div>
-                        </td>
+                        <td><div style="font-size: 0.85rem;">${cIn} &rarr; ${cOut}</div></td>
                         <td><span class="badge badge-${source}">${source.toUpperCase()}</span></td>
                         <td>
                             <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">✕</button>

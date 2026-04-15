@@ -318,7 +318,7 @@
             <div id="grand-total" style="font-size: 2rem; font-weight: 700; font-family: 'Playfair Display';">0 Ft</div>
         </div>
 
-        <button onclick="sendBookingRequest()" id="submit-booking-btn" class="btn-booking" style="width: 100%; padding: 1.2rem; border-radius: 50px; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; transition: 0.3s; opacity: 0.5;" disabled>
+        <button onclick="sendBookingRequest()" id="submit-booking-btn" class="btn-booking" style="width: 100%; padding: 1.2rem; border-radius: 50px; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; transition: 0.3s; opacity: 0.5;">
             Válassz dátumot!
         </button>
     </div>
@@ -574,9 +574,9 @@
 
 
     async function sendBookingRequest() {
-    // Kinyerjük az összeget és csak a számokat hagyjuk meg
-    const rawTotal = document.getElementById('grand-total').innerText;
-    const cleanTotal = parseInt(rawTotal.replace(/[^0-9]/g, '')) || 0;
+    // Kinyerjük az összeget a "50 000 Ft" formátumból és számmá alakítjuk
+    const totalText = document.getElementById('grand-total').innerText;
+    const numericPrice = parseInt(totalText.replace(/[^0-9]/g, '')) || 0;
 
     const data = {
         aptId: currentApt.id,
@@ -585,15 +585,15 @@
         email: document.getElementById('book-email').value,
         phone: document.getElementById('book-phone').value,
         checkIn: document.getElementById('book-start').value,
-        checkOut: document.getElementById('book-end').value, // Átnevezve 'end'-ről a konzisztencia miatt
+        checkOut: document.getElementById('book-end').value, // 'end' helyett 'checkOut' a konzisztencia miatt
         guests: document.getElementById('book-guests').value,
-        totalPrice: cleanTotal, // 'total' helyett 'totalPrice', hogy egyezzen a renderAll-al
+        totalPrice: numericPrice, // Itt a kulcs neve mostantólTotalPrice!
         msg: document.getElementById('book-msg').value,
         source: 'Weboldal'
     };
 
     if (!data.guestName || !data.email || !data.phone) {
-        alert("Kérlek töltsd ki a nevedet, az e-mail címedet és a telefonszámodat is!");
+        showSuccess("Hiba!", "Kérlek töltsd ki az összes kötelező mezőt!");
         return;
     }
 
@@ -605,12 +605,13 @@
         });
 
         if (res.ok) {
-            alert(`Köszönjük, ${data.guestName}! A foglalását rögzítettük.`);
-            closeBookingModal();
-            window.location.reload();
+            showSuccess("Sikeres foglalás!", `Köszönjük, ${data.guestName}!`, () => {
+                closeBookingModal();
+                window.location.reload();
+            });
         }
     } catch (e) {
-        alert("Hiba történt a küldés során. Kérlek próbáld újra!");
+        showSuccess("Hiba!", "Szerver hiba történt.");
     }
 }
 
