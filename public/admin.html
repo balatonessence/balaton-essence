@@ -452,9 +452,8 @@ if (bookingTableBody && db.bookings) {
     }).join('');
 }
 
-    // --- 1. REGGELI TÁBLÁZAT ---
-    // --- REGGELI RENDELÉSEK TÁBLÁZAT ---
-// --- 2. REGGELI RENDELÉSEK TÁBLÁZAT ---
+
+// --- 1. REGGELI RENDELÉSEK TÁBLÁZAT ---
 const breakfastTableBody = document.getElementById('breakfast-table-body');
 if (breakfastTableBody && db.breakfasts) {
     breakfastTableBody.innerHTML = db.breakfasts.map(b => {
@@ -475,8 +474,8 @@ if (breakfastTableBody && db.breakfasts) {
                     <div style="font-size: 0.9rem;">${b.note || 'Nincs részlet'}</div>
                     ${priceHTML}
                 </td>
-                <td style="text-align: right;">
-                    <button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${b.id}')">✕</button>
+                <td style="text-align: center; vertical-align: middle; width: 100px;">
+                    <button class="btn-outline btn-del" onclick="deleteItem('apartments', '${b.id}')">✕</button>
                 </td>
             </tr>
         `;
