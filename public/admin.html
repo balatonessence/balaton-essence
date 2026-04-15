@@ -408,21 +408,19 @@
     }
 
     function openOwnerModal(id) {
-        // 1. Megkeressük az adatot a listában
-        // Ügyelj rá, hogy a db.owners vagy db.apartments listában keresel-e!
         const owner = db.owners.find(o => String(o.id) === String(id));
+        if (!owner) return;
 
-        if (!owner) {
-            console.error("Nem található adat ezzel az ID-val:", id);
-            return;
-        }
+        // Cseréld ki ezeket az ID-kat azokra, amik ténylegesen a HTML modalodban vannak!
+        // Például ha nálad 'owner-name-input' az ID, akkor azt írd ide:
+        const nameInput = document.getElementById('edit-owner-name') || document.getElementById('owner-name');
+        const codeInput = document.getElementById('edit-owner-code') || document.getElementById('owner-code');
+        const idInput = document.getElementById('edit-owner-id') || document.getElementById('owner-id');
 
-        // 2. Csak akkor töltjük be az értékeket, ha az elem létezik
-        document.getElementById('edit-owner-id').value = owner.id;
-        document.getElementById('edit-owner-name').value = owner.name || "";
-        document.getElementById('edit-owner-code').value = owner.code || "";
-        
-        // Modal megjelenítése
+        if (nameInput) nameInput.value = owner.name || "";
+        if (codeInput) codeInput.value = owner.code || "";
+        if (idInput) idInput.value = owner.id;
+
         document.getElementById('owner-modal').style.display = 'flex';
     }
 
@@ -579,22 +577,14 @@ if (breakfastTableBody && db.breakfasts) {
     if (ownerTableBody && db.owners) {
         ownerTableBody.innerHTML = db.owners.map(o => {
             const aptCount = (db.apartments || []).filter(a => a.ownerId == o.id).length;
-            return `
-                <tr>
-                    <td style="padding: 1.2rem 1rem;">
-                        <div style="font-weight: 700; font-size: 0.95rem;">${o.name}</div>
-                    </td>
-                    <td style="padding: 1.2rem 1rem;">
-                        <code style="background: #eee; padding: 2px 6px; border-radius: 4px;">#${o.id.toString().slice(-4)}</code>
-                    </td>
-                    <td style="padding: 1.2rem 1rem;">
-                        <span style="font-weight: 600; color: var(--accent);">${aptCount}</span> ingatlan
-                    </td>
-                    <td style="padding: 1.2rem 1rem; text-align: right;">
-                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                            <button class="btn-edit" onclick="openOwnerModal('${o.id}')">SZERKESZTÉS</button>
-                            <button class="btn-outline btn-del" onclick="deleteItem('owners', '${o.id}')">✕</button>
-                        </div>
+            return// A renderAll-on belül a tulajdonosoknál:
+                `<tr>
+                    <td><strong>${o.name}</strong></td>
+                    <td>#${o.code}</td>
+                    <td><span class="count">${o.apartments ? o.apartments.length : 0} ingatlan</span></td>
+                    <td style="text-align: right;">
+                        <button class="btn-edit" onclick="openOwnerModal('${o.id}')">SZERKESZTÉS</button>
+                        <button class="btn-del" onclick="deleteOwner('${o.id}')">✕</button>
                     </td>
                 </tr>`;
         }).join('');
