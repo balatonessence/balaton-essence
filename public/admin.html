@@ -415,37 +415,47 @@
    function renderAll() {
     if (!db.apartments) return;
 
-    // 1. FOGLALÁSOK (BOOKINGS) MEGJELENÍTÉSE
-    const bookingTableBody = document.getElementById('booking-table-body');
-    if (bookingTableBody) {
-        bookingTableBody.innerHTML = (db.bookings || []).map(b => {
-            let badgeClass = 'bg-essence';
-            if (b.source === 'booking') badgeClass = 'bg-booking';
-            if (b.source === 'szallas') badgeClass = 'bg-szallas';
-
-            return `
-                <tr>
-                    <td>
-                        <div style="font-weight: 700; color: var(--text);">${b.aptName}</div>
-                        <div style="font-size: 0.7rem; color: var(--text-light); text-transform: uppercase;">${b.total || 'N/A'}</div>
-                    </td>
-                    <td>
-                        <div style="font-weight: 600;">${b.guestName}</div>
-                        <div style="font-size: 0.8rem; color: var(--accent);">${b.phone || 'Nincs tel.'}</div>
-                    </td>
-                    <td>
-                        <div style="font-size: 0.85rem;"><strong>${b.checkIn}</strong> &rarr; <strong>${b.end || '...'}</strong></div>
-                        <div style="font-size: 0.75rem; color: #777;">${b.guests || '2'} vendég</div>
-                    </td>
-                    <td>
-                        <span class="badge ${badgeClass}">${b.source}</span>
-                    </td>
-                    <td>
-                        <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">Törlés</button>
-                    </td>
-                </tr>`;
-        }).join('');
+    // --- REGGELI TÁBLÁZAT ---
+    const breakfastBody = document.getElementById('breakfast-table-body');
+    if (breakfastBody) {
+        breakfastBody.innerHTML = (db.breakfasts || []).map(b => `
+            <tr>
+                <td><strong>${b.aptName}</strong><br>${b.guest}</td>
+                <td>${b.date}</td>
+                <td>${b.note}</td>
+                <td><button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${b.id}')">✕</button></td>
+            </tr>
+        `).join('');
     }
+
+    // --- ESZKÖZ BÉRLÉS TÁBLÁZAT ---
+    const rentTableBody = document.getElementById('rent-table-body');
+    if (rentTableBody) {
+        rentTableBody.innerHTML = (db.extras || []).map(e => `
+            <tr>
+                <td>
+                    <div style="font-weight: 700; color: var(--accent);">${e.items || 'Nincs adat'}</div>
+                    <div style="font-size: 0.75rem; color: #777;">Összeg: ${(e.totalPrice || 0).toLocaleString()} Ft</div>
+                </td>
+                <td>
+                    <div style="font-weight: 600;">${e.guestName || 'Ismeretlen'}</div>
+                    <div style="font-size: 0.8rem; color: #777;">${e.phone || ''}</div>
+                </td>
+                <td>
+                    <div style="font-size: 0.85rem;"><strong>${e.start || ''}</strong> &rarr; <strong>${e.end || ''}</strong></div>
+                    <div style="font-size: 0.75rem; color: #777;">${e.days || 0} nap</div>
+                </td>
+                <td>
+                    <div style="font-size: 0.85rem;">${e.apartment || ''}</div>
+                </td>
+                <td>
+                    <button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">✕</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+}
 
     // 2. FELSZERELÉS BÉRLÉSEK (EXTRAS) MEGJELENÍTÉSE - EZ HIÁNYZOTT!
     const extrasTableBody = document.getElementById('extras-table-body');
@@ -569,7 +579,7 @@
             </tr>
         `).join('');
     }
-}
+
 
     function initAptSorting() {
         const el = document.getElementById('apt-list-container');

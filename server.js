@@ -89,12 +89,24 @@ app.post('/api/new-booking', async (req, res) => {
 app.post('/api/order', async (req, res) => {
     try {
         const db = await getDbContent();
-        const newOrder = { id: "order_" + Date.now(), ...req.body, createdAt: new Date().toISOString() };
-        if (!db.extras) db.extras = [];
-        db.extras.push(newOrder);
+        const data = req.body;
+        const id = "ord_" + Date.now();
+
+        if (data.type === 'BREAKFAST') {
+            // Reggeli mentése a breakfasts tömbbe
+            if (!db.breakfasts) db.breakfasts = [];
+            db.breakfasts.push({ id, ...data, createdAt: new Date().toISOString() });
+        } else {
+            // Minden más (SUP, stb.) az extras tömbbe
+            if (!db.extras) db.extras = [];
+            db.extras.push({ id, ...data, createdAt: new Date().toISOString() });
+        }
+
         await saveDbContent(db);
-        res.json({ success: true, id: newOrder.id });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+        res.json({ success: true, id });
+    } catch (e) { 
+        res.status(500).json({ error: e.message }); 
+    }
 });
 
 app.delete('/api/extras/:id', async (req, res) => {
