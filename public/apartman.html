@@ -327,10 +327,13 @@
 
 <div id="custom-alert" class="custom-modal" style="display:none;">
     <div class="modal-content">
-        <div class="success-icon">✓</div>
+        <div id="alert-icon-circle" class="success-icon">✓</div>
+        
         <h2 id="alert-title">Sikeres művelet!</h2>
-        <p id="alert-msg">A foglalást rögzítettük a rendszerben.</p>
-        <button class="btn-main" onclick="closeCustomAlert()">Rendben</button>
+        
+        <p id="alert-msg">...</p>
+        
+        <button id="alert-btn" class="btn-main" onclick="closeCustomAlert()">Rendben</button>
     </div>
 </div>
 
