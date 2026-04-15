@@ -208,22 +208,46 @@
 </div>
 
 <script>
+    let db = { apartments: [], owners: [], bookings: [], extras: [] };
     let activeId = null;
     let activeOId = null;
     let currentCoverImage = null; 
     let currentGalleryImages = []; 
 
+    // ADATBÁZIS INICIALIZÁLÁSA
+    async function initDatabase(callback) {
+        try {
+            const res = await fetch('/api/get-db-content');
+            if (res.ok) {
+                db = await res.json();
+                callback();
+            } else {
+                console.error("Hiba az adatbázis betöltésekor");
+            }
+        } catch (e) {
+            console.error("Szerver hiba betöltéskor:", e);
+        }
+    }
+
     // ADATBÁZIS MENTÉSE
     async function saveDb() {
         try {
-            const res = await fetch('/api/save-db', {
+            const res = await fetch('/api/save', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(db)
             });
-            if (res.ok) { console.log("Sikeres mentés!"); renderAll(); } 
-            else { alert("Hiba a mentésnél!"); }
-        } catch (e) { alert("Nem sikerült elérni a szervert!"); console.error(e); }
+            if (res.ok) { 
+                console.log("Sikeres mentés!"); 
+                renderAll(); 
+                showSaveToast();
+            } else { 
+                alert("Hiba a mentésnél!"); 
+            }
+        } catch (e) { 
+            alert("Nem sikerült elérni a szervert!"); 
+            console.error(e); 
+        }
     }
 
     // TULAJDONOS MENTÉSE
@@ -232,12 +256,14 @@
         const code = document.getElementById('o-code').value;
 
         if (activeOId === null) {
+            if (!db.owners) db.owners = [];
             db.owners.push({ id: Date.now(), name: name, accessCode: code });
         } else {
             const idx = db.owners.findIndex(o => o.id === activeOId);
             if (idx !== -1) { db.owners[idx].name = name; db.owners[idx].accessCode = code; }
         }
-        await saveDb(); closeModal();
+        await saveDb(); 
+        closeModal();
     }
 
     // KÉPKEZELÉS (WebP)
@@ -274,7 +300,8 @@
             const base64 = await compressImage(files[i]);
             currentGalleryImages.push(base64);
         }
-        renderImagePreviews(); event.target.value = ''; 
+        renderImagePreviews(); 
+        event.target.value = ''; 
     }
 
     function removeCoverImage() { currentCoverImage = null; renderImagePreviews(); }
@@ -295,8 +322,7 @@
         else visual.style.backgroundImage = `none`;
     }
 
-    // --- ÚJ: SZEZONOK KEZELÉSE ---
-    // 1. A sor hozzáadása függvény bővítése (Max fő mezővel)
+    // SZEZONOK KEZELÉSE
     function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2', maxGuests = '4', price3 = '', price4 = '') {
         const container = document.getElementById('seasons-container');
         const rowId = 'season-' + Date.now() + Math.floor(Math.random() * 1000);
@@ -317,7 +343,6 @@
         container.insertAdjacentHTML('beforeend', rowHtml);
     }
 
-    // 2. Mentés függvény (Hogy elmentse a Max fő adatot is)
     async function saveApt() {
         const seasonElements = document.querySelectorAll('.season-row');
         const seasonsData = [];
@@ -328,7 +353,7 @@
                 end: row.querySelector('.s-end').value,
                 price: Number(row.querySelector('.s-price').value),
                 minNights: Number(row.querySelector('.s-min').value),
-                maxGuests: Number(row.querySelector('.s-max').value) // <--- Új adat
+                maxGuests: Number(row.querySelector('.s-max').value)
             });
         });
 
@@ -343,20 +368,22 @@
             galleryImages: currentGalleryImages, 
             icalBooking: document.getElementById('a-ical-b').value,
             icalSzallas: document.getElementById('a-ical-sz').value,
-            bookedDates: activeId ? db.apartments.find(a => a.id === activeId).bookedDates : []
+            bookedDates: activeId ? (db.apartments.find(a => a.id === activeId)?.bookedDates || []) : []
         };
+
+        if (!db.apartments) db.apartments = [];
 
         if (activeId === null) { db.apartments.push(aptData); } 
         else { const idx = db.apartments.findIndex(a => a.id === activeId); db.apartments[idx] = aptData; }
         
-        await saveDb(); closeModal();
+        await saveDb(); 
+        closeModal();
     }
 
-    // 3. Modal nyitása (Hogy betöltse a Max fő adatot)
     function openAptModal(id) {
         activeId = id;
         const select = document.getElementById('a-owner-select');
-        select.innerHTML = db.owners.map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+        select.innerHTML = (db.owners || []).map(o => `<option value="${o.id}">${o.name}</option>`).join('');
         
         const seasonsContainer = document.getElementById('seasons-container');
         seasonsContainer.innerHTML = ''; 
@@ -374,7 +401,6 @@
             currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
             
             if (a.seasons && a.seasons.length > 0) {
-                // Itt adjuk át a Max főt a megjelenítéshez
                 a.seasons.forEach(s => addSeasonRow(s.name, s.start, s.end, s.price, s.minNights, s.maxGuests || 2));
             }
         } else {
@@ -402,209 +428,160 @@
 
     function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
-    // MEGJELENÍTÉS (Renderelés)
-function renderAll() {
-    if (!db.apartments) return;
+    // MEGJELENÍTÉS
+    function renderAll() {
+        if (!db.apartments) return;
 
-    // 1. FOGLALÁSOK TÁBLÁZAT FRISSÍTÉSE
-    const bookingTableBody = document.getElementById('booking-table-body');
-    if (bookingTableBody) {
-        bookingTableBody.innerHTML = (db.bookings || []).map(b => {
-            let badgeClass = 'bg-essence';
-            if (b.source === 'booking') badgeClass = 'bg-booking';
-            if (b.source === 'szallas') badgeClass = 'bg-szallas';
+        const bookingTableBody = document.getElementById('booking-table-body');
+        if (bookingTableBody) {
+            bookingTableBody.innerHTML = (db.bookings || []).map(b => {
+                let badgeClass = 'bg-essence';
+                if (b.source === 'booking') badgeClass = 'bg-booking';
+                if (b.source === 'szallas') badgeClass = 'bg-szallas';
 
-            return `
-                <tr>
-                    <td>
-                        <div style="font-weight: 700; color: var(--text);">${b.aptName}</div>
-                        <div style="font-size: 0.7rem; color: var(--text-light); text-transform: uppercase;">${b.total || 'N/A'}</div>
-                    </td>
-                    <td>
-                        <div style="font-weight: 600;">${b.guestName}</div>
-                        <div style="font-size: 0.8rem; color: var(--accent);">${b.phone || 'Nincs tel.'}</div>
-                    </td>
-                    <td>
-                        <div style="font-size: 0.85rem;"><strong>${b.checkIn}</strong> &rarr; <strong>${b.end || '...'}</strong></div>
-                        <div style="font-size: 0.75rem; color: #777;">${b.guests || '2'} vendég</div>
-                    </td>
-                    <td>
-                        <span class="badge ${badgeClass}">${b.source}</span>
-                    </td>
-                    <td>
-                        <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">Törlés</button>
-                    </td>
-                </tr>`;
-        }).join('');
-    }
-
-    // 2. APARTMAN LISTA (SORRENDEZHETŐ)
-    const aptListContainer = document.getElementById('apt-list-container');
-    if (aptListContainer) {
-        aptListContainer.innerHTML = (db.apartments || []).map(a => {
-            const owner = (db.owners || []).find(o => o.id == a.ownerId);
-            const aptBookings = (db.bookings || []).filter(b => b.aptId == a.id);
-            
-            // Statisztika számítása
-            const webCount = aptBookings.filter(b => b.source === 'Weboldal').length;
-            const bookingCount = aptBookings.filter(b => b.source === 'booking').length;
-            const szallasCount = aptBookings.filter(b => b.source === 'szallas').length;
-            
-            const webPerc = Math.min(webCount * 10, 100); 
-            const bookingPerc = Math.min(bookingCount * 10, 100);
-            const szallasPerc = Math.min(szallasCount * 10, 100);
-
-            const thumb = a.coverImage ? 
-                `<img src="${a.coverImage}" style="width:45px; height:45px; border-radius:8px; object-fit:cover; margin-right:15px; border: 1px solid #eee;">` : 
-                `<div style="width:45px; height:45px; border-radius:8px; background:#f5f5f5; margin-right:15px; display:flex; align-items:center; justify-content:center; color:#ccc;">?</div>`;
-            
-            // Itt a div kapott egy "apt-row" osztályt és "data-id"-t a sorrendezéshez
-            return `
-                <div class="apt-row" data-id="${a.id}" style="display:grid; grid-template-columns: 2fr 3.5fr 1.2fr; padding:1.2rem; border-bottom:1px solid #f0f0f0; align-items:center; background: white; cursor: grab;">
-                    <div style="display:flex; align-items:center;">
-                        ${thumb}
-                        <div>
-                            <div style="font-weight: 700; font-size: 1rem;">${a.name}</div>
-                            <div style="font-size: 0.8rem; color: #777;">${a.location} • <span style="color: var(--accent);">${owner ? owner.name : 'Nincs tulaj'}</span></div>
-                        </div>
-                    </div>
-                    <div class="stats-wrapper" style="display: flex; gap: 15px;">
-                        ${drawChart(bookingPerc, 'var(--booking)', 'Booking')}
-                        ${drawChart(szallasPerc, 'var(--szallas)', 'Szallas')}
-                        ${drawChart(webPerc, 'var(--essence)', 'Web')}
-                    </div>
-                    <div style="display:flex; gap:8px; justify-content: flex-end;">
-                        <button class="btn-outline" onclick="openAptModal(${a.id})">Szerkesztés</button>
-                        <button class="btn-outline btn-del" onclick="deleteApt(${a.id})">✕</button>
-                    </div>
-                </div>`;
-        }).join('');
-
-        // Sorrendezés inicializálása a rajzolás után
-        initAptSorting();
-    }
-
-    // 3. TULAJDONOSOK TÁBLÁZATA
-    const ownerTableBody = document.getElementById('owner-table-body');
-    if (ownerTableBody) {
-        ownerTableBody.innerHTML = (db.owners || []).map(o => {
-            const aptCount = (db.apartments || []).filter(a => a.ownerId == o.id).length;
-            return `
-                <tr>
-                    <td style="padding: 1.2rem 1rem;">
-                        <div style="font-weight: 700; font-size: 0.95rem;">${o.name}</div>
-                    </td>
-                    <td style="padding: 1.2rem 1rem;">
-                        <code style="background: #eee; padding: 2px 6px; border-radius: 4px;">#${o.id.toString().slice(-4)}</code>
-                    </td>
-                    <td style="padding: 1.2rem 1rem;">
-                        <span style="font-weight: 600; color: var(--accent);">${aptCount}</span> ingatlan
-                    </td>
-                    <td style="padding: 1.2rem 1rem; text-align: right;">
-                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                            <button class="btn-outline" onclick="openOwnerModal('${o.id}')">Szerkesztés</button>
-                            <button class="btn-outline btn-del" onclick="deleteItem('owners', '${o.id}')">✕</button>
-                        </div>
-                    </td>
-                </tr>`;
-        }).join('');
-    }
-}
-
-
-
-// --- SORRENDEZÉSÉRT FELELŐS SEGÉDFÜGGVÉNYEK ---
-
-function initAptSorting() {
-    const el = document.getElementById('apt-list-container');
-    // Ellenőrizzük, hogy létezik-e a konténer és a Sortable könyvtár
-    if (!el || typeof Sortable === 'undefined') {
-        console.warn("Sortable nem inicializálható: hiányzó elem vagy könyvtár.");
-        return;
-    }
-
-    // Ha már volt rajta Sortable, elpusztítjuk, hogy ne legyen duplikáció
-    if (window.aptSortable) window.aptSortable.destroy();
-
-    window.aptSortable = new Sortable(el, {
-        animation: 150,
-        ghostClass: 'sortable-ghost',
-        handle: '.apt-row', // Biztosítjuk, hogy a sor fogható legyen
-        onEnd: function() {
-            saveAptOrder();
+                return `
+                    <tr>
+                        <td>
+                            <div style="font-weight: 700; color: var(--text);">${b.aptName}</div>
+                            <div style="font-size: 0.7rem; color: var(--text-light); text-transform: uppercase;">${b.total || 'N/A'}</div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600;">${b.guestName}</div>
+                            <div style="font-size: 0.8rem; color: var(--accent);">${b.phone || 'Nincs tel.'}</div>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.85rem;"><strong>${b.checkIn}</strong> &rarr; <strong>${b.end || '...'}</strong></div>
+                            <div style="font-size: 0.75rem; color: #777;">${b.guests || '2'} vendég</div>
+                        </td>
+                        <td>
+                            <span class="badge ${badgeClass}">${b.source}</span>
+                        </td>
+                        <td>
+                            <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">Törlés</button>
+                        </td>
+                    </tr>`;
+            }).join('');
         }
-    });
-}
 
-function saveAptOrder() {
-    const el = document.getElementById('apt-list-container');
-    const rows = el.querySelectorAll('.apt-row');
-    
-    // 1. Kiszedjük az ID-kat az ÚJ sorrendben a HTML-ből
-    let newOrderIds = [];
-    rows.forEach(row => {
-        const id = row.getAttribute('data-id');
-        if (id) newOrderIds.push(id.toString());
-    });
+        const aptListContainer = document.getElementById('apt-list-container');
+        if (aptListContainer) {
+            aptListContainer.innerHTML = (db.apartments || []).map(a => {
+                const owner = (db.owners || []).find(o => o.id == a.ownerId);
+                const aptBookings = (db.bookings || []).filter(b => b.aptId == a.id);
+                
+                const webCount = aptBookings.filter(b => b.source === 'Weboldal').length;
+                const bookingCount = aptBookings.filter(b => b.source === 'booking').length;
+                const szallasCount = aptBookings.filter(b => b.source === 'szallas').length;
+                
+                const webPerc = Math.min(webCount * 10, 100); 
+                const bookingPerc = Math.min(bookingCount * 10, 100);
+                const szallasPerc = Math.min(szallasCount * 10, 100);
 
-    if (newOrderIds.length === 0) return;
+                const thumb = a.coverImage ? 
+                    `<img src="${a.coverImage}" style="width:45px; height:45px; border-radius:8px; object-fit:cover; margin-right:15px; border: 1px solid #eee;">` : 
+                    `<div style="width:45px; height:45px; border-radius:8px; background:#f5f5f5; margin-right:15px; display:flex; align-items:center; justify-content:center; color:#ccc;">?</div>`;
+                
+                return `
+                    <div class="apt-row" data-id="${a.id}" style="display:grid; grid-template-columns: 2fr 3.5fr 1.2fr; padding:1.2rem; border-bottom:1px solid #f0f0f0; align-items:center; background: white; cursor: grab;">
+                        <div style="display:flex; align-items:center;">
+                            ${thumb}
+                            <div>
+                                <div style="font-weight: 700; font-size: 1rem;">${a.name}</div>
+                                <div style="font-size: 0.8rem; color: #777;">${a.location} • <span style="color: var(--accent);">${owner ? owner.name : 'Nincs tulaj'}</span></div>
+                            </div>
+                        </div>
+                        <div class="stats-wrapper" style="display: flex; gap: 15px;">
+                            ${drawChart(bookingPerc, 'var(--booking)', 'Booking')}
+                            ${drawChart(szallasPerc, 'var(--szallas)', 'Szallas')}
+                            ${drawChart(webPerc, 'var(--essence)', 'Web')}
+                        </div>
+                        <div style="display:flex; gap:8px; justify-content: flex-end;">
+                            <button class="btn-outline" onclick="openAptModal(${a.id})">Szerkesztés</button>
+                            <button class="btn-outline btn-del" onclick="deleteApt(${a.id})">✕</button>
+                        </div>
+                    </div>`;
+            }).join('');
 
-    // 2. Újraépítjük a db.apartments tömböt az ID-k alapján (ez stabilabb, mint a .sort)
-    const newOrderedArray = newOrderIds.map(id => {
-        return db.apartments.find(a => a.id.toString() === id);
-    }).filter(a => a !== undefined);
+            initAptSorting();
+        }
 
-    // 3. Frissítjük a globális változót
-    db.apartments = newOrderedArray;
-
-    // 4. Mentés az adatbázisba / LocalStorage-ba
-    if (typeof saveDatabase === 'function') {
-        saveDatabase();
-        console.log("Új sorrend elmentve:", newOrderIds);
-        
-        // Vizuális visszajelzés neked, hogy lásd, működik
-        showSaveToast();
-    } else {
-        console.error("Hiba: saveDatabase függvény nem található!");
+        const ownerTableBody = document.getElementById('owner-table-body');
+        if (ownerTableBody) {
+            ownerTableBody.innerHTML = (db.owners || []).map(o => {
+                const aptCount = (db.apartments || []).filter(a => a.ownerId == o.id).length;
+                return `
+                    <tr>
+                        <td style="padding: 1.2rem 1rem;">
+                            <div style="font-weight: 700; font-size: 0.95rem;">${o.name}</div>
+                        </td>
+                        <td style="padding: 1.2rem 1rem;">
+                            <code style="background: #eee; padding: 2px 6px; border-radius: 4px;">#${o.id.toString().slice(-4)}</code>
+                        </td>
+                        <td style="padding: 1.2rem 1rem;">
+                            <span style="font-weight: 600; color: var(--accent);">${aptCount}</span> ingatlan
+                        </td>
+                        <td style="padding: 1.2rem 1rem; text-align: right;">
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                <button class="btn-outline" onclick="openOwnerModal('${o.id}')">Szerkesztés</button>
+                                <button class="btn-outline btn-del" onclick="deleteItem('owners', '${o.id}')">✕</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            }).join('');
+        }
     }
-}
 
-// EZ HIÁNYZIK A KÓDODBÓL: A tényleges mentés a szerverre
-async function saveDatabase() {
-    try {
-        const res = await fetch('/api/save', { 
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(db)
+    // SORRENDEZÉS
+    function initAptSorting() {
+        const el = document.getElementById('apt-list-container');
+        if (!el || typeof Sortable === 'undefined') {
+            return;
+        }
+
+        if (window.aptSortable) window.aptSortable.destroy();
+
+        window.aptSortable = new Sortable(el, {
+            animation: 150,
+            ghostClass: 'sortable-ghost',
+            handle: '.apt-row',
+            onEnd: function() {
+                saveAptOrder();
+            }
+        });
+    }
+
+    function saveAptOrder() {
+        const el = document.getElementById('apt-list-container');
+        const rows = el.querySelectorAll('.apt-row');
+        
+        let newOrderIds = [];
+        rows.forEach(row => {
+            const id = row.getAttribute('data-id');
+            if (id) newOrderIds.push(id.toString());
         });
 
-        if (res.ok) {
-            console.log("Mentés sikeres! ✨");
-            if (typeof showSaveToast === 'function') showSaveToast();
+        if (newOrderIds.length === 0) return;
+
+        const newOrderedArray = newOrderIds.map(id => {
+            return db.apartments.find(a => a.id.toString() === id);
+        }).filter(a => a !== undefined);
+
+        db.apartments = newOrderedArray;
+        saveDb();
+    }
+
+    function showSaveToast() {
+        let toast = document.getElementById('sort-toast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'sort-toast';
+            toast.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:10px 20px; border-radius:30px; font-size:12px; z-index:9999; pointer-events:none; opacity:0; transition:opacity 0.3s;";
+            document.body.appendChild(toast);
         }
-    } catch (err) {
-        console.error("Hálózati hiba a mentésnél:", err);
+        toast.innerHTML = "Sorrend frissítve! ✨";
+        toast.style.opacity = "1";
+        setTimeout(() => { toast.style.opacity = "0"; }, 1500);
     }
-}
-
-// Hogy a kódod ne dobjon hibát, ha véletlenül máshol saveDb()-t hívsz:
-async function saveDb() {
-    return await saveDatabase();
-}
-
-// Kis felugró üzenet, hogy lásd, a háttérben megtörtént a mentés
-function showSaveToast() {
-    let toast = document.getElementById('sort-toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'sort-toast';
-        toast.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:10px 20px; border-radius:30px; font-size:12px; z-index:9999; pointer-events:none; opacity:0; transition:opacity 0.3s;";
-        document.body.appendChild(toast);
-    }
-    toast.innerHTML = "Sorrend frissítve! ✨";
-    toast.style.opacity = "1";
-    setTimeout(() => { toast.style.opacity = "0"; }, 1500);
-}
 
     function drawChart(p, c, l) {
         const r=24, circ=Math.PI*r, off=circ-(p/100)*circ;
@@ -616,7 +593,7 @@ function showSaveToast() {
     async function deleteApt(id) { if(!confirm("Apartman törlése?")) return; db.apartments = db.apartments.filter(a => a.id != id); await saveDb(); }
     async function deleteOwner(id) { if(!confirm("Tulajdonos törlése?")) return; db.owners = db.owners.filter(o => o.id != id); await saveDb(); }
 
-    window.onload = () => { if (typeof initDatabase === "function") { initDatabase(renderAll); } };
+    window.onload = () => { initDatabase(renderAll); };
 </script>
 </body>
 </html>

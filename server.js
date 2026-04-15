@@ -1,5 +1,4 @@
 const express = require('express');
-const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 const ical = require('ical');
@@ -10,200 +9,121 @@ app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.post('/api/save', (req, res) => {
-    const newData = req.body;
-    
-    // FONTOS: Itt a database.js fájlt célozzuk meg!
-    // Mivel a 11. sorban látszik, hogy van 'public' mappád, 
-    // valószínűleg ott van a fájl:
-    const filePath = path.join(__dirname, 'public', 'database.js');
-
-    // Itt adjuk hozzá a JS változót az adatok elé
-    const fileContent = `const db = ${JSON.stringify(newData, null, 2)};`;
-
-    fs.writeFile(filePath, fileContent, (err) => {
-        if (err) {
-            console.error("Hiba a mentésnél:", err);
-            return res.status(500).send("Hiba a fájl írásakor");
-        }
-        
-        console.log("A database.js sikeresen frissítve az új sorrenddel! ✅");
-        res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-        res.status(200).json({ message: "Sikeres mentés" });
-    });
-});
-
-// 1. POSTGRES CSATLAKOZÁS
+// 1. ADATBÁZIS KAPCSOLAT
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: { rejectUnauthorized: false }
 });
 
-// 2. ADATBÁZIS INICIALIZÁLÁS (Fájlmentes biztonsági indítás)
+// 2. TÁBLA ÉS ALAPADAT LÉTREHOZÁSA (Ha még nem létezik)
 async function initDb() {
     await pool.query(`
         CREATE TABLE IF NOT EXISTS essence_data (
-            id serial PRIMARY KEY,
-            key text UNIQUE,
+            key text PRIMARY KEY,
             content jsonb
         )
     `);
     
-    const res = await pool.query("SELECT * FROM essence_data WHERE key = 'main_db'");
+    const res = await pool.query("SELECT content FROM essence_data WHERE key = 'main_db'");
     if (res.rowCount === 0) {
-        let initialDb = { apartments: [], owners: [], bookings: [], extras: [] };
-        
-        // Csak akkor próbáljuk betölteni, ha létezik a fájl, különben üresen indul
-        const backupPath = path.join(__dirname, 'public', 'database.js');
-        if (fs.existsSync(backupPath)) {
-            try {
-                // Itt nem require-t használunk, hogy ne crash-eljen ha rossz a path
-                const fileContent = fs.readFileSync(backupPath, 'utf8');
-                // Egyszerű tisztítás, hogy JSON-t kapjunk (ha a fájlban 'const db = ...' van)
-                const jsonPart = fileContent.substring(fileContent.indexOf('{'), fileContent.lastIndexOf('}') + 1);
-                initialDb = JSON.parse(jsonPart);
-            } catch (e) { console.log("Nem sikerült beolvasni a backup fájlt, üres DB indul."); }
-        }
-        
+        const initialDb = { apartments: [], owners: [], bookings: [], extras: [] };
         await pool.query("INSERT INTO essence_data (key, content) VALUES ('main_db', $1)", [initialDb]);
+        console.log("Üres adatbázis inicializálva.");
     }
 }
 initDb().catch(console.error);
 
-// Segédfüggvények
-async function getDb() {
+// 3. ADATBÁZIS MŰVELETEK
+async function getDbContent() {
     const res = await pool.query("SELECT content FROM essence_data WHERE key = 'main_db'");
     return res.rows[0].content;
 }
 
-// server.js - Stabilizált mentés
-async function saveDb(data) {
-    const query = `
-        INSERT INTO essence_data (key, content) 
-        VALUES ('main_db', $1) 
-        ON CONFLICT (key) 
-        DO UPDATE SET content = $1;
-    `;
-    try {
-        await pool.query(query, [data]);
-        console.log("Adatok sikeresen mentve a Postgres-be.");
-        return true;
-    } catch (err) {
-        console.error("Adatbázis hiba mentéskor:", err);
-        throw err;
-    }
+async function saveDbContent(data) {
+    await pool.query("UPDATE essence_data SET content = $1 WHERE key = 'main_db'", [data]);
 }
 
 // --- API ÚTVONALAK ---
 
-// Ez kell a frontendnek az adatok eléréséhez!
-// Adatok lekérése
-app.get('/api/get-db-content', (req, res) => {
-    const filePath = path.join(__dirname, 'public', 'data.json');
-    fs.readFile(filePath, 'utf8', (err, data) => {
-        if (err) return res.status(500).send("Hiba");
-        res.setHeader('Content-Type', 'application/json');
-        res.send(data);
-    });
+app.get('/api/get-db-content', async (req, res) => {
+    try {
+        const db = await getDbContent();
+        res.status(200).json(db);
+    } catch (err) {
+        console.error("Lekérdezési hiba:", err);
+        res.status(500).json({ error: "Hiba az adatok lekérésekor" });
+    }
 });
 
-// Adatok mentése
-app.post('/api/save', (req, res) => {
-    const filePath = path.join(__dirname, 'public', 'data.json');
-    const newData = JSON.stringify(req.body, null, 2);
-    
-    fs.writeFile(filePath, newData, (err) => {
-        if (err) return res.status(500).send("Hiba");
-        res.send({ message: "Sikeres mentés" });
-    });
+app.post('/api/save', async (req, res) => {
+    try {
+        await saveDbContent(req.body);
+        res.status(200).json({ message: "Sikeres mentés" });
+    } catch (err) {
+        console.error("Mentés hiba:", err);
+        res.status(500).json({ error: "Hiba az adatbázisba íráskor" });
+    }
 });
 
-// Új foglalás mentése
 app.post('/api/new-booking', async (req, res) => {
     try {
-        const booking = { 
-            id: Date.now().toString(),
-            ...req.body, 
-            createdAt: new Date().toISOString() 
-        };
+        const db = await getDbContent();
+        const booking = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
         
-        // Hozzáadjuk a központi adatbázishoz
         if (!db.bookings) db.bookings = [];
         db.bookings.push(booking);
 
-        // Opcionális: A naptárba is beírjuk, hogy foglalt legyen (Statisztikához)
         const apt = db.apartments.find(a => a.id == booking.aptId);
         if (apt) {
             if (!apt.bookedDates) apt.bookedDates = [];
-            // Itt egyszerűsítve csak elmentjük a kezdő és végdátumot
             apt.bookedDates.push({ start: booking.start, end: booking.end });
         }
 
-        await saveDbToPostgres(); // Mentés az adatbázisba
+        await saveDbContent(db);
         res.json({ success: true });
     } catch (e) {
         res.status(500).json({ error: e.message });
     }
 });
 
-// ÚTVONAL LÉTREHOZÁSA A MENTÉSHEZ
-app.post('/api/save', (req, res) => {
-    const fs = require('fs');
-    const path = require('path');
-    
-    // Az adatok, amiket az admin.html-ből küldtél
-    const updatedDb = req.body; 
-
-    // A fájl útvonala (győződj meg róla, hogy a data.json a szerver mellett van)
-    const filePath = path.join(__dirname, 'data.json');
-
-    // Fájl felülírása az új sorrenddel
-    fs.writeFile(filePath, JSON.stringify(updatedDb, null, 2), (err) => {
-        if (err) {
-            console.error("Hiba a mentésnél:", err);
-            return res.status(500).json({ error: "Nem sikerült a fájlba írás" });
-        }
-        console.log("Adatbázis (data.json) sikeresen frissítve!");
-        res.status(200).json({ message: "Sikeres mentés" });
-    });
-});
-
 app.post('/api/order', async (req, res) => {
     try {
-        const db = await getDb();
+        const db = await getDbContent();
         const newOrder = { id: "order_" + Date.now(), ...req.body, createdAt: new Date().toISOString() };
         if (!db.extras) db.extras = [];
         db.extras.push(newOrder);
-        await saveDb(db);
+        await saveDbContent(db);
         res.json({ success: true, id: newOrder.id });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.delete('/api/extras/:id', async (req, res) => {
     try {
-        const db = await getDb();
+        const db = await getDbContent();
         db.extras = (db.extras || []).filter(item => item.id !== req.params.id);
-        await saveDb(db);
+        await saveDbContent(db);
         res.json({ success: true });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.delete('/api/bookings/:id', async (req, res) => {
     try {
-        const db = await getDb();
+        const db = await getDbContent();
         db.bookings = (db.bookings || []).filter(item => item.id !== req.params.id);
-        await saveDb(db);
+        await saveDbContent(db);
         res.json({ success: true });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/api/sync', async (req, res) => {
     try {
-        const db = await getDb();
+        const db = await getDbContent();
         let hasChange = false;
+        
         for (let apt of db.apartments) {
             let externalDates = [];
             const urls = [apt.icalBooking, apt.icalSzallas].filter(u => u && u.startsWith('http'));
+            
             for (let url of urls) {
                 try {
                     const response = await axios.get(url, { timeout: 8000 });
@@ -226,7 +146,8 @@ app.post('/api/sync', async (req, res) => {
                 hasChange = true;
             }
         }
-        if (hasChange) await saveDb(db);
+        
+        if (hasChange) await saveDbContent(db);
         res.json({ success: true, changed: hasChange });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -238,5 +159,5 @@ app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.ht
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, "0.0.0.0", () => {
-    console.log(`ESSENCE SZERVER ELINDULT (POSTGRES MODE) | Port: ${PORT}`);
+    console.log(`ESSENCE SZERVER ELINDULT (POSTGRES JSONB MÓD) | Port: ${PORT}`);
 });
