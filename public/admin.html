@@ -415,32 +415,31 @@
    function renderAll() {
     if (!db) return;
 
-    // --- 0. FOGLALÁSOK TÁBLÁZAT (iCal és manuális is ide kerül) ---
-    const bookingTableBody = document.getElementById('booking-table-body');
-    if (bookingTableBody) {
-        // Ha nincs foglalás, üres legyen, ne hibaüzenet
-        const bookings = db.bookings || [];
-        bookingTableBody.innerHTML = bookings.map(b => {
-            const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
-            
-            // Forrás formázása (kisbetűs az iCal-ból jövő adatok miatt)
-            const source = (b.source || 'web').toLowerCase();
-            const sourceLabel = source === 'booking' ? 'Booking.com' : 
-                                source === 'szallas' ? 'Szallas.hu' : 'Weboldal';
+    // --- 0. FOGLALÁSOK TÁBLÁZAT ---
+        const bookingTableBody = document.getElementById('booking-table-body');
+        if (bookingTableBody && db.bookings) {
+            bookingTableBody.innerHTML = db.bookings.map(b => {
+                const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
+                
+                // Mezőnév ellenőrzése: próbáljuk a checkOut-ot, ha nincs, akkor az end-et (iCal-nál gyakori)
+                const checkInDate = b.checkIn || b.start || 'Nincs adat';
+                const checkOutDate = b.checkOut || b.end || 'Nincs adat';
 
-            return `
-                <tr>
-                    <td><strong>${apt ? apt.name : 'Ismeretlen'}</strong></td>
-                    <td>${b.guestName || 'Névtelen vendég'}</td>
-                    <td>${b.checkIn} &rarr; ${b.checkOut}</td>
-                    <td><span class="badge badge-${source}">${sourceLabel}</span></td>
-                    <td>
-                        <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">✕</button>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-    }
+                const source = (b.source || 'web').toLowerCase();
+                
+                return `
+                    <tr>
+                        <td><strong>${apt ? apt.name : 'Ismeretlen'}</strong></td>
+                        <td>${b.guestName || 'Névtelen vendég'}</td>
+                        <td>${checkInDate} &rarr; ${checkOutDate}</td>
+                        <td><span class="badge badge-${source}">${source.toUpperCase()}</span></td>
+                        <td>
+                            <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">✕</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
 
     // --- 1. REGGELI TÁBLÁZAT ---
     const breakfastBody = document.getElementById('breakfast-table-body');
