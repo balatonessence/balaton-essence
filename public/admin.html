@@ -417,23 +417,21 @@
 
     
      
-// --- 0. FOGLALÁSOK TÁBLÁZAT ---
+// --- 0. FOGLALÁSOK TÁBLÁZAT (Admin felület) ---
 const bookingTableBody = document.getElementById('booking-table-body');
 if (bookingTableBody && db.bookings) {
     bookingTableBody.innerHTML = db.bookings.map(b => {
         const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
         
-        // Dátumok: megnézzük a checkOut-ot és az end-et is (iCal miatt)
+        // Dátumok kezelése
         const cIn = b.checkIn || 'Nincs adat';
         const cOut = b.checkOut || b.end || 'Nincs adat';
         
-        // ÁR KEZELÉSE: Megnézzük az összes lehetséges kulcsot
-        const price = b.totalPrice || b.total || 0;
-        
-        // Formázás: Csak ha nagyobb mint 0
-        const priceFormatted = (price > 0) 
-            ? `${Number(price).toLocaleString()} Ft` 
-            : '<span style="color:#ccc">0 Ft / Nincs ár</span>';
+        // --- ITT AZ ÁR KEZELÉSE ---
+        const price = Number(b.totalPrice) || Number(b.total) || 0;
+        const priceFormatted = price > 0 
+            ? price.toLocaleString('hu-HU') + ' Ft' 
+            : 'Nincs ár';
 
         const source = (b.source || 'web').toLowerCase();
         

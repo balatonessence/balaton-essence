@@ -574,9 +574,17 @@
 
 
     async function sendBookingRequest() {
-    // 1. Kinyerjük a szöveget (pl. "54 000 Ft"), és csak a számokat hagyjuk meg
-    const totalText = document.getElementById('grand-total').innerText;
-    const cleanNumber = parseInt(totalText.replace(/[^0-9]/g, '')) || 0;
+    // 1. Kinyerjük a szöveget az árból (pl. "54 000 Ft")
+    const totalElement = document.getElementById('grand-total');
+    if (!totalElement) {
+        console.error("Hiba: grand-total elem nem található!");
+        return;
+    }
+
+    // 2. Csak a számokat hagyjuk meg (kiszedjük a Ft-ot és a szóközöket)
+    // Pl: "54 000 Ft" -> "54000" -> 54000 (Number)
+    const rawValue = totalElement.innerText;
+    const cleanNumber = parseInt(rawValue.replace(/[^0-9]/g, '')) || 0;
 
     const data = {
         aptId: currentApt.id,
@@ -585,13 +593,14 @@
         email: document.getElementById('book-email').value,
         phone: document.getElementById('book-phone').value,
         checkIn: document.getElementById('book-start').value,
-        checkOut: document.getElementById('book-end').value, // Távozás dátuma
+        checkOut: document.getElementById('book-end').value,
         guests: document.getElementById('book-guests').value,
-        totalPrice: cleanNumber, // ÍGY küldjük el a szervernek
+        totalPrice: cleanNumber, // Mostantól fixen SZÁM kerül az adatbázisba
         msg: document.getElementById('book-msg').value,
         source: 'Weboldal'
     };
 
+    // Validálás
     if (!data.guestName || !data.email || !data.phone) {
         showSuccess("Hiba!", "Kérlek töltsd ki az összes kötelező mezőt!");
         return;
