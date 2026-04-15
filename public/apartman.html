@@ -608,19 +608,26 @@
         // Opcionális: alert("Hiba: Az ár nem számítható ki!"); 
     }
 
-    // ... a fetch rész marad változatlan ...
     try {
         const res = await fetch('/api/new-booking', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
+
+        const result = await res.json();
+
         if (res.ok) {
-            showSuccess("Sikeres foglalás!", `Köszönjük, ${data.guestName}!`, () => {
+            showSuccess("Sikeres foglalás!", "Várjuk szeretettel!", () => {
                 window.location.reload();
             });
+        } else {
+            // Itt írja ki, hogy "Sajnos ez az időpont már foglalt!"
+            showSuccess("Hiba!", result.error || "Hiba történt.");
         }
-    } catch (e) { console.error(e); }
+    } catch (e) {
+        showSuccess("Hiba!", "Nem sikerült elérni a szervert.");
+    }
 }
 
 let calDate = new Date(); // A naptár aktuális nézete

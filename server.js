@@ -68,21 +68,40 @@ app.post('/api/save', async (req, res) => {
 app.post('/api/new-booking', async (req, res) => {
     try {
         const db = await getDbContent();
-        const booking = { id: Date.now().toString(), ...req.body, createdAt: new Date().toISOString() };
-        
-        if (!db.bookings) db.bookings = [];
-        db.bookings.push(booking);
+        const newB = req.body;
 
-        const apt = db.apartments.find(a => a.id == booking.aptId);
-        if (apt) {
-            if (!apt.bookedDates) apt.bookedDates = [];
-            apt.bookedDates.push({ start: booking.start, end: booking.end });
+        // 1. ÜTKÖZÉS ELLENŐRZÉSE
+        // Megnézzük, van-e már olyan foglalás, ami ugyanarra az apartmanra vonatkozik
+        // ÉS a dátumok átfedik egymást.
+        const isOverlapping = db.bookings.some(oldB => {
+            // Csak ha ugyanaz az apartman
+            if (String(oldB.aptId) !== String(newB.aptId)) return false;
+
+            // Átfedés matek: (Kezdet1 < Vége2) ÉS (Vége1 > Kezdet2)
+            const start1 = new Date(newB.checkIn);
+            const end1 = new Date(newB.checkOut);
+            const start2 = new Date(oldB.checkIn);
+            const end2 = new Date(oldB.checkOut || oldB.end);
+
+            return (start1 < end2 && end1 > start2);
+        });
+
+        if (isOverlapping) {
+            // 400-as hibát küldünk vissza, ha foglalt
+            return res.status(400).json({ error: "Sajnos ez az időpont már foglalt!" });
         }
 
+        // 2. HA NINCS ÜTKÖZÉS, MENTÜNK
+        // Generálunk egy ID-t, ha nincs
+        if (!newB.id) newB.id = 'ord_' + Date.now();
+        
+        db.bookings.push(newB);
         await saveDbContent(db);
+
         res.json({ success: true });
     } catch (e) {
-        res.status(500).json({ error: e.message });
+        console.error("Foglalási hiba:", e);
+        res.status(500).json({ error: "Szerver hiba történt a mentéskor." });
     }
 });
 
