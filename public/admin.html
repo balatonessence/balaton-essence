@@ -263,16 +263,26 @@
         }
     }
 
-    // --- PARTNER MENTÉSE (Javított ID-kkal) ---
+    // --- PARTNER MENTÉSE (4 jegyű random kóddal) ---
     async function saveOwner() {
         const id = document.getElementById('edit-owner-id').value;
         const name = document.getElementById('edit-owner-name').value;
-        const code = document.getElementById('edit-owner-code').value;
+        let code = document.getElementById('edit-owner-code').value;
+
+        // Ha nincs kód, generálunk egy random 4 jegyű számot
+        if (!code || code === "") {
+            code = Math.floor(1000 + Math.random() * 9000).toString();
+        }
 
         if (!db.owners) db.owners = [];
 
         if (!id || id === "") {
-            db.owners.push({ id: Date.now().toString(), name: name, code: code });
+            db.owners.push({ 
+                id: Date.now().toString(), 
+                name: name, 
+                code: code,
+                apartments: [] 
+            });
         } else {
             const idx = db.owners.findIndex(o => String(o.id || o._id) === String(id));
             if (idx !== -1) { 
@@ -284,51 +294,7 @@
         closeModal();
     }
 
-    // --- APARTMAN MENTÉSE ---
-    async function saveApt() {
-        const seasonElements = document.querySelectorAll('.season-row');
-        const seasonsData = [];
-        seasonElements.forEach(row => {
-            seasonsData.push({
-                name: row.querySelector('.s-name').value,
-                start: row.querySelector('.s-start').value,
-                end: row.querySelector('.s-end').value,
-                price: Number(row.querySelector('.s-price').value),
-                minNights: Number(row.querySelector('.s-min').value),
-                maxGuests: Number(row.querySelector('.s-max').value),
-                price3: Number(row.querySelector('.s-price3')?.value || 0),
-                price4: Number(row.querySelector('.s-price4')?.value || 0)
-            });
-        });
-
-        const aptData = {
-            id: activeId || Date.now().toString(),
-            name: document.getElementById('a-name').value,
-            location: document.getElementById('a-loc').value,
-            seasons: seasonsData, 
-            ownerId: document.getElementById('a-owner-select').value,
-            description: document.getElementById('a-desc').value,
-            coverImage: currentCoverImage, 
-            galleryImages: currentGalleryImages, 
-            icalBooking: document.getElementById('a-ical-b').value,
-            icalSzallas: document.getElementById('a-ical-sz').value,
-            bookedDates: activeId ? (db.apartments.find(a => String(a.id) === String(activeId))?.bookedDates || []) : []
-        };
-
-        if (!db.apartments) db.apartments = [];
-
-        if (!activeId) { 
-            db.apartments.push(aptData); 
-        } else { 
-            const idx = db.apartments.findIndex(a => String(a.id) === String(activeId)); 
-            if(idx !== -1) db.apartments[idx] = aptData; 
-        }
-        
-        await saveDb(); 
-        closeModal();
-    }
-
-    // --- KÉPKEZELÉS ---
+    // --- KÉPKEZELÉS (Tömörítés) ---
     function compressImage(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -372,12 +338,20 @@
     function renderImagePreviews() {
         const coverContainer = document.getElementById('a-cover-preview');
         if (coverContainer) {
-            coverContainer.innerHTML = currentCoverImage ? `<div style="position:relative; display:inline-block;"><img src="${currentCoverImage}" style="width:120px; height:80px; object-fit:cover; border-radius:8px; border:3px solid var(--essence);"><div onclick="removeCoverImage()" style="position:absolute; top:-10px; right:-10px; background:var(--danger); color:white; width:24px; height:24px; border-radius:50%; text-align:center; cursor:pointer; line-height:24px; font-size:12px; font-weight:bold;">X</div></div>` : '';
+            coverContainer.innerHTML = currentCoverImage ? `
+                <div style="position:relative; display:inline-block;">
+                    <img src="${currentCoverImage}" style="width:120px; height:80px; object-fit:cover; border-radius:8px; border:3px solid var(--essence);">
+                    <div onclick="removeCoverImage()" style="position:absolute; top:-10px; right:-10px; background:var(--danger); color:white; width:24px; height:24px; border-radius:50%; text-align:center; cursor:pointer; line-height:24px; font-size:12px; font-weight:bold;">X</div>
+                </div>` : '';
         }
 
         const galleryContainer = document.getElementById('a-gallery-preview');
         if (galleryContainer) {
-            galleryContainer.innerHTML = currentGalleryImages.map((img, idx) => `<div style="position:relative; display:inline-block;"><img src="${img}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #eee;"><div onclick="removeGalleryImage(${idx})" style="position:absolute; top:-8px; right:-8px; background:var(--danger); color:white; width:22px; height:22px; border-radius:50%; text-align:center; cursor:pointer; line-height:22px; font-size:12px; font-weight:bold;">X</div></div>`).join('');
+            galleryContainer.innerHTML = currentGalleryImages.map((img, idx) => `
+                <div style="position:relative; display:inline-block;">
+                    <img src="${img}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #eee;">
+                    <div onclick="removeGalleryImage(${idx})" style="position:absolute; top:-8px; right:-8px; background:var(--danger); color:white; width:22px; height:22px; border-radius:50%; text-align:center; cursor:pointer; line-height:22px; font-size:12px; font-weight:bold;">X</div>
+                </div>`).join('');
         }
         
         const visual = document.getElementById('apt-visual');
@@ -388,7 +362,7 @@
         }
     }
 
-    // --- SZEZON SOR HOZZÁADÁSA ---
+    // --- SZEZONOK KEZELÉSE ---
     function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2', maxGuests = '4', price3 = '', price4 = '') {
         const container = document.getElementById('seasons-container');
         if (!container) return;
@@ -402,12 +376,53 @@
                 <div><label>Ár (1-2 fő)</label><input type="number" class="s-price" value="${price}"></div>
                 <div><label>Min. éj</label><input type="number" class="s-min" value="${minNights}"></div>
                 <div><label>Max fő</label><input type="number" class="s-max" value="${maxGuests}"></div>
-                <div><label>Ár (3 fő)</label><input type="number" class="s-price3" value="${price3}" placeholder="Opcionális"></div>
-                <div><label>Ár (4 fő)</label><input type="number" class="s-price4" value="${price4}" placeholder="Opcionális"></div>
+                <div><label>Ár (3 fő)</label><input type="number" class="s-price3" value="${price3}" placeholder="Opc."></div>
+                <div><label>Ár (4 fő)</label><input type="number" class="s-price4" value="${price4}" placeholder="Opc."></div>
                 <button type="button" class="btn-del" style="background:#ff4d4d; color:white; border:none; border-radius:4px; cursor:pointer; height:35px;" onclick="document.getElementById('${rowId}').remove()">X</button>
             </div>
         `;
         container.insertAdjacentHTML('beforeend', rowHtml);
+    }
+
+    // --- APARTMAN MENTÉSE ---
+    async function saveApt() {
+        const seasonElements = document.querySelectorAll('.season-row');
+        const seasonsData = Array.from(seasonElements).map(row => ({
+            name: row.querySelector('.s-name').value,
+            start: row.querySelector('.s-start').value,
+            end: row.querySelector('.s-end').value,
+            price: Number(row.querySelector('.s-price').value),
+            minNights: Number(row.querySelector('.s-min').value),
+            maxGuests: Number(row.querySelector('.s-max').value),
+            price3: Number(row.querySelector('.s-price3')?.value || 0),
+            price4: Number(row.querySelector('.s-price4')?.value || 0)
+        }));
+
+        const aptData = {
+            id: activeId || Date.now().toString(),
+            name: document.getElementById('a-name').value,
+            location: document.getElementById('a-loc').value,
+            seasons: seasonsData, 
+            ownerId: document.getElementById('a-owner-select').value,
+            description: document.getElementById('a-desc').value,
+            coverImage: currentCoverImage, 
+            galleryImages: currentGalleryImages, 
+            icalBooking: document.getElementById('a-ical-b').value,
+            icalSzallas: document.getElementById('a-ical-sz').value,
+            bookedDates: activeId ? (db.apartments.find(a => String(a.id) === String(activeId))?.bookedDates || []) : []
+        };
+
+        if (!db.apartments) db.apartments = [];
+
+        if (!activeId) { 
+            db.apartments.push(aptData); 
+        } else { 
+            const idx = db.apartments.findIndex(a => String(a.id) === String(activeId)); 
+            if(idx !== -1) db.apartments[idx] = aptData; 
+        }
+        
+        await saveDb(); 
+        closeModal();
     }
 
     // --- MODALOK NYITÁSA ---
@@ -445,25 +460,26 @@
     }
 
     function openOwnerModal(id) {
+        const modal = document.getElementById('owner-modal');
         if (!id) {
             document.getElementById('edit-owner-id').value = "";
             document.getElementById('edit-owner-name').value = "";
             document.getElementById('edit-owner-code').value = "";
-            document.querySelector('#owner-modal h2').innerText = "Új partner hozzáadása";
+            modal.querySelector('h2').innerText = "Új partner hozzáadása";
         } else {
             const owner = db.owners.find(o => String(o.id || o._id) === String(id));
             if (!owner) return;
             document.getElementById('edit-owner-id').value = owner.id || owner._id;
             document.getElementById('edit-owner-name').value = owner.name;
             document.getElementById('edit-owner-code').value = owner.code || "";
-            document.querySelector('#owner-modal h2').innerText = "Partner szerkesztése";
+            modal.querySelector('h2').innerText = "Partner szerkesztése";
         }
-        document.getElementById('owner-modal').style.display = 'flex';
+        modal.style.display = 'flex';
     }
 
     function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
-    // --- RENDER ALL ---
+    // --- RENDER ALL (Minden vizuális elemmel) ---
     function renderAll() {
         if (!db) return;
 
@@ -477,7 +493,7 @@
                 return `<tr>
                     <td><strong>${apt ? apt.name : 'Ismeretlen'}</strong></td>
                     <td><div style="font-weight:600;">${b.guestName || 'Vendég'}</div><div style="font-size:0.75rem; color:var(--accent); font-weight:700;">${price.toLocaleString()} Ft</div></td>
-                    <td>${b.checkIn || ''} &rarr; ${b.checkOut || b.end || ''}</td>
+                    <td><div style="font-size: 0.85rem;">${b.checkIn || ''} &rarr; ${b.checkOut || b.end || ''}</div></td>
                     <td><span class="badge badge-${source}">${source.toUpperCase()}</span></td>
                     <td style="text-align:center;"><button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">✕</button></td>
                 </tr>`;
@@ -489,23 +505,23 @@
         if (breakfastTableBody && db.breakfasts) {
             breakfastTableBody.innerHTML = db.breakfasts.map(b => `
                 <tr>
-                    <td><strong>${b.aptName || '---'}</strong><br><small>${b.guestName || ''}</small></td>
+                    <td><strong>${b.aptName || '---'}</strong><br><span style="font-size:0.85rem; color:#666;">${b.guestName || ''}</span></td>
                     <td>${b.date || ''}</td>
-                    <td>${b.note || ''}<div style="font-weight:bold; color:#e67e22;">${(Number(b.totalPrice) || 0).toLocaleString()} Ft</div></td>
-                    <td><button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${b.id}')">✕</button></td>
+                    <td><div style="font-size:0.9rem;">${b.note || ''}</div><div style="font-weight:bold; color:#e67e22; margin-top:4px;">${(Number(b.totalPrice) || 0).toLocaleString()} Ft</div></td>
+                    <td style="text-align:center;"><button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${b.id}')">✕</button></td>
                 </tr>`).join('');
         }
 
-        // 2. EXTRÁK / BÉRLÉS
+        // 2. EXTRÁK
         const rentTableBody = document.getElementById('rent-table-body');
         if (rentTableBody && db.extras) {
             rentTableBody.innerHTML = db.extras.map(e => `
                 <tr>
-                    <td><strong>${e.items || ''}</strong><br><small>${(e.totalPrice || 0).toLocaleString()} Ft</small></td>
-                    <td>${e.guestName || ''}</td>
-                    <td>${e.start || ''} &rarr; ${e.end || ''}</td>
+                    <td><div style="font-weight:700; color:var(--accent);">${e.items || ''}</div><div style="font-size:0.75rem;">${(e.totalPrice || 0).toLocaleString()} Ft</div></td>
+                    <td><div style="font-weight:600;">${e.guestName || ''}</div></td>
+                    <td><div style="font-size:0.85rem;">${e.start || ''} &rarr; ${e.end || ''}</div></td>
                     <td>${e.apartment || ''}</td>
-                    <td><button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">✕</button></td>
+                    <td style="text-align:center;"><button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">✕</button></td>
                 </tr>`).join('');
         }
 
@@ -515,20 +531,12 @@
             aptListContainer.innerHTML = db.apartments.map(a => {
                 const owner = (db.owners || []).find(o => String(o.id) === String(a.ownerId));
                 const aptBookings = (db.bookings || []).filter(b => String(b.aptId) === String(a.id));
-                
-                let webCount = 0, bookingCount = 0, szallasCount = 0;
+                let web=0, book=0, szal=0;
                 aptBookings.forEach(b => {
-                    const src = (b.source || '').toLowerCase();
-                    if (src === 'booking') bookingCount++;
-                    else if (src === 'szallas') szallasCount++;
-                    else webCount++;
+                    const s = (b.source || '').toLowerCase();
+                    if (s === 'booking') book++; else if (s === 'szallas') szal++; else web++;
                 });
-                
-                const webPerc = Math.min(webCount * 10, 100); 
-                const bookingPerc = Math.min(bookingCount * 10, 100);
-                const szallasPerc = Math.min(szallasCount * 10, 100);
-                const thumb = a.coverImage ? `<img src="${a.coverImage}" style="width:45px; height:45px; border-radius:8px; object-fit:cover; margin-right:15px;">` : `<div style="width:45px; height:45px; border-radius:8px; background:#eee; margin-right:15px; display:flex; align-items:center; justify-content:center;">?</div>`;
-                
+                const thumb = a.coverImage ? `<img src="${a.coverImage}" style="width:45px; height:45px; border-radius:8px; object-fit:cover; margin-right:15px;">` : `<div style="width:45px; height:45px; border-radius:8px; background:#f5f5f5; margin-right:15px; display:flex; align-items:center; justify-content:center;">?</div>`;
                 return `
                     <div class="apt-row" data-id="${a.id}" style="display:grid; grid-template-columns: 2fr 3.5fr 1.2fr; padding:1.2rem; border-bottom:1px solid #f0f0f0; align-items:center; background: white;">
                         <div style="display:flex; align-items:center;">
@@ -539,9 +547,9 @@
                             </div>
                         </div>
                         <div style="display: flex; gap: 15px;">
-                            ${drawChart(bookingPerc, 'var(--booking)', 'Booking')}
-                            ${drawChart(szallasPerc, 'var(--szallas)', 'Szallas')}
-                            ${drawChart(webPerc, 'var(--essence)', 'Web')}
+                            ${drawChart(Math.min(book*10, 100), 'var(--booking)', 'Booking')}
+                            ${drawChart(Math.min(szal*10, 100), 'var(--szallas)', 'Szallas')}
+                            ${drawChart(Math.min(web*10, 100), 'var(--essence)', 'Web')}
                         </div>
                         <div style="display:flex; gap:8px; justify-content: flex-end;">
                             <button class="btn-outline" onclick="openAptModal('${a.id}')">Szerkesztés</button>
@@ -559,8 +567,8 @@
                 <tr>
                     <td><strong>${o.name || 'Névtelen'}</strong></td>
                     <td>#${o.code || '---'}</td>
-                    <td><span class="count">${o.apartments ? o.apartments.length : 0} ingatlan</span></td>
-                    <td style="text-align: center;">
+                    <td><span class="count">${(db.apartments || []).filter(a => String(a.ownerId) === String(o.id)).length} ingatlan</span></td>
+                    <td style="text-align: center; width: 100px;">
                         <button class="btn-edit" onclick="openOwnerModal('${o.id || o._id}')">SZERKESZTÉS</button>
                         <button class="btn-del" onclick="deleteOwner('${o.id || o._id}')">✕</button>
                     </td>
@@ -568,13 +576,12 @@
         }
     }
 
-    // --- GRAFIKON RAJZOLÁS ---
+    // --- SEGÉDFÜGGVÉNYEK ---
     function drawChart(p, c, l) {
         const r=24, circ=Math.PI*r, off=circ-(p/100)*circ;
         return `<div class="chart-box" style="text-align:center;"><div style="font-size:0.5rem; font-weight:700;">${p}%</div><svg width="60" height="35" viewBox="0 0 60 35"><path d="M6,30 A24,24 0 0,1 54,30" fill="none" stroke="#eee" stroke-width="5"/><path d="M6,30 A24,24 0 0,1 54,30" fill="none" stroke="${c}" stroke-width="5" style="stroke-dasharray:${circ}; stroke-dashoffset:${off}; transition:0.5s;"/></svg><div style="font-size:0.45rem; color:#999;">${l}</div></div>`;
     }
 
-    // --- TOAST ÉS RENDEZÉS ---
     function showSaveToast() {
         let t = document.getElementById('sort-toast');
         if (!t) {
@@ -600,14 +607,15 @@
         saveDb();
     }
 
-    // --- TÖRLÉS ÉS SZINKRON ---
     async function syncCalendars() { const res = await fetch('/api/sync', {method:'POST'}); if(res.ok) window.location.reload(); }
+    
     async function deleteItem(type, id) {
         if (!confirm("Biztosan törlöd?")) return;
         const res = await fetch(`/api/${type}/${String(id).split(':')[0].trim()}`, { method: 'DELETE' });
         if (res.ok) window.location.reload();
         else alert("Szerver hiba.");
     }
+
     async function deleteApt(id) { if(confirm("Törlöd?")) { db.apartments = db.apartments.filter(a => String(a.id) !== String(id)); await saveDb(); } }
     async function deleteOwner(id) { if(confirm("Törlöd?")) { db.owners = db.owners.filter(o => String(o.id || o._id) !== String(id)); await saveDb(); } }
 
