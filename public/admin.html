@@ -413,7 +413,6 @@
     function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
    function renderAll() {
-    // Biztonsági mentés, ha a db még nem töltődött be
     if (!db) return;
 
     // --- 1. REGGELI TÁBLÁZAT ---
@@ -429,7 +428,7 @@
         `).join('');
     }
 
-    // --- 2. ESZKÖZ BÉRLÉS TÁBLÁZAT (Minden bérlés ide kerül) ---
+    // --- 2. ESZKÖZ BÉRLÉS TÁBLÁZAT ---
     const rentTableBody = document.getElementById('rent-table-body');
     if (rentTableBody) {
         rentTableBody.innerHTML = (db.extras || []).map(e => `
@@ -456,16 +455,32 @@
         `).join('');
     }
 
-    // --- 3. APARTMANOK LISTÁJA ---
+    // --- 3. APARTMANOK LISTÁJA ÉS STATISZTIKA ---
     const aptListContainer = document.getElementById('apt-list-container');
     if (aptListContainer && db.apartments) {
         aptListContainer.innerHTML = db.apartments.map(a => {
             const owner = (db.owners || []).find(o => o.id == a.ownerId);
+            
+            // Csak az aktuális apartman foglalásai
             const aptBookings = (db.bookings || []).filter(b => b.aptId == a.id);
             
-            const webCount = aptBookings.filter(b => b.source === 'Weboldal').length;
-            const bookingCount = aptBookings.filter(b => b.source === 'booking').length;
-            const szallasCount = aptBookings.filter(b => b.source === 'szallas').length;
+            // Számlálók alaphelyzetbe állítása
+            let webCount = 0;
+            let bookingCount = 0;
+            let szallasCount = 0;
+
+            // Pontos szűrés a forrás alapján
+            aptBookings.forEach(b => {
+                const source = (b.source || '').toLowerCase();
+                if (source === 'booking') {
+                    bookingCount++;
+                } else if (source === 'szallas') {
+                    szallasCount++;
+                } else if (source === 'weboldal' || source === 'manual' || source === '') {
+                    // Ha Weboldal, vagy manuális, vagy nincs forrás, azt a Web (Saját) alá számoljuk
+                    webCount++;
+                }
+            });
             
             const webPerc = Math.min(webCount * 10, 100); 
             const bookingPerc = Math.min(bookingCount * 10, 100);
@@ -476,7 +491,7 @@
                 `<div style="width:45px; height:45px; border-radius:8px; background:#f5f5f5; margin-right:15px; display:flex; align-items:center; justify-content:center; color:#ccc;">?</div>`;
             
             return `
-                <div class="apt-row" data-id="${a.id}" style="display:grid; grid-template-columns: 2fr 3.5fr 1.2fr; padding:1.2rem; border-bottom:1px solid #f0f0f0; align-items:center; background: white; cursor: grab;">
+                <div class="apt-row" data-id="${a.id}" style="display:grid; grid-template-columns: 2fr 3.5fr 1.2fr; padding:1.2rem; border-bottom:1px solid #f0f0f0; align-items:center; background: white;">
                     <div style="display:flex; align-items:center;">
                         ${thumb}
                         <div>
@@ -499,7 +514,7 @@
         if (typeof initAptSorting === "function") initAptSorting();
     }
 
-    // --- 4. PARTNEREK / TULAJDONOSOK ---
+    // --- 4. TULAJDONOSOK ---
     const ownerTableBody = document.getElementById('owner-table-body');
     if (ownerTableBody && db.owners) {
         ownerTableBody.innerHTML = db.owners.map(o => {
