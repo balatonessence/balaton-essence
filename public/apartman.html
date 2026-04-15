@@ -574,9 +574,9 @@
 
 
     async function sendBookingRequest() {
-    // Kinyerjük az összeget a "50 000 Ft" formátumból és számmá alakítjuk
+    // 1. Kinyerjük a szöveget (pl. "54 000 Ft"), és csak a számokat hagyjuk meg
     const totalText = document.getElementById('grand-total').innerText;
-    const numericPrice = parseInt(totalText.replace(/[^0-9]/g, '')) || 0;
+    const cleanNumber = parseInt(totalText.replace(/[^0-9]/g, '')) || 0;
 
     const data = {
         aptId: currentApt.id,
@@ -585,9 +585,9 @@
         email: document.getElementById('book-email').value,
         phone: document.getElementById('book-phone').value,
         checkIn: document.getElementById('book-start').value,
-        checkOut: document.getElementById('book-end').value, // 'end' helyett 'checkOut' a konzisztencia miatt
+        checkOut: document.getElementById('book-end').value, // Távozás dátuma
         guests: document.getElementById('book-guests').value,
-        totalPrice: numericPrice, // Itt a kulcs neve mostantólTotalPrice!
+        totalPrice: cleanNumber, // ÍGY küldjük el a szervernek
         msg: document.getElementById('book-msg').value,
         source: 'Weboldal'
     };

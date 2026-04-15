@@ -416,40 +416,43 @@
     if (!db) return;
 
     
-     // --- 0. FOGLALÁSOK TÁBLÁZAT ---
-        const bookingTableBody = document.getElementById('booking-table-body');
-        if (bookingTableBody && db.bookings) {
-            bookingTableBody.innerHTML = db.bookings.map(b => {
-                const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
-                
-                // Dátumok kezelése
-                const cIn = b.checkIn || 'Nincs adat';
-                const cOut = b.checkOut || b.end || 'Nincs adat';
-                
-                // Ár kezelése: megnézzük mindkét lehetséges kulcsot
-                const price = b.totalPrice || b.total || 0;
-                const priceFormatted = price > 0 
-                    ? `${Number(price).toLocaleString()} Ft` 
-                    : '<span style="color:#ccc">Nincs ár</span>';
+     
+// --- 0. FOGLALÁSOK TÁBLÁZAT ---
+const bookingTableBody = document.getElementById('booking-table-body');
+if (bookingTableBody && db.bookings) {
+    bookingTableBody.innerHTML = db.bookings.map(b => {
+        const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
+        
+        // Dátumok: megnézzük a checkOut-ot és az end-et is (iCal miatt)
+        const cIn = b.checkIn || 'Nincs adat';
+        const cOut = b.checkOut || b.end || 'Nincs adat';
+        
+        // ÁR KEZELÉSE: Megnézzük az összes lehetséges kulcsot
+        const price = b.totalPrice || b.total || 0;
+        
+        // Formázás: Csak ha nagyobb mint 0
+        const priceFormatted = (price > 0) 
+            ? `${Number(price).toLocaleString()} Ft` 
+            : '<span style="color:#ccc">0 Ft / Nincs ár</span>';
 
-                const source = (b.source || 'web').toLowerCase();
-                
-                return `
-                    <tr>
-                        <td><strong>${apt ? apt.name : 'Ismeretlen'}</strong></td>
-                        <td>
-                            <div style="font-weight: 600;">${b.guestName || 'Névtelen vendég'}</div>
-                            <div style="font-size: 0.75rem; color: var(--accent); font-weight: 700;">${priceFormatted}</div>
-                        </td>
-                        <td><div style="font-size: 0.85rem;">${cIn} &rarr; ${cOut}</div></td>
-                        <td><span class="badge badge-${source}">${source.toUpperCase()}</span></td>
-                        <td>
-                            <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">✕</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
+        const source = (b.source || 'web').toLowerCase();
+        
+        return `
+            <tr>
+                <td><strong>${apt ? apt.name : 'Ismeretlen'}</strong></td>
+                <td>
+                    <div style="font-weight: 600;">${b.guestName || 'Névtelen vendég'}</div>
+                    <div style="font-size: 0.75rem; color: var(--accent); font-weight: 700;">${priceFormatted}</div>
+                </td>
+                <td><div style="font-size: 0.85rem;">${cIn} &rarr; ${cOut}</div></td>
+                <td><span class="badge badge-${source}">${source.toUpperCase()}</span></td>
+                <td>
+                    <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">✕</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
 
     // --- 1. REGGELI TÁBLÁZAT ---
     const breakfastBody = document.getElementById('breakfast-table-body');
