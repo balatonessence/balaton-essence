@@ -143,11 +143,10 @@
         <div id="apt-list-container"></div>
     </div>
 
-    <div class="section">
-        <div class="section-header">
-            <h2>Partnerek & Tulajdonosok</h2>
-            <button class="btn-main" onclick="openNewOwnerModal()">+ ÚJ PARTNER</button>
-        </div>
+    <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h2>Partnerek & Tulajdonosok</h2>
+        <button class="btn-main" onclick="openNewOwnerModal()">+ ÚJ PARTNER</button>
+    </div>
         <table>
             <thead><tr><th>Név</th><th>Kód</th><th>Ingatlanok</th><th>Művelet</th></tr></thead>
             <tbody id="owner-table-body"></tbody>
@@ -385,67 +384,101 @@
     }
 
     function openAptModal(id) {
-        activeId = id;
-        const select = document.getElementById('a-owner-select');
-        select.innerHTML = (db.owners || []).map(o => `<option value="${o.id}">${o.name}</option>`).join('');
-        
-        const seasonsContainer = document.getElementById('seasons-container');
-        seasonsContainer.innerHTML = ''; 
-
-        if (id) {
-            const a = db.apartments.find(apt => apt.id === id);
-            document.getElementById('a-name').value = a.name;
-            document.getElementById('a-loc').value = a.location;
-            document.getElementById('a-owner-select').value = a.ownerId;
-            document.getElementById('a-desc').value = a.description || '';
-            document.getElementById('a-ical-b').value = a.icalBooking || '';
-            document.getElementById('a-ical-sz').value = a.icalSzallas || '';
-            
-            currentCoverImage = a.coverImage || null;
-            currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
-            
-            if (a.seasons && a.seasons.length > 0) {
-                a.seasons.forEach(s => addSeasonRow(s.name, s.start, s.end, s.price, s.minNights, s.maxGuests || 2));
-            }
-        } else {
-            document.getElementById('a-name').value = '';
-            document.getElementById('a-loc').value = '';
-            document.getElementById('a-desc').value = '';
-            document.getElementById('a-ical-b').value = '';
-            document.getElementById('a-ical-sz').value = '';
-            currentCoverImage = null;
-            currentGalleryImages = [];
-        }
-        renderImagePreviews();
-        document.getElementById('apt-modal').style.display = 'flex';
-    }
-
-function openOwnerModal(id) {
-    // 1. Megkeressük az adatot
-    if (!db.owners) return;
-    const owner = db.owners.find(o => String(o.id) === String(id));
+    activeId = id;
     
-    if (!owner) {
-        console.error("Nem található tulajdonos ezzel az ID-val:", id);
+    // 1. Tulajdonos választó feltöltése
+    const select = document.getElementById('a-owner-select');
+    if (select) {
+        select.innerHTML = (db.owners || []).map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+    }
+    
+    const seasonsContainer = document.getElementById('seasons-container');
+    if (seasonsContainer) seasonsContainer.innerHTML = ''; 
+
+    if (id) {
+        // JAVÍTÁS: String kényszerítés, hogy biztosan megtalálja (== helyett String cast)
+        const a = db.apartments.find(apt => String(apt.id) === String(id));
+        
+        if (!a) {
+            console.error("Nem található apartman ezzel az ID-val:", id);
+            return; // Megállítjuk, hogy ne szálljon el a 'name' olvasásánál
+        }
+
+        // Adatok betöltése - Biztonságos létezés ellenőrzéssel
+        const fields = {
+            'a-name': a.name,
+            'a-loc': a.location,
+            'a-owner-select': a.ownerId,
+            'a-desc': a.description || '',
+            'a-ical-b': a.icalBooking || '',
+            'a-ical-sz': a.icalSzallas || ''
+        };
+
+        for (const [fieldId, value] of Object.entries(fields)) {
+            const el = document.getElementById(fieldId);
+            if (el) el.value = value || '';
+        }
+        
+        currentCoverImage = a.coverImage || null;
+        currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
+        
+        if (a.seasons && a.seasons.length > 0) {
+            a.seasons.forEach(s => {
+                if (typeof addSeasonRow === "function") {
+                    addSeasonRow(s.name, s.start, s.end, s.price, s.minNights, s.maxGuests || 2);
+                }
+            });
+        }
+    } else {
+        // ÚJ APARTMAN - Mezők ürítése
+        ['a-name', 'a-loc', 'a-desc', 'a-ical-b', 'a-ical-sz'].forEach(fieldId => {
+            const el = document.getElementById(fieldId);
+            if (el) el.value = '';
+        });
+        currentCoverImage = null;
+        currentGalleryImages = [];
+    }
+    
+    if (typeof renderImagePreviews === "function") renderImagePreviews();
+    
+    const modal = document.getElementById('apt-modal');
+    if (modal) modal.style.display = 'flex';
+}
+
+function openOwnerModal(id = null) {
+    const modal = document.getElementById('owner-modal');
+    if (!modal) {
+        console.error("Hiba: Az 'owner-modal' nem található!");
         return;
     }
 
-    // 2. Értékek betöltése (ID ellenőrzéssel, hogy ne szálljon el a kód)
+    // Mezők lekérése
     const nameInput = document.getElementById('edit-owner-name');
     const codeInput = document.getElementById('edit-owner-code');
     const idInput = document.getElementById('edit-owner-id');
+    const titleEl = modal.querySelector('h2');
 
-    if (nameInput) nameInput.value = owner.name || "";
-    if (codeInput) codeInput.value = owner.code || "";
-    if (idInput) idInput.value = owner.id;
+    if (id) {
+        // --- SZERKESZTÉS MÓD ---
+        const owner = db.owners.find(o => String(o.id || o._id) === String(id));
+        if (!owner) {
+            console.error("Nem található tulajdonos ezzel az ID-val:", id);
+            return;
+        }
 
-    // 3. Megjelenítés
-    const modal = document.getElementById('owner-modal');
-    if (modal) {
-        modal.style.display = 'flex';
+        if (nameInput) nameInput.value = owner.name || "";
+        if (codeInput) codeInput.value = owner.code || "";
+        if (idInput) idInput.value = owner.id || owner._id;
+        if (titleEl) titleEl.innerText = "Partner szerkesztése";
     } else {
-        console.error("Hiba: Az 'owner-modal' nem található a HTML-ben!");
+        // --- ÚJ PARTNER MÓD (ha id null vagy undefined) ---
+        if (nameInput) nameInput.value = "";
+        if (codeInput) codeInput.value = "";
+        if (idInput) idInput.value = "";
+        if (titleEl) titleEl.innerText = "Új partner hozzáadása";
     }
+
+    modal.style.display = 'flex';
 }
 
 function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
