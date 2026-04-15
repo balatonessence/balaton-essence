@@ -733,7 +733,6 @@ function renderCalendar() {
 
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
     const startOffset = firstDay === 0 ? 6 : firstDay - 1;
 
     for (let i = 0; i < startOffset; i++) {
@@ -742,8 +741,9 @@ function renderCalendar() {
 
     const todayStr = new Date().toISOString().split('T')[0];
 
-    // Adatok kinyerése
-    const bookedDates = currentApt?.bookedDates || [];
+    // Itt a titok: a db.bookings-ból dolgozunk, hogy lássuk a tól-ig tartományokat
+    // (Ha a currentApt-ben csak véglátumok vannak, az kevés)
+    const bookings = db.bookings || [];
 
     for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -751,21 +751,25 @@ function renderCalendar() {
         let className = "cal-day";
         let onClickAttr = `onclick="selectDate('${dateStr}')"`;
 
-        // 1. ELLENŐRZÉS: Múltbéli nap?
-        if (dateStr < todayStr) {
-            className += " past";
-        }
-
-        // 2. JAVÍTOTT ELLENŐRZÉS: Mivel a bookedDates objektumokat tartalmaz {end: '...'}
-        // A .some() végigmegy rajtuk és megnézi, hogy bármelyik 'end' értéke egyezik-e
-        const isBooked = bookedDates.some(b => b.end === dateStr);
+        // ÁTTERVEZETT ELLENŐRZÉS: Benne van-e a nap bármelyik foglalási tartományban?
+        const isBooked = bookings.some(b => {
+            // Csak ehhez az apartmanhoz tartozó foglalást nézzük
+            if (String(b.aptId) !== String(currentApt.id)) return false;
+            
+            const start = b.checkIn || b.start;
+            const end = b.checkOut || b.end;
+            
+            // Ha a nap a checkIn és a checkOut közé esik (vagy egyenlő velük)
+            return dateStr >= start && dateStr < end; 
+            // Megjegyzés: a távozás napja (end) általában már szabad, ezért használtam a '< end' jelet
+        });
 
         if (isBooked) {
             className += " booked";
-            onClickAttr = ""; // Tiltjuk a kattintást foglalt napon
+            onClickAttr = ""; 
         }
 
-        // 3. Kiválasztási stílusok (selectedStart, selectedEnd, stb.)
+        if (dateStr < todayStr) className += " past";
         if (selectedStart && dateStr === selectedStart) className += " selected-start";
         if (selectedEnd && dateStr === selectedEnd) className += " selected-end";
         if (selectedStart && selectedEnd && dateStr > selectedStart && dateStr < selectedEnd) className += " selected-range";
