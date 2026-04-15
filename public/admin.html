@@ -206,11 +206,23 @@
     </div>
 </div>
 
-<div id="owner-modal" class="modal">
+<div id="owner-modal" class="modal" style="display: none;">
     <div class="modal-content">
-        <input type="hidden" id="edit-owner-id"> <input type="text" id="edit-owner-name" placeholder="Partner neve">
-        <input type="text" id="edit-owner-code" placeholder="Kód">
+        <h3>Partner szerkesztése</h3>
+        <input type="hidden" id="edit-owner-id">
+        <div class="input-group">
+            <label>Partner neve</label>
+            <input type="text" id="edit-owner-name">
         </div>
+        <div class="input-group">
+            <label>Kód</label>
+            <input type="text" id="edit-owner-code">
+        </div>
+        <div class="modal-buttons">
+            <button onclick="saveOwner()" class="btn-main">Mentés</button>
+            <button onclick="document.getElementById('owner-modal').style.display='none'" class="btn-outline">Mégse</button>
+        </div>
+    </div>
 </div>
 
 <script src="database.js?v=2.0"></script>
@@ -581,22 +593,20 @@ if (breakfastTableBody && db.breakfasts) {
     }
 
 
-    // --- 4. TULAJDONOSOK ---
-    const ownerTableBody = document.getElementById('owner-table-body');
-    if (ownerTableBody && db.owners) {
-        ownerTableBody.innerHTML = db.owners.map(o => {
-            const aptCount = (db.apartments || []).filter(a => a.ownerId == o.id).length;
-            return// A renderAll-on belül a tulajdonosoknál:
-                `<tr>
-                    <td><strong>${o.name}</strong></td>
-                    <td>#${o.code}</td>
-                    <td><span class="count">${o.apartments ? o.apartments.length : 0} ingatlan</span></td>
-                    <td style="text-align: right;">
-                        <button class="btn-edit" onclick="openOwnerModal('${o.id}')">SZERKESZTÉS</button>
-                        <button class="btn-del" onclick="deleteOwner('${o.id}')">✕</button>
-                    </td>
-                </tr>`;
-        }).join('');
+    // --- PARTNEREK ÉS TULAJDONOSOK ---
+const ownersTableBody = document.getElementById('owners-table-body');
+    if (ownersTableBody && db.owners) {
+        ownersTableBody.innerHTML = db.owners.map(o => `
+            <tr>
+                <td><strong>${o.name}</strong></td>
+                <td>#${o.code}</td>
+                <td><span class="count">${o.apartments ? o.apartments.length : 0} ingatlan</span></td>
+                <td style="text-align: right;">
+                    <button class="btn-edit" onclick="openOwnerModal('${o.id}')">SZERKESZTÉS</button>
+                    <button class="btn-del" onclick="deleteOwner('${o.id}')">✕</button>
+                </td>
+            </tr>
+        `).join('');
     }
 }
 
