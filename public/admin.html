@@ -413,22 +413,23 @@
     function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
    function renderAll() {
-    if (!db.apartments) return;
+    // Biztonsági mentés, ha a db még nem töltődött be
+    if (!db) return;
 
-    // --- REGGELI TÁBLÁZAT ---
+    // --- 1. REGGELI TÁBLÁZAT ---
     const breakfastBody = document.getElementById('breakfast-table-body');
     if (breakfastBody) {
         breakfastBody.innerHTML = (db.breakfasts || []).map(b => `
             <tr>
-                <td><strong>${b.aptName}</strong><br>${b.guest}</td>
-                <td>${b.date}</td>
-                <td>${b.note}</td>
+                <td><strong>${b.aptName || 'Külsős'}</strong><br>${b.guest || b.guestName || 'Vendég'}</td>
+                <td>${b.date || ''}</td>
+                <td>${b.note || ''}</td>
                 <td><button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${b.id}')">✕</button></td>
             </tr>
         `).join('');
     }
 
-    // --- ESZKÖZ BÉRLÉS TÁBLÁZAT ---
+    // --- 2. ESZKÖZ BÉRLÉS TÁBLÁZAT (Minden bérlés ide kerül) ---
     const rentTableBody = document.getElementById('rent-table-body');
     if (rentTableBody) {
         rentTableBody.innerHTML = (db.extras || []).map(e => `
@@ -455,39 +456,10 @@
         `).join('');
     }
 
-}
-
-    // 2. FELSZERELÉS BÉRLÉSEK (EXTRAS) MEGJELENÍTÉSE - EZ HIÁNYZOTT!
-    const extrasTableBody = document.getElementById('extras-table-body');
-    if (extrasTableBody) {
-        extrasTableBody.innerHTML = (db.extras || []).map(e => `
-            <tr>
-                <td>
-                    <div style="font-weight: 700;">${e.guestName}</div>
-                    <div style="font-size: 0.75rem; color: #777;">${e.apartment}</div>
-                </td>
-                <td>
-                    <div style="font-weight: 600; color: var(--accent);">${e.items}</div>
-                    <div style="font-size: 0.75rem;">${e.phone}</div>
-                </td>
-                <td>
-                    <div style="font-size: 0.85rem;"><strong>${e.start}</strong> &rarr; <strong>${e.end}</strong></div>
-                    <div style="font-size: 0.75rem; color: #777;">${e.days} nap</div>
-                </td>
-                <td>
-                    <div style="font-weight: 700;">${(e.totalPrice || 0).toLocaleString()} Ft</div>
-                </td>
-                <td>
-                    <button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">Törlés</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
-    // 3. APARTMANOK LISTÁJA
+    // --- 3. APARTMANOK LISTÁJA ---
     const aptListContainer = document.getElementById('apt-list-container');
-    if (aptListContainer) {
-        aptListContainer.innerHTML = (db.apartments || []).map(a => {
+    if (aptListContainer && db.apartments) {
+        aptListContainer.innerHTML = db.apartments.map(a => {
             const owner = (db.owners || []).find(o => o.id == a.ownerId);
             const aptBookings = (db.bookings || []).filter(b => b.aptId == a.id);
             
@@ -524,13 +496,13 @@
                 </div>`;
         }).join('');
 
-        initAptSorting();
+        if (typeof initAptSorting === "function") initAptSorting();
     }
 
-    // 4. TULAJDONOSOK
+    // --- 4. PARTNEREK / TULAJDONOSOK ---
     const ownerTableBody = document.getElementById('owner-table-body');
-    if (ownerTableBody) {
-        ownerTableBody.innerHTML = (db.owners || []).map(o => {
+    if (ownerTableBody && db.owners) {
+        ownerTableBody.innerHTML = db.owners.map(o => {
             const aptCount = (db.apartments || []).filter(a => a.ownerId == o.id).length;
             return `
                 <tr>
@@ -552,6 +524,7 @@
                 </tr>`;
         }).join('');
     }
+}
 
         // ESZKÖZ BÉRLÉSEK (Strandfelszerelés) MEGJELENÍTÉSE
     const rentTableBody = document.getElementById('rent-table-body');
