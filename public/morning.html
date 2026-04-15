@@ -203,17 +203,31 @@
     const name = document.getElementById('m-name').value;
     const date = document.getElementById('m-date').value;
     const type = document.getElementById('m-item-type').value;
+    
+    // Feltételezzük, hogy a currentQty a választott darabszám (fő)
+    const qty = typeof currentQty !== 'undefined' ? currentQty : 1;
 
     if(!apt || !name || !date || !phone) {
+        // A csúnya alert helyett használd a korábban készített piros X-es modalodat:
+        if (typeof showSuccess === 'function') {
+            return showSuccess("Hiba!", "Kérjük, minden mezőt töltsön ki!", "error");
+        }
         return alert("Kérjük, minden mezőt töltsön ki!");
     }
 
+    // --- ÁRSZÁMÍTÁS ---
+    const pricePerUnit = 3500; // Itt add meg egy reggeli tál árát
+    const totalAmount = qty * pricePerUnit;
+
     const payload = {
+        id: 'ord_' + Date.now(), // Egyedi azonosító a törléshez
         type: 'BREAKFAST',
         guest: name,
         date: date,
         aptName: apt,
-        note: `TÁL: ${type} | TEL: ${phone} | FŐ: ${currentQty}`
+        persons: qty,
+        totalPrice: totalAmount, // EZ KELL AZ ADMINNAK!
+        note: `TÁL: ${type} | TEL: ${phone} | FŐ: ${qty}`
     };
 
     try {
@@ -224,21 +238,28 @@
         });
 
         if(res.ok) {
-            // 1. Bezárjuk az eredeti rendelési ablakot
             closeMorningModal();
 
-            // 2. Beállítjuk a sikeres popup szövegét (opcionális, ha több infót akarsz írni)
-            const successMsg = document.getElementById('success-message');
-            if(successMsg) {
-                successMsg.innerHTML = `A <strong>${type}</strong> rendelését <strong>${date}</strong> napra rögzítettük.`;
+            // Ha a korábban készített showSuccess modalt használod:
+            if (typeof showSuccess === 'function') {
+                showSuccess("Sikeres rendelés!", `A ${type} rendelését rögzítettük. Összeg: ${totalAmount.toLocaleString()} Ft`, "success", () => {
+                    window.location.reload();
+                });
+            } else {
+                // Ha maradsz a success-popup-nál:
+                const successMsg = document.getElementById('success-message');
+                if(successMsg) {
+                    successMsg.innerHTML = `A <strong>${type}</strong> rendelését <strong>${date}</strong> napra rögzítettük.<br>Összeg: <strong>${totalAmount.toLocaleString()} Ft</strong>`;
+                }
+                const popup = document.getElementById('success-popup');
+                if(popup) {
+                    popup.style.display = 'flex';
+                    setTimeout(() => popup.classList.add('active'), 10);
+                }
             }
-
-            // 3. Megjelenítjük a szép popupot
-            const popup = document.getElementById('success-popup');
-            popup.style.display = 'flex';
-            setTimeout(() => popup.classList.add('active'), 10);
         }
     } catch (e) { 
+        console.error(e);
         alert("Hálózati hiba történt!"); 
     }
 }
