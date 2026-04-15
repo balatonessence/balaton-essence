@@ -132,34 +132,57 @@ app.post('/api/sync', async (req, res) => {
         const db = await getDbContent();
         let hasChange = false;
         
+        // Biztosítjuk, hogy létezzen a bookings tömb
+        if (!db.bookings) db.bookings = [];
+
         for (let apt of db.apartments) {
-            let externalDates = [];
-            const urls = [apt.icalBooking, apt.icalSzallas].filter(u => u && u.startsWith('http'));
-            
-            for (let url of urls) {
+            const sources = [
+                { url: apt.icalBooking, name: 'booking' },
+                { url: apt.icalSzallas, name: 'szallas' }
+            ];
+
+            for (let sourceDef of sources) {
+                const url = sourceDef.url;
+                if (!url || !url.startsWith('http')) continue;
+
                 try {
                     const response = await axios.get(url, { timeout: 8000 });
                     const data = ical.parseICS(response.data);
+                    
                     for (let k in data) {
-                        if (data[k].type === 'VEVENT') {
-                            let start = new Date(data[k].start);
-                            let end = new Date(data[k].end);
-                            while (start < end) {
-                                externalDates.push(start.toISOString().split('T')[0]);
-                                start.setDate(start.getDate() + 1);
+                        const event = data[k];
+                        if (event.type === 'VEVENT') {
+                            const start = new Date(event.start).toISOString().split('T')[0];
+                            const end = new Date(event.end).toISOString().split('T')[0];
+                            const uid = event.uid || `${apt.id}-${start}`;
+
+                            // Ellenőrizzük, létezik-e már ez a foglalás (UID alapján)
+                            const exists = db.bookings.find(b => b.icalId === uid);
+
+                            if (!exists) {
+                                // ÚJ FOGLALÁS LÉTREHOZÁSA
+                                db.bookings.push({
+                                    id: Date.now() + Math.random(), // Egyedi belső ID
+                                    icalId: uid,                   // iCal azonosító a duplikáció ellen
+                                    aptId: apt.id,
+                                    aptName: apt.name,
+                                    guestName: event.summary || 'iCal Vendég',
+                                    checkIn: start,
+                                    checkOut: end,
+                                    source: sourceDef.name,        // Itt mentjük el a forrást!
+                                    status: 'confirmed'
+                                });
+                                hasChange = true;
                             }
                         }
                     }
-                } catch (err) { console.error("Sync hiba:", url); }
-            }
-            const combined = [...new Set([...externalDates, ...(apt.manualBlocks || [])])].sort();
-            if (JSON.stringify(apt.bookedDates) !== JSON.stringify(combined)) {
-                apt.bookedDates = combined;
-                hasChange = true;
+                } catch (err) { console.error("Sync hiba:", sourceDef.name, url); }
             }
         }
         
-        if (hasChange) await saveDbContent(db);
+        if (hasChange) {
+            await saveDbContent(db);
+        }
         res.json({ success: true, changed: hasChange });
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
