@@ -615,20 +615,26 @@
             body: JSON.stringify(data)
         });
 
+        // KINYERJÜK A SZERVER VÁLASZÁT (Siker vagy hiba üzenet)
         const result = await res.json();
 
         if (res.ok) {
-            showSuccess("Sikeres foglalás!", "Várjuk szeretettel!", () => {
+            // SIKER: Itt minden rendben
+            showSuccess("Sikeres foglalás!", "Köszönjük, a foglalást rögzítettük!", () => {
+                closeBookingModal();
                 window.location.reload();
             });
         } else {
-            // Itt írja ki, hogy "Sajnos ez az időpont már foglalt!"
-            showSuccess("Hiba!", result.error || "Hiba történt.");
+            // HIBA: Itt íratjuk ki a szerver által küldött hibaüzenetet
+            // A result.error-ban lesz benne: "Sajnos ez az időpont már foglalt!"
+            showSuccess("Hiba!", result.error || "Hiba történt a foglalás során.");
         }
     } catch (e) {
-        showSuccess("Hiba!", "Nem sikerült elérni a szervert.");
+        console.error(e);
+        showSuccess("Hiba!", "Nem sikerült kapcsolódni a szerverhez.");
     }
 }
+
 
 let calDate = new Date(); // A naptár aktuális nézete
 let selectedStart = null;

@@ -86,8 +86,8 @@ app.post('/api/new-booking', async (req, res) => {
             return (start1 < end2 && end1 > start2);
         });
 
+        // server.js részlet
         if (isOverlapping) {
-            // 400-as hibát küldünk vissza, ha foglalt
             return res.status(400).json({ error: "Sajnos ez az időpont már foglalt!" });
         }
 
