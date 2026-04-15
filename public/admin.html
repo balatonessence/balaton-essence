@@ -454,24 +454,29 @@ if (bookingTableBody && db.bookings) {
 
     // --- 1. REGGELI TÁBLÁZAT ---
     // --- REGGELI RENDELÉSEK TÁBLÁZAT ---
+// --- 2. REGGELI RENDELÉSEK TÁBLÁZAT ---
 const breakfastTableBody = document.getElementById('breakfast-table-body');
 if (breakfastTableBody && db.breakfasts) {
     breakfastTableBody.innerHTML = db.breakfasts.map(b => {
-        // Ár kezelése
+        // Ár formázása
         const price = Number(b.totalPrice) || 0;
-        const priceFormatted = price > 0 
-            ? `<div style="color: var(--accent); font-weight: 700; font-size: 0.8rem;">Összeg: ${price.toLocaleString()} Ft</div>` 
-            : '<div style="color: #ccc; font-size: 0.8rem;">Nincs ár megadva</div>';
+        const priceHTML = price > 0 
+            ? `<div style="color: #e67e22; font-weight: bold; margin-top: 4px;">${price.toLocaleString()} Ft</div>` 
+            : `<div style="color: #e74c3c; font-weight: bold; margin-top: 4px;">Nincs ár</div>`;
 
         return `
             <tr>
-                <td><strong>${b.aptName}</strong><br>${b.guestName || b.guest}</td>
-                <td>${b.date}</td>
                 <td>
-                    <div>${b.note}</div>
-                    <div style="color:var(--accent); font-weight:bold;">
-                        ${b.totalPrice ? b.totalPrice.toLocaleString() + ' Ft' : 'Nincs ár'}
-                    </div>
+                    <strong>${b.aptName || 'Ismeretlen'}</strong><br>
+                    <span style="font-size: 0.85rem; color: #666;">${b.guestName || b.guest || 'Névtelen'}</span>
+                </td>
+                <td>${b.date || '---'}</td>
+                <td>
+                    <div style="font-size: 0.9rem;">${b.note || 'Nincs részlet'}</div>
+                    ${priceHTML}
+                </td>
+                <td style="text-align: right;">
+                    <button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${b.id}')">✕</button>
                 </td>
             </tr>
         `;
