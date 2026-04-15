@@ -198,69 +198,60 @@
     }
 
     async function submitMorning() {
-    const apt = document.getElementById('m-apt-select').value;
-    const phone = document.getElementById('m-phone').value;
-    const name = document.getElementById('m-name').value;
-    const date = document.getElementById('m-date').value;
-    const type = document.getElementById('m-item-type').value;
+    // Adatok begyűjtése az ID-k alapján
+    const apt = document.getElementById('m-apt-select')?.value;
+    const phone = document.getElementById('m-phone')?.value;
+    const name = document.getElementById('m-name')?.value;
+    const date = document.getElementById('m-date')?.value;
+    const type = document.getElementById('m-item-type')?.value;
     
-    // Feltételezzük, hogy a currentQty a választott darabszám (fő)
-    const qty = typeof currentQty !== 'undefined' ? currentQty : 1;
+    // Ha a currentQty nem globális, próbáljuk meg kinyerni az inputból
+    const qtyInput = document.getElementById('m-guest-count');
+    const qty = qtyInput ? parseInt(qtyInput.value) : (typeof currentQty !== 'undefined' ? currentQty : 1);
 
-    if(!apt || !name || !date || !phone) {
-        // A csúnya alert helyett használd a korábban készített piros X-es modalodat:
-        if (typeof showSuccess === 'function') {
-            return showSuccess("Hiba!", "Kérjük, minden mezőt töltsön ki!", "error");
-        }
-        return alert("Kérjük, minden mezőt töltsön ki!");
+    // Ellenőrzés, hogy semmi ne legyen üres
+    if(!apt || !name || !date || !phone || !type) {
+        return showSuccess("Hiba!", "Kérjük, minden mezőt töltsön ki!", "error");
     }
 
-    // --- ÁRSZÁMÍTÁS ---
-    const pricePerUnit = 3500; // Itt add meg egy reggeli tál árát
+    // Árszámítás
+    const pricePerUnit = 3500; 
     const totalAmount = qty * pricePerUnit;
 
+    // A PAYLOAD felépítése - úgy, hogy az ADMIN felület is értse
     const payload = {
-        id: 'ord_' + Date.now(), // Egyedi azonosító a törléshez
+        id: 'ord_' + Date.now(),
         type: 'BREAKFAST',
-        guest: name,
+        guestName: name, // Az admin valószínűleg guestName-et vár
         date: date,
         aptName: apt,
+        phone: phone,
         persons: qty,
-        totalPrice: totalAmount, // EZ KELL AZ ADMINNAK!
+        totalPrice: totalAmount,
+        // Összefűzzük a note-ot, hogy ne legyen undefined a táblázatban
         note: `TÁL: ${type} | TEL: ${phone} | FŐ: ${qty}`
     };
 
     try {
-        const res = await fetch('/api/order', {
+        // Figyelj az URL-re! Ha az admin a /api/breakfasts-t használja, küldd oda!
+        const res = await fetch('/api/order', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
 
         if(res.ok) {
-            closeMorningModal();
-
-            // Ha a korábban készített showSuccess modalt használod:
-            if (typeof showSuccess === 'function') {
-                showSuccess("Sikeres rendelés!", `A ${type} rendelését rögzítettük. Összeg: ${totalAmount.toLocaleString()} Ft`, "success", () => {
-                    window.location.reload();
-                });
-            } else {
-                // Ha maradsz a success-popup-nál:
-                const successMsg = document.getElementById('success-message');
-                if(successMsg) {
-                    successMsg.innerHTML = `A <strong>${type}</strong> rendelését <strong>${date}</strong> napra rögzítettük.<br>Összeg: <strong>${totalAmount.toLocaleString()} Ft</strong>`;
-                }
-                const popup = document.getElementById('success-popup');
-                if(popup) {
-                    popup.style.display = 'flex';
-                    setTimeout(() => popup.classList.add('active'), 10);
-                }
-            }
+            if (typeof closeMorningModal === 'function') closeMorningModal();
+            
+            showSuccess("Sikeres rendelés!", `A ${type} rögzítve. Összeg: ${totalAmount.toLocaleString()} Ft`, "success", () => {
+                window.location.reload();
+            });
+        } else {
+            const errorData = await res.json();
+            showSuccess("Hiba!", errorData.error || "A szerver elutasította a rendelést.", "error");
         }
     } catch (e) { 
-        console.error(e);
-        alert("Hálózati hiba történt!"); 
+        showSuccess("Hiba!", "Hálózati hiba történt!", "error");
     }
 }
 </script>

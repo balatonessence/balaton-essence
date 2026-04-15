@@ -465,16 +465,13 @@ if (breakfastTableBody && db.breakfasts) {
 
         return `
             <tr>
+                <td><strong>${b.aptName}</strong><br>${b.guestName || b.guest}</td>
+                <td>${b.date}</td>
                 <td>
-                    <strong>${b.aptName || 'Ismeretlen'}</strong><br>
-                    <span style="font-size: 0.85rem; color: #666;">${b.guestName || 'ab'}</span>
-                </td>
-                <td>${b.date || 'Nincs dátum'}</td>
-                <td>
-                    <div>TÁL: ${b.type} | TEL: ${b.phone} | FŐ: ${b.persons}</div>
-                    ${priceFormatted} </td>
-                <td>
-                    <button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${b.id}')">✕</button>
+                    <div>${b.note}</div>
+                    <div style="color:var(--accent); font-weight:bold;">
+                        ${b.totalPrice ? b.totalPrice.toLocaleString() + ' Ft' : 'Nincs ár'}
+                    </div>
                 </td>
             </tr>
         `;
