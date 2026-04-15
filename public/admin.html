@@ -206,14 +206,11 @@
     </div>
 </div>
 
-<div id="owner-modal" class="modal-overlay">
-    <div class="custom-modal" style="width:400px; height:auto; flex-direction:column; padding:3rem; margin:auto;">
-        <h2>Partner Kezelése</h2>
-        <div class="form-group"><label>Név</label><input type="text" id="o-name"></div>
-        <div class="form-group"><label>Kód</label><input type="text" id="o-code"></div>
-        <button class="btn-cta" style="width:100%;" onclick="saveOwner()">Mentés</button>
-        <button class="btn-outline" style="width:100%; margin-top:10px; border:none;" onclick="closeModal()">Mégse</button>
-    </div>
+<div id="owner-modal" class="modal">
+    <div class="modal-content">
+        <input type="hidden" id="edit-owner-id"> <input type="text" id="edit-owner-name" placeholder="Partner neve">
+        <input type="text" id="edit-owner-code" placeholder="Kód">
+        </div>
 </div>
 
 <script src="database.js?v=2.0"></script>
@@ -408,21 +405,33 @@
     }
 
     function openOwnerModal(id) {
-        const owner = db.owners.find(o => String(o.id) === String(id));
-        if (!owner) return;
-
-        // Cseréld ki ezeket az ID-kat azokra, amik ténylegesen a HTML modalodban vannak!
-        // Például ha nálad 'owner-name-input' az ID, akkor azt írd ide:
-        const nameInput = document.getElementById('edit-owner-name') || document.getElementById('owner-name');
-        const codeInput = document.getElementById('edit-owner-code') || document.getElementById('owner-code');
-        const idInput = document.getElementById('edit-owner-id') || document.getElementById('owner-id');
-
-        if (nameInput) nameInput.value = owner.name || "";
-        if (codeInput) codeInput.value = owner.code || "";
-        if (idInput) idInput.value = owner.id;
-
-        document.getElementById('owner-modal').style.display = 'flex';
+    // 1. Megkeressük a tulajdonost az adatok között
+    const owner = db.owners.find(o => String(o.id) === String(id));
+    if (!owner) {
+        console.error("Tulajdonos nem található:", id);
+        return;
     }
+
+    // 2. Biztonságos kitöltés: csak akkor írjuk be, ha létezik az elem
+    const fields = {
+        'edit-owner-id': owner.id,
+        'edit-owner-name': owner.name,
+        'edit-owner-code': owner.code
+    };
+
+    Object.keys(fields).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.value = fields[id] || "";
+        } else {
+            console.warn(`Hiányzó HTML elem: ${id}`);
+        }
+    });
+
+    // 3. Modal megjelenítése
+    const modal = document.getElementById('owner-modal');
+    if (modal) modal.style.display = 'flex';
+}
 
     function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
