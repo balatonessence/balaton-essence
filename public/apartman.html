@@ -742,8 +742,7 @@ function renderCalendar() {
 
     const todayStr = new Date().toISOString().split('T')[0];
 
-    // Feltételezzük, hogy az apartman adatai a 'currentApt' változóban vannak
-    // és abban van a 'bookedDates' tömb (pl. ["2026-04-15", "2026-04-16"])
+    // Adatok kinyerése
     const bookedDates = currentApt?.bookedDates || [];
 
     for (let d = 1; d <= daysInMonth; d++) {
@@ -757,13 +756,16 @@ function renderCalendar() {
             className += " past";
         }
 
-        // 2. ELLENŐRZÉS: Foglalt nap? (Ha benne van a bookedDates-ben)
-        if (bookedDates.includes(dateStr)) {
+        // 2. JAVÍTOTT ELLENŐRZÉS: Mivel a bookedDates objektumokat tartalmaz {end: '...'}
+        // A .some() végigmegy rajtuk és megnézi, hogy bármelyik 'end' értéke egyezik-e
+        const isBooked = bookedDates.some(b => b.end === dateStr);
+
+        if (isBooked) {
             className += " booked";
-            onClickAttr = ""; // Tiltjuk a kattintást
+            onClickAttr = ""; // Tiltjuk a kattintást foglalt napon
         }
 
-        // 3. Kiválasztási stílusok
+        // 3. Kiválasztási stílusok (selectedStart, selectedEnd, stb.)
         if (selectedStart && dateStr === selectedStart) className += " selected-start";
         if (selectedEnd && dateStr === selectedEnd) className += " selected-end";
         if (selectedStart && selectedEnd && dateStr > selectedStart && dateStr < selectedEnd) className += " selected-range";
