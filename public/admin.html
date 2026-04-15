@@ -649,7 +649,22 @@ if (bookingTableBody && db.bookings) {
     }
 
     async function syncCalendars() { const res = await fetch('/api/sync', {method:'POST'}); if(res.ok) { window.location.reload(); } }
-    async function deleteItem(type, id) { if(!confirm("Biztosan törlöd?")) return; const res = await fetch(`/api/${type}/${id}`, { method: 'DELETE' }); if(res.ok) { window.location.reload(); } }
+    async function deleteItem(type, id) {
+    if (!confirm("Biztosan törlöd?")) return;
+
+    // Stringgé alakítjuk és levágjuk az esetleges szemetet a végéről
+    const cleanId = String(id).split(':')[0].trim();
+
+    const res = await fetch(`/api/${type}/${cleanId}`, { 
+        method: 'DELETE' 
+    });
+
+    if (res.ok) {
+        window.location.reload();
+    } else {
+        alert("Szerver hiba: Nem sikerült a törlés. (404)");
+    }
+}
     async function deleteApt(id) { if(!confirm("Apartman törlése?")) return; db.apartments = db.apartments.filter(a => a.id != id); await saveDb(); }
     async function deleteOwner(id) { if(!confirm("Tulajdonos törlése?")) return; db.owners = db.owners.filter(o => o.id != id); await saveDb(); }
 

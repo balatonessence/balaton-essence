@@ -127,6 +127,26 @@ app.delete('/api/bookings/:id', async (req, res) => {
     } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+app.delete('/api/breakfasts/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const db = await getDbContent();
+
+        // Kiszűrjük a törlendő ID-t (String kényszerítés a biztonság kedvéért)
+        const initialLength = db.breakfasts.length;
+        db.breakfasts = db.breakfasts.filter(b => String(b.id) !== String(id));
+
+        if (db.breakfasts.length < initialLength) {
+            await saveDbContent(db);
+            res.json({ success: true });
+        } else {
+            res.status(404).json({ error: "Rendelés nem található." });
+        }
+    } catch (e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 app.post('/api/sync', async (req, res) => {
     try {
         const db = await getDbContent();
