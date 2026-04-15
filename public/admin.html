@@ -453,77 +453,71 @@ function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m =>
 function renderAll() {
     if (!db) return;
 
-    
-     
-// --- 0. FOGLALÁSOK TÁBLÁZAT (Admin felület) ---
-const bookingTableBody = document.getElementById('booking-table-body');
-if (bookingTableBody && db.bookings) {
-    bookingTableBody.innerHTML = db.bookings.map(b => {
-        const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
-        
-        // Dátumok kezelése
-        const cIn = b.checkIn || 'Nincs adat';
-        const cOut = b.checkOut || b.end || 'Nincs adat';
-        
-        // --- ITT AZ ÁR KEZELÉSE ---
-        const price = Number(b.totalPrice) || Number(b.total) || 0;
-        const priceFormatted = price > 0 
-            ? price.toLocaleString('hu-HU') + ' Ft' 
-            : 'Nincs ár';
+    // --- 0. FOGLALÁSOK TÁBLÁZAT (Admin felület) ---
+    const bookingTableBody = document.getElementById('booking-table-body');
+    if (bookingTableBody && db.bookings) {
+        bookingTableBody.innerHTML = db.bookings.map(b => {
+            const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
+            
+            const cIn = b.checkIn || 'Nincs adat';
+            const cOut = b.checkOut || b.end || 'Nincs adat';
+            
+            const price = Number(b.totalPrice) || Number(b.total) || 0;
+            const priceFormatted = price > 0 
+                ? price.toLocaleString('hu-HU') + ' Ft' 
+                : 'Nincs ár';
 
-        const source = (b.source || 'web').toLowerCase();
-        
-        return `
-            <tr>
-                <td><strong>${apt ? apt.name : 'Ismeretlen'}</strong></td>
-                <td>
-                    <div style="font-weight: 600;">${b.guestName || 'Névtelen vendég'}</div>
-                    <div style="font-size: 0.75rem; color: var(--accent); font-weight: 700;">${priceFormatted}</div>
-                </td>
-                <td><div style="font-size: 0.85rem;">${cIn} &rarr; ${cOut}</div></td>
-                <td><span class="badge badge-${source}">${source.toUpperCase()}</span></td>
-                <td>
-                    <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">✕</button>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
+            const source = (b.source || 'web').toLowerCase();
+            
+            return `
+                <tr>
+                    <td><strong>${apt ? apt.name : 'Ismeretlen'}</strong></td>
+                    <td>
+                        <div style="font-weight: 600;">${b.guestName || 'Névtelen vendég'}</div>
+                        <div style="font-size: 0.75rem; color: var(--accent); font-weight: 700;">${priceFormatted}</div>
+                    </td>
+                    <td><div style="font-size: 0.85rem;">${cIn} &rarr; ${cOut}</div></td>
+                    <td><span class="badge badge-${source}">${source.toUpperCase()}</span></td>
+                    <td style="text-align: center; width: 100px;">
+                        <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">✕</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
 
+    // --- 1. REGGELI RENDELÉSEK TÁBLÁZAT ---
+    const breakfastTableBody = document.getElementById('breakfast-table-body');
+    if (breakfastTableBody && db.breakfasts) {
+        breakfastTableBody.innerHTML = db.breakfasts.map(b => {
+            const price = Number(b.totalPrice) || 0;
+            const priceHTML = price > 0 
+                ? `<div style="color: #e67e22; font-weight: bold; margin-top: 4px;">${price.toLocaleString()} Ft</div>` 
+                : `<div style="color: #e74c3c; font-weight: bold; margin-top: 4px;">Nincs ár</div>`;
 
-// --- 1. REGGELI RENDELÉSEK TÁBLÁZAT ---
-const breakfastTableBody = document.getElementById('breakfast-table-body');
-if (breakfastTableBody && db.breakfasts) {
-    breakfastTableBody.innerHTML = db.breakfasts.map(b => {
-        // Ár formázása
-        const price = Number(b.totalPrice) || 0;
-        const priceHTML = price > 0 
-            ? `<div style="color: #e67e22; font-weight: bold; margin-top: 4px;">${price.toLocaleString()} Ft</div>` 
-            : `<div style="color: #e74c3c; font-weight: bold; margin-top: 4px;">Nincs ár</div>`;
-
-        return `
-            <tr>
-                <td>
-                    <strong>${b.aptName || 'Ismeretlen'}</strong><br>
-                    <span style="font-size: 0.85rem; color: #666;">${b.guestName || b.guest || 'Névtelen'}</span>
-                </td>
-                <td>${b.date || '---'}</td>
-                <td>
-                    <div style="font-size: 0.9rem;">${b.note || 'Nincs részlet'}</div>
-                    ${priceHTML}
-                </td>
-                <td style="text-align: center; vertical-align: middle; width: 100px;">
-                    <button class="btn-outline btn-del" onclick="deleteItem('apartments', '${b.id}')">✕</button>
-                </td>
-            </tr>
-        `;
-    }).join('');
-}
+            return `
+                <tr>
+                    <td>
+                        <strong>${b.aptName || 'Ismeretlen'}</strong><br>
+                        <span style="font-size: 0.85rem; color: #666;">${b.guestName || b.guest || 'Névtelen'}</span>
+                    </td>
+                    <td>${b.date || '---'}</td>
+                    <td>
+                        <div style="font-size: 0.9rem;">${b.note || 'Nincs részlet'}</div>
+                        ${priceHTML}
+                    </td>
+                    <td style="text-align: center; vertical-align: middle; width: 100px;">
+                        <button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${b.id}')">✕</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
 
     // --- 2. ESZKÖZ BÉRLÉS TÁBLÁZAT ---
     const rentTableBody = document.getElementById('rent-table-body');
-    if (rentTableBody) {
-        rentTableBody.innerHTML = (db.extras || []).map(e => `
+    if (rentTableBody && db.extras) {
+        rentTableBody.innerHTML = db.extras.map(e => `
             <tr>
                 <td>
                     <div style="font-weight: 700; color: var(--accent);">${e.items || 'Nincs adat'}</div>
@@ -538,7 +532,9 @@ if (breakfastTableBody && db.breakfasts) {
                     <div style="font-size: 0.75rem; color: #777;">${e.days || 0} nap</div>
                 </td>
                 <td><div style="font-size: 0.85rem;">${e.apartment || ''}</div></td>
-                <td><button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">✕</button></td>
+                <td style="text-align: center; width: 100px;">
+                    <button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">✕</button>
+                </td>
             </tr>
         `).join('');
     }
@@ -548,19 +544,14 @@ if (breakfastTableBody && db.breakfasts) {
     if (aptListContainer && db.apartments) {
         aptListContainer.innerHTML = db.apartments.map(a => {
             const owner = (db.owners || []).find(o => String(o.id) === String(a.ownerId));
-            
-            // Szűrés: Csak az aktuális apartman foglalásai
             const aptBookings = (db.bookings || []).filter(b => String(b.aptId) === String(a.id));
             
-            let webCount = 0;
-            let bookingCount = 0;
-            let szallasCount = 0;
-
+            let webCount = 0, bookingCount = 0, szallasCount = 0;
             aptBookings.forEach(b => {
                 const src = (b.source || '').toLowerCase();
                 if (src === 'booking') bookingCount++;
                 else if (src === 'szallas') szallasCount++;
-                else webCount++; // Minden más ide fut be
+                else webCount++;
             });
             
             const webPerc = Math.min(webCount * 10, 100); 
@@ -586,8 +577,8 @@ if (breakfastTableBody && db.breakfasts) {
                         ${drawChart(webPerc, 'var(--essence)', 'Web')}
                     </div>
                     <div style="display:flex; gap:8px; justify-content: flex-end;">
-                        <button class="btn-outline" onclick="openAptModal(${a.id})">Szerkesztés</button>
-                        <button class="btn-outline btn-del" onclick="deleteApt(${a.id})">✕</button>
+                        <button class="btn-outline" onclick="openAptModal('${a.id}')">Szerkesztés</button>
+                        <button class="btn-outline btn-del" onclick="deleteApt('${a.id}')">✕</button>
                     </div>
                 </div>`;
         }).join('');
@@ -595,51 +586,25 @@ if (breakfastTableBody && db.breakfasts) {
         if (typeof initAptSorting === "function") initAptSorting();
     }
 
-
-    // --- PARTNEREK ÉS TULAJDONOSOK ---
-const ownersTableBody = document.getElementById('owners-table-body');
+    // --- 4. PARTNEREK ÉS TULAJDONOSOK ---
+    const ownersTableBody = document.getElementById('owners-table-body');
     if (ownersTableBody && db.owners) {
-        ownersTableBody.innerHTML = db.owners.map(o => `
-            <tr>
-                <td><strong>${o.name}</strong></td>
-                <td>#${o.code}</td>
-                <td><span class="count">${o.apartments ? o.apartments.length : 0} ingatlan</span></td>
-                <td style="text-align: right;">
-                    <button class="btn-edit" onclick="openOwnerModal('${o.id}')">SZERKESZTÉS</button>
-                    <button class="btn-del" onclick="deleteOwner('${o.id}')">✕</button>
-                </td>
-            </tr>
-        `).join('');
+        ownersTableBody.innerHTML = db.owners.map(o => {
+            const safeId = o.id || o._id || "";
+            return `
+                <tr>
+                    <td><strong>${o.name || 'Névtelen'}</strong></td>
+                    <td>#${o.code || '---'}</td>
+                    <td><span class="count">${o.apartments ? o.apartments.length : 0} ingatlan</span></td>
+                    <td style="text-align: center; width: 100px;">
+                        <button class="btn-edit" onclick="openOwnerModal('${safeId}')">SZERKESZTÉS</button>
+                        <button class="btn-del" onclick="deleteOwner('${safeId}')">✕</button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
     }
-}
-
-        // ESZKÖZ BÉRLÉSEK (Strandfelszerelés) MEGJELENÍTÉSE
-    const rentTableBody = document.getElementById('rent-table-body');
-    if (rentTableBody) {
-        rentTableBody.innerHTML = (db.extras || []).map(e => `
-            <tr>
-                <td>
-                    <div style="font-weight: 700; color: var(--accent);">${e.items}</div>
-                    <div style="font-size: 0.75rem; color: #777;">Összeg: ${(e.totalPrice || 0).toLocaleString()} Ft</div>
-                </td>
-                <td>
-                    <div style="font-weight: 600;">${e.guestName}</div>
-                    <div style="font-size: 0.8rem; color: #777;">${e.phone}</div>
-                </td>
-                <td>
-                    <div style="font-size: 0.85rem;"><strong>${e.start}</strong> &rarr; <strong>${e.end}</strong></div>
-                    <div style="font-size: 0.75rem; color: #777;">${e.days} nap</div>
-                </td>
-                <td>
-                    <div style="font-size: 0.85rem;">${e.apartment}</div>
-                </td>
-                <td>
-                    <button class="btn-outline btn-del" onclick="deleteItem('extras', '${e.id}')">✕</button>
-                </td>
-            </tr>
-        `).join('');
-    }
-
+} 
 
     function initAptSorting() {
         const el = document.getElementById('apt-list-container');
