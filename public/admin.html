@@ -265,34 +265,41 @@
 
     // --- PARTNER MENTÉSE (4 jegyű random kóddal) ---
     async function saveOwner() {
-        const id = document.getElementById('edit-owner-id').value;
-        const name = document.getElementById('edit-owner-name').value;
-        let code = document.getElementById('edit-owner-code').value;
+    const id = document.getElementById('edit-owner-id').value;
+    const name = document.getElementById('edit-owner-name').value;
+    let code = document.getElementById('edit-owner-code').value;
 
-        // Ha nincs kód, generálunk egy random 4 jegyű számot
-        if (!code || code === "") {
-            code = Math.floor(1000 + Math.random() * 9000).toString();
-        }
-
-        if (!db.owners) db.owners = [];
-
-        if (!id || id === "") {
-            db.owners.push({ 
-                id: Date.now().toString(), 
-                name: name, 
-                code: code,
-                apartments: [] 
-            });
-        } else {
-            const idx = db.owners.findIndex(o => String(o.id || o._id) === String(id));
-            if (idx !== -1) { 
-                db.owners[idx].name = name; 
-                db.owners[idx].code = code; 
-            }
-        }
-        await saveDb(); 
-        closeModal();
+    if (!code || code === "") {
+        code = Math.floor(1000 + Math.random() * 9000).toString();
     }
+
+    if (!db.owners) db.owners = [];
+
+    if (!id || id === "") {
+        db.owners.push({ 
+            id: Date.now().toString(), 
+            name: name, 
+            code: code,
+            apartments: [] 
+        });
+    } else {
+        const idx = db.owners.findIndex(o => String(o.id || o._id) === String(id));
+        if (idx !== -1) { 
+            db.owners[idx].name = name; 
+            db.owners[idx].code = code; 
+        }
+    }
+
+    // Hibakezelés: ha a mentés elszáll, a modal akkor is záródjon be
+    try {
+        await saveDb(); 
+    } catch (err) {
+        console.error("Hiba a mentés során:", err);
+    } finally {
+        closeModal(); 
+    }
+}
+
 
     // --- KÉPKEZELÉS (Tömörítés) ---
     function compressImage(file) {
@@ -477,7 +484,17 @@
         modal.style.display = 'flex';
     }
 
-    function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+   function closeModal() {
+    // Elrejtünk minden lehetséges modal réteget
+    const selectors = ['.modal-overlay', '.modal', '#owner-modal', '#apt-modal'];
+    selectors.forEach(s => {
+        document.querySelectorAll(s).forEach(m => m.style.display = 'none');
+    });
+    
+    // Alaphelyzetbe állítjuk az aktív ID-kat
+    activeId = null;
+    activeOId = null;
+}
 
     // --- RENDER ALL (Minden vizuális elemmel) ---
     function renderAll() {
