@@ -308,7 +308,7 @@ img {
                 <div class="sun-card-img" style="background-image: url('img/sup.png');"></div>
                 <div class="sun-card-content">
                     <h3 class="sun-card-title">SUP</h3>
-                    <p class="sun-card-price">4.500 Ft <small>/ nap</small></p>
+                    <p class="sun-card-price">5.900 Ft <small>/ nap</small></p>
                 </div>
             </div>
             
@@ -407,7 +407,12 @@ img {
             
             <input type="text" id="r-apt" placeholder="Apartmanod neve / vagy 'KÜLSŐS'" required style="width: 100%; padding: 14px; margin-bottom: 25px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 1rem;">
 
-            <button type="submit" class="btn-book-extras" style="width: 100%; margin: 0; padding: 1.2rem;">Igénylés leadása</button>
+            <div id="live-total-display" style="margin-top: 20px; padding: 15px; background: #faf9f6; border-top: 2px solid #eee; text-align: right; border-radius: 0 0 8px 8px;">
+                <span style="font-size: 0.9rem; color: #777; text-transform: uppercase; letter-spacing: 1px;">Várható végösszeg:</span>
+                <div id="modal-total-amount" style="font-size: 1.6rem; font-weight: 700; color: #5a6b5a; font-family: 'Playfair Display', serif;">0 Ft</div>
+            </div>
+
+            <button type="submit" class="btn-book-extras" style="width: 100%; margin: 0; padding: 1.2rem;">Foglalás elküldése</button>
         </form>
     </div>
 </div>
@@ -435,12 +440,22 @@ img {
     });
 
     // Modal nyitása animációval
-    function openRentModal(title) {
-        document.getElementById('m-title').innerText = title || "Felszerelés Igénylése";
-        const modal = document.getElementById('rent-modal');
-        modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('active'), 10);
-    }
+    // Az openRentModal-t is egészítsd ki:
+        function openRentModal(title) {
+            document.getElementById('m-title').innerText = title || "Foglalás";
+            const modal = document.getElementById('rent-modal');
+            modal.style.display = 'flex';
+            
+            // Eseményfigyelők hozzáadása (hogy pipa vagy dátum váltáskor is számoljon)
+            const inputs = ['item-sup', 'item-sunbed', 'item-umbrella', 'r-start', 'r-end'];
+            inputs.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.addEventListener('change', updateLiveTotal);
+            });
+
+            updateLiveTotal(); // Alaphelyzet számítása
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
 
     // Modal zárása animációval és űrlap törléssel
     function closeRentModal() {
@@ -456,14 +471,15 @@ img {
         }, 400);
     }
 
-    // Mennyiség növelése/csökkentése segédfüggvény
-    function changeQty(id, delta) {
-        const el = document.getElementById(id);
-        let currentVal = parseInt(el.innerText) || 1;
-        let newVal = currentVal + delta;
-        if (newVal < 1) newVal = 1;
-        el.innerText = newVal;
-    }
+    // A meglévő changeQty-t egészítsd ki az utolsó sorral:
+        function changeQty(id, delta) {
+            const el = document.getElementById(id);
+            let currentVal = parseInt(el.innerText) || 1;
+            let newVal = currentVal + delta;
+            if (newVal < 1) newVal = 1;
+            el.innerText = newVal;
+            updateLiveTotal(); // <--- EZT ADD HOZZÁ
+        }
 
     // A fő küldő és számoló függvény (Multi-Item logic)
     async function submitRentForm(e) {
@@ -477,7 +493,7 @@ img {
             // Fontos: innerText-et olvasunk a +/- gombok mellől!
             const qty = parseInt(document.getElementById('qty-sup').innerText) || 1;
             items.push(`${qty}x SUP`);
-            dailyTotal += qty * 4500;
+            dailyTotal += qty * 5900;
         }
         
         // 2. Napozószék ellenőrzése
@@ -517,7 +533,7 @@ img {
             return;
         }
 
-        let diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24));
+        let diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
         if (diffDays === 0) diffDays = 1;
 
         const finalTotal = dailyTotal * diffDays;
@@ -555,6 +571,38 @@ img {
             alert("Hálózati hiba történt.");
         }
     }
+
+    function updateLiveTotal() {
+    let dailyTotal = 0;
+    
+    // Árak ellenőrzése
+    if (document.getElementById('item-sup').checked) {
+        dailyTotal += (parseInt(document.getElementById('qty-sup').innerText) || 1) * 4500;
+    }
+    if (document.getElementById('item-sunbed').checked) {
+        dailyTotal += (parseInt(document.getElementById('qty-sunbed').innerText) || 1) * 1500;
+    }
+    if (document.getElementById('item-umbrella').checked) {
+        dailyTotal += (parseInt(document.getElementById('qty-umbrella').innerText) || 1) * 1000;
+    }
+
+    const startStr = document.getElementById('r-start').value;
+    const endStr = document.getElementById('r-end').value;
+    let total = 0;
+
+    if (startStr && endStr) {
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        
+        if (end >= start) {
+            // Itt a lényeg: +1 nap, hogy a zárónap is bérleti nap legyen
+            let days = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
+            total = dailyTotal * days;
+        }
+    }
+
+    document.getElementById('modal-total-amount').innerText = total.toLocaleString() + " Ft";
+}
 </script>
 </body>
 </html>
