@@ -577,7 +577,10 @@
             if (typeof initAptSorting === "function") initAptSorting();
         }
 
-        // --- 4. PARTNEREK ÉS TULAJDONOSOK JAVÍTOTT RENDER ---
+        // --- 4. PARTNEREK ÉS TULAJDONOSOK (Kártya/Blokk stílusban) ---
+        const ownersContainer = document.getElementById('owners-table-body')?.closest('.admin-card') || document.getElementById('owners-table-body')?.parentElement;
+        
+        // Ha a HTML-ben már benne van a táblázat, csak a sorokat töltjük fel:
         const ownersTableBody = document.getElementById('owners-table-body');
         if (ownersTableBody && db.owners) {
             ownersTableBody.innerHTML = db.owners.map(o => {
@@ -585,14 +588,14 @@
                 const aptCount = (db.apartments || []).filter(a => String(a.ownerId) === String(safeId)).length;
                 
                 return `
-                    <tr>
-                        <td><strong>${o.name || 'Névtelen'}</strong></td>
-                        <td>#${o.code || '---'}</td>
-                        <td><span class="count">${aptCount} ingatlan</span></td>
-                        <td style="text-align: right; width: 150px;">
-                            <div style="display: flex; gap: 10px; justify-content: flex-end; align-items: center;">
-                                <button class="btn-outline" style="padding: 5px 10px; font-size: 0.75rem;" onclick="openOwnerModal('${safeId}')">SZERKESZTÉS</button>
-                                <button class="btn-outline btn-del" style="width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;" onclick="deleteOwner('${safeId}')">✕</button>
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 15px;"><strong>${o.name || 'Névtelen'}</strong></td>
+                        <td style="padding: 15px; color: #777;">#${o.code || '---'}</td>
+                        <td style="padding: 15px;"><span class="badge" style="background: #f0f4f8; color: #555; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${aptCount} ingatlan</span></td>
+                        <td style="padding: 15px; text-align: right;">
+                            <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                <button class="btn-outline" style="padding: 6px 12px;" onclick="openOwnerModal('${safeId}')">SZERKESZTÉS</button>
+                                <button class="btn-outline btn-del" style="width: 32px; height: 32px;" onclick="deleteOwner('${safeId}')">✕</button>
                             </div>
                         </td>
                     </tr>
