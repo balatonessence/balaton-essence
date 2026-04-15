@@ -427,22 +427,20 @@ img {
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hu.js"></script>
 
 <script>
+    // Flatpickr inicializálása
     document.addEventListener('DOMContentLoaded', function() {
         const config = {
             locale: "hu",
             dateFormat: "Y-m-d",
             minDate: "today",
             onChange: function() {
-                updateLiveTotal(); // Automatikusan számol, ha választasz dátumot
+                updateLiveTotal();
             }
         };
-
-        // Aktiváljuk a szép naptárat
         flatpickr("#r-start", config);
         flatpickr("#r-end", config);
     });
 
-    // Mennyiség váltó
     function changeQty(id, delta) {
         const el = document.getElementById(id);
         let val = parseInt(el.innerText) || 1;
@@ -451,7 +449,6 @@ img {
         updateLiveTotal();
     }
 
-    // Élő ár számítás
     function updateLiveTotal() {
         let daily = 0;
         if(document.getElementById('item-sup').checked) daily += (parseInt(document.getElementById('qty-sup').innerText) || 1) * 4500;
@@ -469,24 +466,24 @@ img {
                 days = Math.ceil(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
             }
         }
-        document.getElementById('modal-total-amount').innerText = (daily * days).toLocaleString() + " Ft";
-        return { total: daily * days, days: days };
+        const total = daily * days;
+        document.getElementById('modal-total-amount').innerText = total.toLocaleString() + " Ft";
+        return { total: total, days: days };
     }
 
-    // Modal kezelés
     function openRentModal(title) {
-        document.getElementById('rent-modal').style.display = 'flex';
-        setTimeout(() => document.getElementById('rent-modal').classList.add('active'), 10);
+        const modal = document.getElementById('rent-modal');
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('active'), 10);
         updateLiveTotal();
     }
 
     function closeRentModal() {
-        const m = document.getElementById('rent-modal');
-        m.classList.remove('active');
-        setTimeout(() => { m.style.display = 'none'; }, 400);
+        const modal = document.getElementById('rent-modal');
+        modal.classList.remove('active');
+        setTimeout(() => { modal.style.display = 'none'; }, 400);
     }
 
-    // Beküldés
     async function submitRentForm(e) {
         e.preventDefault();
         
@@ -495,9 +492,15 @@ img {
         if(document.getElementById('item-sunbed').checked) items.push(document.getElementById('qty-sunbed').innerText + "x Napozószék");
         if(document.getElementById('item-umbrella').checked) items.push(document.getElementById('qty-umbrella').innerText + "x Napernyő");
 
-        if(items.length === 0) return alert("Válassz legalább egy eszközt!");
+        if(items.length === 0) {
+            alert("Kérlek, válassz legalább egy eszközt!");
+            return;
+        }
 
         const calc = updateLiveTotal();
+        
+        // FONTOS: Az objektum kulcsainak (guestName, apartment, stb.) 
+        // egyeznie kell azzal, amit a szerver oldalon a bérlésekhez használsz!
         const orderData = {
             type: "Strandfelszerelés",
             items: items.join(", "),
@@ -508,33 +511,40 @@ img {
             end: document.getElementById('r-end').value,
             days: calc.days,
             totalPrice: calc.total,
-            status: "Új"
+            status: "Új",
+            date: new Date().toISOString()
         };
 
         try {
-            const res = await fetch('/api/order', {
+            // Ellenőrizd a szerveren, hogy /api/orders vagy /api/order-e a végpont!
+            // Ha a partner beküldésnél /api/save-et használsz, nézd meg a server.js-ben a route-ot.
+            const res = await fetch('/api/order', { 
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
             });
 
             if(res.ok) {
-                // ITT A JAVÍTÁS: Előbb bezárjuk a régit, aztán KÉNYSZERÍTJÜK a Popupot
+                // Sikeres mentés esetén bezárjuk az űrlapot és mutatjuk a saját popupot
                 document.getElementById('rent-modal').style.display = 'none';
                 
                 const successDetails = document.getElementById('success-details');
                 successDetails.innerHTML = `
-                    <p>Sikeresen lefoglalva: <strong>${orderData.items}</strong></p>
-                    <p>Összesen: <strong>${orderData.totalPrice.toLocaleString()} Ft</strong></p>
-                    <p style="font-size:0.8rem; margin-top:10px;">Hamarosan keresünk a megadott számon!</p>
+                    <p>Foglalt tételek: <strong>${orderData.items}</strong></p>
+                    <p>Időtartam: <strong>${orderData.days} nap</strong></p>
+                    <p>Végösszeg: <strong>${orderData.totalPrice.toLocaleString()} Ft</strong></p>
                 `;
                 
                 const popup = document.getElementById('success-popup');
                 popup.style.display = 'flex';
                 setTimeout(() => popup.classList.add('active'), 10);
+            } else {
+                const errorData = await res.json();
+                alert("Hiba a mentésnél: " + (errorData.message || "Ismeretlen hiba"));
             }
         } catch (err) {
-            alert("Hiba történt a küldéskor.");
+            console.error("Hiba:", err);
+            alert("Hálózati hiba történt a beküldéskor.");
         }
     }
 </script>
