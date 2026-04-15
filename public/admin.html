@@ -586,8 +586,8 @@
                     <td>#${o.code || '---'}</td>
                     <td><span class="count">${(db.apartments || []).filter(a => String(a.ownerId) === String(o.id)).length} ingatlan</span></td>
                     <td style="text-align: center; width: 100px;">
-                        <button class="btn-edit" onclick="openOwnerModal('${o.id || o._id}')">SZERKESZTÉS</button>
-                        <button class="btn-del" onclick="deleteOwner('${o.id || o._id}')">✕</button>
+                        <button class="btn-outline" onclick="openOwnerModal('${o.id || o._id}')">SZERKESZTÉS</button>
+                        <button class="btn-outline" onclick="deleteOwner('${o.id || o._id}')">✕</button>
                     </td>
                 </tr>`).join('');
         }
