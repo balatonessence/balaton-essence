@@ -177,21 +177,21 @@
             animation: popupAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
+        /* Módosítsd ezeket a CSS-ben */
         .success-icon {
             width: 60px;
             height: 60px;
-            background: #27ae60;
-            color: white;
+            color: white; /* Csak a pipa/X színe marad fix */
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 30px;
             margin: 0 auto 15px;
+            transition: background 0.3s; /* Szép átmenet a színek között */
         }
 
         .btn-main {
-            background: #27ae60;
             color: white;
             border: none;
             padding: 12px 30px;
@@ -200,6 +200,7 @@
             font-weight: 600;
             width: 100%;
             margin-top: 20px;
+            transition: background 0.3s;
         }
 
         @keyframes popupAnim {
@@ -619,16 +620,15 @@
         const result = await res.json();
 
         if (res.ok) {
-            // SIKER: Itt minden rendben
-            showSuccess("Sikeres foglalás!", "Köszönjük, a foglalást rögzítettük!", () => {
-                closeBookingModal();
-                window.location.reload();
-            });
-        } else {
-            // HIBA: Itt íratjuk ki a szerver által küldött hibaüzenetet
-            // A result.error-ban lesz benne: "Sajnos ez az időpont már foglalt!"
-            showSuccess("Hiba!", result.error || "Hiba történt a foglalás során.");
-        }
+    // SIKER: Itt marad zöld ('success' az alapértelmezett, de kiírhatod)
+    showSuccess("Sikeres foglalás!", "Köszönjük, a foglalást rögzítettük!", 'success', () => {
+        closeBookingModal();
+        window.location.reload();
+    });
+} else {
+    // HIBA: Itt adjuk át az 'error' paramétert, hogy PIROS legyen és X-et mutasson
+    showSuccess("Hiba!", result.error || "Hiba történt a foglalás során.", 'error');
+}
     } catch (e) {
         console.error(e);
         showSuccess("Hiba!", "Nem sikerült kapcsolódni a szerverhez.");
@@ -764,11 +764,30 @@ function changeMonth(dir) {
     renderCalendar();
 }
 
-function showSuccess(title, message, callback) {
-    document.getElementById('alert-title').innerText = title;
-    document.getElementById('alert-msg').innerText = message;
-    document.getElementById('custom-alert').style.display = 'flex';
+function showSuccess(title, message, type = 'success', callback) {
+    const modal = document.getElementById('custom-alert');
+    const iconCircle = document.getElementById('alert-icon-circle');
+    const btn = document.getElementById('alert-btn');
+    const titleEl = document.getElementById('alert-title');
+    const msgEl = document.getElementById('alert-msg');
+
+    titleEl.innerText = title;
+    msgEl.innerText = message;
     window.alertCallback = callback;
+
+    if (type === 'error') {
+        // PIROS STÍLUS HIBÁHOZ
+        iconCircle.innerText = '✕';
+        iconCircle.style.background = '#e74c3c'; // Piros
+        btn.style.background = '#e74c3c';
+    } else {
+        // ZÖLD STÍLUS SIKERHEZ
+        iconCircle.innerText = '✓';
+        iconCircle.style.background = '#27ae60'; // Zöld
+        btn.style.background = '#27ae60';
+    }
+
+    modal.style.display = 'flex';
 }
 
 function closeCustomAlert() {
