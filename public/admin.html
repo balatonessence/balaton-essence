@@ -146,7 +146,7 @@
     <div class="section">
         <div class="section-header">
             <h2>Partnerek & Tulajdonosok</h2>
-            <button class="btn-cta" onclick="openOwnerModal(null)">+ Új Partner</button>
+            <button class="btn-main" onclick="openNewOwnerModal()">+ ÚJ PARTNER</button>
         </div>
         <table>
             <thead><tr><th>Név</th><th>Kód</th><th>Ingatlanok</th><th>Művelet</th></tr></thead>
@@ -679,6 +679,37 @@ function renderAll() {
     async function deleteOwner(id) { if(!confirm("Tulajdonos törlése?")) return; db.owners = db.owners.filter(o => o.id != id); await saveDb(); }
 
     window.onload = () => { initDatabase(renderAll); };
+
+    // ÚJ PARTNER GOMBHOZ
+function openNewOwnerModal() {
+    // Kiürítjük a mezőket
+    if (document.getElementById('edit-owner-id')) document.getElementById('edit-owner-id').value = "";
+    if (document.getElementById('edit-owner-name')) document.getElementById('edit-owner-name').value = "";
+    if (document.getElementById('edit-owner-code')) document.getElementById('edit-owner-code').value = "";
+    
+    // Átírjuk a címet, hogy ne "Szerkesztés" legyen
+    const title = document.querySelector('#owner-modal h2');
+    if (title) title.innerText = "Új partner hozzáadása";
+
+    document.getElementById('owner-modal').style.display = 'flex';
+}
+
+// SZERKESZTÉS GOMBHOZ (A javított, hibaálló verzió)
+function openOwnerModal(id) {
+    if (!id || id === 'null' || id === 'undefined') return;
+
+    const owner = db.owners.find(o => String(o.id || o._id) === String(id));
+    if (!owner) return;
+
+    if (document.getElementById('edit-owner-id')) document.getElementById('edit-owner-id').value = owner.id || owner._id;
+    if (document.getElementById('edit-owner-name')) document.getElementById('edit-owner-name').value = owner.name || "";
+    if (document.getElementById('edit-owner-code')) document.getElementById('edit-owner-code').value = owner.code || "";
+
+    const title = document.querySelector('#owner-modal h2');
+    if (title) title.innerText = "Partner szerkesztése";
+
+    document.getElementById('owner-modal').style.display = 'flex';
+}
 </script>
 </body>
 </html>
