@@ -7,6 +7,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
     
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/hu.js"></script>
     
     <style>
         :root { 
@@ -332,24 +334,18 @@ img {
     </section>
 </main>
 
-<div id="rent-modal" class="modal-overlay" onclick="closeRentModal()" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000;">
-    <div class="modal-content" onclick="event.stopPropagation()" style="background: white; padding: 2rem; border-radius: 8px; max-width: 500px; width: 90%; position: relative;">
-        <span class="close-modal" onclick="closeRentModal()" style="position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #999;">&times;</span>
-        
-        <h2 id="m-title" style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem; text-align: center;">Felszerelés Igénylése</h2>
+<div id="rent-modal" class="modal-overlay" onclick="closeRentModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeRentModal()">&times;</span>
+        <h2 id="m-title" style="font-family: 'Playfair Display', serif; margin-bottom: 1.5rem; text-align: center;">Felszerelés Foglalása</h2>
         
         <form id="rent-form" onsubmit="submitRentForm(event)">
-    
-            <div style="margin-bottom: 1.5rem; text-align: left; background: #fbfbfb; padding: 20px; border-radius: 8px; border: 1px solid #eee;">
-                <label style="font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; display: block; margin-bottom: 20px; color: #333; border-bottom: 1px solid #eaeaea; padding-bottom: 10px;">Válaszd ki a felszereléseket:</label>
-                
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+            <div style="margin-bottom: 1.5rem; text-align: left; background: #fbfbfb; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                     <label class="extras-item-label">
-                        <input type="checkbox" id="item-sup" value="SUP"> 
-                        <span class="custom-checkmark"></span> <div>
-                            <span class="item-text-main">SUP</span>
-                            <span class="item-text-price">(4.500 Ft/nap)</span>
-                        </div>
+                        <input type="checkbox" id="item-sup" onchange="updateLiveTotal()"> 
+                        <span class="custom-checkmark"></span>
+                        <span class="item-text-main">SUP <small style="color: #777;">(4.500 Ft/nap)</small></span>
                     </label>
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" onclick="changeQty('qty-sup', -1)">−</button>
@@ -357,15 +353,11 @@ img {
                         <button type="button" class="qty-btn" onclick="changeQty('qty-sup', 1)">+</button>
                     </div>
                 </div>
-                
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
                     <label class="extras-item-label">
-                        <input type="checkbox" id="item-sunbed" value="Napozószék"> 
+                        <input type="checkbox" id="item-sunbed" onchange="updateLiveTotal()"> 
                         <span class="custom-checkmark"></span>
-                        <div>
-                            <span class="item-text-main">Napozószék</span>
-                            <span class="item-text-price">(1.500 Ft/nap)</span>
-                        </div>
+                        <span class="item-text-main">Napozószék <small style="color: #777;">(1.500 Ft/nap)</small></span>
                     </label>
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" onclick="changeQty('qty-sunbed', -1)">−</button>
@@ -373,15 +365,11 @@ img {
                         <button type="button" class="qty-btn" onclick="changeQty('qty-sunbed', 1)">+</button>
                     </div>
                 </div>
-
                 <div style="display: flex; align-items: center; justify-content: space-between;">
                     <label class="extras-item-label">
-                        <input type="checkbox" id="item-umbrella" value="Napernyő"> 
+                        <input type="checkbox" id="item-umbrella" onchange="updateLiveTotal()"> 
                         <span class="custom-checkmark"></span>
-                        <div>
-                            <span class="item-text-main">Napernyő</span>
-                            <span class="item-text-price">(1.000 Ft/nap)</span>
-                        </div>
+                        <span class="item-text-main">Napernyő <small style="color: #777;">(1.000 Ft/nap)</small></span>
                     </label>
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" onclick="changeQty('qty-umbrella', -1)">−</button>
@@ -393,27 +381,35 @@ img {
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                 <div>
-                    <label style="font-size: 0.8rem; color: #777; text-transform: uppercase; letter-spacing: 1px;">Kezdés</label>
-                    <input type="date" id="r-start" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    <label style="display: block; font-size: 0.7rem; color: #999; text-transform: uppercase; margin-bottom: 4px; text-align: left;">Kezdés</label>
+                    <input type="text" id="r-start" required onchange="updateLiveTotal()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;">
                 </div>
                 <div>
-                    <label style="font-size: 0.8rem; color: #777; text-transform: uppercase; letter-spacing: 1px;">Befejezés</label>
-                    <input type="date" id="r-end" required style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+                    <label style="display: block; font-size: 0.7rem; color: #999; text-transform: uppercase; margin-bottom: 4px; text-align: left;">Befejezés</label>
+                    <input type="text" id="r-end" required onchange="updateLiveTotal()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;">
                 </div>
             </div>
 
-            <input type="text" id="r-name" placeholder="Teljes neved" required style="width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 1rem;">
-            <input type="tel" id="r-phone" placeholder="Telefonszámod (pl: 06201234567)" required style="width: 100%; padding: 14px; margin-bottom: 12px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 1rem;">
-            
-            <input type="text" id="r-apt" placeholder="Apartmanod neve / vagy 'KÜLSŐS'" required style="width: 100%; padding: 14px; margin-bottom: 25px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; font-size: 1rem;">
+            <input type="text" id="r-name" placeholder="Teljes neved" required style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+            <input type="tel" id="r-phone" placeholder="Telefonszámod" required style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
+            <input type="text" id="r-apt" placeholder="Apartman neve vagy 'KÜLSŐS'" required style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box;">
 
-            <div id="live-total-display" style="margin-top: 20px; padding: 15px; background: #faf9f6; border-top: 2px solid #eee; text-align: right; border-radius: 0 0 8px 8px;">
-                <span style="font-size: 0.9rem; color: #777; text-transform: uppercase; letter-spacing: 1px;">Várható végösszeg:</span>
-                <div id="modal-total-amount" style="font-size: 1.6rem; font-weight: 700; color: #5a6b5a; font-family: 'Playfair Display', serif;">0 Ft</div>
+            <div id="live-total-display" style="padding: 20px; background: #faf9f6; text-align: right; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eee;">
+                <span style="font-size: 0.8rem; color: #777; letter-spacing: 1px;">VÁRHATÓ VÉGÖSSZEG:</span>
+                <div id="modal-total-amount" style="font-size: 2rem; font-weight: 700; color: #5a6b5a; font-family: 'Playfair Display', serif;">0 Ft</div>
             </div>
 
-            <button type="submit" class="btn-book-extras" style="width: 100%; margin: 0; padding: 1.2rem;">Foglalás elküldése</button>
+            <button type="submit" class="btn-book-extras" style="width: 100%; margin: 0; padding: 1.2rem; background: #5a6b5a; color: white; border: none; border-radius: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; cursor: pointer;">Foglalás elküldése</button>
         </form>
+    </div>
+</div>
+
+<div id="success-popup" class="modal-overlay" style="display: none; align-items: center; justify-content: center;">
+    <div class="modal-content" style="text-align: center; max-width: 400px; padding: 3rem 2rem;">
+        <div style="font-size: 4rem; color: #5a6b5a; margin-bottom: 1rem;">✓</div>
+        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 1rem;">Köszönjük!</h2>
+        <div id="success-details" style="margin-bottom: 2rem; color: #666; line-height: 1.5;"></div>
+        <button onclick="window.location.href='index.html'" class="btn-book-extras" style="width: 100%; margin: 0;">Vissza a főoldalra</button>
     </div>
 </div>
 
@@ -431,138 +427,90 @@ img {
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hu.js"></script>
 
 <script>
-    // Naptárak inicializálása elegáns stílusban
     document.addEventListener('DOMContentLoaded', function() {
-        if (typeof flatpickr !== 'undefined') {
-            flatpickr("#r-start", {
-                locale: "hu",
-                dateFormat: "Y-m-d",
-                minDate: "today",
-                disableMobile: "true"
-            });
-            flatpickr("#r-end", {
-                locale: "hu",
-                dateFormat: "Y-m-d",
-                minDate: "today",
-                disableMobile: "true"
-            });
-        }
+        const config = {
+            locale: "hu",
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            onChange: function() {
+                updateLiveTotal(); // Automatikusan számol, ha választasz dátumot
+            }
+        };
+
+        // Aktiváljuk a szép naptárat
+        flatpickr("#r-start", config);
+        flatpickr("#r-end", config);
     });
 
-    // Modal nyitása animációval
-    // Az openRentModal-t is egészítsd ki:
-        function openRentModal(title) {
-            document.getElementById('m-title').innerText = title || "Foglalás";
-            const modal = document.getElementById('rent-modal');
-            modal.style.display = 'flex';
-            
-            // Eseményfigyelők hozzáadása (hogy pipa vagy dátum váltáskor is számoljon)
-            const inputs = ['item-sup', 'item-sunbed', 'item-umbrella', 'r-start', 'r-end'];
-            inputs.forEach(id => {
-                const el = document.getElementById(id);
-                if(el) el.addEventListener('change', updateLiveTotal);
-            });
-
-            updateLiveTotal(); // Alaphelyzet számítása
-            setTimeout(() => modal.classList.add('active'), 10);
-        }
-
-    // Modal zárása animációval és űrlap törléssel
-    function closeRentModal() {
-        const modal = document.getElementById('rent-modal');
-        modal.classList.remove('active');
-        setTimeout(() => {
-            modal.style.display = 'none';
-            document.getElementById('rent-form').reset();
-            // Töröljük az egyedi db számokat is vissza 1-re
-            document.getElementById('qty-sup').innerText = "1";
-            document.getElementById('qty-sunbed').innerText = "1";
-            document.getElementById('qty-umbrella').innerText = "1";
-        }, 400);
+    // Mennyiség váltó
+    function changeQty(id, delta) {
+        const el = document.getElementById(id);
+        let val = parseInt(el.innerText) || 1;
+        val = Math.max(1, val + delta);
+        el.innerText = val;
+        updateLiveTotal();
     }
 
-    // A meglévő changeQty-t egészítsd ki az utolsó sorral:
-        function changeQty(id, delta) {
-            const el = document.getElementById(id);
-            let currentVal = parseInt(el.innerText) || 1;
-            let newVal = currentVal + delta;
-            if (newVal < 1) newVal = 1;
-            el.innerText = newVal;
-            updateLiveTotal(); // <--- EZT ADD HOZZÁ
-        }
+    // Élő ár számítás
+    function updateLiveTotal() {
+        let daily = 0;
+        if(document.getElementById('item-sup').checked) daily += (parseInt(document.getElementById('qty-sup').innerText) || 1) * 4500;
+        if(document.getElementById('item-sunbed').checked) daily += (parseInt(document.getElementById('qty-sunbed').innerText) || 1) * 1500;
+        if(document.getElementById('item-umbrella').checked) daily += (parseInt(document.getElementById('qty-umbrella').innerText) || 1) * 1000;
 
-    // A fő küldő és számoló függvény (Multi-Item logic)
+        const start = document.getElementById('r-start').value;
+        const end = document.getElementById('r-end').value;
+        let days = 0;
+
+        if(start && end) {
+            const d1 = new Date(start);
+            const d2 = new Date(end);
+            if(d2 >= d1) {
+                days = Math.ceil(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+            }
+        }
+        document.getElementById('modal-total-amount').innerText = (daily * days).toLocaleString() + " Ft";
+        return { total: daily * days, days: days };
+    }
+
+    // Modal kezelés
+    function openRentModal(title) {
+        document.getElementById('rent-modal').style.display = 'flex';
+        setTimeout(() => document.getElementById('rent-modal').classList.add('active'), 10);
+        updateLiveTotal();
+    }
+
+    function closeRentModal() {
+        const m = document.getElementById('rent-modal');
+        m.classList.remove('active');
+        setTimeout(() => { m.style.display = 'none'; }, 400);
+    }
+
+    // Beküldés
     async function submitRentForm(e) {
         e.preventDefault();
-
+        
         const items = [];
-        let dailyTotal = 0;
+        if(document.getElementById('item-sup').checked) items.push(document.getElementById('qty-sup').innerText + "x SUP");
+        if(document.getElementById('item-sunbed').checked) items.push(document.getElementById('qty-sunbed').innerText + "x Napozószék");
+        if(document.getElementById('item-umbrella').checked) items.push(document.getElementById('qty-umbrella').innerText + "x Napernyő");
 
-        // 1. SUP ellenőrzése
-        if (document.getElementById('item-sup').checked) {
-            // Fontos: innerText-et olvasunk a +/- gombok mellől!
-            const qty = parseInt(document.getElementById('qty-sup').innerText) || 1;
-            items.push(`${qty}x SUP`);
-            dailyTotal += qty * 5900;
-        }
-        
-        // 2. Napozószék ellenőrzése
-        if (document.getElementById('item-sunbed').checked) {
-            const qty = parseInt(document.getElementById('qty-sunbed').innerText) || 1;
-            items.push(`${qty}x Napozószék`);
-            dailyTotal += qty * 1500; 
-        }
+        if(items.length === 0) return alert("Válassz legalább egy eszközt!");
 
-        // 3. Napernyő ellenőrzése
-        if (document.getElementById('item-umbrella').checked) {
-            const qty = parseInt(document.getElementById('qty-umbrella').innerText) || 1;
-            items.push(`${qty}x Napernyő`);
-            dailyTotal += qty * 1000; 
-        }
-
-        // 4. Ha semmit sem választott ki
-        if (items.length === 0) {
-            alert("Kérjük, válasszon legalább egy felszerelést a pipák segítségével!");
-            return;
-        }
-
-        // 5. Dátumok és napok számítása
-        const startDateStr = document.getElementById('r-start').value;
-        const endDateStr = document.getElementById('r-end').value;
-        
-        if (!startDateStr || !endDateStr) {
-            alert("Kérjük, adja meg a bérlés kezdő és befejező dátumát!");
-            return;
-        }
-
-        const start = new Date(startDateStr);
-        const end = new Date(endDateStr);
-        
-        if (end < start) {
-            alert("A befejezés dátuma nem lehet korábban, mint a kezdés!");
-            return;
-        }
-
-        let diffDays = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
-        if (diffDays === 0) diffDays = 1;
-
-        const finalTotal = dailyTotal * diffDays;
-
-        // 6. Adatcsomag összeállítása az Adminnak (az apartman mezőt is olvassa)
+        const calc = updateLiveTotal();
         const orderData = {
             type: "Strandfelszerelés",
-            items: items.join(" + "), 
+            items: items.join(", "),
             guestName: document.getElementById('r-name').value,
             phone: document.getElementById('r-phone').value,
-            apartment: document.getElementById('r-apt').value, // Külsős esetén is ezt olvassa
-            start: startDateStr,
-            end: endDateStr,
-            days: diffDays,
-            totalPrice: finalTotal,
+            apartment: document.getElementById('r-apt').value,
+            start: document.getElementById('r-start').value,
+            end: document.getElementById('r-end').value,
+            days: calc.days,
+            totalPrice: calc.total,
             status: "Új"
         };
 
-        // 7. Küldés a szerverre
         try {
             const res = await fetch('/api/order', {
                 method: 'POST',
@@ -570,68 +518,25 @@ img {
                 body: JSON.stringify(orderData)
             });
 
-            if (res.ok) {
+            if(res.ok) {
+                // ITT A JAVÍTÁS: Előbb bezárjuk a régit, aztán KÉNYSZERÍTJÜK a Popupot
+                document.getElementById('rent-modal').style.display = 'none';
                 
-                closeRentModal(); // Bezárjuk a foglalási űrlapot
-                showSuccessPopup(orderData); // Megnyitjuk a szép visszaigazolót
-            } else {
-                alert("Hiba történt a mentés során.");
+                const successDetails = document.getElementById('success-details');
+                successDetails.innerHTML = `
+                    <p>Sikeresen lefoglalva: <strong>${orderData.items}</strong></p>
+                    <p>Összesen: <strong>${orderData.totalPrice.toLocaleString()} Ft</strong></p>
+                    <p style="font-size:0.8rem; margin-top:10px;">Hamarosan keresünk a megadott számon!</p>
+                `;
+                
+                const popup = document.getElementById('success-popup');
+                popup.style.display = 'flex';
+                setTimeout(() => popup.classList.add('active'), 10);
             }
-        } catch (error) {
-            console.error(error);
-            alert("Hálózati hiba történt.");
+        } catch (err) {
+            alert("Hiba történt a küldéskor.");
         }
     }
-
-    function updateLiveTotal() {
-    let dailyTotal = 0;
-    
-    // Árak ellenőrzése
-    if (document.getElementById('item-sup').checked) {
-        dailyTotal += (parseInt(document.getElementById('qty-sup').innerText) || 1) * 4500;
-    }
-    if (document.getElementById('item-sunbed').checked) {
-        dailyTotal += (parseInt(document.getElementById('qty-sunbed').innerText) || 1) * 1500;
-    }
-    if (document.getElementById('item-umbrella').checked) {
-        dailyTotal += (parseInt(document.getElementById('qty-umbrella').innerText) || 1) * 1000;
-    }
-
-    const startStr = document.getElementById('r-start').value;
-    const endStr = document.getElementById('r-end').value;
-    let total = 0;
-
-    if (startStr && endStr) {
-        const start = new Date(startStr);
-        const end = new Date(endStr);
-        
-        if (end >= start) {
-            // Itt a lényeg: +1 nap, hogy a zárónap is bérleti nap legyen
-            let days = Math.ceil(Math.abs(end - start) / (1000 * 60 * 60 * 24)) + 1;
-            total = dailyTotal * days;
-        }
-    }
-
-    document.getElementById('modal-total-amount').innerText = total.toLocaleString() + " Ft";
-}
-
-function showSuccessPopup(details) {
-    const popup = document.getElementById('success-popup');
-    const detailsDiv = document.getElementById('success-details');
-    
-    detailsDiv.innerHTML = `
-        <p style="margin-bottom: 8px;">Kiválasztott tételek: <strong>${details.items}</strong></p>
-        <p style="margin-bottom: 8px;">Időtartam: <strong>${details.days} nap</strong></p>
-        <p style="font-size: 1.2rem; color: #5a6b5a; margin-top: 15px;">Fizetendő: <strong>${details.totalPrice.toLocaleString()} Ft</strong></p>
-        <p style="font-size: 0.85rem; color: #999; margin-top: 20px;">Hamarosan felvesszük Önnel a kapcsolatot.</p>
-    `;
-    
-    popup.style.display = 'flex';
-}
-
-function goToHome() {
-    window.location.href = 'index.html'; // Ide dobja a felhasználót a gombnyomás után
-}
 </script>
 </body>
 </html>
