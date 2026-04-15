@@ -206,21 +206,25 @@
     </div>
 </div>
 
-<div id="owner-modal" class="modal" style="display: none;">
-    <div class="modal-content">
-        <h3>Partner szerkesztése</h3>
+<div id="owner-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="modal-content" style="background: white; padding: 30px; border-radius: 15px; width: 400px; position: relative;">
+        <h2 style="margin-bottom: 20px; font-family: 'Playfair Display', serif;">Partner szerkesztése</h2>
+        
         <input type="hidden" id="edit-owner-id">
-        <div class="input-group">
-            <label>Partner neve</label>
-            <input type="text" id="edit-owner-name">
+        
+        <div style="margin-bottom: 15px;">
+            <label style="display: block; margin-bottom: 5px; font-size: 0.9rem; color: #666;">Partner neve</label>
+            <input type="text" id="edit-owner-name" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
         </div>
-        <div class="input-group">
-            <label>Kód</label>
-            <input type="text" id="edit-owner-code">
+
+        <div style="margin-bottom: 25px;">
+            <label style="display: block; margin-bottom: 5px; font-size: 0.9rem; color: #666;">Kód</label>
+            <input type="text" id="edit-owner-code" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px;">
         </div>
-        <div class="modal-buttons">
-            <button onclick="saveOwner()" class="btn-main">Mentés</button>
-            <button onclick="document.getElementById('owner-modal').style.display='none'" class="btn-outline">Mégse</button>
+
+        <div style="display: flex; gap: 10px;">
+            <button onclick="saveOwner()" style="flex: 1; padding: 12px; background: #2c3e50; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Mentés</button>
+            <button onclick="document.getElementById('owner-modal').style.display='none'" style="flex: 1; padding: 12px; background: #eee; border: none; border-radius: 8px; cursor: pointer;">Mégse</button>
         </div>
     </div>
 </div>
@@ -416,38 +420,37 @@
         document.getElementById('apt-modal').style.display = 'flex';
     }
 
-    function openOwnerModal(id) {
-    // 1. Megkeressük a tulajdonost az adatok között
+function openOwnerModal(id) {
+    // 1. Megkeressük az adatot
+    if (!db.owners) return;
     const owner = db.owners.find(o => String(o.id) === String(id));
+    
     if (!owner) {
-        console.error("Tulajdonos nem található:", id);
+        console.error("Nem található tulajdonos ezzel az ID-val:", id);
         return;
     }
 
-    // 2. Biztonságos kitöltés: csak akkor írjuk be, ha létezik az elem
-    const fields = {
-        'edit-owner-id': owner.id,
-        'edit-owner-name': owner.name,
-        'edit-owner-code': owner.code
-    };
+    // 2. Értékek betöltése (ID ellenőrzéssel, hogy ne szálljon el a kód)
+    const nameInput = document.getElementById('edit-owner-name');
+    const codeInput = document.getElementById('edit-owner-code');
+    const idInput = document.getElementById('edit-owner-id');
 
-    Object.keys(fields).forEach(id => {
-        const el = document.getElementById(id);
-        if (el) {
-            el.value = fields[id] || "";
-        } else {
-            console.warn(`Hiányzó HTML elem: ${id}`);
-        }
-    });
+    if (nameInput) nameInput.value = owner.name || "";
+    if (codeInput) codeInput.value = owner.code || "";
+    if (idInput) idInput.value = owner.id;
 
-    // 3. Modal megjelenítése
+    // 3. Megjelenítés
     const modal = document.getElementById('owner-modal');
-    if (modal) modal.style.display = 'flex';
+    if (modal) {
+        modal.style.display = 'flex';
+    } else {
+        console.error("Hiba: Az 'owner-modal' nem található a HTML-ben!");
+    }
 }
 
-    function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
+function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
-   function renderAll() {
+function renderAll() {
     if (!db) return;
 
     
