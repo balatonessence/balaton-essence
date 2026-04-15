@@ -415,23 +415,34 @@
    function renderAll() {
     if (!db) return;
 
-    // --- 0. FOGLALÁSOK TÁBLÁZAT ---
+    
+     // --- 0. FOGLALÁSOK TÁBLÁZAT ---
         const bookingTableBody = document.getElementById('booking-table-body');
         if (bookingTableBody && db.bookings) {
             bookingTableBody.innerHTML = db.bookings.map(b => {
                 const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
                 
-                // Mezőnév ellenőrzése: próbáljuk a checkOut-ot, ha nincs, akkor az end-et (iCal-nál gyakori)
+                // Dátumok és összeg kezelése
                 const checkInDate = b.checkIn || b.start || 'Nincs adat';
                 const checkOutDate = b.checkOut || b.end || 'Nincs adat';
+                
+                // Pénznem formázása (ha nincs megadva ár, akkor 0 Ft)
+                const priceDisplay = b.totalPrice 
+                    ? `${Number(b.totalPrice).toLocaleString()} Ft` 
+                    : 'Nincs ár megadva';
 
                 const source = (b.source || 'web').toLowerCase();
                 
                 return `
                     <tr>
                         <td><strong>${apt ? apt.name : 'Ismeretlen'}</strong></td>
-                        <td>${b.guestName || 'Névtelen vendég'}</td>
-                        <td>${checkInDate} &rarr; ${checkOutDate}</td>
+                        <td>
+                            <div style="font-weight: 600;">${b.guestName || 'Névtelen vendég'}</div>
+                            <div style="font-size: 0.75rem; color: var(--accent); font-weight: 700;">${priceDisplay}</div>
+                        </td>
+                        <td>
+                            <div style="font-size: 0.9rem;">${checkInDate} &rarr; ${checkOutDate}</div>
+                        </td>
                         <td><span class="badge badge-${source}">${source.toUpperCase()}</span></td>
                         <td>
                             <button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">✕</button>
