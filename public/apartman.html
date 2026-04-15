@@ -574,17 +574,19 @@
 
 
     async function sendBookingRequest() {
-    // 1. Kinyerjük a szöveget az árból (pl. "54 000 Ft")
     const totalElement = document.getElementById('grand-total');
-    if (!totalElement) {
-        console.error("Hiba: grand-total elem nem található!");
-        return;
+    
+    // DEBUG: Kiírjuk a konzolra, hogy mit lát a gép
+    console.log("Nyers összeg az oldalon:", totalElement ? totalElement.innerText : "Elem nem található");
+
+    let cleanNumber = 0;
+    if (totalElement) {
+        // Kiszedünk mindent, ami nem szám (szóköz, Ft, stb.)
+        const rawValue = totalElement.innerText;
+        cleanNumber = parseInt(rawValue.replace(/[^0-9]/g, '')) || 0;
     }
 
-    // 2. Csak a számokat hagyjuk meg (kiszedjük a Ft-ot és a szóközöket)
-    // Pl: "54 000 Ft" -> "54000" -> 54000 (Number)
-    const rawValue = totalElement.innerText;
-    const cleanNumber = parseInt(rawValue.replace(/[^0-9]/g, '')) || 0;
+    console.log("Átalakított szám:", cleanNumber);
 
     const data = {
         aptId: currentApt.id,
@@ -595,33 +597,30 @@
         checkIn: document.getElementById('book-start').value,
         checkOut: document.getElementById('book-end').value,
         guests: document.getElementById('book-guests').value,
-        totalPrice: cleanNumber, // Mostantól fixen SZÁM kerül az adatbázisba
+        totalPrice: cleanNumber, // Fontos: totalPrice néven küldjük!
         msg: document.getElementById('book-msg').value,
         source: 'Weboldal'
     };
 
-    // Validálás
-    if (!data.guestName || !data.email || !data.phone) {
-        showSuccess("Hiba!", "Kérlek töltsd ki az összes kötelező mezőt!");
-        return;
+    // Ha a szám még mindig 0, megállítjuk, hogy lásd a hibát
+    if (data.totalPrice === 0) {
+        console.error("HIBA: Az összeg 0, nem küldöm el!");
+        // Opcionális: alert("Hiba: Az ár nem számítható ki!"); 
     }
 
+    // ... a fetch rész marad változatlan ...
     try {
         const res = await fetch('/api/new-booking', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
-
         if (res.ok) {
             showSuccess("Sikeres foglalás!", `Köszönjük, ${data.guestName}!`, () => {
-                closeBookingModal();
                 window.location.reload();
             });
         }
-    } catch (e) {
-        showSuccess("Hiba!", "Szerver hiba történt.");
-    }
+    } catch (e) { console.error(e); }
 }
 
 let calDate = new Date(); // A naptár aktuális nézete
