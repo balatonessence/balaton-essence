@@ -246,9 +246,8 @@
     </div>
 </div>
 
-<script src="database.js?v=1.1"></script>
+<script src="database.js?v=2.0"></script>
 <script>
-    // Biztonságos betöltés: megvárjuk az adatbázist, aztán rajzolunk
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof initDatabase === "function") {
         initDatabase(renderIndexApartments);
@@ -258,18 +257,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function renderIndexApartments() {
-    // 1. Megkeressük a rácsot ÉS a betöltő konténert is
     const grid = document.getElementById('apartment-grid');
     const loaderContainer = document.getElementById('apt-list-container');
     
     if (!grid || !db.apartments) return;
 
-    // 2. Ha az adatok megérkeztek, ELTÜNTETJÜK a teljes betöltő konténert (karikástul)
     if (loaderContainer) {
         loaderContainer.style.display = 'none';
     }
 
-    // 3. Kiürítjük a rácsot (biztonság kedvéért)
     grid.innerHTML = "";
 
     db.apartments.forEach(apt => {
@@ -281,11 +277,10 @@ function renderIndexApartments() {
         } else {
             const minSeasonPrice = apt.seasons && apt.seasons.length > 0 
                 ? Math.min(...apt.seasons.map(s => s.price)) 
-                : apt.price;
+                : (apt.price || 0);
             priceDisplay = `NYITÁS ÁPRILISBAN: ${minSeasonPrice.toLocaleString()} FT-TÓL`;
         }
 
-        // 4. Kirajzoljuk az apartmanokat
         grid.innerHTML += `
             <a href="apartman.html?id=${apt.id}" class="pillar-card" style="text-decoration: none; color: inherit;">
                 <div class="pillar-header">
@@ -299,14 +294,10 @@ function renderIndexApartments() {
     });
 }
 
-
-    function openAdminLogin() {
+function openAdminLogin() {
     const modal = document.getElementById('admin-login-modal');
     modal.style.display = 'flex';
-    // Kis késleltetés, hogy a focus biztosan működjön
-    setTimeout(() => {
-        document.getElementById('admin-pass-input').focus();
-    }, 100);
+    setTimeout(() => { document.getElementById('admin-pass-input').focus(); }, 100);
 }
 
 function closeAdminLogin() {
@@ -317,12 +308,10 @@ function closeAdminLogin() {
 
 function validateAdminCode() {
     const codeInput = document.getElementById('admin-pass-input');
-    const secretCode = "1234"; // Itt a te kódod legyen!
+    const secretCode = "1234"; // Ide a te kódod kerüljön
 
     if (codeInput.value === secretCode) {
-        // EZ A SOR A KULCS: Ez helyezi el a "pecsétet" a böngészőben
         sessionStorage.setItem('adminLoggedIn', 'true'); 
-        
         window.location.href = 'admin.html';
     } else {
         document.getElementById('login-error').style.display = 'block';
@@ -330,7 +319,6 @@ function validateAdminCode() {
     }
 }
 
-// Billentyűzet figyelése (Enter = Belépés, Esc = Mégse)
 document.addEventListener('keydown', function(e) {
     const modal = document.getElementById('admin-login-modal');
     if (modal.style.display === 'flex') {

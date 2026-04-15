@@ -1,4 +1,3 @@
-// public/database.js
 var db = { apartments: [], owners: [], bookings: [], extras: [] };
 
 async function initDatabase(callback) {
@@ -13,7 +12,6 @@ async function initDatabase(callback) {
     } catch (e) { console.error("Hiba az adatok betöltésekor:", e); }
 }
 
-// --- JAVÍTOTT ÁRMOTOR ---
 function getAptStatusAndPrice(apt, targetDate = new Date(), guestCount = 2) {
     const dateStr = targetDate.toISOString().split('T')[0];
     const month = targetDate.getMonth() + 1;
@@ -29,8 +27,7 @@ function getAptStatusAndPrice(apt, targetDate = new Date(), guestCount = 2) {
     if (apt.seasons && apt.seasons.length > 0) {
         for (let s of apt.seasons) {
             if (dateStr >= s.start && dateStr <= s.end) {
-                // ÁR LOGIKA A VENDÉGSZÁM ALAPJÁN
-                let finalPrice = s.price; // Alapár (1-2 fő)
+                let finalPrice = s.price; 
                 if (guestCount == 3 && s.price3) finalPrice = s.price3;
                 if (guestCount >= 4 && s.price4) finalPrice = s.price4;
 

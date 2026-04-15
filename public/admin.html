@@ -206,29 +206,14 @@
     </div>
 </div>
 
+<script src="database.js?v=2.0"></script>
 <script>
-    let db = { apartments: [], owners: [], bookings: [], extras: [] };
     let activeId = null;
     let activeOId = null;
     let currentCoverImage = null; 
     let currentGalleryImages = []; 
 
-    // ADATBÁZIS INICIALIZÁLÁSA
-    async function initDatabase(callback) {
-        try {
-            const res = await fetch('/api/get-db-content');
-            if (res.ok) {
-                db = await res.json();
-                callback();
-            } else {
-                console.error("Hiba az adatbázis betöltésekor");
-            }
-        } catch (e) {
-            console.error("Szerver hiba betöltéskor:", e);
-        }
-    }
-
-    // ADATBÁZIS MENTÉSE
+    // ADATBÁZIS MENTÉSE (A db már a database.js-ből jön)
     async function saveDb() {
         try {
             const res = await fetch('/api/save', {
@@ -249,7 +234,6 @@
         }
     }
 
-    // TULAJDONOS MENTÉSE
     async function saveOwner() {
         const name = document.getElementById('o-name').value;
         const code = document.getElementById('o-code').value;
@@ -265,7 +249,6 @@
         closeModal();
     }
 
-    // KÉPKEZELÉS (WebP)
     function compressImage(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
@@ -321,7 +304,6 @@
         else visual.style.backgroundImage = `none`;
     }
 
-    // SZEZONOK KEZELÉSE
     function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2', maxGuests = '4', price3 = '', price4 = '') {
         const container = document.getElementById('seasons-container');
         const rowId = 'season-' + Date.now() + Math.floor(Math.random() * 1000);
@@ -427,7 +409,6 @@
 
     function closeModal() { document.querySelectorAll('.modal-overlay').forEach(m => m.style.display = 'none'); }
 
-    // MEGJELENÍTÉS
     function renderAll() {
         if (!db.apartments) return;
 
@@ -530,12 +511,9 @@
         }
     }
 
-    // SORRENDEZÉS
     function initAptSorting() {
         const el = document.getElementById('apt-list-container');
-        if (!el || typeof Sortable === 'undefined') {
-            return;
-        }
+        if (!el || typeof Sortable === 'undefined') return;
 
         if (window.aptSortable) window.aptSortable.destroy();
 
@@ -543,9 +521,7 @@
             animation: 150,
             ghostClass: 'sortable-ghost',
             handle: '.apt-row',
-            onEnd: function() {
-                saveAptOrder();
-            }
+            onEnd: function() { saveAptOrder(); }
         });
     }
 
