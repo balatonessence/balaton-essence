@@ -453,17 +453,33 @@ if (bookingTableBody && db.bookings) {
 }
 
     // --- 1. REGGELI TÁBLÁZAT ---
-    const breakfastBody = document.getElementById('breakfast-table-body');
-    if (breakfastBody) {
-        breakfastBody.innerHTML = (db.breakfasts || []).map(b => `
+    // --- REGGELI RENDELÉSEK TÁBLÁZAT ---
+const breakfastTableBody = document.getElementById('breakfast-table-body');
+if (breakfastTableBody && db.breakfasts) {
+    breakfastTableBody.innerHTML = db.breakfasts.map(b => {
+        // Ár kezelése
+        const price = Number(b.totalPrice) || 0;
+        const priceFormatted = price > 0 
+            ? `<div style="color: var(--accent); font-weight: 700; font-size: 0.8rem;">Összeg: ${price.toLocaleString()} Ft</div>` 
+            : '<div style="color: #ccc; font-size: 0.8rem;">Nincs ár megadva</div>';
+
+        return `
             <tr>
-                <td><strong>${b.aptName || 'Külsős'}</strong><br>${b.guest || b.guestName || 'Vendég'}</td>
-                <td>${b.date || ''}</td>
-                <td>${b.note || ''}</td>
-                <td><button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${b.id}')">✕</button></td>
+                <td>
+                    <strong>${b.aptName || 'Ismeretlen'}</strong><br>
+                    <span style="font-size: 0.85rem; color: #666;">${b.guestName || 'ab'}</span>
+                </td>
+                <td>${b.date || 'Nincs dátum'}</td>
+                <td>
+                    <div>TÁL: ${b.type} | TEL: ${b.phone} | FŐ: ${b.persons}</div>
+                    ${priceFormatted} </td>
+                <td>
+                    <button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${b.id}')">✕</button>
+                </td>
             </tr>
-        `).join('');
-    }
+        `;
+    }).join('');
+}
 
     // --- 2. ESZKÖZ BÉRLÉS TÁBLÁZAT ---
     const rentTableBody = document.getElementById('rent-table-body');
