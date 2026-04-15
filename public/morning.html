@@ -233,7 +233,6 @@
     };
 
     try {
-        // Figyelj az URL-re! Ha az admin a /api/breakfasts-t használja, küldd oda!
         const res = await fetch('/api/order', { 
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -241,17 +240,25 @@
         });
 
         if(res.ok) {
+            // 1. Bezárjuk a rendelési ablakot (ha van ilyen függvényed)
             if (typeof closeMorningModal === 'function') closeMorningModal();
-            
-            showSuccess("Sikeres rendelés!", `A ${type} rögzítve. Összeg: ${totalAmount.toLocaleString()} Ft`, "success", () => {
-                window.location.reload();
-            });
+
+            // 2. Megjelenítjük a központi, szép visszajelzőt
+            // Ez ugyanaz, amit az apartmannál használsz
+            showSuccess(
+                "Sikeres rendelés!", 
+                `A reggelit rögzítettük ${date} napra. Fizetendő: ${totalAmount.toLocaleString()} Ft.`, 
+                "success", 
+                () => {
+                    window.location.reload(); // Frissítés a gombra kattintás után
+                }
+            );
         } else {
-            const errorData = await res.json();
-            showSuccess("Hiba!", errorData.error || "A szerver elutasította a rendelést.", "error");
+            showSuccess("Hiba!", "Sajnos nem sikerült rögzíteni a rendelést.", "error");
         }
     } catch (e) { 
-        showSuccess("Hiba!", "Hálózati hiba történt!", "error");
+        console.error(e);
+        showSuccess("Hiba!", "Hálózati hiba történt a küldés során.", "error");
     }
 }
 </script>
