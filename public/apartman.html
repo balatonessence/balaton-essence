@@ -730,7 +730,6 @@ function renderCalendar() {
     const monthYearLabel = document.getElementById('calendar-month-year');
     
     if (!daysContainer) return;
-    daysContainer.innerHTML = "";
     
     const year = calDate.getFullYear();
     const month = calDate.getMonth();
@@ -742,15 +741,30 @@ function renderCalendar() {
     const daysInMonth = new Date(year, month + 1, 0).getDate();
     const startOffset = firstDay === 0 ? 6 : firstDay - 1;
 
-    for (let i = 0; i < startOffset; i++) {
-        daysContainer.innerHTML += `<div class="cal-day empty"></div>`;
-    }
-
     const todayStr = new Date().toISOString().split('T')[0];
+    const bookings = (db.bookings || []).filter(b => String(b.aptId) === String(currentApt.id));
 
-    // Itt a titok: a db.bookings-ból dolgozunk, hogy lássuk a tól-ig tartományokat
-    // (Ha a currentApt-ben csak véglátumok vannak, az kevés)
-    const bookings = db.bookings || [];
+    // 1. ELŐRE KISZÁMOLJUK A FOGLALT DÁTUMOKAT (Set-be, ami villámgyors)
+    const reservedDates = new Set();
+    bookings.forEach(b => {
+        let start = b.checkIn || b.start;
+        let end = b.checkOut || b.end;
+        
+        let curr = new Date(start);
+        let last = new Date(end);
+        
+        while (curr < last) {
+            reservedDates.add(curr.toISOString().split('T')[0]);
+            curr.setDate(curr.getDate() + 1);
+        }
+    });
+
+    // 2. EGYETLEN STRINGBE ÉPÍTJÜK A HTML-T (Nem használunk += innerHTML-t a ciklusban!)
+    let htmlContent = "";
+
+    for (let i = 0; i < startOffset; i++) {
+        htmlContent += `<div class="cal-day empty"></div>`;
+    }
 
     for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
@@ -758,20 +772,8 @@ function renderCalendar() {
         let className = "cal-day";
         let onClickAttr = `onclick="selectDate('${dateStr}')"`;
 
-        // ÁTTERVEZETT ELLENŐRZÉS: Benne van-e a nap bármelyik foglalási tartományban?
-        const isBooked = bookings.some(b => {
-            // Csak ehhez az apartmanhoz tartozó foglalást nézzük
-            if (String(b.aptId) !== String(currentApt.id)) return false;
-            
-            const start = b.checkIn || b.start;
-            const end = b.checkOut || b.end;
-            
-            // Ha a nap a checkIn és a checkOut közé esik (vagy egyenlő velük)
-            return dateStr >= start && dateStr < end; 
-            // Megjegyzés: a távozás napja (end) általában már szabad, ezért használtam a '< end' jelet
-        });
-
-        if (isBooked) {
+        // Villámgyors ellenőrzés a Set-ben
+        if (reservedDates.has(dateStr)) {
             className += " booked";
             onClickAttr = ""; 
         }
@@ -781,8 +783,11 @@ function renderCalendar() {
         if (selectedEnd && dateStr === selectedEnd) className += " selected-end";
         if (selectedStart && selectedEnd && dateStr > selectedStart && dateStr < selectedEnd) className += " selected-range";
 
-        daysContainer.innerHTML += `<div class="${className}" ${onClickAttr}>${d}</div>`;
+        htmlContent += `<div class="${className}" ${onClickAttr}>${d}</div>`;
     }
+
+    // 3. CSAK A LEGVEGÉN ÍRJUK BE A DOM-BA (Egyszeri művelet = nincs laggolás)
+    daysContainer.innerHTML = htmlContent;
 }
 
 function selectDate(dateStr) {
