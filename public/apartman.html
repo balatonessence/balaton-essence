@@ -443,16 +443,19 @@
         const mainImg = document.getElementById('apt-main-img');
         if (cImg) { mainImg.src = cImg; mainImg.style.display = 'block'; }
         
+        // A renderDetails függvényen belül a galéria rész:
         const gal = document.getElementById('apt-gallery');
-        if (gal) {
-            gal.innerHTML = "";
-            gImgs.forEach((img, idx) => {
+        if (gal && gImgs.length > 0) {
+            // Egyetlen nagy stringet építünk fel, és csak egyszer írjuk be a DOM-ba
+            const galleryHTML = gImgs.map((img, idx) => {
                 const lbIndex = cImg ? idx + 1 : idx;
-                gal.innerHTML += `
+                return `
                     <div class="img-container">
-                        <img src="${img}" class="gallery-img" onclick="openLightbox(${lbIndex})">
+                        <img src="${img}" class="gallery-img" onclick="openLightbox(${lbIndex})" loading="lazy">
                     </div>`;
-            });
+            }).join('');
+            
+            gal.innerHTML = galleryHTML;
         }
     }
 
