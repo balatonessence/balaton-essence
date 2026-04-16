@@ -432,37 +432,58 @@
 
     // --- MODALOK NYITÁSA ---
     function openAptModal(id) {
+    try {
+        if (!id) {
+            // ÚJ APARTMAN MÓD
+            activeId = null;
+            resetAptFields();
+            document.getElementById('apt-modal').style.display = 'flex';
+            return;
+        }
+
         activeId = id;
-        const select = document.getElementById('a-owner-select');
-        if (select) select.innerHTML = (db.owners || []).map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+        
+        // BIZTONSÁGOS KERESÉS: String-re kényszerítjük mindkét oldalt
+        const a = db.apartments.find(apt => String(apt.id) === String(id));
+        
+        if (!a) {
+            console.error("Apartman nem található! ID:", id);
+            alert("Hiba: Az apartman adatai nem elérhetőek.");
+            return;
+        }
+
+        // Adatok betöltése biztonságosan (ellenőrizzük, létezik-e az elem a HTML-ben)
+        const setVal = (id, val) => {
+            const el = document.getElementById(id);
+            if (el) el.value = val || '';
+        };
+
+        setVal('a-name', a.name);
+        setVal('a-loc', a.location);
+        setVal('a-owner-select', a.ownerId);
+        setVal('a-desc', a.description);
+        setVal('a-ical-b', a.icalBooking);
+        setVal('a-ical-sz', a.icalSzallas);
+        
+        currentCoverImage = a.coverImage || null;
+        currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
         
         const seasonsContainer = document.getElementById('seasons-container');
-        if (seasonsContainer) seasonsContainer.innerHTML = ''; 
-
-        if (id) {
-            const a = db.apartments.find(apt => String(apt.id) === String(id));
-            if (!a) return;
-            document.getElementById('a-name').value = a.name;
-            document.getElementById('a-loc').value = a.location;
-            document.getElementById('a-owner-select').value = a.ownerId;
-            document.getElementById('a-desc').value = a.description || '';
-            document.getElementById('a-ical-b').value = a.icalBooking || '';
-            document.getElementById('a-ical-sz').value = a.icalSzallas || '';
-            currentCoverImage = a.coverImage || null;
-            currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
-            if (a.seasons) a.seasons.forEach(s => addSeasonRow(s.name, s.start, s.end, s.price, s.minNights, s.maxGuests, s.price3, s.price4));
-        } else {
-            activeId = null;
-            ['a-name', 'a-loc', 'a-desc', 'a-ical-b', 'a-ical-sz'].forEach(f => {
-                const el = document.getElementById(f);
-                if (el) el.value = '';
-            });
-            currentCoverImage = null;
-            currentGalleryImages = [];
+        if (seasonsContainer) {
+            seasonsContainer.innerHTML = '';
+            if (a.seasons) {
+                a.seasons.forEach(s => addSeasonRow(s.name, s.start, s.end, s.price, s.minNights, s.maxGuests, s.price3, s.price4));
+            }
         }
+
         renderImagePreviews();
         document.getElementById('apt-modal').style.display = 'flex';
+
+    } catch (error) {
+        console.error("Kritikus hiba a modal nyitásakor:", error);
+        alert("Hiba történt a szerkesztő megnyitásakor. Ellenőrizd a konzolt!");
     }
+}
 
     function openOwnerModal(id) {
         const modal = document.getElementById('owner-modal');

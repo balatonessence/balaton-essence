@@ -373,19 +373,23 @@
     let currentIndex = 0;
 
     document.addEventListener('DOMContentLoaded', async () => {
-        const params = new URLSearchParams(window.location.search);
-        const id = parseInt(params.get('id'));
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id'); // Ne használd a parseInt-et, maradjunk a szövegnél
 
-        await initDatabase(() => {
-            currentApt = db.apartments.find(a => a.id === id);
-            if (currentApt) {
-                renderDetails();
-                document.getElementById('main-content').style.display = 'block';
-            } else {
-                window.location.href = "index.html";
-            }
-        });
+    await initDatabase(() => {
+        // String összehasonlítás a biztos sikerért
+        currentApt = db.apartments.find(a => String(a.id) === String(id));
+        
+        if (currentApt) {
+            renderDetails();
+            const mainContent = document.getElementById('main-content');
+            if (mainContent) mainContent.style.display = 'block';
+        } else {
+            console.error("Apartman nem található, ID:", id);
+            window.location.href = "index.html";
+        }
     });
+});
 
     function renderDetails() {
         const today = new Date();
