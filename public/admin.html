@@ -496,75 +496,91 @@
     // --- MODALOK NYITÁSA ---
    // --- MODALOK NYITÁSA ---
     function openAptModal(id) {
-        try {
-            const select = document.getElementById('a-owner-select');
-            if (select) select.innerHTML = (db.owners || []).map(o => `<option value="${o.id}">${o.name}</option>`).join('');
+    try {
+        const select = document.getElementById('a-owner-select');
+        if (select) select.innerHTML = (db.owners || []).map(o => `<option value="${o.id}">${o.name}</option>`).join('');
 
-            if (!id) {
-                // ÚJ APARTMAN MÓD
-                activeId = null;
-                
-                // ITT A JAVÍTÁS: resetAptFields() helyett manuálisan ürítünk mindent
-                ['a-name', 'a-loc', 'a-desc', 'a-ical-b', 'a-ical-sz'].forEach(f => {
-                    const el = document.getElementById(f);
-                    if (el) el.value = '';
-                });
-                currentCoverImage = null;
-                currentGalleryImages = [];
-                
-                const seasonsContainer = document.getElementById('seasons-container');
-                if (seasonsContainer) seasonsContainer.innerHTML = '';
-                
-                if (typeof renderImagePreviews === "function") renderImagePreviews();
-                
-                document.getElementById('apt-modal').style.display = 'flex';
-                return;
-            }
+        const calendarWrapper = document.querySelector('.admin-calendar-wrapper');
 
-            // SZERKESZTÉS MÓD
-            activeId = id;
+        if (!id) {
+            // ÚJ APARTMAN MÓD
+            activeId = null;
             
-            // BIZTONSÁGOS KERESÉS: String-re kényszerítjük mindkét oldalt
-            const a = db.apartments.find(apt => String(apt.id) === String(id));
+            // Ha új apartmant hozunk létre, elrejtjük a naptárat, mert még nincs ID-ja
+            if (calendarWrapper) calendarWrapper.style.display = 'none';
             
-            if (!a) {
-                console.error("Apartman nem található! ID:", id);
-                alert("Hiba: Az apartman adatai nem elérhetőek.");
-                return;
-            }
-
-            // Adatok betöltése biztonságosan (ellenőrizzük, létezik-e az elem a HTML-ben)
-            const setVal = (fieldId, val) => {
-                const el = document.getElementById(fieldId);
-                if (el) el.value = val || '';
-            };
-
-            setVal('a-name', a.name);
-            setVal('a-loc', a.location);
-            setVal('a-owner-select', a.ownerId);
-            setVal('a-desc', a.description);
-            setVal('a-ical-b', a.icalBooking);
-            setVal('a-ical-sz', a.icalSzallas);
-            
-            currentCoverImage = a.coverImage || null;
-            currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
+            ['a-name', 'a-loc', 'a-desc', 'a-ical-b', 'a-ical-sz'].forEach(f => {
+                const el = document.getElementById(f);
+                if (el) el.value = '';
+            });
+            currentCoverImage = null;
+            currentGalleryImages = [];
             
             const seasonsContainer = document.getElementById('seasons-container');
-            if (seasonsContainer) {
-                seasonsContainer.innerHTML = '';
-                if (a.seasons) {
-                    a.seasons.forEach(s => addSeasonRow(s.name, s.start, s.end, s.price, s.minNights, s.maxGuests, s.price3, s.price4));
-                }
-            }
-
+            if (seasonsContainer) seasonsContainer.innerHTML = '';
+            
             if (typeof renderImagePreviews === "function") renderImagePreviews();
+            
             document.getElementById('apt-modal').style.display = 'flex';
-
-        } catch (error) {
-            console.error("Kritikus hiba a modal nyitásakor:", error);
-            alert("Hiba történt a szerkesztő megnyitásakor. Ellenőrizd a konzolt!");
+            return;
         }
+
+        // SZERKESZTÉS MÓD
+        activeId = id;
+        
+        // Visszakapcsoljuk a naptárat, ha szerkesztünk
+        if (calendarWrapper) calendarWrapper.style.display = 'block';
+        
+        const a = db.apartments.find(apt => String(apt.id) === String(id));
+        
+        if (!a) {
+            console.error("Apartman nem található! ID:", id);
+            alert("Hiba: Az apartman adatai nem elérhetőek.");
+            return;
+        }
+
+        const setVal = (fieldId, val) => {
+            const el = document.getElementById(fieldId);
+            if (el) el.value = val || '';
+        };
+
+        setVal('a-name', a.name);
+        setVal('a-loc', a.location);
+        setVal('a-owner-select', a.ownerId);
+        setVal('a-desc', a.description);
+        setVal('a-ical-b', a.icalBooking);
+        setVal('a-ical-sz', a.icalSzallas);
+        
+        currentCoverImage = a.coverImage || null;
+        currentGalleryImages = a.galleryImages ? [...a.galleryImages] : [];
+        
+        const seasonsContainer = document.getElementById('seasons-container');
+        if (seasonsContainer) {
+            seasonsContainer.innerHTML = '';
+            if (a.seasons) {
+                a.seasons.forEach(s => addSeasonRow(s.name, s.start, s.end, s.price, s.minNights, s.maxGuests, s.price3, s.price4));
+            }
+        }
+
+        // --- ITT A LÉNYEG: NAPTÁR INICIALIZÁLÁSA ---
+        const aptNameSpan = document.getElementById('admin-apt-name');
+        if (aptNameSpan) aptNameSpan.innerText = a.name; // Kiírjuk az apartman nevét a naptár fölé
+        
+        if (typeof initAdminCalendar === "function") {
+            initAdminCalendar(a.id); // Elindítjuk a naptár rajzolását
+        } else {
+            console.error("Az initAdminCalendar függvény hiányzik!");
+        }
+        // -------------------------------------------
+
+        if (typeof renderImagePreviews === "function") renderImagePreviews();
+        document.getElementById('apt-modal').style.display = 'flex';
+
+    } catch (error) {
+        console.error("Kritikus hiba a modal nyitásakor:", error);
+        alert("Hiba történt a szerkesztő megnyitásakor. Ellenőrizd a konzolt!");
     }
+}
 
     function openOwnerModal(id) {
         const modal = document.getElementById('owner-modal');
