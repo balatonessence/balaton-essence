@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Partner Portfólió | Balaton Essence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    <style>
+        :root { --bg: #F9F9F7; --text: #1A1A1A; --accent: #E76F51; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 5rem; }
+        header { padding: 2.5rem 5vw; display: flex; justify-content: space-between; align-items: center; background: #fff; border-bottom: 1px solid rgba(0,0,0,0.05); }
+        .logo { font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 700; }
+        main { max-width: 1200px; margin: 5rem auto; padding: 0 5vw; }
+        .property-card { background: #fff; padding: 4rem; margin-bottom: 4rem; box-shadow: 0 20px 40px rgba(0,0,0,0.03); display: grid; grid-template-columns: 1fr 1.5fr; gap: 4rem; }
+        .visual { height: 400px; background-size: cover; background-position: center; border-radius: 2px; }
+        h1 { font-family: 'Playfair Display'; font-size: 4rem; margin-bottom: 3rem; }
+        h2 { font-family: 'Playfair Display'; font-size: 2.5rem; margin-bottom: 1rem; }
+        .stat-box { border-top: 1px solid #eee; padding-top: 2rem; margin-top: 2rem; display: flex; gap: 4rem; }
+        .stat-box span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #999; }
+        .stat-box p { font-family: 'Playfair Display'; font-size: 2rem; color: var(--accent); }
+    </style>
+</head>
+<body>
+    <header><div class="logo">Balaton<span>.</span>Essence PARTNER</div><button onclick="sessionStorage.clear(); window.location.href='index.html'" style="background:none; border:1px solid #000; padding:10px 20px; border-radius:50px; cursor:pointer;">Kijelentkezés</button></header>
+    <main>
+        <h1 id="welcome">Üdvözöljük!</h1>
+        <div id="my-properties"></div>
+    </main>
+    <script src="database.js"></script>
+    <script>
+        const owner = JSON.parse(sessionStorage.getItem('loggedOwner'));
+        if(!owner) window.location.href='index.html';
+        document.getElementById('welcome').innerText = `Üdvözöljük,\n${owner.name}`;
+        const myApts = db.apartments.filter(a => a.ownerId === owner.id);
+        const cont = document.getElementById('my-properties');
+        myApts.forEach(apt => {
+            const income = db.bookings.filter(b => b.aptName === apt.name).reduce((sum, b) => sum + b.totalPrice, 0);
+            cont.innerHTML += `<div class="property-card"><div class="visual" style="background-image: ${apt.mainImage?`url(${apt.mainImage})`:`linear-gradient(45deg, #E76F51, #06111C)`}"></div><div class="info"><span>${apt.location}</span><h2>${apt.name}</h2><p>${apt.desc}</p><div class="stat-box"><div><span>Összes bevétel</span><p>${income.toLocaleString()} Ft</p></div><div><span>Foglaltság</span><p>${apt.occupancy}%</p></div></div></div></div>`;
+        });
+    </script>
+</body>
+</html>

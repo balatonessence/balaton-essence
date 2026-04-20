@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rólunk | Essence Balaton</title>
+    <title>Über uns | Essence Balaton</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
         :root { 
@@ -49,7 +49,7 @@
             margin-left: 2rem;
         }
 
-        /* HERO SZEKCIÓ - BALATONI KÉPPEL */
+        /* HERO SEKTION */
         .about-hero {
             height: 65vh;
             display: flex;
@@ -57,8 +57,7 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            /* Balatoni panoráma kép */
-            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1586106856257-e23581588d7a?q=80&w=1074&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');
+            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1586106856257-e23581588d7a?q=80&w=1074&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
             color: white;
@@ -80,7 +79,7 @@
             color: rgba(255,255,255,0.9);
         }
 
-        /* TARTALOM */
+        /* INHALT */
         .content-section {
             max-width: 1400px;
             margin: -5rem auto 5rem;
@@ -121,7 +120,7 @@
             border-radius: 2px;
         }
 
-        /* CSAPAT SZEKCIÓ - SZÍNES KÉPEKKEL */
+        /* TEAM SEKTION */
         .team-section {
             padding: 5rem 5vw;
             max-width: 1400px;
@@ -155,7 +154,7 @@
 
         .team-member:hover {
             box-shadow: 0 15px 40px rgba(0,0,0,0.05);
-            border-color: var(--accent);
+            border-color: var(--essence);
         }
 
         .member-img {
@@ -164,7 +163,6 @@
             border-radius: 50%;
             object-fit: cover;
             margin-bottom: 2rem;
-            /* NINCS GRAYSCALE, MINDIG SZÍNES */
             border: 3px solid var(--bg);
             box-shadow: 0 10px 20px rgba(0,0,0,0.08);
         }
@@ -176,7 +174,7 @@
         }
 
         .team-member span {
-            color: var(--accent);
+            color: var(--essence);
             font-size: 0.75rem;
             font-weight: 700;
             text-transform: uppercase;
@@ -199,58 +197,57 @@
             .about-image { height: 350px; }
         }
     </style>
-    <link rel="stylesheet" href="mobile.css">
+    <link rel="stylesheet" href="../mobile.css">
 </head>
 <body>
 
     <header>
         <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1;">
-        <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
-        <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: #1A1A1A; text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+            <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
+            <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: #1A1A1A; text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
         </a>
 
-        <nav class="nav-links" style="display: flex; gap: 2rem;">
-        <a href="index.html#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Apartmanok</a>
-        <a href="rolunk.html" style="text-decoration: none; color: var(--essence); font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Rólunk</a>
+        <nav class="nav-links">
+            <a href="index.html#apartments">Apartments</a>
+            <a href="rolunk.html" style="color: var(--essence);">Über uns</a>
         </nav>
     </header>
 
     <section class="about-hero">
-        <p>Üdvözöljük az Essence világában</p>
-        <h1>A mi történetünk</h1>
+        <p>Willkommen in der Welt von Essence</p>
+        <h1>Unsere Geschichte</h1>
     </section>
 
     <main class="content-section">
         <div class="about-card">
             <div class="about-text">
-                <h2>A Balaton iránti elkötelezettség.</h2>
-                <p>Cégünk célja, hogy a Balaton környéki pihenést új szintre emeljük.</p>
-                <p>Minden apartmanunkat szigorú minőségi szempontok alapján választjuk ki, hogy vendégeink számára a maximumot nyújthassuk.</p>
-                <p>Az Balaton Essence csapata nap mint nap azon dolgozik, hogy a vendéglátás valódi élmény legyen, ahol Ön az első pillanattól kezdve otthon érezheti magát.</p>
+                <h2>Leidenschaft für den Plattensee.</h2>
+                <p>Unser Ziel ist es, den Urlaub am Plattensee auf ein neues Niveau zu heben.</p>
+                <p>Jedes unserer Apartments wird nach strengen Qualitätskriterien ausgewählt, um unseren Gästen das Maximum an Komfort zu bieten.</p>
+                <p>Das Team von Balaton Essence arbeitet täglich daran, Gastfreundschaft zu einem echten Erlebnis zu machen, bei dem Sie sich vom ersten Moment an wie zu Hause fühlen.</p>
             </div>
-            
         </div>
     </main>
 
     <section class="team-section">
         <div class="team-title">
-            <h2>MI</h2>
-            <p style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem;">Személyes figyelem minden foglalásnál</p>
+            <h2>WER WIR SIND</h2>
+            <p style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem;">Persönliche Betreuung bei jeder Buchung</p>
         </div>
         <div class="team-grid">
             <div class="team-member">
                 <img src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=1974&auto=format&fit=crop" alt="Zsuzsa" class="member-img">
-                <h3>Szabó Zsuzsa</h3>
+                <h3>Zsuzsa Szabó</h3>
             </div>
             <div class="team-member">
                 <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=1974&auto=format&fit=crop" alt="Tamás" class="member-img">
-                <h3>Szabó Tamás</h3>
+                <h3>Tamás Szabó</h3>
             </div>
         </div>
     </section>
 
     <footer>
-        &copy; 2026 Essence Balaton. Minden jog fenntartva.
+        &copy; 2026 Essence Balaton. Alle Rechte vorbehalten.
     </footer>
 
 </body>

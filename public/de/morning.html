@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -60,7 +60,6 @@
             letter-spacing: 2px; cursor: pointer; width: 100%; margin-top: 1rem; 
         }
 
-        /* Success/Error Modal */
         .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; }
         .custom-modal .modal-content { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
         .success-icon { width: 80px; height: 80px; background: #27ae60; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; }
@@ -76,22 +75,22 @@
         <span class="logo-title">BALATON</span>
         <span class="logo-sub">Essence</span>
     </a>
-    <a href="index.html" style="text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text);">← Vissza</a>
+    <a href="index.html" style="text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text);">← Zurück</a>
 </header>
 
 <div class="section-header">
     <h1>MORNING ESSENCE</h1>
-    <p>Lassú reggelek a fonyódi apartmanjainkban.</p>
+    <p>Entspannte Morgenstunden in unseren Apartments in Fonyód.</p>
 </div>
 
 <main>
     <div class="breakfast-grid">
-        <div class="pillar-card" onclick="openMorningModal('Mediterrán Tál')">
-            <div class="pillar-header"><h3>Mediterrán Tál</h3><span class="price-tag">4.200 FT / FŐ</span></div>
+        <div class="pillar-card" onclick="openMorningModal('Mediterrane Platte')">
+            <div class="pillar-header"><h3>Mediterrane Platte</h3><span class="price-tag">4.200 HUF / PERSON</span></div>
             <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?auto=format&fit=crop&w=800&q=80');"></div>
         </div>
-        <div class="pillar-card" onclick="openMorningModal('Termelői Tál')">
-            <div class="pillar-header"><h3>Termelői Tál</h3><span class="price-tag">4.800 FT / FŐ</span></div>
+        <div class="pillar-card" onclick="openMorningModal('Bauernplatte')">
+            <div class="pillar-header"><h3>Bauernplatte</h3><span class="price-tag">4.800 HUF / PERSON</span></div>
             <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1525351484163-7529414344d8?auto=format&fit=crop&w=800&q=80');"></div>
         </div>
     </div>
@@ -100,40 +99,40 @@
 <div id="morning-modal" class="modal-overlay" onclick="closeMorningModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
         <span class="close-modal" onclick="closeMorningModal()">✕</span>
-        <h2 id="m-title" class="modal-title">Reggeli</h2>
+        <h2 id="m-title" class="modal-title">Frühstück</h2>
         <div id="order-info-box" style="display: none; margin-bottom: 25px;"></div>
         
         <div class="form-group">
-            <label class="form-label">Apartman</label>
+            <label class="form-label">Apartment</label>
             <select id="m-apt-select" class="essence-input">
-                <option value="" disabled selected>Válasszon apartmant...</option>
+                <option value="" disabled selected>Apartment auswählen...</option>
             </select>
         </div>
 
         <div class="form-group">
-            <label class="form-label">Az Ön neve</label>
-            <input type="text" id="m-name" class="essence-input" placeholder="Vendég neve">
+            <label class="form-label">Ihr Name</label>
+            <input type="text" id="m-name" class="essence-input" placeholder="Name des Gastes">
         </div>
 
         <div class="form-group">
-            <label class="form-label">E-mail cím</label>
-            <input type="email" id="m-email" class="essence-input" placeholder="minta@email.com">
+            <label class="form-label">E-Mail-Adresse</label>
+            <input type="email" id="m-email" class="essence-input" placeholder="beispiel@email.com">
         </div>
 
         <div class="form-group">
-            <label class="form-label">Telefonszám</label>
+            <label class="form-label">Telefonnummer</label>
             <input type="tel" id="m-phone" class="essence-input" placeholder="+36 ...">
         </div>
 
         <div class="form-group">
-            <label class="form-label">Dátum</label>
-            <input type="text" id="m-date" class="essence-input" placeholder="Melyik napra kéri?">
+            <label class="form-label">Datum</label>
+            <input type="text" id="m-date" class="essence-input" placeholder="Für welchen Tag?">
         </div>
 
         <div class="form-group">
-            <label class="form-label">Személyek száma</label>
+            <label class="form-label">Anzahl der Personen</label>
             <div class="essence-counter">
-                <span style="font-size: 0.9rem;">Létszám</span>
+                <span style="font-size: 0.9rem;">Anzahl</span>
                 <div class="counter-controls">
                     <button class="c-btn" onclick="updateQty(-1)">−</button>
                     <span id="qty-num" style="font-weight:600; min-width:20px; text-align:center;">1</span>
@@ -143,35 +142,35 @@
         </div>
 
         <div class="form-group">
-            <label class="form-label">Fizetés módja</label>
+            <label class="form-label">Zahlungsart</label>
             <div style="display: flex; gap: 20px; margin-top: 10px;">
                 <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
                     <input type="radio" name="m-payment" value="cash" checked style="accent-color: #5c7a4d;"> 
-                    <span>Helyszínen (KP)</span>
+                    <span>Barzahlung vor Ort</span>
                 </label>
                 <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
                     <input type="radio" name="m-payment" value="card" style="accent-color: #5c7a4d;"> 
-                    <span>Online kártyával</span>
+                    <span>Online mit Karte</span>
                 </label>
             </div>
         </div>
 
         <input type="hidden" id="m-item-type">
-        <button class="btn-submit" onclick="submitMorning()">Rendelés leadása</button>
+        <button class="btn-submit" onclick="submitMorning()">Bestellung aufgeben</button>
     </div>
 </div>
 
 <div id="custom-alert" class="custom-modal" style="display:none;">
     <div class="modal-content">
         <div id="alert-icon-circle" class="success-icon">✓</div>
-        <h2 id="alert-title">Sikeres!</h2>
+        <h2 id="alert-title">Erfolg!</h2>
         <p id="alert-msg">...</p>
-        <button id="alert-btn" class="btn-main" onclick="closeCustomAlert()">Rendben</button>
+        <button id="alert-btn" class="btn-main" onclick="closeCustomAlert()">OK</button>
     </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hu.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/de.js"></script>
 <script src="https://js.stripe.com/v3/"></script>
 
 <script>
@@ -189,9 +188,9 @@
         if (!bookingId) {
             infoBox.innerHTML = `
                 <div style="background: #f4f7f2; border: 1px dashed #5c7a4d; padding: 25px; text-align: center; border-radius: 8px;">
-                    <p style="color: #5c7a4d; font-weight: 700; font-size: 1.1rem; margin-bottom: 10px;">Kedves Vendégünk!</p>
-                    <p style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">Reggelit kizárólag érvényes szállásfoglalással rendelkező vendégeink kérhetnek fonyódi apartmanjainkba.</p>
-                    <a href="index.html#apartments" style="display: inline-block; background: #5c7a4d; color: white; text-decoration: none; padding: 12px 25px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Foglaljon szállást itt</a>
+                    <p style="color: #5c7a4d; font-weight: 700; font-size: 1.1rem; margin-bottom: 10px;">Lieber Gast!</p>
+                    <p style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">Das Frühstück kann nur von Gästen mit einer gültigen Unterkunftsbuchung in unseren Apartments in Fonyód bestellt werden.</p>
+                    <a href="index.html#apartments" style="display: inline-block; background: #5c7a4d; color: white; text-decoration: none; padding: 12px 25px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Hier Aufenthalt buchen</a>
                 </div>`;
             infoBox.style.display = 'block';
             formGroups.forEach(group => group.style.display = 'none');
@@ -213,7 +212,7 @@
                 select.innerHTML = `<option value="${data.aptName}">${data.aptName}</option>`;
                 select.disabled = true;
             } else {
-                showSuccess("Hiba!", "Érvénytelen foglalási azonosító.", "error");
+                showSuccess("Fehler!", "Ungültige Buchungs-ID.", "error");
                 if(submitBtn) submitBtn.disabled = true;
             }
         } catch (e) {
@@ -221,8 +220,8 @@
         }
 
         calendar = flatpickr("#m-date", {
-            locale: "hu",
-            dateFormat: "Y. m. d.",
+            locale: "de",
+            dateFormat: "Y-m-d",
             minDate: new Date().fp_incr(1)
         });
     });
@@ -258,10 +257,10 @@
         const method = document.querySelector('input[name="m-payment"]:checked').value;
 
         if(!apt || !name || !date || !phone || !email) {
-            return showSuccess("Hiba!", "Minden mező kitöltése kötelező!", "error");
+            return showSuccess("Fehler!", "Bitte füllen Sie alle Felder aus!", "error");
         }
 
-        const pricePerUnit = type === 'Mediterrán Tál' ? 4200 : 4800;
+        const pricePerUnit = type === 'Mediterrane Platte' ? 4200 : 4800;
         const totalAmount = currentQty * pricePerUnit;
 
         const payload = {
@@ -274,8 +273,8 @@
             phone: phone,
             amount: totalAmount,
             method: method,
-            lang: 'hu',
-            details: `Reggeli: ${type} | Fő: ${currentQty}`
+            lang: 'de',
+            details: `Frühstück: ${type} | Personen: ${currentQty}`
         };
 
         try {
@@ -292,13 +291,13 @@
                 if (method === 'card' && result.stripeSessionId) {
                     await stripe.redirectToCheckout({ sessionId: result.stripeSessionId });
                 } else {
-                    showSuccess("Sikeres rendelés!", `Reggeli rögzítve. Helyszínen fizetendő: ${totalAmount.toLocaleString()} Ft.`, "success", () => location.reload());
+                    showSuccess("Erfolgreiche Bestellung!", `Frühstück wurde registriert. Vor Ort zu zahlen: ${totalAmount.toLocaleString()} HUF.`, "success", () => location.reload());
                 }
             } else {
-                showSuccess("Hiba!", result.error, "error");
+                showSuccess("Fehler!", result.error, "error");
             }
         } catch (e) {
-            showSuccess("Hiba!", "Hálózati hiba történt.", "error");
+            showSuccess("Fehler!", "Netzwerkfehler aufgetreten.", "error");
         }
     }
 

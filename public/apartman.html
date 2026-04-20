@@ -100,8 +100,7 @@
             padding: 1.3rem; 
             border-radius: 50px; 
             font-weight: 700; 
-            text-transform: uppercase; 
-            cursor: not-allowed; 
+            text-transform: uppercase;  
             margin-top: 2rem;
             letter-spacing: 2px; 
             font-size: 0.7rem;
@@ -148,12 +147,6 @@
             color: var(--accent);
         }
 
-        /* Tiltott gomb stílusa */
-        .btn-booking:disabled {
-            background: #ccc !important;
-            cursor: not-allowed !important;
-            opacity: 0.6;
-        }
         
 
         .custom-modal {
@@ -234,12 +227,9 @@
         @keyframes fadeInPage { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
     </style>
+    <link rel="stylesheet" href="mobile.css">
 </head>
 <body>
-
-<div class="dev-banner">
-    HU: Az oldal fejlesztés alatt áll, foglalás jelenleg nem lehetséges. | EN: Site under development.
-</div>
 
 <header>
     <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1;">
@@ -272,14 +262,14 @@
             <div class="booking-card">
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; font-style: italic;">Foglalás</h3>
                 <p id="apt-price" class="price-tag"></p>
-                <hr style="border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0;">
                 
                 <div class="dev-status">
-                    <span>⚠️</span>
-                    <span>A foglalási rendszer karbantartás miatt átmenetileg szünetel.</span>
-                </div>
+                    <span></span>
+                    <span></span> </div>
                 
-                <button class="btn-booking">Foglalás nem lehetséges</button>
+                <hr style="border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0;">
+                
+                <button class="btn-booking" id="booking-btn" disabled>FOGLALÁS ELKÜLDÉSE</button>
             </div>
         </div>
     </div>
@@ -367,112 +357,136 @@
 </div>
 
 <script src="database.js?v=16.1"></script>
+<script src="https://js.stripe.com/v3/"></script>
+<script src="figyelmeztetes.js"></script>
 <script>
     let currentApt = null;
-    let allImages = [];
+    let allImages = []; // Ez a tömb fogja tartani a képeket
     let currentIndex = 0;
 
     document.addEventListener('DOMContentLoaded', async () => {
-    const params = new URLSearchParams(window.location.search);
-    const id = params.get('id'); // Ne használd a parseInt-et, maradjunk a szövegnél
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
 
-    await initDatabase(() => {
-        // String összehasonlítás a biztos sikerért
-        currentApt = db.apartments.find(a => String(a.id) === String(id));
-        
-        if (currentApt) {
-            renderDetails();
-            const mainContent = document.getElementById('main-content');
-            if (mainContent) mainContent.style.display = 'block';
-        } else {
-            console.error("Apartman nem található, ID:", id);
-            window.location.href = "index.html";
-        }
+        await initDatabase(() => {
+            currentApt = db.apartments.find(a => String(a.id) === String(id));
+            
+            if (currentApt) {
+                // Képek összegyűjtése a Lightbox számára
+                allImages = [];
+                if (currentApt.coverImage) allImages.push(currentApt.coverImage);
+                if (currentApt.galleryImages) allImages.push(...currentApt.galleryImages);
+
+                renderDetails();
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) mainContent.style.display = 'block';
+            } else {
+                window.location.href = "index.html";
+            }
+        });
     });
-});
 
     function renderDetails() {
+        if (!currentApt) return;
+
         const today = new Date();
         const info = getAptStatusAndPrice(currentApt, today);
         
+        const setSafeText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = text;
+        };
+
         // 1. ALAPADATOK
-        document.getElementById('apt-name').innerText = currentApt.name || "Ismeretlen Apartman";
-        document.getElementById('apt-loc').innerText = currentApt.location || "";
+        setSafeText('apt-name', currentApt.name || "Ismeretlen Apartman");
+        setSafeText('apt-loc', currentApt.location || "");
         
         const descEl = document.getElementById('apt-desc');
-        if (descEl) {
-            descEl.innerText = currentApt.description || "Nincs megadva leírás.";
-        }
+        if (descEl) descEl.innerText = currentApt.description || "Nincs megadva leírás.";
 
-        // 2. FOGLALÁSI KÁRTYA (Ár, Szezon infó, Max fő)
+        // 2. FOGLALÁSI KÁRTYA
         const priceTag = document.getElementById('apt-price');
-        const bookingBtn = document.querySelector('.btn-booking');
-        
-        // Itt keressük meg a kis információs sávot a kártya alján
+        const bookingBtn = document.getElementById('booking-btn');
         const statusMsg = document.querySelector('.dev-status span:last-child');
 
         if (info.status === 'OPEN') {
-            priceTag.innerHTML = `<span class="price-num">${info.price.toLocaleString()} Ft</span> / éjszaka`;
-            bookingBtn.innerText = "Foglalás";
-            bookingBtn.disabled = false;
-            bookingBtn.style.opacity = "1";
-            bookingBtn.style.cursor = "pointer";
-            bookingBtn.onclick = openBookingModal;
+            if (priceTag) priceTag.innerHTML = `<span class="price-num">${info.price.toLocaleString()} Ft</span> / éjszaka`;
+            
+            if (bookingBtn) {
+                bookingBtn.innerText = "Foglalás";
+                bookingBtn.disabled = false;
+                bookingBtn.style.opacity = "1";
+                bookingBtn.style.cursor = "pointer";
+                bookingBtn.onclick = openBookingModal;
+            }
 
-            // MEGJELENÍTÉS: Szezon neve + Max fő + Min éj
-            statusMsg.innerHTML = `
-                <div style="margin-top: 10px; border-top: 1px solid #eee; pt: 10px;">
-                    <p><strong>Aktuális időszak:</strong> ${info.label}</p>
-                    <p><strong>Kapacitás:</strong> max. ${info.maxGuests} fő</p>
-                    <p><strong>Minimum tartózkodás:</strong> ${info.minNights} éjszaka</p>
-                </div>
-            `;
+            if (statusMsg) {
+                statusMsg.innerHTML = `
+                    <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                        <p><strong>Aktuális időszak:</strong> ${info.label}</p>
+                        <p><strong>Kapacitás:</strong> max. ${info.maxGuests} fő</p>
+                        <p><strong>Minimum tartózkodás:</strong> ${info.minNights} éjszaka</p>
+                    </div>
+                `;
+            }
         } else {
-            priceTag.innerHTML = `<span style="color:var(--warning)">Szezonon kívül</span>`;
-            bookingBtn.innerText = "Jelenleg zárva";
-            bookingBtn.disabled = true;
-            bookingBtn.style.opacity = "0.5";
-            statusMsg.innerText = "Az apartman április 1. és szeptember 30. között fogad vendégeket.";
+            if (priceTag) priceTag.innerHTML = `<span style="color:var(--warning)">Szezonon kívül</span>`;
+            if (bookingBtn) {
+                bookingBtn.innerText = "Jelenleg zárva";
+                bookingBtn.disabled = true;
+                bookingBtn.style.opacity = "0.5";
+                bookingBtn.onclick = null;
+            }
+            if (statusMsg) statusMsg.innerText = "Az apartman április 1. és szeptember 30. között fogad vendégeket.";
         }
 
-        // 3. KÉPEK ÉS GALÉRIA (Változatlan)
-        const cImg = currentApt.coverImage || ''; 
-        const gImgs = currentApt.galleryImages || [];
-        allImages = cImg ? [cImg, ...gImgs] : [...gImgs];
-        
+        // 3. KÉPEK ÉS GALÉRIA
         const mainImg = document.getElementById('apt-main-img');
-        if (cImg) { mainImg.src = cImg; mainImg.style.display = 'block'; }
-        
-        // A renderDetails függvényen belül a galéria rész:
+        if (mainImg && currentApt.coverImage) {
+            mainImg.src = currentApt.coverImage;
+            mainImg.onclick = () => openLightbox(0);
+        }
+
         const gal = document.getElementById('apt-gallery');
-        if (gal && gImgs.length > 0) {
-            // Egyetlen nagy stringet építünk fel, és csak egyszer írjuk be a DOM-ba
-            const galleryHTML = gImgs.map((img, idx) => {
-                const lbIndex = cImg ? idx + 1 : idx;
-                return `
-                    <div class="img-container">
-                        <img src="${img}" class="gallery-img" onclick="openLightbox(${lbIndex})" loading="lazy">
-                    </div>`;
-            }).join('');
-            
-            gal.innerHTML = galleryHTML;
+        const gImgs = currentApt.galleryImages || [];
+
+        if (gal) {
+            gal.innerHTML = ''; 
+            gImgs.forEach((imgSrc, idx) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'img-container';
+                
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.className = 'gallery-img';
+                img.loading = 'lazy';
+                // Az index eltolva +1-gyel, mert a 0. a coverImage
+                img.onclick = () => openLightbox(idx + 1);
+                
+                wrapper.appendChild(img);
+                gal.appendChild(wrapper);
+            });
         }
     }
 
     // --- LIGHTBOX LOGIKA ---
-
     function openLightbox(index) {
-        if (!allImages || allImages.length === 0) return; // Biztonsági csekk
+        if (!allImages || allImages.length === 0) return;
         currentIndex = index;
-        document.getElementById('lightbox-img').src = allImages[currentIndex];
+        const lbImg = document.getElementById('lightbox-img');
         const lb = document.getElementById('lightbox');
-        lb.style.display = 'flex';
-        setTimeout(() => lb.classList.add('active'), 10); 
-        document.body.style.overflow = 'hidden';
+        
+        if (lbImg && lb) {
+            lbImg.src = allImages[currentIndex];
+            lb.style.display = 'flex';
+            setTimeout(() => lb.classList.add('active'), 10); 
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     function closeLightbox() {
         const lb = document.getElementById('lightbox');
+        if (!lb) return;
         lb.classList.remove('active');
         setTimeout(() => {
             lb.style.display = 'none';
@@ -483,7 +497,8 @@
     function changeImage(dir) {
         if (!allImages || allImages.length === 0) return;
         currentIndex = (currentIndex + dir + allImages.length) % allImages.length;
-        document.getElementById('lightbox-img').src = allImages[currentIndex];
+        const lbImg = document.getElementById('lightbox-img');
+        if (lbImg) lbImg.src = allImages[currentIndex];
     }
 
     document.addEventListener('keydown', (e) => {
@@ -619,7 +634,11 @@
         cleanNumber = parseInt(rawValue.replace(/[^0-9]/g, '')) || 0;
     }
 
-    console.log("Átalakított szám:", cleanNumber);
+    // NYELV MEGHATÁROZÁSA (Hogy a backend tudja, milyen e-mailt küldjön)
+    let currentLang = 'hu';
+    const path = window.location.pathname.toLowerCase();
+    if (path.includes('/en/')) currentLang = 'en';
+    else if (path.includes('/de/')) currentLang = 'de';
 
     const data = {
         aptId: currentApt.id,
@@ -630,40 +649,60 @@
         checkIn: document.getElementById('book-start').value,
         checkOut: document.getElementById('book-end').value,
         guests: document.getElementById('book-guests').value,
-        totalPrice: cleanNumber, // Fontos: totalPrice néven küldjük!
+        totalPrice: cleanNumber,
         msg: document.getElementById('book-msg').value,
-        source: 'Weboldal'
+        lang: currentLang,
+        source: `Weboldal (${currentLang.toUpperCase()})`
     };
 
-    // Ha a szám még mindig 0, megállítjuk, hogy lásd a hibát
+    console.log("Küldendő adatok a Stripe-nak:", data);
+
     if (data.totalPrice === 0) {
         console.error("HIBA: Az összeg 0, nem küldöm el!");
-        // Opcionális: alert("Hiba: Az ár nem számítható ki!"); 
+        return; 
+    }
+
+    // Gomb letiltása és töltés jelzése, hogy ne nyomkodják kétszer
+    const submitBtn = document.querySelector('.btn-main') || document.querySelector('button[onclick="sendBookingRequest()"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerText = "Átirányítás a fizetéshez...";
     }
 
     try {
-        const res = await fetch('/api/new-booking', {
+        // ÚJ RÉSZ: A checkout session meghívása
+        const res = await fetch('/api/create-checkout-session', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(data)
         });
 
-        // KINYERJÜK A SZERVER VÁLASZÁT (Siker vagy hiba üzenet)
-        const result = await res.json();
+        const session = await res.json();
 
-        if (res.ok) {
-    // SIKER: Itt marad zöld ('success' az alapértelmezett, de kiírhatod)
-    showSuccess("Sikeres foglalás!", "Köszönjük, a foglalást rögzítettük!", 'success', () => {
-        closeBookingModal();
-        window.location.reload();
-    });
-} else {
-    // HIBA: Itt adjuk át az 'error' paramétert, hogy PIROS legyen és X-et mutasson
-    showSuccess("Hiba!", result.error || "Hiba történt a foglalás során.", 'error');
-}
+        if (session.error) {
+            showSuccess("Hiba!", session.error, 'error');
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Foglalás véglegesítése";
+            }
+            return;
+        }
+
+        // STRIPE ÁTIRÁNYÍTÁS
+        // FIGYELEM: Ide a TE Stripe Publishable key-ed kell!
+        const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0'); 
+        
+        await stripe.redirectToCheckout({
+            sessionId: session.id
+        });
+
     } catch (e) {
         console.error(e);
-        showSuccess("Hiba!", "Nem sikerült kapcsolódni a szerverhez.");
+        showSuccess("Hiba!", "Hálózati hiba történt a fizetés indításakor.");
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerText = "Foglalás véglegesítése";
+        }
     }
 }
 
@@ -849,6 +888,16 @@ function closeCustomAlert() {
     if (window.alertCallback) {
         window.alertCallback();
         window.alertCallback = null;
+    }
+}
+
+function updateSEO(apartmanNeve, varos) {
+    document.title = apartmanNeve + " - Luxus Apartman " + varos + " | Balaton Essence";
+    
+    // Meta description frissítése
+    let metaDesc = document.querySelector('meta[name="description"]');
+    if (metaDesc) {
+        metaDesc.setAttribute("content", "Foglaljon szállást a(z) " + apartmanNeve + " apartmanban " + varos + " területén. Prémium környezet, SUP bérlés és pihenés a Balatonnál.");
     }
 }
 

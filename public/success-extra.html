@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Success - Balaton Essence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --essence-green: #5c7a4d;
+            --essence-dark: #1a1a1a;
+            --essence-white: #faf8f5;
+        }
+
+        body {
+            margin: 0; padding: 0; display: flex; align-items: center; justify-content: center;
+            min-height: 100vh; background-color: var(--essence-white);
+            font-family: 'Montserrat', sans-serif; color: var(--essence-dark); text-align: center;
+        }
+
+        .success-container {
+            max-width: 500px; padding: 40px; background: white; border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05); animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .icon-circle {
+            width: 80px; height: 80px; background: var(--essence-green); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center; margin: 0 auto 30px;
+            color: white; font-size: 40px; animation: scaleIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+        }
+
+        @keyframes scaleIn { from { transform: scale(0); } to { transform: scale(1); } }
+
+        h1 { font-family: 'Playfair Display', serif; font-size: 2.2rem; margin-bottom: 15px; }
+        p { line-height: 1.6; color: #666; margin-bottom: 30px; }
+
+        .details-box { background: #f9fbf8; border: 1px solid #eee; border-radius: 12px; padding: 20px; margin-bottom: 30px; }
+        .btn-home {
+            display: inline-block; padding: 15px 35px; background: var(--essence-green); color: white;
+            text-decoration: none; border-radius: 50px; font-weight: 600; letter-spacing: 1px; transition: all 0.3s ease;
+        }
+        .btn-home:hover { background: var(--essence-dark); transform: translateY(-2px); }
+        .countdown { margin-top: 20px; font-size: 0.8rem; color: #999; }
+    </style>
+</head>
+<body>
+
+    <div class="success-container">
+        <div class="icon-circle">✓</div>
+        <h1 id="t-title">Köszönjük!</h1>
+        <p id="t-msg">A fizetés sikeres volt, a rendelésedet rögzítettük.</p>
+        
+        <div class="details-box">
+            <div id="service-type" style="font-weight: 600; color: var(--essence-green); margin-bottom: 5px;">Szolgáltatás rögzítve</div>
+            <div id="order-id" style="color: #999; font-size: 0.8rem;">Azonosító: ...</div>
+        </div>
+
+        <a href="/" id="t-btn" class="btn-home">Vissza a főoldalra</a>
+        
+        <div class="countdown">
+            <span id="t-redir">Automatikus átirányítás</span> <span id="seconds">10</span> <span id="t-sec">másodperc múlva...</span>
+        </div>
+    </div>
+
+    <script>
+        const translations = {
+            hu: { title: 'Köszönjük!', msg: 'A fizetés sikeres volt, a rendelésedet rögzítettük a rendszerünkben.', btn: 'Vissza a főoldalra', redir: 'Automatikus átirányítás', sec: 'másodperc múlva...', service: 'Szolgáltatás rögzítve' },
+            en: { title: 'Thank You!', msg: 'Payment successful, your order has been recorded in our system.', btn: 'Back to Home', redir: 'Redirecting automatically in', sec: 'seconds...', service: 'Service confirmed' },
+            de: { title: 'Vielen Dank!', msg: 'Die Zahlung war erfolgreich, Ihre Bestellung wurde in unserem System registriert.', btn: 'Zurück zur Startseite', redir: 'Automatische Weiterleitung in', sec: 'Sekunden...', service: 'Service bestätigt' }
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        // Nyelv kiválasztása: URL paraméter (?lang=en) VAGY böngésző nyelv VAGY magyar
+        const lang = params.get('lang') || navigator.language.split('-')[0] || 'hu';
+        const t = translations[lang] || translations.hu;
+
+        // Szövegek behelyettesítése
+        document.getElementById('t-title').innerText = t.title;
+        document.getElementById('t-msg').innerText = t.msg;
+        document.getElementById('t-btn').innerText = t.btn;
+        document.getElementById('t-redir').innerText = t.redir;
+        document.getElementById('t-sec').innerText = t.sec;
+        document.getElementById('service-type').innerText = t.service;
+
+        // URL adatok dekorációhoz
+        const type = params.get('type');
+        const sessionId = params.get('session_id');
+        if (type) document.getElementById('service-type').innerText = decodeURIComponent(type);
+        if (sessionId) document.getElementById('order-id').innerText = 'ID: ' + sessionId.substring(0, 15) + '...';
+
+        // Visszaszámlálás
+        let timeLeft = 10;
+        setInterval(() => {
+            timeLeft--;
+            document.getElementById('seconds').innerText = timeLeft;
+            if (timeLeft <= 0) window.location.href = '/';
+        }, 1000);
+    </script>
+</body>
+</html>

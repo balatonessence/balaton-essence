@@ -1,19 +1,20 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Balaton Essence | Luxus Apartman és SUP bérlés</title>
-    <meta name="description" content="Válogasson a Balaton Essence exkluzív apartmanjai közül! Több prémium szálláshely és SUP bérlési lehetőség a Balaton legnépszerűbb városaiban. Foglaljon most!">
-    <meta name="keywords" content="apartman bérlés a Balaton, szállás és SUP bérlés Balaton, vízisport eszközök, luxus szállás Balaton">
-    <link rel="canonical" href="https://balatonessence.com">
+    <title>Balaton Essence | Luxus-Apartments & SUP-Verleih</title>
+    <meta name="description" content="Wählen Sie aus den exklusiven Apartments von Balaton Essence! Mehrere Premium-Unterkünfte und SUP-Verleihmöglichkeiten in den beliebtesten Städten am Plattensee. Jetzt buchen!">
+    <meta name="keywords" content="Apartment mieten Plattensee, Unterkunft und SUP Balaton, Wassersportgeräte, Luxusunterkunft Balaton">
+    <link rel="canonical" href="https://balatonessence.com/de/">
 
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://balatonessence.com">
-    <meta property="og:title" content="Balaton Essence | Luxus Apartman és SUP bérlés">
-    <meta property="og:description" content="Prémium szállás és SUP élmények a Balatonnál. Foglaljon most!">
-    <meta property="og:image" content="https://balatonessence.com/img/hatter.png">
+    <meta property="og:url" content="https://balatonessence.com/de/">
+    <meta property="og:title" content="Balaton Essence | Luxus-Apartments & SUP-Verleih">
+    <meta property="og:description" content="Premium-Unterkunft und SUP-Erlebnisse am Plattensee. Buchen Sie jetzt Ihren Aufenthalt!">
+    <meta property="og:image" content="https://balatonessence.com/img/hatter.png"> 
+    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
     
     <style>
@@ -26,7 +27,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
 
-        /* FEJLESZTÉSI BANNER */
+        /* ENTWICKLUNGSBANNER */
         .dev-banner {
             background: var(--warning); color: white; text-align: center; padding: 12px 5vw;
             font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; position: fixed;
@@ -69,7 +70,7 @@
         .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2); }
 
         /* HERO */
-        .hero { height: 100vh; display: flex; align-items: center; padding: 0 5vw; background: linear-gradient(to right, rgba(252,251,249, 1) 0%, rgba(252,251,249, 0.85) 45%, rgba(252,251,249, 0) 100%), url('img/hatter.png') center/cover no-repeat; }
+        .hero { height: 100vh; display: flex; align-items: center; padding: 0 5vw; background: linear-gradient(to right, rgba(252,251,249, 1) 0%, rgba(252,251,249, 0.85) 45%, rgba(252,251,249, 0) 100%), url('../img/hatter.png') center/cover no-repeat; }
         .hero-content { max-width: 650px; margin-top: 5rem; }
         .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 1.5rem; color: var(--text); }
 
@@ -86,19 +87,12 @@
 
         .apt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 4rem; margin-top: 2rem; }
 
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 51, 37, 0.7); backdrop-filter: blur(8px); z-index: 3000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
-        .login-overlay.active { display: flex; opacity: 1; }
-        .login-modal { background: var(--bg); width: 90%; max-width: 400px; padding: 4rem 3rem; text-align: center; border-radius: 4px; position: relative; }
-        .login-input { width: 100%; border: none; border-bottom: 2px solid var(--border); padding: 1rem 0; margin-bottom: 2rem; outline: none; font-family: 'Montserrat'; font-size: 1.2rem; text-align: center; background: transparent; }
-
-        /* Nyelvválasztó konténer */
         .lang-dropdown {
             position: relative;
             display: inline-block;
             margin-left: 1.5rem;
         }
 
-        /* Fő gomb */
         .lang-btn {
             background: none;
             border: none;
@@ -124,7 +118,6 @@
             transition: 0.3s;
         }
 
-        /* Legördülő rész */
         .lang-content {
             display: none;
             position: absolute;
@@ -153,7 +146,6 @@
             color: var(--accent);
         }
 
-        /* Hover esemény */
         .lang-dropdown:hover .lang-content {
             display: block;
             animation: fadeIn 0.2s ease-out;
@@ -222,8 +214,7 @@
             100% { transform: rotate(360deg); }
         }
     </style>
-
-    <link rel="stylesheet" href="mobile.css?v=1.1">
+    <link rel="stylesheet" href="../mobile.css">
 </head>
 <body>
 
@@ -235,23 +226,23 @@
     </a>
 
     <nav class="nav-links" style="display: flex; gap: 2rem;">
-        <a href="#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Apartmanok</a>
-        <a href="rolunk.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Rólunk</a>
+        <a href="#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Apartments</a>
+        <a href="rolunk.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Über uns</a>
         <div class="nav-weather-pill" id="weather-widget">
-            <span id="weather-loader" class="weather-loader">Időjárás...</span>
+            <span id="weather-loader" class="weather-loader">Wetter...</span>
             <div id="weather-content" class="weather-pill-content hidden">
-                <span id="weather-icon" title="Levegő">☀️</span>
+                <span id="weather-icon" title="Lufttemperatur">☀️</span>
                 <span id="weather-temp" class="air-temp">--°C</span>
                 <span class="weather-divider">|</span>
-                <span title="Balaton vízhőfok" class="water-temp">🌊 <span id="water-temp-val">22°C</span></span>
+                <span title="Plattensee Wasser" class="water-temp">🌊 <span id="water-temp-val">22°C</span></span>
             </div>
         </div>
         <div class="lang-dropdown">
-            <button class="lang-btn">HU <span class="arrow"></span></button>
+            <button class="lang-btn">DE <span class="arrow"></span></button>
             <div class="lang-content">
-                <a href="index.html" class="active">Magyar</a>
-                <a href="./en/index.html">English</a>
-                <a href="./de/index.html">Deutsch</a>
+                <a href="../index.html">Magyar</a>
+                <a href="../en/index.html">English</a>
+                <a href="index.html">Deutsch</a>
             </div>
         </div>
     </nav>
@@ -261,32 +252,32 @@
 
 <section class="hero">
     <div class="hero-content">
-        <h1 class="hero-title" aria-label="Balaton Essence - Prémium apartmankezelés és szállásfoglalás a Balaton környékén">
-            A Balaton esszenciája — <br>
-            <i>élmény, amit megérzel</i>.
+        <h1 class="hero-title" aria-label="Balaton Essence - Premium-Apartmentverwaltung und Buchung am Plattensee">
+            Die Essenz des Balaton — <br>
+            <i>ein Erlebnis, das man fühlt</i>.
         </h1>
-        <a href="#pillars" class="btn-primary">Felfedezés</a>
+        <a href="#pillars" class="btn-primary">Entdecken</a>
     </div>
 </section>
 
 <section id="pillars" class="pillars-section">
     <div class="section-header">
-        <h2>Essence Életérzés</h2>
+        <h2>Essence Lebensgefühl</h2>
     </div>
     <div class="pillars-grid">
         <div class="pillar-card">
             <div class="pillar-header">
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">SUP & SUN</h3>
-                <p style="font-style: italic; color: var(--text-light); margin-bottom: 2rem;">Vízparti élmények.</p>
-                <a href="sun.html" class="btn-primary">Kínálatunk</a>
+                <p style="font-style: italic; color: var(--text-light); margin-bottom: 2rem;">Erlebnisse am Wasser.</p>
+                <a href="sun.html" class="btn-primary">Unser Angebot</a>
             </div>
-            <div class="pillar-img" style="background-image: url('img/sunkartya.png');"></div>
+            <div class="pillar-img" style="background-image: url('../img/sunkartya.png');"></div>
         </div>
         <div class="pillar-card">
             <div class="pillar-header">
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">MORNING</h3>
-                <p style="font-style: italic; color: var(--text-light); margin-bottom: 2rem;">Lassú reggelek.</p>
-                <a href="morning.html" class="btn-primary">Rendelés</a>
+                <p style="font-style: italic; color: var(--text-light); margin-bottom: 2rem;">Entschleunigte Morgen.</p>
+                <a href="morning.html" class="btn-primary">Bestellen</a>
             </div>
             <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1718942900907-06790d4a852c?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');"></div>
         </div>
@@ -295,24 +286,16 @@
 
 <section id="apartments" class="pillars-section" style="padding-top: 0; background: var(--bg-alt);">
     <div class="section-header" style="padding-top: 8rem;">
-        <h2>Prémium Apartmanok</h2>
+        <h2>Premium Apartments</h2>
     </div>
     <div id="apartment-grid" class="apt-grid"></div>
 </section>
-
-<div id="login-overlay" class="login-overlay" onclick="closeLoginModal()">
-    <div class="login-modal" onclick="event.stopPropagation()">
-        <h2 style="font-family: 'Playfair Display'; font-size: 2rem; margin-bottom: 2rem;">Admin belépés</h2>
-        <input type="password" id="admin-password" class="login-input" placeholder="••••••••" onkeyup="if(event.key === 'Enter') attemptLogin()">
-        <button class="btn-primary" style="width: 100%; padding: 1.2rem;" onclick="attemptLogin()">Belépés</button>
-    </div>
-</div>
 
 <div id="apt-list-container" style="min-height: 60vh; margin-top: 120px;">
     <div style="text-align: center; padding: 10rem 5vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div class="loader-spinner" style="width: 40px; height: 40px; border: 3px solid #eee; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
         <p style="font-family: 'Montserrat', sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #999;">
-            Apartmanok betöltése...
+            Apartments werden geladen...
         </p>
     </div>
 </div>
@@ -326,15 +309,15 @@
                 <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
             </a>
             <p style="font-size: 0.85rem; color: #666; line-height: 1.8; margin-top: 1rem;">
-                Prémium apartmanok és felejthetetlen élmények a Balaton északi és déli partján. Gondoskodunk a kényelméről, hogy Önnek csak a pihenésre kelljen koncentrálnia.
+                Premium-Apartments und unvergessliche Erlebnisse am Nord- und Südufer des Plattensees. Wir kümmern uns um Ihren Komfort, damit Sie sich ganz auf Ihre Erholung konzentrieren können.
             </p>
         </div>
 
         <div>
-            <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Kapcsolat</h4>
+            <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Kontakt</h4>
             <ul style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 2;">
                 <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <span style="color: var(--accent);">📍</span> 8640 Fonyód
+                    <span style="color: var(--accent);">📍</span> 8640 Fonyód, Ungarn
                 </li>
                 <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
                     <span style="color: var(--accent);">📞</span> +36 30 123 4567
@@ -346,75 +329,47 @@
         </div>
 
         <div>
-            <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Navigáció</h4>
+            <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Navigation</h4>
             <ul style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 2;">
-                <li><a href="index.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Apartmanok</a></li>
-                <li><a href="rolunk.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Rólunk</a></li>
-                <li><a href="#contact" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Kapcsolat</a></li>
-                <li><a href="#" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Általános Szerződési Feltételek</a></li>
+                <li><a href="index.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Apartments</a></li>
+                <li><a href="ueber-uns.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Über uns</a></li>
+                <li><a href="#contact" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Kontakt</a></li>
+                <li><a href="#" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">AGB</a></li>
             </ul>
-        </div>
-
-    </div>
-
-    <div style="max-width: 1400px; margin: 4rem auto 0; padding-top: 2rem; border-top: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
-        <div style="display: flex; gap: 20px;">
-            <a href="#" style="text-decoration: none; color: #1A1A1A; font-size: 0.8rem; font-weight: 600;">FB</a>
-            <a href="#" style="text-decoration: none; color: #1A1A1A; font-size: 0.8rem; font-weight: 600;">IG</a>
         </div>
     </div>
 </section>
 
 <footer>
     <div class="logo-container" onclick="openAdminLogin()" style="cursor: pointer; display: flex; flex-direction: column; line-height: 1.1;">
-    <span class="logo-title" style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: 2px;">BALATON ESSENCE</span>
-    <span class="logo-sub" style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+        <span class="logo-title" style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: 2px;">BALATON ESSENCE</span>
+        <span class="logo-sub" style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
     </div>
-    <p style="font-size: 0.8rem; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase;">Élmény, amit megérzel.</p>
-    <p style="margin-top: 4rem; font-size: 0.7rem; opacity: 0.5;">&copy; 2026 Essence Balaton. Minden jog fenntartva.</p>
+    <p style="font-size: 0.8rem; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase;">Ein Erlebnis, das man fühlt.</p>
+    <p style="margin-top: 4rem; font-size: 0.7rem; opacity: 0.5;">&copy; 2026 Essence Balaton. Alle Rechte vorbehalten.</p>
 </footer>
 
 <div id="admin-login-modal" class="lightbox" style="display: none; align-items: center; justify-content: center; background: rgba(26,26,26,0.98); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10000; backdrop-filter: blur(10px);">
     <div style="background: white; padding: 3.5rem 2.5rem; border-radius: 4px; text-align: center; width: 90%; max-width: 380px; box-shadow: 0 40px 100px rgba(0,0,0,0.5);">
         <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">Admin Panel</h3>
-        <p style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 2.5rem;">Biztonsági kód szükséges</p>
-        
+        <p style="font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 2.5rem;">Sicherheitscode erforderlich</p>
         <input type="password" id="admin-pass-input" placeholder="••••" maxlength="4" style="width: 100%; padding: 1.2rem; border: 1px solid #eee; border-radius: 2px; text-align: center; font-size: 1.5rem; letter-spacing: 10px; margin-bottom: 2rem; font-family: 'Montserrat'; outline: none; background: #f9f9f9;">
-        
         <div style="display: flex; gap: 15px;">
-            <button onclick="closeAdminLogin()" style="flex: 1; padding: 1.2rem; border: 1px solid #eee; background: none; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Mégse</button>
-            <button onclick="validateAdminCode()" style="flex: 1; padding: 1.2rem; border: none; background: #1A1A1A; color: white; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Belépés</button>
+            <button onclick="closeAdminLogin()" style="flex: 1; padding: 1.2rem; border: 1px solid #eee; background: none; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Abbrechen</button>
+            <button onclick="validateAdminCode()" style="flex: 1; padding: 1.2rem; border: none; background: #1A1A1A; color: white; cursor: pointer; font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px;">Login</button>
         </div>
-        <p id="login-error" style="color: #b0413e; font-size: 0.75rem; margin-top: 1.5rem; font-weight: 600; display: none;">Helytelen kód!</p>
+        <p id="login-error" style="color: #b0413e; font-size: 0.75rem; margin-top: 1.5rem; font-weight: 600; display: none;">Falscher Code!</p>
     </div>
 </div>
 
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "RealEstateAgent", 
-  "name": "Balaton Essence",
-  "description": "Prémium apartmankezelés és SUP bérlés a Balaton több pontján. 15-20 exkluzív szálláshely Siófoktól Badacsonyig.",
-  "url": "https://balatonessence.com",
-  "address": {
-    "@type": "PostalAddress",
-    "addressRegion": "Balaton",
-    "addressCountry": "HU"
-  },
-  "areaServed": [
-    "Siófok", "Balatonszemes", "Fonyód", "Balatonederics" 
-  ]
-}
-</script>
-
-<script src="database.js?v=2.0"></script>
+<script src="../database.js?v=2.0"></script>
 <script src="figyelmeztetes.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     if (typeof initDatabase === "function") {
         initDatabase(renderIndexApartments);
     } else {
-        console.error("A database.js nem töltődött be!");
+        console.error("database.js konnte nicht geladen werden!");
     }
 });
 
@@ -452,10 +407,7 @@ function renderIndexApartments() {
     const loaderContainer = document.getElementById('apt-list-container');
     
     if (!grid || !db.apartments) return;
-
-    if (loaderContainer) {
-        loaderContainer.style.display = 'none';
-    }
+    if (loaderContainer) loaderContainer.style.display = 'none';
 
     grid.innerHTML = "";
 
@@ -464,12 +416,12 @@ function renderIndexApartments() {
         let priceDisplay = "";
 
         if (info.status === 'OPEN') {
-            priceDisplay = `${info.price.toLocaleString()} FT / ÉJ`;
+            priceDisplay = `${info.price.toLocaleString()} HUF / NACHT`;
         } else {
             const minSeasonPrice = apt.seasons && apt.seasons.length > 0 
                 ? Math.min(...apt.seasons.map(s => s.price)) 
                 : (apt.price || 0);
-            priceDisplay = `NYITÁS ÁPRILISBAN: ${minSeasonPrice.toLocaleString()} FT-TÓL`;
+            priceDisplay = `ERÖFFNUNG IM APRIL: AB ${minSeasonPrice.toLocaleString()} HUF`;
         }
 
         grid.innerHTML += `
@@ -478,7 +430,7 @@ function renderIndexApartments() {
                     <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">${apt.name}</h3>
                     <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">${apt.location}</p>
                     <p style="font-weight: 700; color: var(--accent); letter-spacing: 1px; margin-bottom: 2rem;">${priceDisplay}</p>
-                    <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem; display: inline-block;">Felfedezés</span>
+                    <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem; display: inline-block;">Entdecken</span>
                 </div>
                 <div class="pillar-img" style="background-image: url('${apt.coverImage || ''}');"></div>
             </a>`;
@@ -499,7 +451,7 @@ function closeAdminLogin() {
 
 function validateAdminCode() {
     const codeInput = document.getElementById('admin-pass-input');
-    const secretCode = "1234"; // Ide a te kódod kerüljön
+    const secretCode = "1234"; 
 
     if (codeInput.value === secretCode) {
         sessionStorage.setItem('adminLoggedIn', 'true'); 

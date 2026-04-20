@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUP-Verleih, Sonnenliegen & Sonnenschirme | Balaton Essence</title>
+    <meta name="description" content="Premium SUP-Verleih am Plattensee! Komfortable Sonnenliegen und Sonnenschirme können ebenfalls gebucht werden. Genießen Sie das Wasser mit uns!">
+    <meta name="keywords" content="SUP Verleih Balaton, Sonnenliege mieten, Sonnenschirm Verleih, Wassersportgeräte, Strandausrüstung Plattensee">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://npmcdn.com/flatpickr/dist/l10n/de.js"></script>
+    
+    <style>
+        :root { 
+            --bg: #FCFBF9; --bg-alt: #F4F2EC; --text: #2C3325; --text-light: #6A7063;  
+            --accent: #5C7A4D; --accent-hover: #48613A; --border: #E3E0D8; --shadow: rgba(44, 51, 37, 0.05);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+
+        header { padding: 2rem 5vw; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        .logo-container { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: inherit; }
+        .logo-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; letter-spacing: 2px; }
+        .logo-sub { font-size: 0.5rem; font-weight: 500; letter-spacing: 4px; color: var(--text-light); text-transform: uppercase; }
+
+        .section-header { text-align: center; padding: 6rem 5vw 4rem; }
+        .section-header h1 { font-family: 'Playfair Display'; font-size: clamp(2.5rem, 5vw, 4rem); font-style: italic; }
+
+        main { max-width: 1200px; margin: 0 auto; padding: 0 5vw 8rem; }
+
+        .sun-cards-section { padding: 0 1rem 6rem 1rem; max-width: 1200px; margin: 0 auto; }
+        .sun-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
+        .sun-item-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
+        .sun-item-card:hover { transform: translateY(-8px); box-shadow: 0 20px 45px rgba(0,0,0,0.08); }
+        .sun-card-img { width: 100%; height: 400px; background-position: center; background-size: cover; background-repeat: no-repeat; border-bottom: 1px solid #f0f0f0; }
+        .sun-card-content { padding: 2.5rem 1.5rem; text-align: center; background-color: #faf9f6; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .sun-card-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #2c3e50; margin-bottom: 0.5rem; letter-spacing: 1px; }
+        .sun-card-price { font-size: 1.1rem; color: #5a6b5a; font-weight: 700; }
+        .sun-card-price small { font-size: 0.85rem; color: #888; font-weight: 400; }
+
+        @media (max-width: 950px) { .sun-cards-grid { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 650px) { .sun-cards-grid { grid-template-columns: 1fr; } .sun-card-img { height: 300px; } }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 51, 37, 0.7); backdrop-filter: blur(8px); z-index: 5000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content { background: var(--bg); width: 90%; max-width: 450px; padding: 4rem 3rem; position: relative; }
+        .close-modal { position: absolute; top: 25px; right: 25px; font-size: 1.2rem; cursor: pointer; color: var(--text-light); }
+        
+        .qty-selector { display: flex; align-items: center; background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 2px 4px; }
+        .qty-btn { background: transparent; border: none; font-size: 1.2rem; color: #666; cursor: pointer; padding: 0 8px; }
+        .qty-val { font-weight: 600; font-size: 1rem; color: #333; min-width: 24px; text-align: center; user-select: none; }
+
+        .extras-item-label { display: flex; align-items: center; position: relative; cursor: pointer; gap: 12px; user-select: none; flex-grow: 1; }
+        .modal-overlay input[type="checkbox"] { position: absolute; opacity: 0; height: 0; width: 0; }
+        .custom-checkmark { position: relative; height: 22px; width: 22px; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; transition: all 0.3s ease; }
+        .modal-overlay input:checked ~ .custom-checkmark { background-color: #5a6b5a; border-color: #5a6b5a; }
+        .custom-checkmark:after { content: ""; position: absolute; display: none; left: 7px; top: 3px; width: 5px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+        .modal-overlay input:checked ~ .custom-checkmark:after { display: block; }
+
+        .btn-book-extras { width: 100%; padding: 1.2rem; background: #5a6b5a; color: white; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
+        .flatpickr-calendar { background: var(--bg); border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
+        .flatpickr-day.selected { background: var(--accent) !important; border-color: var(--accent) !important; }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="index.html" class="logo-container">
+        <span class="logo-title">BALATON</span>
+        <span class="logo-sub">Essence</span>
+        <a href="index.html" style="text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text);">← zur startseite</a>
+    </a>
+</header>
+
+<main>
+    <div class="section-header" style="text-align: center; margin-top: 4rem; margin-bottom: 3rem;">
+        <h1 style="font-family: 'Playfair Display', serif; font-size: 3.5rem; font-weight: 400; letter-spacing: 4px; color: #333; margin-bottom: 0.5rem;">
+            SUP & SUN
+        </h1>
+        <p style="font-size: 0.9rem; color: #777; letter-spacing: 2px; text-transform: uppercase;">Erlebnisbuchung</p>
+    </div>
+
+    <section class="sun-cards-section">
+        <div class="sun-cards-grid">
+            <div class="sun-item-card" onclick="openRentModal()">
+                <div class="sun-card-img" style="background-image: url('../img/sup.png');"></div>
+                <div class="sun-card-content">
+                    <h3 class="sun-card-title">SUP</h3>
+                    <p class="sun-card-price">5.900 HUF <small>/ Tag</small></p>
+                </div>
+            </div>
+            <div class="sun-item-card" onclick="openRentModal()">
+                <div class="sun-card-img" style="background-image: url('../img/napozoszek.png');"></div>
+                <div class="sun-card-content">
+                    <h3 class="sun-card-title">Sonnenliege</h3>
+                    <p class="sun-card-price">1.500 HUF <small>/ Tag</small></p>
+                </div>
+            </div>
+            <div class="sun-item-card" onclick="openRentModal()">
+                <div class="sun-card-img" style="background-image: url('../img/napernyo.png');"></div>
+                <div class="sun-card-content">
+                    <h3 class="sun-card-title">Sonnenschirm</h3>
+                    <p class="sun-card-price">1.000 HUF <small>/ Tag</small></p>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<div id="rent-modal" class="modal-overlay" onclick="closeRentModal()">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="closeRentModal()">&times;</span>
+        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 0.5rem; text-align: center;">Ausrüstung Buchen</h2>
+        
+        <p style="text-align: center; color: #5a6b5a; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem; letter-spacing: 0.5px;">
+            📍 Abhol- und Rückgabeort:<br> Fonyód, Fürdő utca 40
+        </p>
+        
+        <form id="rent-form" onsubmit="submitRentForm(event)">
+            <div style="margin-bottom: 1.5rem; text-align: left; background: #fbfbfb; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
+                
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <label class="extras-item-label">
+                        <input type="checkbox" id="item-sup" onchange="updateLiveTotal()"> 
+                        <span class="custom-checkmark"></span>
+                        <span class="item-text-main">SUP <small style="color: #777;">(5.900 HUF/Tag)</small></span>
+                    </label>
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-sup', -1)">−</button>
+                        <span id="qty-sup" class="qty-val">1</span>
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-sup', 1)">+</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <label class="extras-item-label">
+                        <input type="checkbox" id="item-sunbed" onchange="updateLiveTotal()"> 
+                        <span class="custom-checkmark"></span>
+                        <span class="item-text-main">Sonnenliege <small style="color: #777;">(1.500 HUF/Tag)</small></span>
+                    </label>
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-sunbed', -1)">−</button>
+                        <span id="qty-sunbed" class="qty-val">1</span>
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-sunbed', 1)">+</button>
+                    </div>
+                </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between;">
+                    <label class="extras-item-label">
+                        <input type="checkbox" id="item-umbrella" onchange="updateLiveTotal()"> 
+                        <span class="custom-checkmark"></span>
+                        <span class="item-text-main">Sonnenschirm <small style="color: #777;">(1.000 HUF/Tag)</small></span>
+                    </label>
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-umbrella', -1)">−</button>
+                        <span id="qty-umbrella" class="qty-val">1</span>
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-umbrella', 1)">+</button>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <label style="display: block; font-size: 0.7rem; color: #999; text-transform: uppercase; margin-bottom: 4px; text-align: left;">Startdatum</label>
+                    <input type="text" id="r-start" required onchange="updateLiveTotal()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                <div>
+                    <label style="display: block; font-size: 0.7rem; color: #999; text-transform: uppercase; margin-bottom: 4px; text-align: left;">Enddatum</label>
+                    <input type="text" id="r-end" required onchange="updateLiveTotal()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+            </div>
+
+            <input type="text" id="r-name" placeholder="Vollständiger Name" required style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <input type="email" id="r-email" placeholder="E-Mail-Adresse" required style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <input type="tel" id="r-phone" placeholder="Telefonnummer" required style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            
+            <select id="r-apt" required style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px; background: white;">
+                <option value="" disabled selected>Apartment auswählen...</option>
+                <option value="EXTERN">EXTERN (Kein Gast)</option>
+            </select>
+
+            <div style="margin-bottom: 20px; text-align: left;">
+                <label style="display: block; font-size: 0.7rem; color: #999; text-transform: uppercase; margin-bottom: 8px;">Zahlungsart</label>
+                <div style="display: flex; gap: 20px;">
+                    <label><input type="radio" name="s-payment" value="cash" checked> Barzahlung</label>
+                    <label><input type="radio" name="s-payment" value="card"> Kreditkarte (Online)</label>
+                </div>
+            </div>
+
+            <div id="live-total-display" style="padding: 20px; background: #faf9f6; text-align: right; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eee;">
+                <span style="font-size: 0.8rem; color: #777;">VORAUSSICHTLICHER GESAMTPREIS:</span>
+                <div id="modal-total-amount" style="font-size: 2rem; font-weight: 700; color: #5a6b5a; font-family: 'Playfair Display', serif;">0 HUF</div>
+            </div>
+
+            <button type="submit" class="btn-book-extras">Buchen & Bezahlen</button>
+        </form>
+    </div>
+</div>
+
+<div id="success-popup" class="modal-overlay" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(4px);">
+    <div style="background: white; padding: 3rem 2rem; border-radius: 12px; max-width: 450px; width: 90%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
+        <div style="font-size: 4rem; color: #5a6b5a; margin-bottom: 1.5rem;">✓</div>
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: #333; margin-bottom: 1rem;">Erfolg!</h2>
+        <div id="success-details" style="color: #666; line-height: 1.6; margin-bottom: 2rem; font-size: 1rem;"></div>
+        <button onclick="window.location.href='index.html'" class="btn-book-extras" style="width: 100%; margin: 0; cursor: pointer;">Zurück zur Startseite</button>
+    </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+
+<script>
+    const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0'); 
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        // 1. Apartmanok betöltése közvetlenül az API-ból
+        const aptSelect = document.getElementById('r-apt');
+        
+        try {
+            const res = await fetch('/api/get-db-content');
+            if (res.ok) {
+                const database = await res.json();
+                if (database && database.apartments) {
+                    // Töröljük a meglévő opciókat a defaultokon kívül, ha szükséges
+                    // De a lényeg, hogy hozzáadjuk az adatbázisból jövőket:
+                    database.apartments.forEach(apt => {
+                        const opt = document.createElement('option');
+                        opt.value = apt.name;
+                        opt.textContent = apt.name;
+                        aptSelect.appendChild(opt);
+                    });
+                }
+            }
+        } catch (err) {
+            console.error("Hiba az apartmanok betöltésekor:", err);
+        }
+
+        // 2. Naptár inicializálása (Flatpickr)
+        const config = {
+            locale: "hu", // Az angolnál 'en', németnél 'de' legyen!
+            dateFormat: "Y-m-d",
+            minDate: "today",
+            onChange: function() {
+                updateLiveTotal();
+            }
+        };
+        flatpickr("#r-start", config);
+        flatpickr("#r-end", config);
+    });
+
+    function changeQty(id, delta) {
+        const el = document.getElementById(id);
+        let val = parseInt(el.innerText) || 1;
+        val = Math.max(1, val + delta);
+        el.innerText = val;
+        updateLiveTotal();
+    }
+
+    function updateLiveTotal() {
+        let daily = 0;
+        if(document.getElementById('item-sup').checked) daily += (parseInt(document.getElementById('qty-sup').innerText) || 1) * 5900;
+        if(document.getElementById('item-sunbed').checked) daily += (parseInt(document.getElementById('qty-sunbed').innerText) || 1) * 1500;
+        if(document.getElementById('item-umbrella').checked) daily += (parseInt(document.getElementById('qty-umbrella').innerText) || 1) * 1000;
+
+        const start = document.getElementById('r-start').value;
+        const end = document.getElementById('r-end').value;
+        let days = 0;
+
+        if(start && end) {
+            const d1 = new Date(start);
+            const d2 = new Date(end);
+            if(d2 >= d1) {
+                days = Math.ceil(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+            }
+        }
+        const total = daily * days;
+        document.getElementById('modal-total-amount').innerText = total.toLocaleString() + " HUF";
+        return { total: total, days: days };
+    }
+
+    function openRentModal() {
+        const modal = document.getElementById('rent-modal');
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('active'), 10);
+        updateLiveTotal();
+    }
+
+    function closeRentModal() {
+        const modal = document.getElementById('rent-modal');
+        modal.classList.remove('active');
+        setTimeout(() => { modal.style.display = 'none'; }, 400);
+    }
+
+    async function submitRentForm(e) {
+        e.preventDefault();
+        
+        const items = [];
+        if(document.getElementById('item-sup').checked) items.push(document.getElementById('qty-sup').innerText + "x SUP");
+        if(document.getElementById('item-sunbed').checked) items.push(document.getElementById('qty-sunbed').innerText + "x Sonnenliege");
+        if(document.getElementById('item-umbrella').checked) items.push(document.getElementById('qty-umbrella').innerText + "x Sonnenschirm");
+
+        if(items.length === 0) {
+            alert("Bitte wählen Sie mindestens ein Teil aus!");
+            return;
+        }
+
+        const calc = updateLiveTotal();
+        const method = document.querySelector('input[name="s-payment"]:checked').value;
+
+        const orderData = {
+            type: "EXTRA",
+            serviceName: "Strand-Ausrüstung Verleih",
+            items: items.join(", "),
+            guestName: document.getElementById('r-name').value,
+            email: document.getElementById('r-email').value,
+            phone: document.getElementById('r-phone').value,
+            apartment: document.getElementById('r-apt').value,
+            start: document.getElementById('r-start').value,
+            end: document.getElementById('r-end').value,
+            days: calc.days,
+            amount: calc.total,
+            method: method,
+            lang: 'de',
+            details: `Ort: Fonyód | Artikel: ${items.join(", ")} | Zeitraum: ${document.getElementById('r-start').value} - ${document.getElementById('r-end').value}`
+        };
+
+        try {
+            const res = await fetch('/api/order', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(orderData)
+            });
+
+            const result = await res.json();
+
+            if(res.ok) {
+                if (method === 'card' && result.stripeSessionId) {
+                    await stripe.redirectToCheckout({ sessionId: result.stripeSessionId });
+                } else {
+                    closeRentModal();
+                    document.getElementById('success-details').innerHTML = `
+                        <p>Gebuchte Artikel: <strong>${orderData.items}</strong></p>
+                        <p>Abholort: <strong>Fonyód</strong></p>
+                        <p>Gesamt: <strong>${orderData.amount.toLocaleString()} HUF</strong></p>
+                        <p>Zahlung: <strong>Bar bei Abholung</strong></p>
+                    `;
+                    document.getElementById('success-popup').style.display = 'flex';
+                }
+            } else {
+                alert("Fehler: " + (result.error || "Buchung fehlgeschlagen"));
+            }
+        } catch (err) {
+            alert("Ein Netzwerkfehler ist aufgetreten.");
+        }
+    }
+</script>
+</body>
+</html>
