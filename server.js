@@ -813,37 +813,21 @@ app.post('/api/create-checkout-session', async (req, res) => {
     }
 });
 
-// --- TODO LISTA KEZELÉSE (GOLYÓÁLLÓ VERZIÓ) ---
+// --- TODO LISTA KEZELÉSE ---
 
-app.get('/api/get-todos', (req, res) => {
-    fs.readFile(dbPath, 'utf8', (err, data) => {
-        if (err) return res.status(500).json({ error: "Adatbázis olvasási hiba" });
-        
-        let db = {};
-        try {
-            db = JSON.parse(data || '{}');
-        } catch (e) {
-            console.error("Hiba a data.json olvasásakor (GET):", e.message);
-            db = {};
-        }
-        
+app.get('/api/get-todos', async (req, res) => {
+    try {
+        const db = await getDbContent();
         res.json(db.todos || []);
-    });
+    } catch (e) {
+        console.error("Hiba a feladatok lekérésekor:", e);
+        res.status(500).json({ error: "Szerver hiba" });
+    }
 });
 
-app.post('/api/add-todo', (req, res) => {
-    fs.readFile(dbPath, 'utf8', (err, data) => {
-        if (err) return res.status(500).json({ error: "Adatbázis olvasási hiba" });
-        
-        let db = {};
-        try {
-            db = JSON.parse(data || '{}');
-        } catch (e) {
-            console.error("Hiba a data.json beolvasásakor (ADD):", e.message);
-            // Ha hibás a JSON, ne omlasztjuk össze, hanem csinálunk egy üres objektumot
-            db = {}; 
-        }
-        
+app.post('/api/add-todo', async (req, res) => {
+    try {
+        const db = await getDbContent();
         if (!db.todos) db.todos = [];
         
         const newTodo = {
@@ -852,36 +836,28 @@ app.post('/api/add-todo', (req, res) => {
         };
         
         db.todos.push(newTodo);
+        await saveDbContent(db);
         
-        fs.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8', (err) => {
-            if (err) {
-                console.error("Hiba az adatbázis mentésekor:", err);
-                return res.status(500).json({ error: "Mentési hiba" });
-            }
-            res.json(newTodo);
-        });
-    });
+        res.json(newTodo);
+    } catch (e) {
+        console.error("Hiba a feladat hozzáadásakor:", e);
+        res.status(500).json({ error: "Szerver hiba" });
+    }
 });
 
-app.post('/api/delete-todo', (req, res) => {
-    fs.readFile(dbPath, 'utf8', (err, data) => {
-        if (err) return res.status(500).json({ error: "Adatbázis olvasási hiba" });
+app.post('/api/delete-todo', async (req, res) => {
+    try {
+        const db = await getDbContent();
+        if (!db.todos) db.todos = [];
         
-        let db = {};
-        try {
-            db = JSON.parse(data || '{}');
-        } catch (e) {
-            console.error("Hiba a data.json beolvasásakor (DELETE):", e.message);
-            db = {};
-        }
+        db.todos = db.todos.filter(todo => todo.id !== req.body.id);
+        await saveDbContent(db);
         
-        db.todos = (db.todos || []).filter(todo => todo.id !== req.body.id);
-        
-        fs.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8', (err) => {
-            if (err) return res.status(500).json({ error: "Mentési hiba" });
-            res.json({ success: true });
-        });
-    });
+        res.json({ success: true });
+    } catch (e) {
+        console.error("Hiba a feladat törlésekor:", e);
+        res.status(500).json({ error: "Szerver hiba" });
+    }
 });
 
 const PORT = process.env.PORT || 8080;
