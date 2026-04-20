@@ -223,20 +223,20 @@
         }
     </style>
 
-    <link rel="stylesheet" href="mobile.css?v=1.1">
+    <link rel="stylesheet" href="mobile.css?v=2">
 </head>
 <body>
 
-<header style="position: fixed; top: 38px; left: 0; width: 100%; padding: 1rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);">
-    
-    <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1;">
-        <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
-        <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+<header class="site-header">
+    <a href="index.html" class="logo-container">
+        <span class="logo-title">BALATON</span>
+        <span class="logo-subtitle">Essence</span>
     </a>
 
-    <nav class="nav-links" style="display: flex; gap: 2rem;">
-        <a href="#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Apartmanok</a>
-        <a href="rolunk.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Rólunk</a>
+    <nav class="nav-links">
+        <a href="#apartments">Apartmanok</a>
+        <a href="rolunk.html">Rólunk</a>
+        
         <div class="nav-weather-pill" id="weather-widget">
             <span id="weather-loader" class="weather-loader">Időjárás...</span>
             <div id="weather-content" class="weather-pill-content hidden">
@@ -246,6 +246,7 @@
                 <span title="Balaton vízhőfok" class="water-temp">🌊 <span id="water-temp-val">22°C</span></span>
             </div>
         </div>
+
         <div class="lang-dropdown">
             <button class="lang-btn">HU <span class="arrow"></span></button>
             <div class="lang-content">
