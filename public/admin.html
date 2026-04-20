@@ -454,44 +454,49 @@
 
     // --- APARTMAN MENTÉSE ---
     async function saveApt() {
-        const seasonElements = document.querySelectorAll('.season-row');
-        const seasonsData = Array.from(seasonElements).map(row => ({
-            name: row.querySelector('.s-name').value,
-            start: row.querySelector('.s-start').value,
-            end: row.querySelector('.s-end').value,
-            price: Number(row.querySelector('.s-price').value),
-            minNights: Number(row.querySelector('.s-min').value),
-            maxGuests: Number(row.querySelector('.s-max').value),
-            price3: Number(row.querySelector('.s-price3')?.value || 0),
-            price4: Number(row.querySelector('.s-price4')?.value || 0)
-        }));
+    const seasonElements = document.querySelectorAll('.season-row');
+    const seasonsData = Array.from(seasonElements).map(row => ({
+        name: row.querySelector('.s-name').value,
+        start: row.querySelector('.s-start').value,
+        end: row.querySelector('.s-end').value,
+        price: Number(row.querySelector('.s-price').value),
+        minNights: Number(row.querySelector('.s-min').value),
+        maxGuests: Number(row.querySelector('.s-max').value),
+        price3: Number(row.querySelector('.s-price3')?.value || 0),
+        price4: Number(row.querySelector('.s-price4')?.value || 0)
+    }));
 
-        const aptData = {
-            id: activeId || Date.now().toString(),
-            name: document.getElementById('a-name').value,
-            location: document.getElementById('a-loc').value,
-            seasons: seasonsData, 
-            ownerId: document.getElementById('a-owner-select').value,
-            description: document.getElementById('a-desc').value,
-            coverImage: currentCoverImage, 
-            galleryImages: currentGalleryImages, 
-            icalBooking: document.getElementById('a-ical-b').value,
-            icalSzallas: document.getElementById('a-ical-sz').value,
-            bookedDates: activeId ? (db.apartments.find(a => String(a.id) === String(activeId))?.bookedDates || []) : []
-        };
+    // Előre megkeressük a meglévő apartmant, hogy kiolvassuk belőle a mentendő adatokat
+    const existingApt = activeId ? db.apartments.find(a => String(a.id) === String(activeId)) : null;
 
-        if (!db.apartments) db.apartments = [];
+    const aptData = {
+        id: activeId || Date.now().toString(),
+        name: document.getElementById('a-name').value,
+        location: document.getElementById('a-loc').value,
+        seasons: seasonsData, 
+        ownerId: document.getElementById('a-owner-select').value,
+        description: document.getElementById('a-desc').value,
+        coverImage: currentCoverImage, 
+        galleryImages: currentGalleryImages, 
+        icalBooking: document.getElementById('a-ical-b').value,
+        icalSzallas: document.getElementById('a-ical-sz').value,
+        bookedDates: existingApt ? (existingApt.bookedDates || []) : [],
+        // --- ITT A JAVÍTÁS: Átemeljük a naptárban letiltott napokat is ---
+        disabledDates: existingApt ? (existingApt.disabledDates || []) : [] 
+    };
 
-        if (!activeId) { 
-            db.apartments.push(aptData); 
-        } else { 
-            const idx = db.apartments.findIndex(a => String(a.id) === String(activeId)); 
-            if(idx !== -1) db.apartments[idx] = aptData; 
-        }
-        
-        await saveDb(); 
-        closeModal();
+    if (!db.apartments) db.apartments = [];
+
+    if (!activeId) { 
+        db.apartments.push(aptData); 
+    } else { 
+        const idx = db.apartments.findIndex(a => String(a.id) === String(activeId)); 
+        if(idx !== -1) db.apartments[idx] = aptData; 
     }
+    
+    await saveDb(); 
+    closeModal();
+}
 
     // --- MODALOK NYITÁSA ---
    // --- MODALOK NYITÁSA ---
