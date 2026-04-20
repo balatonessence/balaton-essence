@@ -754,27 +754,6 @@ app.get('/api/balaton-water-temp', async (req, res) => {
     }
 });
 
-app.get('/health', (req, res) => res.status(200).send('OK'));
-
-app.get('/apartman', (req, res) => res.sendFile(path.join(__dirname, 'public', 'apartman.html')));
-app.get('/en/apartman', (req, res) => res.sendFile(path.join(__dirname, 'public', 'en', 'apartman.html')));
-app.get('/de/apartman', (req, res) => res.sendFile(path.join(__dirname, 'public', 'de', 'apartman.html')));
-
-app.get('/en', (req, res) => res.sendFile(path.join(__dirname, 'public', 'en', 'index.html')));
-app.get('/de', (req, res) => res.sendFile(path.join(__dirname, 'public', 'de', 'index.html')));
-
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-
-app.get('*', (req, res) => {
-    if (req.url.startsWith('/en/')) {
-        res.sendFile(path.join(__dirname, 'public', 'en', 'index.html'));
-    } else if (req.url.startsWith('/de/')) {
-        res.sendFile(path.join(__dirname, 'public', 'de', 'index.html'));
-    } else {
-        res.sendFile(path.join(__dirname, 'public', 'index.html'));
-    }
-});
-
 app.post('/api/create-checkout-session', async (req, res) => {
     try {
         const { booking } = req.body;
@@ -859,6 +838,29 @@ app.post('/api/delete-todo', async (req, res) => {
         res.status(500).json({ error: "Szerver hiba" });
     }
 });
+
+
+app.get('/health', (req, res) => res.status(200).send('OK'));
+
+app.get('/apartman', (req, res) => res.sendFile(path.join(__dirname, 'public', 'apartman.html')));
+app.get('/en/apartman', (req, res) => res.sendFile(path.join(__dirname, 'public', 'en', 'apartman.html')));
+app.get('/de/apartman', (req, res) => res.sendFile(path.join(__dirname, 'public', 'de', 'apartman.html')));
+
+app.get('/en', (req, res) => res.sendFile(path.join(__dirname, 'public', 'en', 'index.html')));
+app.get('/de', (req, res) => res.sendFile(path.join(__dirname, 'public', 'de', 'index.html')));
+
+app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
+
+app.get('*', (req, res) => {
+    if (req.url.startsWith('/en/')) {
+        res.sendFile(path.join(__dirname, 'public', 'en', 'index.html'));
+    } else if (req.url.startsWith('/de/')) {
+        res.sendFile(path.join(__dirname, 'public', 'de', 'index.html'));
+    } else {
+        res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    }
+});
+
 
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, "0.0.0.0", () => {
