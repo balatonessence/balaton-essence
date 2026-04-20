@@ -62,8 +62,21 @@
         }
 
         nav { display: flex; gap: 2rem; align-items: center; }
-        .nav-link { font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--text); text-decoration: none; transition: 0.3s; }
-        .nav-link:hover { color: var(--accent); }
+        /* Navigációs linkek alapértelmezett stílusának felülírása */
+        .nav-links a {
+            text-decoration: none !important;
+            color: #1A1A1A !important;
+            font-weight: 700;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: color 0.3s ease;
+        }
+
+        /* Hover (rámutatás) effektus */
+        .nav-links a:hover {
+            color: #5c7a4d !important; /* Vagy a var(--accent) színed */
+        }
         
         .btn-primary { background: var(--accent); color: white; border: 1px solid var(--accent); padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.4s; text-decoration: none; display: inline-block; }
         .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2); }
