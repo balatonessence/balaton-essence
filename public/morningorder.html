@@ -3,372 +3,388 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="title">Reggeli Rendelés | Balaton Essence</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://js.stripe.com/v3/"></script>
-
+    <title>Közös Feladatlista | Balaton Essence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #5c7a4d;    /* Elegáns zsálya/erdőzöld */
-            --primary-light: #769764;
-            --accent-color: #d4a373;     /* Meleg homok/arany */
-            --bg-color: #f4f3ef;         /* Törtfehér háttér */
-            --text-dark: #2c3325;        /* Mély olajzöld */
-            --text-light: #6a7063;
-            --surface: rgba(255, 255, 255, 0.85);
+            --primary: #5c7a4d;
+            --accent: #d4a373;
+            --bg: #f4f3ef;
+            --text: #2c3325;
+            --surface: #ffffff;
             --border: #e3e0d8;
         }
 
-        body { 
-            background-color: var(--bg-color); 
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(212, 163, 115, 0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(92, 122, 77, 0.1) 0px, transparent 50%);
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; margin: 0; padding: 40px 20px;
-            font-family: 'Montserrat', sans-serif; 
-            color: var(--text-dark);
+        body {
+            background-color: var(--bg);
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+            min-height: 100vh;
         }
 
-        .container { 
-            background: var(--surface); 
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            width: 100%; max-width: 580px; 
-            padding: 50px 45px; 
-            border-radius: 24px; 
-            box-shadow: 0 20px 40px rgba(44, 51, 37, 0.08), inset 0 1px 0 rgba(255,255,255,0.6); 
-            box-sizing: border-box;
-            border: 1px solid rgba(255, 255, 255, 0.5);
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(44, 51, 37, 0.05);
+            align-self: flex-start;
         }
-        
-        /* Nyelvválasztó */
-        .lang-switcher { display: flex; justify-content: flex-end; gap: 6px; margin-bottom: 30px; }
-        .lang-btn { 
-            background: transparent; border: 1px solid var(--border); padding: 6px 14px; 
-            border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 11px; letter-spacing: 1px;
-            color: var(--text-light); transition: all 0.3s ease;
-        }
-        .lang-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
-        .lang-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(92, 122, 77, 0.2); }
 
-        h1 { 
-            text-align: center; margin-top: 0; margin-bottom: 10px; 
-            color: var(--text-dark); font-family: 'Playfair Display', serif; 
-            font-size: 36px; font-weight: 600; letter-spacing: -0.5px;
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            margin: 0 0 10px 0;
+            color: var(--text);
         }
 
         .subtitle {
-            text-align: center; color: var(--text-light); font-size: 14px; margin-bottom: 35px;
-        }
-
-        .notice { 
-            background-color: rgba(212, 163, 115, 0.1); color: #a67c52; padding: 12px 20px; 
-            border-radius: 12px; font-size: 0.85em; font-weight: 600; margin-bottom: 30px; text-align: center; 
-            border: 1px solid rgba(212, 163, 115, 0.2); letter-spacing: 0.5px;
-        }
-        
-        .row { display: flex; gap: 20px; }
-        .row .form-floating { flex: 1; }
-        
-        /* Lebegő címkék (Floating Labels) */
-        .form-floating {
-            position: relative;
-            margin-bottom: 25px;
-        }
-
-        .form-floating input, .form-floating select, .form-floating textarea {
-            width: 100%;
-            padding: 18px 16px 10px;
-            font-size: 15px;
-            font-family: inherit;
-            color: var(--text-dark);
-            background-color: rgba(255, 255, 255, 0.6);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-            outline: none;
-        }
-
-        .form-floating input:focus, .form-floating select:focus, .form-floating textarea:focus {
-            border-color: var(--primary-color);
-            background-color: #ffffff;
-            box-shadow: 0 0 0 4px rgba(92, 122, 77, 0.1);
-        }
-
-        .form-floating label {
-            position: absolute;
-            top: 50%;
-            left: 16px;
-            transform: translateY(-50%);
-            color: var(--text-light);
-            font-size: 15px;
-            transition: all 0.2s ease-out;
-            pointer-events: none;
-            background: transparent;
-        }
-
-        .form-floating textarea ~ label {
-            top: 24px;
-        }
-
-        /* Amikor fókuszban van, vagy van benne adat */
-        .form-floating input:focus ~ label,
-        .form-floating input:not(:placeholder-shown) ~ label,
-        .form-floating select:focus ~ label,
-        .form-floating select:valid ~ label,
-        .form-floating textarea:focus ~ label,
-        .form-floating textarea:not(:placeholder-shown) ~ label {
-            top: 10px;
-            transform: translateY(-50%) scale(0.8);
-            transform-origin: left;
-            color: var(--primary-color);
+            color: var(--accent);
+            font-size: 14px;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
             font-weight: 600;
         }
 
-        /* Select nyilacska igazítás */
-        select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%235c7a4d%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 10px auto; }
-        select:disabled { background-color: rgba(227, 224, 216, 0.5); cursor: not-allowed; color: var(--text-light); }
-
-        /* Gomb stílus */
-        button[type="submit"] { 
-            width: 100%; padding: 18px; 
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-            color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; 
-            cursor: pointer; margin-top: 15px; letter-spacing: 1px;
-            transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;
-            box-shadow: 0 10px 20px rgba(92, 122, 77, 0.25);
+        /* Új feladat hozzáadása */
+        .add-todo-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+            padding-bottom: 25px;
+            border-bottom: 2px solid var(--bg);
         }
-        button[type="submit"]:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(92, 122, 77, 0.35); }
-        button[type="submit"]:active { transform: translateY(1px); box-shadow: 0 5px 10px rgba(92, 122, 77, 0.2); }
-        button[type="submit"]:disabled { background: #b2b9bf; box-shadow: none; cursor: not-allowed; transform: none; }
-        
-        #message { margin-top: 25px; font-weight: 600; text-align: center; font-size: 14px; }
 
-        /* Flatpickr Prémium Színek */
-        .flatpickr-calendar { font-family: 'Montserrat', sans-serif !important; border-radius: 16px !important; box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; border: none !important; }
-        .flatpickr-day.selected, .flatpickr-day.selected:focus, .flatpickr-day.selected:hover {
-            background: var(--primary-color) !important; border-color: var(--primary-color) !important; color: white !important;
+        input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            font-family: inherit;
+            outline: none;
+            font-size: 15px;
+            background: #faf9f6;
+            transition: all 0.3s;
         }
-        .flatpickr-months .flatpickr-month { background: var(--primary-color); border-radius: 16px 16px 0 0; }
-        .flatpickr-current-month .flatpickr-monthDropdown-months, .flatpickr-current-month input.cur-year { color: white !important; }
-        .flatpickr-weekday { color: var(--primary-color) !important; font-weight: 600; }
-        span.flatpickr-weekday { background: transparent; }
-        .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { color: white !important; fill: white !important; }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(92, 122, 77, 0.1);
+            background: #fff;
+        }
+
+        .add-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .add-btn:hover { background: #4a633e; transform: translateY(-2px); }
+        .add-btn:active { transform: translateY(0); }
+        .add-btn:disabled { background: #b2b9bf; cursor: not-allowed; transform: none; }
+
+        /* Lista stílusa */
+        .todo-list { list-style: none; padding: 0; margin: 0; }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: var(--bg);
+            margin-bottom: 12px;
+            border-radius: 14px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .todo-item:hover {
+            border-color: var(--border);
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+
+        .todo-text { 
+            flex: 1; 
+            font-size: 15px; 
+            font-weight: 500; 
+            padding-right: 20px;
+            line-height: 1.4;
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: var(--primary);
+            border: 1px solid rgba(92, 122, 77, 0.3);
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover { 
+            background: rgba(92, 122, 77, 0.1); 
+            border-color: var(--primary); 
+        }
+
+        .loading { text-align: center; color: var(--accent); padding: 20px; font-weight: 500; }
+
+        /* --- PRÉMIUM EGYEDI POPUP (MODAL) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 51, 37, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 24px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-icon {
+            width: 60px; height: 60px;
+            background: rgba(92, 122, 77, 0.1);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px;
+            margin: 0 auto 20px auto;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: var(--text);
+            margin: 0 0 10px 0;
+        }
+
+        .modal-text {
+            color: var(--text-light);
+            font-size: 15px;
+            margin: 0 0 30px 0;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            font-family: inherit;
+        }
+
+        .btn-cancel:hover { background: #f0f0f0; color: var(--text); }
+
+        .btn-confirm {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            font-family: inherit;
+        }
+
+        .btn-confirm:hover { background: #4a633e; }
+        .btn-confirm:disabled { background: #b2b9bf; cursor: not-allowed; }
+
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="lang-switcher">
-            <button class="lang-btn active" data-lang="hu">HU</button>
-            <button class="lang-btn" data-lang="en">EN</button>
-            <button class="lang-btn" data-lang="de">DE</button>
-        </div>
-        
-        <h1 data-i18n="h1">Reggeli Rendelés</h1>
-        <div class="subtitle" data-i18n="subtitle">Balaton Essence Luxury Apartments</div>
-        <div class="notice" data-i18n="notice">Másnapi kiszállításhoz a rendelést ma 16:00-ig adhatja le.</div>
-        
-        <form id="breakfastForm">
-            <div class="form-floating">
-                <input type="text" id="name" placeholder=" " required>
-                <label for="name" data-i18n="nameLabel">Név (foglaláson szereplő)</label>
-            </div>
-            
-            <div class="form-floating">
-                <input type="email" id="email" placeholder=" " required>
-                <label for="email" data-i18n="emailLabel">E-mail cím</label>
-            </div>
-            
-            <div class="row">
-                <div class="form-floating">
-                    <select id="apartment" required>
-                        <option value="" disabled selected></option>
-                        <option value="FONYÓD SUN">Fonyód SUN</option>
-                        <option value="FONYÓD SUP">Fonyód SUP</option>
-                    </select>
-                    <label for="apartment" data-i18n="aptLabel">Apartman</label>
-                </div>
-                <div class="form-floating">
-                    <input type="number" id="guests" min="1" max="10" value="2" placeholder=" " required>
-                    <label for="guests" data-i18n="guestsLabel">Fő</label>
-                </div>
-            </div>
 
-            <div class="form-floating">
-                <input type="text" id="date" placeholder=" " required>
-                <label for="date" data-i18n="dateLabel">Napok kiválasztása (egyesével)</label>
-            </div>
+<div class="container">
+    <h1>Közös Fejlesztési Lista</h1>
+    <div class="subtitle">Balaton Essence x Developer</div>
 
-            <div class="form-floating">
-                <textarea id="orderDetails" rows="3" placeholder=" " required></textarea>
-                <label for="orderDetails" data-i18n="detailsLabel">Milyen reggelit kértek? (Kívánságok)</label>
-            </div>
+    <form class="add-todo-form" id="addForm">
+        <input type="text" id="todoText" placeholder="Új feladat leírása..." required autocomplete="off">
+        <button type="submit" class="add-btn">Hozzáadás</button>
+    </form>
 
-            <div class="form-floating">
-                <select id="paymentMethod" required>
-                    <option value="cash" data-i18n="payCash" selected>Helyszíni készpénz</option>
-                    <option value="card" data-i18n="payCard">Online bankkártya</option>
-                </select>
-                <label for="paymentMethod" data-i18n="paymentLabel">Fizetési mód</label>
-            </div>
-
-            <button type="submit" id="submitBtn" data-i18n="submitBtn">Rendelés Véglegesítése</button>
-        </form>
-        <div id="message"></div>
+    <div id="todoContainer">
+        <div class="loading">Betöltés...</div>
     </div>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/hu.js"></script>
-    <script src="https://npmcdn.com/flatpickr/dist/l10n/de.js"></script>
+<div class="modal-overlay" id="customModal">
+    <div class="modal-box">
+        <div class="modal-icon">✓</div>
+        <h2 class="modal-title">Feladat kész?</h2>
+        <p class="modal-text">Biztosan elkészültél ezzel a feladattal? A törlés végleges, a listáról eltűnik.</p>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal()">Mégsem</button>
+            <button class="btn-confirm" id="confirmDeleteBtn">Igen, kész!</button>
+        </div>
+    </div>
+</div>
 
-    <script>
-        const STRIPE_PUBLIC_KEY = 'pk_test_Vezesd_Be_A_Sajatod'; 
-        const PRICE_PER_PERSON_PER_DAY = 4500; 
+<script>
+    const container = document.getElementById('todoContainer');
+    const addForm = document.getElementById('addForm');
+    
+    // Popup változók
+    const modal = document.getElementById('customModal');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    let todoIdToDelete = null;
 
-        const translations = {
-            hu: { 
-                title: "Reggeli Rendelés | Balaton Essence", h1: "Reggeli Rendelés", subtitle: "Balaton Essence Luxury Apartments", notice: "Másnapi kiszállításhoz a rendelést ma 16:00-ig adhatja le.", 
-                nameLabel: "Név (foglaláson szereplő)", emailLabel: "E-mail cím", 
-                aptLabel: "Apartman", guestsLabel: "Személyek",
-                dateLabel: "Napok kiválasztása (egyesével)", detailsLabel: "Milyen reggelit kértek? (Kívánságok)", 
-                paymentLabel: "Fizetési mód", payCash: "Helyszíni készpénz", payCard: "Online bankkártya",
-                submitBtn: "Rendelés Véglegesítése", sending: "Feldolgozás...", redirecting: "Biztonságos fizetés indítása...",
-                success: "Sikeres rendelés! A visszaigazolást elküldtük." 
-            },
-            en: { 
-                title: "Breakfast Order | Balaton Essence", h1: "Breakfast Order", subtitle: "Balaton Essence Luxury Apartments", notice: "For next-day delivery, please order by 16:00 today.", 
-                nameLabel: "Name (used for booking)", emailLabel: "Email address", 
-                aptLabel: "Apartment", guestsLabel: "Guests",
-                dateLabel: "Select days (one by one)", detailsLabel: "Breakfast preferences / requests", 
-                paymentLabel: "Payment method", payCash: "Cash on site", payCard: "Credit Card online",
-                submitBtn: "Complete Order", sending: "Processing...", redirecting: "Starting secure checkout...",
-                success: "Success! Confirmation email sent." 
-            },
-            de: { 
-                title: "Frühstück | Balaton Essence", h1: "Frühstück", subtitle: "Balaton Essence Luxury Apartments", notice: "Für eine Lieferung am nächsten Tag bestellen Sie bitte bis 16:00 Uhr.", 
-                nameLabel: "Name (wie gebucht)", emailLabel: "E-Mail-Adresse", 
-                aptLabel: "Apartment", guestsLabel: "Personen",
-                dateLabel: "Tage auswählen (einzeln)", detailsLabel: "Frühstückswünsche / Bemerkungen", 
-                paymentLabel: "Zahlungsart", payCash: "Barzahlung vor Ort", payCard: "Kreditkarte online",
-                submitBtn: "Bestellung Abschließen", sending: "Verarbeitung...", redirecting: "Sichere Zahlung starten...",
-                success: "Erfolgreich! Bestätigung gesendet." 
-            }
-        };
+    // Lista betöltése
+    async function fetchTodos() {
+        try {
+            const res = await fetch('/api/get-todos');
+            if (!res.ok) throw new Error('Szerver hiba');
+            const todos = await res.json();
+            renderTodos(todos);
+        } catch (err) {
+            container.innerHTML = '<div style="color:#cc0000; text-align:center;">Hiba a betöltéskor. Nézd meg a konzolt!</div>';
+        }
+    }
 
-        let currentLang = 'hu';
-        const apartmentSelect = document.getElementById('apartment');
-        let fpInstance;
-
-        const getMinDate = () => {
-            const now = new Date();
-            const minDate = new Date();
-            now.getHours() >= 16 ? minDate.setDate(now.getDate() + 2) : minDate.setDate(now.getDate() + 1);
-            return minDate;
-        };
-
-        function updateLang(lang) {
-            currentLang = lang;
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
-            document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = translations[lang][el.dataset.i18n]);
-            if(fpInstance) { fpInstance.set('locale', lang === 'en' ? 'default' : lang); }
+    // Lista kirajzolása
+    function renderTodos(todos) {
+        if (todos.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#aaa; font-style:italic; padding: 20px;">Nincs aktív feladat. Minden kész! ✨</p>';
+            return;
         }
 
-        document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => updateLang(b.dataset.lang)));
+        container.innerHTML = '';
+        const list = document.createElement('ul');
+        list.className = 'todo-list';
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const apt = urlParams.get('apt');
-        if (apt) {
-            const searchVal = "FONYÓD " + apt.toUpperCase();
-            for (let opt of apartmentSelect.options) {
-                if (opt.value === searchVal) { apartmentSelect.value = searchVal; apartmentSelect.disabled = true; break; }
-            }
-        }
+        todos.forEach(todo => {
+            const li = document.createElement('li');
+            li.className = 'todo-item';
+            // Itt már a custom popupot hívjuk meg a sima deleteTodo helyett
+            li.innerHTML = `
+                <span class="todo-text">${todo.text}</span>
+                <button class="delete-btn" onclick="openModal(${todo.id})">KÉSZ</button>
+            `;
+            list.appendChild(li);
+        });
+        container.appendChild(list);
+    }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            fpInstance = flatpickr("#date", {
-                mode: "multiple", 
-                minDate: getMinDate(),
-                dateFormat: "Y-m-d",
-                locale: "hu",
-                conjunction: ", "
+    // Új feladat küldése
+    addForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = document.getElementById('todoText').value;
+        const btn = addForm.querySelector('.add-btn');
+        btn.disabled = true;
+
+        try {
+            await fetch('/api/add-todo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
             });
-            updateLang(currentLang);
-        });
+            addForm.reset();
+            fetchTodos();
+        } catch (err) {
+            alert('Nem sikerült hozzáadni a feladatot.');
+        } finally {
+            btn.disabled = false;
+        }
+    });
 
-        document.getElementById('breakfastForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const msg = document.getElementById('message');
-            
-            const selectedDates = fpInstance.selectedDates.sort((a, b) => a - b);
-            if (selectedDates.length === 0) {
-                msg.textContent = currentLang === 'hu' ? "Kérjük, válasszon legalább egy napot!" : "Please select at least one day!";
-                msg.style.color = "#dc3545";
-                return;
-            }
+    // --- POPUP LOGIKA ---
 
-            btn.disabled = true;
-            btn.textContent = translations[currentLang].sending;
-            
-            const daysCount = selectedDates.length;
-            const guestsCount = parseInt(document.getElementById('guests').value, 10);
-            const totalAmount = daysCount * guestsCount * PRICE_PER_PERSON_PER_DAY;
-            const paymentMethod = document.getElementById('paymentMethod').value;
+    // Popup megnyitása
+    function openModal(id) {
+        todoIdToDelete = id;
+        modal.classList.add('active');
+    }
 
-            const dateList = selectedDates.map(d => d.toISOString().split('T')[0]).join(', ');
+    // Popup bezárása
+    function closeModal() {
+        todoIdToDelete = null;
+        modal.classList.remove('active');
+    }
 
-            const payload = {
-                type: 'BREAKFAST',
-                lang: currentLang,
-                guestName: document.getElementById('name').value,
-                email: document.getElementById('email').value,
-                apartment: apartmentSelect.value,
-                start: selectedDates[0].toISOString().split('T')[0], 
-                end: selectedDates[selectedDates.length - 1].toISOString().split('T')[0],
-                days: daysCount,
-                items: document.getElementById('orderDetails').value + ` | NAPOK: ${dateList} | FŐ: ${guestsCount}`,
-                method: paymentMethod,
-                amount: totalAmount
-            };
+    // Ha a sötét háttérre kattint, akkor is bezárul
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
 
-            try {
-                const res = await fetch('/api/order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
+    // Törlés végrehajtása a gombnyomásra
+    confirmBtn.addEventListener('click', async () => {
+        if (!todoIdToDelete) return;
+        
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Törlés...';
 
-                const result = await res.json();
+        try {
+            await fetch('/api/delete-todo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: todoIdToDelete })
+            });
+            fetchTodos();
+            closeModal();
+        } catch (err) {
+            alert('Hiba történt a törlés során.');
+        } finally {
+            // Gomb visszaállítása a következő alkalomra
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Igen, kész!';
+        }
+    });
 
-                if (res.ok && result.success) {
-                    if (paymentMethod === 'card' && result.stripeSessionId) {
-                        btn.textContent = translations[currentLang].redirecting;
-                        const stripe = Stripe(STRIPE_PUBLIC_KEY);
-                        await stripe.redirectToCheckout({ sessionId: result.stripeSessionId });
-                    } else {
-                        msg.textContent = translations[currentLang].success;
-                        msg.style.color = "var(--primary-color)";
-                        e.target.reset();
-                        fpInstance.clear();
-                        if (apt) apartmentSelect.value = "FONYÓD " + apt.toUpperCase();
-                    }
-                } else {
-                    msg.textContent = result.error || "Hiba történt a feldolgozás során.";
-                    msg.style.color = "#dc3545";
-                }
-            } catch (err) {
-                msg.textContent = "Hálózati hiba. Kérjük, próbálja újra.";
-                msg.style.color = "#dc3545";
-            } finally {
-                btn.disabled = false;
-                btn.textContent = translations[currentLang].submitBtn;
-            }
-        });
-    </script>
+    // Kezdeti betöltés
+    fetchTodos();
+</script>
+
 </body>
 </html>
