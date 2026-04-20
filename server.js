@@ -813,12 +813,20 @@ app.post('/api/create-checkout-session', async (req, res) => {
     }
 });
 
-// --- TODO LISTA KEZELÉSE (BOMBABIZTOS VERZIÓ) ---
+// --- TODO LISTA KEZELÉSE (GOLYÓÁLLÓ VERZIÓ) ---
 
 app.get('/api/get-todos', (req, res) => {
     fs.readFile(dbPath, 'utf8', (err, data) => {
         if (err) return res.status(500).json({ error: "Adatbázis olvasási hiba" });
-        const db = JSON.parse(data || '{}');
+        
+        let db = {};
+        try {
+            db = JSON.parse(data || '{}');
+        } catch (e) {
+            console.error("Hiba a data.json olvasásakor (GET):", e.message);
+            db = {};
+        }
+        
         res.json(db.todos || []);
     });
 });
@@ -826,7 +834,16 @@ app.get('/api/get-todos', (req, res) => {
 app.post('/api/add-todo', (req, res) => {
     fs.readFile(dbPath, 'utf8', (err, data) => {
         if (err) return res.status(500).json({ error: "Adatbázis olvasási hiba" });
-        const db = JSON.parse(data || '{}');
+        
+        let db = {};
+        try {
+            db = JSON.parse(data || '{}');
+        } catch (e) {
+            console.error("Hiba a data.json beolvasásakor (ADD):", e.message);
+            // Ha hibás a JSON, ne omlasztjuk össze, hanem csinálunk egy üres objektumot
+            db = {}; 
+        }
+        
         if (!db.todos) db.todos = [];
         
         const newTodo = {
@@ -837,7 +854,10 @@ app.post('/api/add-todo', (req, res) => {
         db.todos.push(newTodo);
         
         fs.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8', (err) => {
-            if (err) return res.status(500).json({ error: "Mentési hiba" });
+            if (err) {
+                console.error("Hiba az adatbázis mentésekor:", err);
+                return res.status(500).json({ error: "Mentési hiba" });
+            }
             res.json(newTodo);
         });
     });
@@ -846,7 +866,14 @@ app.post('/api/add-todo', (req, res) => {
 app.post('/api/delete-todo', (req, res) => {
     fs.readFile(dbPath, 'utf8', (err, data) => {
         if (err) return res.status(500).json({ error: "Adatbázis olvasási hiba" });
-        const db = JSON.parse(data || '{}');
+        
+        let db = {};
+        try {
+            db = JSON.parse(data || '{}');
+        } catch (e) {
+            console.error("Hiba a data.json beolvasásakor (DELETE):", e.message);
+            db = {};
+        }
         
         db.todos = (db.todos || []).filter(todo => todo.id !== req.body.id);
         
