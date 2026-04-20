@@ -798,7 +798,10 @@ function renderCalendar() {
         }
     });
 
-    // 2. EGYETLEN STRINGBE ÉPÍTJÜK A HTML-T (Nem használunk += innerHTML-t a ciklusban!)
+    // --- ÚJ RÉSZ: Admin által letiltott napok kigyűjtése ---
+    const blockedDates = new Set(currentApt.disabledDates || []);
+
+    // 2. EGYETLEN STRINGBE ÉPÍTJÜK A HTML-T
     let htmlContent = "";
 
     for (let i = 0; i < startOffset; i++) {
@@ -811,8 +814,8 @@ function renderCalendar() {
         let className = "cal-day";
         let onClickAttr = `onclick="selectDate('${dateStr}')"`;
 
-        // Villámgyors ellenőrzés a Set-ben
-        if (reservedDates.has(dateStr)) {
+        // --- ÚJ RÉSZ: Ha foglalt VAGY letiltott, akkor kap "booked" stílust és nem kattintható ---
+        if (reservedDates.has(dateStr) || blockedDates.has(dateStr)) {
             className += " booked";
             onClickAttr = ""; 
         }
@@ -825,7 +828,7 @@ function renderCalendar() {
         htmlContent += `<div class="${className}" ${onClickAttr}>${d}</div>`;
     }
 
-    // 3. CSAK A LEGVEGÉN ÍRJUK BE A DOM-BA (Egyszeri művelet = nincs laggolás)
+    // 3. CSAK A LEGVEGÉN ÍRJUK BE A DOM-BA
     daysContainer.innerHTML = htmlContent;
 }
 
