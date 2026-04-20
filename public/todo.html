@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Közös Feladatlista | Balaton Essence</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #5c7a4d;
@@ -23,6 +23,7 @@
             justify-content: center;
             padding: 40px 20px;
             margin: 0;
+            min-height: 100vh;
         }
 
         .container {
@@ -32,6 +33,7 @@
             padding: 40px;
             border-radius: 24px;
             box-shadow: 0 15px 35px rgba(44, 51, 37, 0.05);
+            align-self: flex-start;
         }
 
         h1 {
@@ -47,6 +49,7 @@
             letter-spacing: 1px;
             margin-bottom: 30px;
             text-transform: uppercase;
+            font-weight: 600;
         }
 
         /* Új feladat hozzáadása */
@@ -54,32 +57,43 @@
             display: flex;
             gap: 10px;
             margin-bottom: 40px;
-            padding-bottom: 20px;
+            padding-bottom: 25px;
             border-bottom: 2px solid var(--bg);
         }
 
         input {
             flex: 1;
-            padding: 12px 15px;
+            padding: 14px 18px;
             border: 1px solid var(--border);
-            border-radius: 10px;
+            border-radius: 12px;
             font-family: inherit;
             outline: none;
             font-size: 15px;
+            background: #faf9f6;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(92, 122, 77, 0.1);
+            background: #fff;
         }
 
         .add-btn {
             background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 24px;
-            border-radius: 10px;
+            padding: 14px 28px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
-            transition: opacity 0.2s;
+            font-family: inherit;
+            transition: all 0.2s;
         }
 
-        .add-btn:hover { opacity: 0.9; }
+        .add-btn:hover { background: #4a633e; transform: translateY(-2px); }
+        .add-btn:active { transform: translateY(0); }
+        .add-btn:disabled { background: #b2b9bf; cursor: not-allowed; transform: none; }
 
         /* Lista stílusa */
         .todo-list { list-style: none; padding: 0; margin: 0; }
@@ -87,11 +101,18 @@
         .todo-item {
             display: flex;
             align-items: center;
-            padding: 15px 20px;
+            padding: 16px 20px;
             background: var(--bg);
-            margin-bottom: 10px;
-            border-radius: 12px;
-            transition: transform 0.2s;
+            margin-bottom: 12px;
+            border-radius: 14px;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .todo-item:hover {
+            border-color: var(--border);
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
         }
 
         .todo-text { 
@@ -99,24 +120,128 @@
             font-size: 15px; 
             font-weight: 500; 
             padding-right: 20px;
+            line-height: 1.4;
         }
 
         .delete-btn {
             background: transparent;
-            color: #cc0000;
-            border: 1px solid #ffcccc;
-            padding: 8px 14px;
+            color: var(--primary);
+            border: 1px solid rgba(92, 122, 77, 0.3);
+            padding: 8px 16px;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 700;
             letter-spacing: 0.5px;
+            font-family: inherit;
             transition: all 0.2s;
         }
 
-        .delete-btn:hover { background: #feebeb; border-color: #f8d7da; }
+        .delete-btn:hover { 
+            background: rgba(92, 122, 77, 0.1); 
+            border-color: var(--primary); 
+        }
 
-        .loading { text-align: center; color: var(--accent); padding: 20px; }
+        .loading { text-align: center; color: var(--accent); padding: 20px; font-weight: 500; }
+
+        /* --- PRÉMIUM EGYEDI POPUP (MODAL) --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(44, 51, 37, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 24px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            transform: scale(0.9) translateY(20px);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .modal-overlay.active .modal-box {
+            transform: scale(1) translateY(0);
+        }
+
+        .modal-icon {
+            width: 60px; height: 60px;
+            background: rgba(92, 122, 77, 0.1);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px;
+            margin: 0 auto 20px auto;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            color: var(--text);
+            margin: 0 0 10px 0;
+        }
+
+        .modal-text {
+            color: var(--text-light);
+            font-size: 15px;
+            margin: 0 0 30px 0;
+            line-height: 1.5;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            color: var(--text-light);
+            border: 1px solid var(--border);
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            font-family: inherit;
+        }
+
+        .btn-cancel:hover { background: #f0f0f0; color: var(--text); }
+
+        .btn-confirm {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+            font-family: inherit;
+        }
+
+        .btn-confirm:hover { background: #4a633e; }
+        .btn-confirm:disabled { background: #b2b9bf; cursor: not-allowed; }
+
     </style>
 </head>
 <body>
@@ -135,37 +260,43 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="customModal">
+    <div class="modal-box">
+        <div class="modal-icon">✓</div>
+        <h2 class="modal-title">Feladat kész?</h2>
+        <p class="modal-text">Biztosan elkészültél ezzel a feladattal? A törlés végleges, a listáról eltűnik.</p>
+        <div class="modal-buttons">
+            <button class="btn-cancel" onclick="closeModal()">Mégsem</button>
+            <button class="btn-confirm" id="confirmDeleteBtn">Igen, kész!</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const container = document.getElementById('todoContainer');
     const addForm = document.getElementById('addForm');
-
     
+    // Popup változók
+    const modal = document.getElementById('customModal');
+    const confirmBtn = document.getElementById('confirmDeleteBtn');
+    let todoIdToDelete = null;
+
+    // Lista betöltése
     async function fetchTodos() {
         try {
             const res = await fetch('/api/get-todos');
-            
-            // Ha a szerver hibát dob (pl. 404 vagy 500)
-            if (!res.ok) {
-                const errorText = await res.text();
-                console.error("Szerver válasz:", errorText);
-                throw new Error(`Szerver hibakód: ${res.status}`);
-            }
-
+            if (!res.ok) throw new Error('Szerver hiba');
             const todos = await res.json();
             renderTodos(todos);
         } catch (err) {
-            console.error("Részletes hiba:", err);
-            container.innerHTML = `<div style="color:red; text-align:center; font-weight:bold;">
-                Hiba a betöltéskor: <br> ${err.message}
-                <br><br><span style="font-size:12px; color:#555;">(Nézd meg a böngésző konzolját a részletekért!)</span>
-            </div>`;
+            container.innerHTML = '<div style="color:#cc0000; text-align:center;">Hiba a betöltéskor. Nézd meg a konzolt!</div>';
         }
     }
 
     // Lista kirajzolása
     function renderTodos(todos) {
         if (todos.length === 0) {
-            container.innerHTML = '<p style="text-align:center; color:#aaa; font-style:italic;">Nincs aktív feladat. Minden kész!</p>';
+            container.innerHTML = '<p style="text-align:center; color:#aaa; font-style:italic; padding: 20px;">Nincs aktív feladat. Minden kész! ✨</p>';
             return;
         }
 
@@ -176,9 +307,10 @@
         todos.forEach(todo => {
             const li = document.createElement('li');
             li.className = 'todo-item';
+            // Itt már a custom popupot hívjuk meg a sima deleteTodo helyett
             li.innerHTML = `
                 <span class="todo-text">${todo.text}</span>
-                <button class="delete-btn" onclick="deleteTodo(${todo.id})">KÉSZ / TÖRLÉS</button>
+                <button class="delete-btn" onclick="openModal(${todo.id})">KÉSZ</button>
             `;
             list.appendChild(li);
         });
@@ -189,8 +321,6 @@
     addForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const text = document.getElementById('todoText').value;
-
-        // Gomb letiltása küldés közben
         const btn = addForm.querySelector('.add-btn');
         btn.disabled = true;
 
@@ -209,21 +339,48 @@
         }
     });
 
-    // Törlés
-    async function deleteTodo(id) {
-        if (!confirm('Valóban elkészült ez a feladat?')) return;
+    // --- POPUP LOGIKA ---
+
+    // Popup megnyitása
+    function openModal(id) {
+        todoIdToDelete = id;
+        modal.classList.add('active');
+    }
+
+    // Popup bezárása
+    function closeModal() {
+        todoIdToDelete = null;
+        modal.classList.remove('active');
+    }
+
+    // Ha a sötét háttérre kattint, akkor is bezárul
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) closeModal();
+    });
+
+    // Törlés végrehajtása a gombnyomásra
+    confirmBtn.addEventListener('click', async () => {
+        if (!todoIdToDelete) return;
         
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = 'Törlés...';
+
         try {
             await fetch('/api/delete-todo', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id })
+                body: JSON.stringify({ id: todoIdToDelete })
             });
             fetchTodos();
+            closeModal();
         } catch (err) {
             alert('Hiba történt a törlés során.');
+        } finally {
+            // Gomb visszaállítása a következő alkalomra
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = 'Igen, kész!';
         }
-    }
+    });
 
     // Kezdeti betöltés
     fetchTodos();
