@@ -139,14 +139,26 @@
     const container = document.getElementById('todoContainer');
     const addForm = document.getElementById('addForm');
 
-    // Lista betöltése a szerverről
+    
     async function fetchTodos() {
         try {
             const res = await fetch('/api/get-todos');
+            
+            // Ha a szerver hibát dob (pl. 404 vagy 500)
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error("Szerver válasz:", errorText);
+                throw new Error(`Szerver hibakód: ${res.status}`);
+            }
+
             const todos = await res.json();
             renderTodos(todos);
         } catch (err) {
-            container.innerHTML = '<div style="color:red">Hiba a betöltéskor.</div>';
+            console.error("Részletes hiba:", err);
+            container.innerHTML = `<div style="color:red; text-align:center; font-weight:bold;">
+                Hiba a betöltéskor: <br> ${err.message}
+                <br><br><span style="font-size:12px; color:#555;">(Nézd meg a böngésző konzolját a részletekért!)</span>
+            </div>`;
         }
     }
 
