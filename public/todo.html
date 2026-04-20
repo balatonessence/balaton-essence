@@ -310,7 +310,7 @@
             // Itt már a custom popupot hívjuk meg a sima deleteTodo helyett
             li.innerHTML = `
                 <span class="todo-text">${todo.text}</span>
-                <button class="delete-btn" onclick="openModal(${todo.id})">KÉSZ</button>
+                <button class="delete-btn" onclick="openModal(${todo.id})">KÉSZ / TÖRLÉS</button>
             `;
             list.appendChild(li);
         });
