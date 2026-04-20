@@ -813,22 +813,20 @@ app.post('/api/create-checkout-session', async (req, res) => {
     }
 });
 
-// --- TODO LISTA KEZELÉSE ---
+// --- TODO LISTA KEZELÉSE (BOMBABIZTOS VERZIÓ) ---
 
-// Feladatok lekérése
-app.get('/api/get-todos', async (req, res) => {
-    try {
-        const db = await getDbContent();
+app.get('/api/get-todos', (req, res) => {
+    fs.readFile(dbPath, 'utf8', (err, data) => {
+        if (err) return res.status(500).json({ error: "Adatbázis olvasási hiba" });
+        const db = JSON.parse(data || '{}');
         res.json(db.todos || []);
-    } catch (err) {
-        res.status(500).json({ error: "Hiba a feladatok lekérésekor" });
-    }
+    });
 });
 
-// Új feladat hozzáadása
-app.post('/api/add-todo', async (req, res) => {
-    try {
-        const db = await getDbContent();
+app.post('/api/add-todo', (req, res) => {
+    fs.readFile(dbPath, 'utf8', (err, data) => {
+        if (err) return res.status(500).json({ error: "Adatbázis olvasási hiba" });
+        const db = JSON.parse(data || '{}');
         if (!db.todos) db.todos = [];
         
         const newTodo = {
@@ -837,25 +835,26 @@ app.post('/api/add-todo', async (req, res) => {
         };
         
         db.todos.push(newTodo);
-        await saveDbContent(db);
-        res.json(newTodo);
-    } catch (err) {
-        res.status(500).json({ error: "Hiba a mentéskor" });
-    }
+        
+        fs.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8', (err) => {
+            if (err) return res.status(500).json({ error: "Mentési hiba" });
+            res.json(newTodo);
+        });
+    });
 });
 
-// Feladat törlése
-app.post('/api/delete-todo', async (req, res) => {
-    try {
-        const db = await getDbContent();
-        const id = req.body.id;
+app.post('/api/delete-todo', (req, res) => {
+    fs.readFile(dbPath, 'utf8', (err, data) => {
+        if (err) return res.status(500).json({ error: "Adatbázis olvasási hiba" });
+        const db = JSON.parse(data || '{}');
         
-        db.todos = db.todos.filter(todo => todo.id !== id);
-        await saveDbContent(db);
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: "Hiba a törléskor" });
-    }
+        db.todos = (db.todos || []).filter(todo => todo.id !== req.body.id);
+        
+        fs.writeFile(dbPath, JSON.stringify(db, null, 2), 'utf8', (err) => {
+            if (err) return res.status(500).json({ error: "Mentési hiba" });
+            res.json({ success: true });
+        });
+    });
 });
 
 const PORT = process.env.PORT || 8080;
