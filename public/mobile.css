@@ -1,66 +1,58 @@
-/* mobile.css - TELJES JAVÍTÁS */
+/* mobile.css */
 
 /* 1. KIS MOBILOK (Telefonok) */
 @media (max-width: 768px) {
+    /* Fejléc elrendezésének felülírása */
     header {
         position: fixed !important;
-        top: 0 !important; /* Felülírja a 38px-et, felmegy a szélére */
-        left: 0;
-        width: 100%;
+        top: 0 !important; 
+        left: 0 !important;
+        width: 100% !important;
         height: auto !important;
-        flex-direction: column !important; /* Egymás alá kerül minden */
-        padding: 10px 15px !important;
+        flex-direction: column !important; 
+        padding: 15px 10px !important;
         background: rgba(255, 255, 255, 0.98) !important;
-        gap: 5px !important;
     }
 
     .logo-container {
-        margin-bottom: 5px;
-        align-items: center;
+        margin-bottom: 15px !important;
+        align-items: center !important;
     }
 
+    /* Itt a lényeg: a flex-wrap engedi, hogy a kilógó elemek új sorba kerüljenek */
     .nav-links {
-        padding: 0;
-        margin-top: 5px;
+        flex-wrap: wrap !important; 
+        justify-content: center !important;
+        gap: 15px 20px !important; 
         width: 100% !important;
-        flex-direction: column !important; /* Menüpontok, widget és nyelv egymás alatt */
-        align-items: center !important;
-        gap: 12px !important;
     }
 
     .nav-links a {
-        padding: 5px;
         font-size: 0.85rem !important;
-        letter-spacing: 1px !important;
     }
 
-    /* IDŐJÁRÁS WIDGET MOBILON */
     .nav-weather-pill {
         background: rgba(0, 0, 0, 0.04) !important;
-        border: 1px solid rgba(0,0,0,0.05);
-        padding: 8px 20px !important;
+        padding: 8px 15px !important;
         border-radius: 50px !important;
-        width: fit-content !important;
-        margin: 5px 0 !important;
+        margin: 0 !important;
     }
 
-    /* Nyelvválasztó */
     .lang-dropdown {
-        margin-top: 5px;
+        margin: 0 !important;
     }
 
     /* Apartman rács az indexen */
     .apartment-grid {
         grid-template-columns: 1fr !important;
-        gap: 20px;
-        padding: 0 15px;
+        gap: 20px !important;
+        padding: 0 15px !important;
     }
 
-    /* Oldalak tetejének eltolása, hogy ne takarja el a header */
-    /* Mivel a header magas lett, 220px kell */
+    /* Oldalak tetejének eltolása, hogy ne takarja el a megnövelt header */
     main, section:first-of-type, .hero {
-        margin-top: 220px !important; 
-        padding-top: 0 !important;
+        padding-top: 180px !important; 
+        margin-top: 0 !important;
     }
 }
 
@@ -84,7 +76,7 @@
     .booking-card {
         position: static !important;
         padding: 1.5rem;
-        order: -1; /* Foglalás box felülre */
+        order: -1; 
         margin-bottom: 30px;
     }
 
@@ -98,7 +90,6 @@
         gap: 15px;
     }
 
-    /* Naptár igazítása */
     #booking-modal > div {
         width: 95% !important;
         padding: 1rem !important;
