@@ -14,6 +14,12 @@ async function initDatabase(callback) {
 
 function getAptStatusAndPrice(apt, targetDate = new Date(), guestCount = 2) {
     const dateStr = targetDate.toISOString().split('T')[0];
+    
+    // --- ÚJ: Manuálisan letiltott napok ellenőrzése ---
+    if (apt.disabledDates && apt.disabledDates.includes(dateStr)) {
+        return { status: 'DISABLED', price: null, label: 'Karbantartás', maxGuests: 0 };
+    }
+
     const month = targetDate.getMonth() + 1;
     const day = targetDate.getDate();
 

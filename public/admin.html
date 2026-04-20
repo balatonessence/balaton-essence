@@ -88,6 +88,47 @@
         .apt-item-row:active {
             cursor: grabbing;
         }
+
+        /* Admin naptár*/
+        .admin-cal-day {
+            padding: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .admin-cal-day.empty {
+            background: transparent;
+            border: none;
+            cursor: default;
+        }
+
+        /* 1. Szabad nap */
+        .admin-cal-day.status-free {
+            background: #f9f9f9;
+            color: #333;
+        }
+        .admin-cal-day.status-free:hover {
+            background: #e2e2e2;
+        }
+
+        /* 2. Foglalt nap (Vendég által kifizetett) - NARANCS */
+        .admin-cal-day.status-booked {
+            background: #f39c12;
+            color: white;
+            cursor: not-allowed;
+            border-color: #e67e22;
+        }
+
+        /* 3. Letiltott nap (Admin által) - PIROS */
+        .admin-cal-day.status-blocked {
+            background: #b0413e;
+            color: white;
+            font-weight: bold;
+            border-color: #8f3431;
+        }
     </style>
 </head>
 <body>
@@ -188,6 +229,28 @@
             <div class="form-group" style="margin-top:1.5rem;">
                 <label>Leírás (Felszereltség, infók)</label>
                 <textarea id="a-desc" rows="4" placeholder="Az apartman az épület legfelső emeletén helyezkedik el..."></textarea>
+            </div>
+            <div class="admin-calendar-wrapper" style="background:#f9f9f9; padding:1.5rem; border-radius:8px; border:1px solid #ddd; margin-top:1.5rem; margin-bottom:1.5rem;">
+                <h3 style="margin-bottom: 1rem; font-size: 1rem; color: var(--text);">Dátumok manuális letiltása</h3>
+                
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; font-size: 0.75rem; font-weight: bold;">
+                    <span style="color: #666;"><span style="display:inline-block; width:12px; height:12px; background:#fff; border:1px solid #ccc; margin-right:5px; vertical-align:middle;"></span> Szabad</span>
+                    <span style="color: #d35400;"><span style="display:inline-block; width:12px; height:12px; background:#f39c12; margin-right:5px; vertical-align:middle;"></span> Foglalt (Vendég)</span>
+                    <span style="color: #c0392b;"><span style="display:inline-block; width:12px; height:12px; background:#b0413e; margin-right:5px; vertical-align:middle;"></span> Letiltott (Karbantartás/Zárva)</span>
+                </div>
+
+                <div class="admin-calendar-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: white; padding: 10px; border-radius: 4px; border: 1px solid #eee;">
+                    <button type="button" onclick="changeAdminMonth(-1)" style="padding: 5px 15px; cursor:pointer; border: none; background: #eee; border-radius: 4px; font-weight: bold;">‹ Előző</button>
+                    <span id="admin-cal-month" style="font-weight: bold; font-family: 'Playfair Display'; font-size: 1.1rem; color: var(--essence);">2026. 05.</span>
+                    <button type="button" onclick="changeAdminMonth(1)" style="padding: 5px 15px; cursor:pointer; border: none; background: #eee; border-radius: 4px; font-weight: bold;">Következő ›</button>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.65rem; font-weight: 700; color: #999; margin-bottom: 8px;">
+                    <div>HÉ</div><div>KE</div><div>SZE</div><div>CSÜ</div><div>PÉ</div><div>SZO</div><div>VAS</div>
+                </div>
+
+                <div id="admin-calendar-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;">
+                    </div>
             </div>
 
             <div class="form-group" style="background:#f0f5ec; padding:1rem; border-radius:8px; border: 1px solid #d4e0c8;">
@@ -532,6 +595,130 @@
     activeId = null;
     activeOId = null;
 }
+
+let adminCalDate = new Date();
+let currentEditingAptId = null; // Ezt állítsd be arra az ID-ra, amit épp szerkesztesz!
+
+// Ezt hívd meg, amikor megnyitod az apartman szerkesztő ablakát
+function initAdminCalendar(aptId) {
+    currentEditingAptId = aptId;
+    adminCalDate = new Date(); // Visszaállunk a jelenlegi hónapra
+    renderAdminCalendar();
+}
+
+function renderAdminCalendar() {
+    if (!currentEditingAptId) return;
+    
+    // Kikeressük az apartmant
+    const apt = db.apartments.find(a => String(a.id) === String(currentEditingAptId));
+    const container = document.getElementById('admin-calendar-days');
+    if (!container || !apt) return;
+
+    const year = adminCalDate.getFullYear();
+    const month = adminCalDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    // Kezdőnap eltolása (hétfővel kezdődjön)
+    let firstDay = new Date(year, month, 1).getDay();
+    let startOffset = firstDay === 0 ? 6 : firstDay - 1;
+
+    // 1. Foglalások (Vendégek) kigyűjtése -> Narancssárga
+    const bookedDates = new Set();
+    (db.bookings || []).filter(b => String(b.aptId) === String(apt.id)).forEach(b => {
+        let curr = new Date(b.checkIn || b.start);
+        let last = new Date(b.checkOut || b.end);
+        while (curr < last) {
+            bookedDates.add(curr.toISOString().split('T')[0]);
+            curr.setDate(curr.getDate() + 1);
+        }
+    });
+
+    // 2. Admin által letiltott napok -> Piros
+    const blockedDates = new Set(apt.disabledDates || []);
+
+    let html = "";
+    
+    // Üres napok a hónap elején
+    for (let i = 0; i < startOffset; i++) {
+        html += `<div class="admin-cal-day empty"></div>`;
+    }
+
+    // Napok generálása
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        let className = "admin-cal-day";
+        let isBooked = bookedDates.has(dateStr);
+        
+        if (isBooked) {
+            className += " status-booked"; // Narancs
+        } else if (blockedDates.has(dateStr)) {
+            className += " status-blocked"; // Piros
+        } else {
+            className += " status-free"; // Szabad
+        }
+
+        // onclick esemény bekötése (átadjuk az ID-t, a dátumot és hogy foglalt-e)
+        html += `<div class="${className}" onclick="toggleAdminBlock('${apt.id}', '${dateStr}', ${isBooked})">${d}</div>`;
+    }
+    
+    container.innerHTML = html;
+    
+    // Fejléc hónap frissítése (pl. 2026. 05.)
+    document.getElementById('admin-cal-month').innerText = `${year}. ${String(month + 1).padStart(2, '0')}.`;
+}
+
+// Hónap léptetése
+function changeAdminMonth(dir) {
+    adminCalDate.setMonth(adminCalDate.getMonth() + dir);
+    renderAdminCalendar();
+}
+
+// Kattintás egy napra
+function toggleAdminBlock(aptId, dateStr, isBooked) {
+    // Ha a vendég már lefoglalta (narancs), nem engedjük a tiltást
+    if (isBooked) {
+        alert("Ezt a napot már lefoglalták! Ha törölni akarod, előbb a foglalást kell visszavonni.");
+        return;
+    }
+
+    const apt = db.apartments.find(a => String(a.id) === String(aptId));
+    if (!apt) return;
+    
+    if (!apt.disabledDates) apt.disabledDates = [];
+
+    const idx = apt.disabledDates.indexOf(dateStr);
+    if (idx > -1) {
+        // Ha benne volt, kivesszük (Feloldás)
+        apt.disabledDates.splice(idx, 1);
+    } else {
+        // Ha nem volt benne, betesszük (Letiltás)
+        apt.disabledDates.push(dateStr);
+    }
+    
+    // Azonnali újrarajzolás, hogy lássuk a piros/fehér váltást
+    renderAdminCalendar();
+}
+
+// Mentés gomb logikája az adatbázisba
+async function saveAdminChanges() {
+    try {
+        const res = await fetch('/api/save-db-content', { // Cseréld a saját végpontodra!
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(db) // Elküldjük a teljes frissített db-t
+        });
+        
+        if (res.ok) {
+            alert("Sikeresen elmentve!");
+        } else {
+            alert("Hiba a mentés során!");
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Hálózati hiba!");
+    }
+}
+
 
     // --- RENDER ALL (Minden vizuális elemmel) ---
     function renderAll() {
