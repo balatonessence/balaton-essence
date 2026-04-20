@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Közös Feladatlista | Balaton Essence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:wght@600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5c7a4d;
+            --accent: #d4a373;
+            --bg: #f4f3ef;
+            --text: #2c3325;
+            --surface: #ffffff;
+            --border: #e3e0d8;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding: 40px 20px;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 650px;
+            background: var(--surface);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(44, 51, 37, 0.05);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 32px;
+            margin: 0 0 10px 0;
+            color: var(--text);
+        }
+
+        .subtitle {
+            color: var(--accent);
+            font-size: 14px;
+            letter-spacing: 1px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        /* Új feladat hozzáadása */
+        .add-todo-form {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--bg);
+        }
+
+        input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-family: inherit;
+            outline: none;
+            font-size: 15px;
+        }
+
+        .add-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .add-btn:hover { opacity: 0.9; }
+
+        /* Lista stílusa */
+        .todo-list { list-style: none; padding: 0; margin: 0; }
+
+        .todo-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--bg);
+            margin-bottom: 10px;
+            border-radius: 12px;
+            transition: transform 0.2s;
+        }
+
+        .todo-text { 
+            flex: 1; 
+            font-size: 15px; 
+            font-weight: 500; 
+            padding-right: 20px;
+        }
+
+        .delete-btn {
+            background: transparent;
+            color: #cc0000;
+            border: 1px solid #ffcccc;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            transition: all 0.2s;
+        }
+
+        .delete-btn:hover { background: #feebeb; border-color: #f8d7da; }
+
+        .loading { text-align: center; color: var(--accent); padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Közös Fejlesztési Lista</h1>
+    <div class="subtitle">Balaton Essence x Developer</div>
+
+    <form class="add-todo-form" id="addForm">
+        <input type="text" id="todoText" placeholder="Új feladat leírása..." required autocomplete="off">
+        <button type="submit" class="add-btn">Hozzáadás</button>
+    </form>
+
+    <div id="todoContainer">
+        <div class="loading">Betöltés...</div>
+    </div>
+</div>
+
+<script>
+    const container = document.getElementById('todoContainer');
+    const addForm = document.getElementById('addForm');
+
+    // Lista betöltése a szerverről
+    async function fetchTodos() {
+        try {
+            const res = await fetch('/api/get-todos');
+            const todos = await res.json();
+            renderTodos(todos);
+        } catch (err) {
+            container.innerHTML = '<div style="color:red">Hiba a betöltéskor.</div>';
+        }
+    }
+
+    // Lista kirajzolása
+    function renderTodos(todos) {
+        if (todos.length === 0) {
+            container.innerHTML = '<p style="text-align:center; color:#aaa; font-style:italic;">Nincs aktív feladat. Minden kész!</p>';
+            return;
+        }
+
+        container.innerHTML = '';
+        const list = document.createElement('ul');
+        list.className = 'todo-list';
+
+        todos.forEach(todo => {
+            const li = document.createElement('li');
+            li.className = 'todo-item';
+            li.innerHTML = `
+                <span class="todo-text">${todo.text}</span>
+                <button class="delete-btn" onclick="deleteTodo(${todo.id})">KÉSZ / TÖRLÉS</button>
+            `;
+            list.appendChild(li);
+        });
+        container.appendChild(list);
+    }
+
+    // Új feladat küldése
+    addForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const text = document.getElementById('todoText').value;
+
+        // Gomb letiltása küldés közben
+        const btn = addForm.querySelector('.add-btn');
+        btn.disabled = true;
+
+        try {
+            await fetch('/api/add-todo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text })
+            });
+            addForm.reset();
+            fetchTodos();
+        } catch (err) {
+            alert('Nem sikerült hozzáadni a feladatot.');
+        } finally {
+            btn.disabled = false;
+        }
+    });
+
+    // Törlés
+    async function deleteTodo(id) {
+        if (!confirm('Valóban elkészült ez a feladat?')) return;
+        
+        try {
+            await fetch('/api/delete-todo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            });
+            fetchTodos();
+        } catch (err) {
+            alert('Hiba történt a törlés során.');
+        }
+    }
+
+    // Kezdeti betöltés
+    fetchTodos();
+</script>
+
+</body>
+</html>

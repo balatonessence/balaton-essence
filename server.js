@@ -813,6 +813,51 @@ app.post('/api/create-checkout-session', async (req, res) => {
     }
 });
 
+// --- TODO LISTA KEZELÉSE ---
+
+// Feladatok lekérése
+app.get('/api/get-todos', async (req, res) => {
+    try {
+        const db = await getDbContent();
+        res.json(db.todos || []);
+    } catch (err) {
+        res.status(500).json({ error: "Hiba a feladatok lekérésekor" });
+    }
+});
+
+// Új feladat hozzáadása
+app.post('/api/add-todo', async (req, res) => {
+    try {
+        const db = await getDbContent();
+        if (!db.todos) db.todos = [];
+        
+        const newTodo = {
+            id: Date.now(),
+            text: req.body.text
+        };
+        
+        db.todos.push(newTodo);
+        await saveDbContent(db);
+        res.json(newTodo);
+    } catch (err) {
+        res.status(500).json({ error: "Hiba a mentéskor" });
+    }
+});
+
+// Feladat törlése
+app.post('/api/delete-todo', async (req, res) => {
+    try {
+        const db = await getDbContent();
+        const id = req.body.id;
+        
+        db.todos = db.todos.filter(todo => todo.id !== id);
+        await saveDbContent(db);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: "Hiba a törléskor" });
+    }
+});
+
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, "0.0.0.0", () => {
     console.log(`ESSENCE SZERVER ELINDULT | Port: ${PORT}`);
