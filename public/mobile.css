@@ -1,26 +1,42 @@
-/* mobile.css - Csak a mobil módosítások */
+/* mobile.css - Frissített verzió az időjárás widgethez */
 @media (max-width: 768px) {
     /* Általános elemek */
     header {
         flex-direction: column;
         padding: 1rem;
+        height: auto; /* Hagyjuk, hogy a widget miatt nyúljon */
+    }
+
+    .logo-container {
+        margin-bottom: 10px;
     }
 
     .nav-links {
         padding: 0;
-        margin-top: 1rem;
+        margin-top: 10px;
         width: 100%;
         justify-content: space-around;
     }
 
     .nav-links a {
-        padding: 10px;
-        font-size: 1.1rem;
+        padding: 8px;
+        font-size: 0.9rem;
+    }
+
+    /* IDŐJÁRÁS WIDGET MOBILON - Hogy ne foglaljon sok helyet */
+    #weather-widget {
+        font-size: 0.8rem;
+        padding: 5px;
+        margin-bottom: 10px;
+        background: rgba(92, 122, 77, 0.05);
+        border-radius: 4px;
+        width: 100%;
+        text-align: center;
     }
 
     /* Index oldal - Apartman rács */
     .apartment-grid {
-        grid-template-columns: 1fr !important; /* Felülbírálja a HTML-ben lévő gridet */
+        grid-template-columns: 1fr !important;
         gap: 20px;
     }
 
@@ -31,7 +47,7 @@
         font-size: 1.1rem;
     }
 
-    /* Galéria és Modal (Részletező oldalhoz is előre) */
+    /* Galéria és Modal */
     .gallery-grid {
         grid-template-columns: 1fr !important;
     }
@@ -48,14 +64,12 @@
     }
 }
 
-/* POPUP - Ez asztali gépen és mobilon is megjelenik */
+/* POPUP */
 .dev-modal-overlay {
     display: flex;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.85);
     z-index: 9999;
     align-items: center;
@@ -66,13 +80,11 @@
 .dev-modal-content {
     background: #b0413e;
     color: white;
-    padding: 40px;
+    padding: 30px;
     border-radius: 12px;
     max-width: 550px;
     width: 90%;
     text-align: center;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-    font-family: sans-serif;
 }
 
 .dev-modal-btn {
@@ -83,77 +95,63 @@
     font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
-    text-transform: uppercase;
     margin-top: 20px;
-    transition: transform 0.2s;
-}
-
-.dev-modal-btn:hover {
-    transform: scale(1.05);
-}
-
-/* MOBIL SPECIFIKUS DOLGOK */
-@media (max-width: 768px) {
-    .dev-modal-content {
-        padding: 25px;
-        width: 95%;
-    }
-    
-
 }
 
 /* apartman.html mobil optimalizálás */
 @media (max-width: 992px) {
     body {
-        padding-top: 0; /* A banner és header miatt mobilon finomítunk */
+        padding-top: 0;
     }
 
     main {
-        margin: 120px auto 50px; /* Kevesebb hely a header alatt */
+        /* MEGNÖVELT MARGIN: Ez akadályozza meg, hogy a tartalom a menü alá csússzon */
+        margin: 180px auto 40px !important; 
+        padding: 0 20px;
     }
 
     .apt-title {
-        font-size: 2.2rem; /* Kisebb cím, hogy ne törjön 4 sorba */
+        font-size: 1.8rem;
+        text-align: center;
+        margin-top: 10px;
     }
 
     .apt-container {
         display: flex;
-        flex-direction: column; /* Egymás alá kerül minden */
+        flex-direction: column;
     }
 
     .booking-card {
-        position: static !important; /* Megszüntetjük a sticky-t */
-        padding: 2rem 1.5rem;
-        order: -1; /* A foglalás box felugrik a leírás ELÉ */
-        margin-bottom: 2rem;
+        position: static !important;
+        padding: 1.5rem;
+        order: -1; /* A foglalás box mobilon legfelülre kerül */
+        margin-bottom: 30px;
     }
 
     .main-image-wrapper {
-        margin: 1.5rem 0;
+        margin: 1rem 0;
+        aspect-ratio: 4/3; /* Mobilon jobb ez az arány */
     }
 
     .gallery-grid {
-        grid-template-columns: 1fr; /* A galéria képei egymás alatt */
+        grid-template-columns: 1fr;
         gap: 15px;
-        margin-top: 2rem;
+        margin-top: 20px;
     }
 
-    /* Foglalási Modal (naptár) igazítása mobilra */
+    /* Foglalási Modal (naptár) */
     #booking-modal > div {
         width: 95% !important;
-        padding: 1.5rem !important;
+        padding: 1rem !important;
     }
 
     .cal-day {
-        padding: 15px 0; /* Nagyobb érintési felület a naptárban */
-        font-size: 1rem;
-    }
-
-    #custom-calendar {
-        padding: 5px;
+        padding: 12px 0;
+        font-size: 0.9rem;
     }
 
     .lightbox-nav {
-        font-size: 2.5rem; /* Kisebb nyilak a képnézegetőben */
+        font-size: 2rem;
+        padding: 10px;
     }
 }
