@@ -685,10 +685,19 @@ app.delete('/api/breakfasts/:id', async (req, res) => {
 });
 
 function formatLocalDate(dateInput) {
+    if (!dateInput) return null;
+
     const d = new Date(dateInput);
+
+    if (isNaN(d.getTime())) {
+        console.error("Hibás dátum:", dateInput);
+        return null;
+    }
+
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
+
     return `${year}-${month}-${day}`;
 }
 
@@ -723,6 +732,11 @@ app.post('/api/sync', async (req, res) => {
 
                         const start = formatLocalDate(event.start);
                         const end = formatLocalDate(event.end);
+
+                        if (!start || !end) {
+                            console.warn("Hibás iCal event kihagyva:", event);
+                            continue;
+                        }
 
                         const stableId = event.uid
                             ? `${apt.id}__${sourceDef.name}__${event.uid}`
