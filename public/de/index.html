@@ -155,6 +155,10 @@
             transform: rotate(180deg);
         }
 
+        #weather-widget {
+            display: none;
+        }
+
         /* Vékony Kapszula Stílusok */
 .nav-weather-pill {
     background-color: rgba(255, 255, 255, 0.6); /* Enyhén átlátszó, hogy szép legyen */
@@ -228,13 +232,13 @@
     <nav class="nav-links" style="display: flex; gap: 2rem;">
         <a href="#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Apartments</a>
         <a href="rolunk.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Über uns</a>
-        <div class="nav-weather-pill" id="weather-widget">
-            <span id="weather-loader" class="weather-loader">Wetter...</span>
+        <div class="nav-weather-pill" id="weather-widget" style="display: none;">
+            <span id="weather-loader" class="weather-loader" style="display: none;"></span>
             <div id="weather-content" class="weather-pill-content hidden">
                 <span id="weather-icon" title="Lufttemperatur">☀️</span>
-                <span id="weather-temp" class="air-temp">--°C</span>
+                <span id="weather-temp" class="air-temp"></span>
                 <span class="weather-divider">|</span>
-                <span title="Plattensee Wasser" class="water-temp">🌊 <span id="water-temp-val">22°C</span></span>
+                <span title="Plattensee Wasser" class="water-temp">🌊 <span id="water-temp-val"></span></span>
             </div>
         </div>
         <div class="lang-dropdown">
@@ -293,10 +297,7 @@
 
 <div id="apt-list-container" style="min-height: 60vh; margin-top: 120px;">
     <div style="text-align: center; padding: 10rem 5vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <div class="loader-spinner" style="width: 40px; height: 40px; border: 3px solid #eee; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;"></div>
-        <p style="font-family: 'Montserrat', sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 2px; color: #999;">
-            Apartments werden geladen...
-        </p>
+        <div class="loader-spinner" style="width: 40px; height: 40px; border: 3px solid #eee; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></div>
     </div>
 </div>
 
@@ -369,21 +370,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function fetchWeather() {
     try {
-        // 1. Levegő lekérése (Open-Meteo)
+        // 1. Levegő
         const airRes = await fetch(apiUrl);
         const airData = await airRes.json();
-        document.getElementById('weather-temp').innerText = `${Math.round(airData.current_weather.temperature)}°C`;
+        document.getElementById('weather-temp').innerText =
+            `${Math.round(airData.current_weather.temperature)}°C`;
 
-        // 2. VÍZ lekérése a saját szerverünkről
+        // 2. Víz
         const waterRes = await fetch('/api/balaton-water-temp');
         const waterData = await waterRes.json();
         document.getElementById('water-temp-val').innerText = waterData.temp;
 
-        // Ikon és megjelenítés marad a régi...
-        document.getElementById('weather-loader').classList.add('hidden');
+        // 👉 MEGJELENÍTÉS CSAK SIKER ESETÉN
         document.getElementById('weather-content').classList.remove('hidden');
+        document.getElementById('weather-widget').style.display = 'inline-flex';
+
     } catch (error) {
         console.error("Hiba:", error);
+
+        // 👉 ha hiba van → maradjon rejtve
+        document.getElementById('weather-widget').style.display = 'none';
     }
 }
 
@@ -394,7 +400,21 @@ function renderIndexApartments() {
     const grid = document.getElementById('apartment-grid');
     const loaderContainer = document.getElementById('apt-list-container');
     
-    if (!grid || !db.apartments) return;
+    if (!grid) return;
+
+    // 👉 ha nincs adat vagy üres
+    if (!db.apartments || db.apartments.length === 0) {
+        if (loaderContainer) {
+            loaderContainer.innerHTML = `
+                <div style="text-align:center; padding: 6rem 5vw; color: #777; font-size: 0.9rem;">
+                    Jelenleg nincs elérhető apartman.
+                </div>
+            `;
+        }
+        return;
+    }
+
+    // 👉 ha VAN adat → loader eltűnik
     if (loaderContainer) loaderContainer.style.display = 'none';
 
     grid.innerHTML = "";
