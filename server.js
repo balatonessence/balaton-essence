@@ -684,53 +684,138 @@ app.delete('/api/breakfasts/:id', async (req, res) => {
     }
 });
 
+function formatLocalDate(dateInput) {
+    const d = new Date(dateInput);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
 app.post('/api/sync', async (req, res) => {
     try {
         const db = await getDbContent();
         let hasChange = false;
+
         if (!db.bookings) db.bookings = [];
-        for (let apt of db.apartments) {
+        if (!db.apartments) db.apartments = [];
+
+        for (const apt of db.apartments) {
             const sources = [
                 { url: apt.icalBooking, name: 'booking' },
                 { url: apt.icalSzallas, name: 'szallas' }
             ];
-            for (let sourceDef of sources) {
+
+            for (const sourceDef of sources) {
                 const url = sourceDef.url;
                 if (!url || !url.startsWith('http')) continue;
+
                 try {
                     const response = await axios.get(url, { timeout: 8000 });
                     const data = ical.parseICS(response.data);
-                    for (let k in data) {
-                        const event = data[k];
-                        if (event.type === 'VEVENT') {
-                            const start = new Date(event.start).toISOString().split('T')[0];
-                            const end = new Date(event.end).toISOString().split('T')[0];
-                            const uid = event.uid || `${apt.id}-${start}`;
-                            const exists = db.bookings.find(b => b.icalId === uid);
-                            if (!exists) {
-                                db.bookings.push({
-                                    id: Date.now() + Math.random(),
-                                    icalId: uid,
-                                    aptId: apt.id,
-                                    aptName: apt.name,
-                                    guestName: event.summary || 'iCal Vendég',
-                                    checkIn: start,
-                                    checkOut: end,
-                                    source: sourceDef.name,
-                                    status: 'confirmed'
-                                });
+
+                    const incomingEvents = [];
+
+                    for (const key in data) {
+                        const event = data[key];
+                        if (event.type !== 'VEVENT') continue;
+                        if (!event.start || !event.end) continue;
+
+                        const start = formatLocalDate(event.start);
+                        const end = formatLocalDate(event.end);
+
+                        const stableId = event.uid
+                            ? `${apt.id}__${sourceDef.name}__${event.uid}`
+                            : `${apt.id}__${sourceDef.name}__${start}__${end}__${(event.summary || 'guest').trim()}`;
+
+                        incomingEvents.push({
+                            id: stableId,
+                            icalId: stableId,
+                            aptId: apt.id,
+                            aptName: apt.name,
+                            guestName: event.summary || 'iCal Vendég',
+                            checkIn: start,
+                            checkOut: end,
+                            source: sourceDef.name,
+                            status: 'confirmed',
+                            importedFrom: sourceDef.name,
+                            syncedAt: new Date().toISOString()
+                        });
+                    }
+
+                    const existingSourceBookings = db.bookings.filter(b =>
+                        String(b.aptId) === String(apt.id) &&
+                        b.source === sourceDef.name &&
+                        b.icalId
+                    );
+
+                    const incomingIds = new Set(incomingEvents.map(ev => ev.icalId));
+
+                    // 1. Törlés: ami már nincs a feedben
+                    const beforeDeleteCount = db.bookings.length;
+                    db.bookings = db.bookings.filter(b => {
+                        const isThisSourceBooking =
+                            String(b.aptId) === String(apt.id) &&
+                            b.source === sourceDef.name &&
+                            b.icalId;
+
+                        if (!isThisSourceBooking) return true;
+
+                        return incomingIds.has(b.icalId);
+                    });
+
+                    if (db.bookings.length !== beforeDeleteCount) {
+                        hasChange = true;
+                    }
+
+                    // 2. Frissítés vagy hozzáadás
+                    for (const incoming of incomingEvents) {
+                        const existingIndex = db.bookings.findIndex(b => b.icalId === incoming.icalId);
+
+                        if (existingIndex === -1) {
+                            db.bookings.push({
+                                ...incoming,
+                                id: `ical_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+                            });
+                            hasChange = true;
+                        } else {
+                            const existing = db.bookings[existingIndex];
+
+                            const changed =
+                                existing.guestName !== incoming.guestName ||
+                                existing.checkIn !== incoming.checkIn ||
+                                existing.checkOut !== incoming.checkOut ||
+                                existing.aptName !== incoming.aptName ||
+                                existing.status !== incoming.status;
+
+                            if (changed) {
+                                db.bookings[existingIndex] = {
+                                    ...existing,
+                                    ...incoming,
+                                    id: existing.id
+                                };
                                 hasChange = true;
+                            } else {
+                                db.bookings[existingIndex].syncedAt = new Date().toISOString();
                             }
                         }
                     }
-                } catch (err) { console.error("Sync hiba:", sourceDef.name, url); }
+
+                } catch (err) {
+                    console.error("Sync hiba:", sourceDef.name, url, err.message);
+                }
             }
         }
+
         if (hasChange) {
             await saveDbContent(db);
         }
+
         res.json({ success: true, changed: hasChange });
-    } catch (e) { res.status(500).json({ error: e.message }); }
+    } catch (e) {
+        console.error("Általános sync hiba:", e);
+        res.status(500).json({ error: e.message });
+    }
 });
 
 // Szükséged lesz a 'node-fetch' csomagra: npm install node-fetch@2
