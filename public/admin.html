@@ -750,12 +750,18 @@ async function saveAdminChanges() {
         if (bookingTableBody && db.bookings) {
             bookingTableBody.innerHTML = db.bookings.map(b => {
                 const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
+                const isIcalBooking = !!b.icalId;
                 const price = Number(b.totalPrice || b.total || 0);
+                const priceHtml = isIcalBooking
+                    ? `<div style="font-size:0.75rem; color:#999; font-weight:700;">Külső foglalás</div>`
+                    : `<div style="font-size:0.75rem; color:var(--accent); font-weight:700;">${price.toLocaleString()} Ft</div>`;
                 const source = (b.source || 'web').toLowerCase();
                 return `<tr>
                     <td><strong>${apt ? apt.name : 'Ismeretlen'}</strong></td>
-                    <td><div style="font-weight:600;">${b.guestName || 'Vendég'}</div><div style="font-size:0.75rem; color:var(--accent); font-weight:700;">${price.toLocaleString()} Ft</div></td>
-                    <td><div style="font-size: 0.85rem;">${b.checkIn || ''} &rarr; ${b.checkOut || b.end || ''}</div></td>
+                    <td>
+                        <div style="font-weight:600;">${b.guestName || 'Vendég'}</div>
+                        ${priceHtml}
+                    </td><td><div style="font-size: 0.85rem;">${b.checkIn || ''} &rarr; ${b.checkOut || b.end || ''}</div></td>
                     <td><span class="badge badge-${source}">${source.toUpperCase()}</span></td>
                     <td style="text-align:center;"><button class="btn-outline btn-del" onclick="deleteItem('bookings', '${b.id}')">✕</button></td>
                 </tr>`;

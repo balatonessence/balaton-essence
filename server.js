@@ -803,8 +803,21 @@ app.post('/api/sync', async (req, res) => {
 
                         if (!start || !end) continue;
 
-                        const summary = (event.summary || 'iCal Vendég').trim();
+                        const rawSummary = (event.summary || '').trim();
+                        const rawSummaryLower = rawSummary.toLowerCase();
 
+                        let bookingType = 'reservation';
+                        let displayName = 'Külső foglalás';
+
+                        if (rawSummaryLower.includes('not available')) {
+                            bookingType = 'blocked';
+                            displayName = 'Zárolt időszak';
+                        } else if (rawSummaryLower.includes('reserved')) {
+                            bookingType = 'reservation';
+                            displayName = 'Külső foglalás';
+                        } else if (rawSummary) {
+                            displayName = rawSummary;
+                        }
                         // stabil azonosító: apartman + source + uid
                         // ha nincs uid, fallback a dátum + summary
                         const stableExternalId = event.uid
@@ -815,7 +828,9 @@ app.post('/api/sync', async (req, res) => {
                             icalId: stableExternalId,
                             aptId: apt.id,
                             aptName: apt.name,
-                            guestName: summary,
+                            guestName: displayName,
+                            type: bookingType,
+                            rawSummary: rawSummary,
                             checkIn: start,
                             checkOut: end,
                             source: sourceDef.name,
