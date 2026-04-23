@@ -701,6 +701,75 @@ function formatLocalDate(dateInput) {
     return `${year}-${month}-${day}`;
 }
 
+function pad2(num) {
+    return String(num).padStart(2, '0');
+}
+
+function normalizeIcalDate(input) {
+    if (!input) return null;
+
+    // 1) Már Date objektum
+    if (input instanceof Date) {
+        if (isNaN(input.getTime())) return null;
+        return `${input.getFullYear()}-${pad2(input.getMonth() + 1)}-${pad2(input.getDate())}`;
+    }
+
+    // 2) Timestamp
+    if (typeof input === 'number') {
+        const d = new Date(input);
+        if (isNaN(d.getTime())) return null;
+        return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+    }
+
+    // 3) String
+    if (typeof input === 'string') {
+        const trimmed = input.trim();
+
+        // YYYY-MM-DD
+        if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+            return trimmed;
+        }
+
+        // YYYYMMDD
+        if (/^\d{8}$/.test(trimmed)) {
+            return `${trimmed.slice(0, 4)}-${trimmed.slice(4, 6)}-${trimmed.slice(6, 8)}`;
+        }
+
+        // ISO vagy bármi parse-olható
+        const d = new Date(trimmed);
+        if (!isNaN(d.getTime())) {
+            return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+        }
+
+        return null;
+    }
+
+    // 4) Luxon / custom date wrapper
+    if (typeof input === 'object') {
+        if (typeof input.toJSDate === 'function') {
+            const d = input.toJSDate();
+            if (d instanceof Date && !isNaN(d.getTime())) {
+                return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+            }
+        }
+
+        // gyakori beágyazott mezők
+        if (input.val) return normalizeIcalDate(input.val);
+        if (input.date) return normalizeIcalDate(input.date);
+
+        // year/month/day szerkezet
+        if (
+            typeof input.year === 'number' &&
+            typeof input.month === 'number' &&
+            typeof input.day === 'number'
+        ) {
+            return `${input.year}-${pad2(input.month)}-${pad2(input.day)}`;
+        }
+    }
+
+    return null;
+}   
+
 app.post('/api/sync', async (req, res) => {
     try {
         const db = await getDbContent();
@@ -720,34 +789,33 @@ app.post('/api/sync', async (req, res) => {
                 if (!url || !url.startsWith('http')) continue;
 
                 try {
-                    const response = await axios.get(url, { timeout: 8000 });
-                    const data = ical.parseICS(response.data);
+                    const response = await axios.get(url, { timeout: 10000 });
+                    const parsed = ical.parseICS(response.data);
 
                     const incomingEvents = [];
 
-                    for (const key in data) {
-                        const event = data[key];
-                        if (event.type !== 'VEVENT') continue;
-                        if (!event.start || !event.end) continue;
+                    for (const key in parsed) {
+                        const event = parsed[key];
+                        if (!event || event.type !== 'VEVENT') continue;
 
-                        const start = formatLocalDate(event.start);
-                        const end = formatLocalDate(event.end);
+                        const start = normalizeIcalDate(event.start);
+                        const end = normalizeIcalDate(event.end);
 
-                        if (!start || !end) {
-                            console.warn("Hibás iCal event kihagyva:", event);
-                            continue;
-                        }
+                        if (!start || !end) continue;
 
-                        const stableId = event.uid
+                        const summary = (event.summary || 'iCal Vendég').trim();
+
+                        // stabil azonosító: apartman + source + uid
+                        // ha nincs uid, fallback a dátum + summary
+                        const stableExternalId = event.uid
                             ? `${apt.id}__${sourceDef.name}__${event.uid}`
-                            : `${apt.id}__${sourceDef.name}__${start}__${end}__${(event.summary || 'guest').trim()}`;
+                            : `${apt.id}__${sourceDef.name}__${start}__${end}__${summary}`;
 
                         incomingEvents.push({
-                            id: stableId,
-                            icalId: stableId,
+                            icalId: stableExternalId,
                             aptId: apt.id,
                             aptName: apt.name,
-                            guestName: event.summary || 'iCal Vendég',
+                            guestName: summary,
                             checkIn: start,
                             checkOut: end,
                             source: sourceDef.name,
@@ -757,39 +825,41 @@ app.post('/api/sync', async (req, res) => {
                         });
                     }
 
-                    const existingSourceBookings = db.bookings.filter(b =>
+                    // meglévő iCal foglalások ennél az apartmannál és forrásnál
+                    const existingForSource = db.bookings.filter(b =>
                         String(b.aptId) === String(apt.id) &&
                         b.source === sourceDef.name &&
-                        b.icalId
+                        !!b.icalId
                     );
 
                     const incomingIds = new Set(incomingEvents.map(ev => ev.icalId));
 
-                    // 1. Törlés: ami már nincs a feedben
-                    const beforeDeleteCount = db.bookings.length;
+                    // 1. ami eltűnt a feedből, azt töröljük
+                    const beforeCount = db.bookings.length;
                     db.bookings = db.bookings.filter(b => {
-                        const isThisSourceBooking =
+                        const isMatchingImportedBooking =
                             String(b.aptId) === String(apt.id) &&
                             b.source === sourceDef.name &&
-                            b.icalId;
+                            !!b.icalId;
 
-                        if (!isThisSourceBooking) return true;
-
+                        if (!isMatchingImportedBooking) return true;
                         return incomingIds.has(b.icalId);
                     });
 
-                    if (db.bookings.length !== beforeDeleteCount) {
+                    if (db.bookings.length !== beforeCount) {
                         hasChange = true;
                     }
 
-                    // 2. Frissítés vagy hozzáadás
+                    // 2. hozzáadás / frissítés
                     for (const incoming of incomingEvents) {
-                        const existingIndex = db.bookings.findIndex(b => b.icalId === incoming.icalId);
+                        const existingIndex = db.bookings.findIndex(
+                            b => b.icalId === incoming.icalId
+                        );
 
                         if (existingIndex === -1) {
                             db.bookings.push({
-                                ...incoming,
-                                id: `ical_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+                                id: `ical_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+                                ...incoming
                             });
                             hasChange = true;
                         } else {
@@ -814,9 +884,8 @@ app.post('/api/sync', async (req, res) => {
                             }
                         }
                     }
-
                 } catch (err) {
-                    console.error("Sync hiba:", sourceDef.name, url, err.message);
+                    console.error(`Sync hiba [${sourceDef.name}] ${apt.name}:`, err.message);
                 }
             }
         }
@@ -825,7 +894,7 @@ app.post('/api/sync', async (req, res) => {
             await saveDbContent(db);
         }
 
-        res.json({ success: true, changed: hasChange });
+        res.json({ success: true, changed: hasChange, bookingsCount: db.bookings.length });
     } catch (e) {
         console.error("Általános sync hiba:", e);
         res.status(500).json({ error: e.message });
