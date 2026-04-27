@@ -422,7 +422,7 @@
     </div>
 </div>
 
-<section id="reviews-section" class="pillars-section" style="background: var(--bg);">
+<section id="reviews" class="pillars-section" style="background: var(--bg);">
     <div class="section-header">
         <h2>Das sagen unsere Gäste</h2>
     </div>
@@ -524,78 +524,42 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchWeather();
 });
 
-function renderReviews(targetLang = 'hu') {
-    const container = document.getElementById('reviews-grid');
-    if (!container || !db.reviews) return;
-
-    const reviews = db.reviews
-        .filter(r => r.isVisible !== false)
-        .slice(0, 6);
-
-    if (reviews.length === 0) {
-        const section = document.getElementById('reviews-section');
-        if (section) section.style.display = 'none';
-        return;
-    }
-
-    container.innerHTML = reviews.map(r => `
-        <div class="review-card">
-            <div class="review-stars">${'★'.repeat(Number(r.rating || 5))}</div>
-
-            <p class="review-text" id="review-text-${r.id}" data-original="${encodeURIComponent(r.text || '')}">
-                “${r.text || ''}”
-            </p>
-
-            <button class="review-translate-btn" onclick="translateReview('${r.id}', '${targetLang}', this)">
-                Übersetzung ins Deutsche
-            </button>
-
-            <div class="review-name">— ${r.name}</div>
-        </div>
-    `).join('');
+function getLang() {
+    if (location.pathname.startsWith('/en')) return 'en';
+    if (location.pathname.startsWith('/de')) return 'de';
+    return 'hu';
 }
 
-async function translateReview(id, targetLang, btn) {
-    const textEl = document.getElementById(`review-text-${id}`);
-    if (!textEl || !btn) return;
+async function renderReviews() {
+    const res = await fetch('/api/reviews');
+    const reviews = await res.json();
 
-    const original = decodeURIComponent(textEl.dataset.original || "");
+    const container = document.getElementById('reviews');
+    const lang = getLang();
 
-    if (btn.dataset.mode === "translated") {
-        textEl.innerText = `“${original}”`;
-        btn.innerText = "Übersetzung ins Deutsche";
-        btn.dataset.mode = "original";
-        return;
-    }
+    container.innerHTML = "";
 
-    btn.disabled = true;
-    btn.innerText = "Fordítás...";
+    reviews.forEach(r => {
+        if (r.isVisible === false) return;
 
-    try {
-        const res = await fetch(`/api/translate-review/${id}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ targetLang })
-        });
+        let text = "";
 
-        const data = await res.json();
+        if (lang === 'hu') text = r.text_hu || r.text_en || r.text_de;
+        if (lang === 'en') text = r.text_en || r.text_hu || r.text_de;
+        if (lang === 'de') text = r.text_de || r.text_en || r.text_hu;
 
-        if (!res.ok || !data.translated) {
-            throw new Error(data.error || "Fordítási hiba");
-        }
-
-        textEl.innerText = `“${data.translated}”`;
-        btn.innerText = "Originaltext";
-        btn.dataset.mode = "translated";
-
-    } catch (e) {
-        console.error(e);
-        alert("A fordítás nem sikerült.");
-        btn.innerText = "Auf Deutsch übersetzen";
-    } finally {
-        btn.disabled = false;
-    }
+        container.innerHTML += `
+            <div style="margin-bottom:2rem;">
+                <div style="color:#5a6b5a;">${'★'.repeat(r.rating)}</div>
+                <p style="font-style: italic;">"${text}"</p>
+                <small>${r.name}</small>
+            </div>
+        `;
+    });
 }
+
+renderReviews();
+
 
 function renderIndexApartments() {
     const grid = document.getElementById('apartment-grid');

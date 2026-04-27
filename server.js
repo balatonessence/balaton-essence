@@ -1024,20 +1024,6 @@ app.post('/api/delete-todo', async (req, res) => {
 
 // --- VENDÉGVÉLEMÉNYEK KEZELÉSE ---
 
-function extractOpenAIText(data) {
-    if (data.output_text) return data.output_text;
-
-    if (Array.isArray(data.output)) {
-        return data.output
-            .flatMap(item => item.content || [])
-            .map(content => content.text || "")
-            .join("")
-            .trim();
-    }
-
-    return "";
-}
-
 app.get('/api/reviews', async (req, res) => {
     try {
         const db = await getDbContent();
@@ -1056,15 +1042,14 @@ app.post('/api/save-review', async (req, res) => {
         const data = req.body;
         const existing = db.reviews.find(r => String(r.id) === String(data.id));
 
-        const textChanged = existing && existing.text !== data.text;
-
         const review = {
             id: data.id || `rev_${Date.now()}`,
             name: data.name || "",
             rating: Math.min(5, Math.max(1, Number(data.rating || 5))),
-            text: data.text || "",
+            text_hu: data.text_hu || "",
+            text_en: data.text_en || "",
+            text_de: data.text_de || "",
             isVisible: data.isVisible !== false,
-            translations: textChanged ? {} : (existing?.translations || {}),
             createdAt: existing?.createdAt || new Date().toISOString(),
             updatedAt: new Date().toISOString()
         };
@@ -1097,90 +1082,6 @@ app.delete('/api/reviews/:id', async (req, res) => {
     } catch (e) {
         console.error("Review törlési hiba:", e);
         res.status(500).json({ error: "Szerver hiba" });
-    }
-});
-
-app.post('/api/translate-review/:id', async (req, res) => {
-    try {
-        const { id } = req.params;
-        const { targetLang } = req.body;
-
-        const allowedLangs = ['hu', 'en', 'de'];
-        if (!allowedLangs.includes(targetLang)) {
-            return res.status(400).json({ error: "Érvénytelen nyelv." });
-        }
-
-        const langNames = {
-            hu: "Hungarian",
-            en: "English",
-            de: "German"
-        };
-
-        const db = await getDbContent();
-        if (!db.reviews) db.reviews = [];
-
-        const review = db.reviews.find(r => String(r.id) === String(id));
-        if (!review) {
-            return res.status(404).json({ error: "Vélemény nem található." });
-        }
-
-        if (!review.translations) review.translations = {};
-
-        if (review.translations[targetLang]) {
-            return res.json({
-                success: true,
-                translated: review.translations[targetLang],
-                cached: true
-            });
-        }
-
-        if (!process.env.OPENAI_API_KEY) {
-            return res.status(500).json({ error: "Hiányzó OPENAI_API_KEY." });
-        }
-
-        const response = await axios.post(
-            'https://api.openai.com/v1/responses',
-            {
-                model: process.env.OPENAI_TRANSLATE_MODEL || "gpt-4o-mini",
-                input: [
-                    {
-                        role: "system",
-                        content: "You translate guest reviews naturally and accurately. Preserve the meaning, tone, and hospitality context. Return only the translated review text."
-                    },
-                    {
-                        role: "user",
-                        content: `Translate this guest review to ${langNames[targetLang]}:\n\n${review.text}`
-                    }
-                ]
-            },
-            {
-                headers: {
-                    "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-                    "Content-Type": "application/json"
-                }
-            }
-        );
-
-        const translated = extractOpenAIText(response.data);
-
-        if (!translated) {
-            return res.status(500).json({ error: "Üres fordítás érkezett." });
-        }
-
-        review.translations[targetLang] = translated;
-        review.updatedAt = new Date().toISOString();
-
-        await saveDbContent(db);
-
-        res.json({
-            success: true,
-            translated,
-            cached: false
-        });
-
-    } catch (e) {
-        console.error("Review fordítási hiba:", e.response?.data || e.message);
-        res.status(500).json({ error: "Fordítási hiba." });
     }
 });
 

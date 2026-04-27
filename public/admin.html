@@ -236,7 +236,9 @@
 
         <div class="form-group">
             <label>Vélemény</label>
-            <textarea id="review-text" rows="5" placeholder="A vendég véleménye..."></textarea>
+            <textarea id="review-text-hu" placeholder="Magyar szöveg"></textarea>
+            <textarea id="review-text-en" placeholder="Angol szöveg"></textarea>
+            <textarea id="review-text-de" placeholder="Német szöveg"></textarea>
         </div>
 
         <div class="form-group">
@@ -1011,12 +1013,14 @@ async function saveReview() {
         id: document.getElementById('review-id').value || null,
         name: document.getElementById('review-name').value.trim(),
         rating: Number(document.getElementById('review-rating').value),
-        text: document.getElementById('review-text').value.trim(),
+        text_hu: document.getElementById('review-text-hu').value.trim(),
+        text_en: document.getElementById('review-text-en').value.trim(),
+        text_de: document.getElementById('review-text-de').value.trim(),
         isVisible: document.getElementById('review-visible').checked
     };
 
-    if (!review.name || !review.text) {
-        alert("A név és a vélemény mező kötelező.");
+    if (!review.name || (!review.text_hu && !review.text_en && !review.text_de)) {
+        alert("A név és legalább egy vélemény szöveg kötelező.");
         return;
     }
 
@@ -1043,7 +1047,6 @@ async function saveReview() {
     renderReviews();
     showSaveToast();
 }
-
 async function deleteReview(id) {
     if (!confirm("Biztosan törlöd ezt a véleményt?")) return;
 
