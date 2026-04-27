@@ -70,9 +70,52 @@
         .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2); }
 
         /* HERO */
-        .hero { height: 100vh; display: flex; align-items: center; padding: 0 5vw; background: linear-gradient(to right, rgba(252,251,249, 1) 0%, rgba(252,251,249, 0.85) 45%, rgba(252,251,249, 0) 100%), url('../img/hatter.png') center/cover no-repeat; }
-        .hero-content { max-width: 650px; margin-top: 5rem; }
-        .hero-title { font-family: 'Playfair Display', serif; font-size: clamp(3rem, 5vw, 4.5rem); line-height: 1.1; margin-bottom: 1.5rem; color: var(--text); }
+.hero {
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 0 5vw;
+    position: relative;
+    overflow: hidden;
+    background: none;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url('img/hatter.png') center/cover no-repeat;
+    filter: contrast(1.2) brightness(1.08) saturate(1.8);
+    z-index: 0;
+}
+
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to right,
+        rgba(252,251,249, 1) 0%,
+        rgba(252,251,249, 0.85) 45%,
+        rgba(252,251,249, 0) 100%
+    );
+    z-index: 1;
+}
+
+.hero-content {
+    max-width: 650px;
+    margin-top: 5rem;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+}
 
         /* PILLARS */
         .pillars-section { padding: 8rem 5vw; background: var(--bg); max-width: 1600px; margin: 0 auto; }
