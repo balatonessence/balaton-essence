@@ -235,10 +235,18 @@
         </div>
 
         <div class="form-group">
-            <label>Vélemény</label>
-            <textarea id="review-text-hu" placeholder="Magyar szöveg"></textarea>
-            <textarea id="review-text-en" placeholder="Angol szöveg"></textarea>
-            <textarea id="review-text-de" placeholder="Német szöveg"></textarea>
+            <label>Magyar vélemény</label>
+            <textarea id="review-text-hu" rows="4" placeholder="Magyar szöveg"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Angol vélemény</label>
+            <textarea id="review-text-en" rows="4" placeholder="English text"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Német vélemény</label>
+            <textarea id="review-text-de" rows="4" placeholder="Deutscher Text"></textarea>
         </div>
 
         <div class="form-group">
@@ -988,7 +996,9 @@ function openReviewModal(id = null) {
         document.getElementById('review-id').value = '';
         document.getElementById('review-name').value = '';
         document.getElementById('review-rating').value = '5';
-        document.getElementById('review-text').value = '';
+        document.getElementById('review-text-hu').value = '';
+        document.getElementById('review-text-en').value = '';
+        document.getElementById('review-text-de').value = '';
         document.getElementById('review-visible').checked = true;
     } else {
         const r = (db.reviews || []).find(item => String(item.id) === String(id));
@@ -997,7 +1007,11 @@ function openReviewModal(id = null) {
         document.getElementById('review-id').value = r.id;
         document.getElementById('review-name').value = r.name || '';
         document.getElementById('review-rating').value = String(r.rating || 5);
-        document.getElementById('review-text').value = r.text || '';
+
+        document.getElementById('review-text-hu').value = r.text_hu || r.text || '';
+        document.getElementById('review-text-en').value = r.text_en || '';
+        document.getElementById('review-text-de').value = r.text_de || '';
+
         document.getElementById('review-visible').checked = r.isVisible !== false;
     }
 
