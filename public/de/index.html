@@ -446,6 +446,79 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchWeather();
 });
 
+function renderReviews(targetLang = 'hu') {
+    const container = document.getElementById('reviews-grid');
+    if (!container || !db.reviews) return;
+
+    const reviews = db.reviews
+        .filter(r => r.isVisible !== false)
+        .slice(0, 6);
+
+    if (reviews.length === 0) {
+        const section = document.getElementById('reviews-section');
+        if (section) section.style.display = 'none';
+        return;
+    }
+
+    container.innerHTML = reviews.map(r => `
+        <div class="review-card">
+            <div class="review-stars">${'★'.repeat(Number(r.rating || 5))}</div>
+
+            <p class="review-text" id="review-text-${r.id}" data-original="${encodeURIComponent(r.text || '')}">
+                “${r.text || ''}”
+            </p>
+
+            <button class="review-translate-btn" onclick="translateReview('${r.id}', '${targetLang}', this)">
+                Fordítás magyarra
+            </button>
+
+            <div class="review-name">— ${r.name}</div>
+        </div>
+    `).join('');
+}
+
+async function translateReview(id, targetLang, btn) {
+    const textEl = document.getElementById(`review-text-${id}`);
+    if (!textEl || !btn) return;
+
+    const original = decodeURIComponent(textEl.dataset.original || "");
+
+    if (btn.dataset.mode === "translated") {
+        textEl.innerText = `“${original}”`;
+        btn.innerText = "Fordítás magyarra";
+        btn.dataset.mode = "original";
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Fordítás...";
+
+    try {
+        const res = await fetch(`/api/translate-review/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetLang })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.translated) {
+            throw new Error(data.error || "Fordítási hiba");
+        }
+
+        textEl.innerText = `“${data.translated}”`;
+        btn.innerText = "Originaltext";
+        btn.dataset.mode = "translated";
+
+    } catch (e) {
+        console.error(e);
+        alert("A fordítás nem sikerült.");
+        btn.innerText = "Auf Deutsch übersetzen";
+    } finally {
+        btn.disabled = false;
+    }
+}
+
 function renderIndexApartments() {
     const grid = document.getElementById('apartment-grid');
     const loaderContainer = document.getElementById('apt-list-container');
@@ -493,6 +566,7 @@ function renderIndexApartments() {
                 <div class="pillar-img" style="background-image: url('${apt.coverImage || ''}');"></div>
             </a>`;
     });
+    renderReviews('de');
 }
 
 </script>

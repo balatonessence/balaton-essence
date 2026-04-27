@@ -184,6 +184,14 @@
         <div id="apt-list-container"></div>
     </div>
 
+    <div class="section">
+    <div class="section-header">
+        <h2>Vendégvélemények</h2>
+        <button class="btn-cta" onclick="openReviewModal()">+ Új vélemény</button>
+    </div>
+    <div id="reviews-list-container"></div>
+</div>
+
         <div class="admin-card" style="background: white; border-radius: 12px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); padding: 20px; margin-top: 30px; border-left: 5px solid #298538; position: relative;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <h2 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: #1a1a1a;">Partnerek & Tulajdonosok</h2>
@@ -203,6 +211,47 @@
             </table>
         </div>
 </main>
+
+<div id="review-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:3000; align-items:center; justify-content:center;">
+    <div style="background:white; padding:30px; border-radius:12px; width:90%; max-width:500px;">
+        <h2 style="font-family:'Playfair Display'; margin-bottom:25px;">Vélemény szerkesztése</h2>
+
+        <input type="hidden" id="review-id">
+
+        <div class="form-group">
+            <label>Név</label>
+            <input type="text" id="review-name" placeholder="Pl. Anna">
+        </div>
+
+        <div class="form-group">
+            <label>Csillag</label>
+            <select id="review-rating">
+                <option value="5">★★★★★ - 5</option>
+                <option value="4">★★★★ - 4</option>
+                <option value="3">★★★ - 3</option>
+                <option value="2">★★ - 2</option>
+                <option value="1">★ - 1</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Vélemény</label>
+            <textarea id="review-text" rows="5" placeholder="A vendég véleménye..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label style="display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="review-visible" checked style="width:auto;">
+                Látható a publikus oldalon
+            </label>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button class="btn-cta" style="flex:2;" onclick="saveReview()">Mentés</button>
+            <button class="btn-outline" style="flex:1;" onclick="closeReviewModal()">Mégse</button>
+        </div>
+    </div>
+</div>
 
 <div id="apt-modal" class="modal-overlay">
     <div class="custom-modal">
@@ -853,6 +902,7 @@ async function saveAdminChanges() {
                 `;
             }).join('');
         }
+        renderReviews();
     }
 
     // --- SEGÉDFÜGGVÉNYEK ---
@@ -894,6 +944,135 @@ async function saveAdminChanges() {
         if (res.ok) window.location.reload();
         else alert("Szerver hiba.");
     }
+
+    function renderReviews() {
+    const container = document.getElementById('reviews-list-container');
+    if (!container) return;
+
+    const reviews = db.reviews || [];
+
+    if (reviews.length === 0) {
+        container.innerHTML = `
+            <div style="padding:2rem; text-align:center; color:#999;">
+                Még nincs feltöltött vélemény.
+            </div>
+        `;
+        return;
+    }
+
+    container.innerHTML = reviews.map(r => `
+        <div style="display:grid; grid-template-columns: 1.2fr 0.8fr 3fr 1fr; gap:15px; align-items:center; padding:1rem; border-bottom:1px solid #eee;">
+            <div>
+                <strong>${r.name || 'Névtelen'}</strong>
+            </div>
+            <div style="color:#e0a800;">
+                ${'★'.repeat(Number(r.rating || 5))}${'☆'.repeat(5 - Number(r.rating || 5))}
+            </div>
+            <div style="font-size:0.85rem; color:#666;">
+                ${(r.text || '').slice(0, 160)}${(r.text || '').length > 160 ? '...' : ''}
+            </div>
+            <div style="display:flex; gap:8px; justify-content:flex-end;">
+                <button class="btn-outline" onclick="openReviewModal('${r.id}')">Szerkesztés</button>
+                <button class="btn-outline btn-del" onclick="deleteReview('${r.id}')">✕</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function openReviewModal(id = null) {
+    const modal = document.getElementById('review-modal');
+
+    if (!id) {
+        document.getElementById('review-id').value = '';
+        document.getElementById('review-name').value = '';
+        document.getElementById('review-rating').value = '5';
+        document.getElementById('review-text').value = '';
+        document.getElementById('review-visible').checked = true;
+    } else {
+        const r = (db.reviews || []).find(item => String(item.id) === String(id));
+        if (!r) return;
+
+        document.getElementById('review-id').value = r.id;
+        document.getElementById('review-name').value = r.name || '';
+        document.getElementById('review-rating').value = String(r.rating || 5);
+        document.getElementById('review-text').value = r.text || '';
+        document.getElementById('review-visible').checked = r.isVisible !== false;
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeReviewModal() {
+    document.getElementById('review-modal').style.display = 'none';
+}
+
+async function saveReview() {
+    const review = {
+        id: document.getElementById('review-id').value || null,
+        name: document.getElementById('review-name').value.trim(),
+        rating: Number(document.getElementById('review-rating').value),
+        text: document.getElementById('review-text').value.trim(),
+        isVisible: document.getElementById('review-visible').checked
+    };
+
+    if (!review.name || !review.text) {
+        alert("A név és a vélemény mező kötelező.");
+        return;
+    }
+
+    const res = await fetch('/api/save-review', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(review)
+    });
+
+    if (!res.ok) {
+        alert("Nem sikerült menteni a véleményt.");
+        return;
+    }
+
+    const saved = await res.json();
+
+    if (!db.reviews) db.reviews = [];
+
+    const idx = db.reviews.findIndex(r => String(r.id) === String(saved.review.id));
+    if (idx === -1) db.reviews.push(saved.review);
+    else db.reviews[idx] = saved.review;
+
+    closeReviewModal();
+    renderReviews();
+    showSaveToast();
+}
+
+async function deleteReview(id) {
+    if (!confirm("Biztosan törlöd ezt a véleményt?")) return;
+
+    const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+
+    if (!res.ok) {
+        alert("Nem sikerült törölni.");
+        return;
+    }
+
+    db.reviews = (db.reviews || []).filter(r => String(r.id) !== String(id));
+    renderReviews();
+    showSaveToast();
+}
+
+async function deleteReview(id) {
+    if (!confirm("Biztosan törlöd ezt a véleményt?")) return;
+
+    const res = await fetch(`/api/reviews/${id}`, { method: 'DELETE' });
+
+    if (!res.ok) {
+        alert("Nem sikerült törölni.");
+        return;
+    }
+
+    db.reviews = (db.reviews || []).filter(r => String(r.id) !== String(id));
+    renderReviews();
+    showSaveToast();
+}   
 
     async function deleteApt(id) { if(confirm("Törlöd?")) { db.apartments = db.apartments.filter(a => String(a.id) !== String(id)); await saveDb(); } }
     async function deleteOwner(id) { if(confirm("Törlöd?")) { db.owners = db.owners.filter(o => String(o.id || o._id) !== String(id)); await saveDb(); } }

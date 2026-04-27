@@ -290,6 +290,49 @@
             transform: translateY(-2px);
         }
 
+        .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+
+.review-card {
+    background: white;
+    border: 1px solid var(--border);
+    padding: 2rem;
+    box-shadow: 0 15px 40px var(--shadow);
+}
+
+.review-stars {
+    color: #d8a944;
+    letter-spacing: 2px;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.review-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    line-height: 1.6;
+    font-style: italic;
+    color: var(--text);
+    margin-bottom: 1.5rem;
+}
+
+.review-name {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-light);
+    font-weight: 700;
+}
+
+@media (max-width: 900px) {
+    .reviews-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
@@ -384,6 +427,13 @@
         <div class="loader-spinner" style="width: 40px; height: 40px; border: 3px solid #eee; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></div>
     </div>
 </div>
+
+<section id="reviews-section" class="pillars-section" style="background: var(--bg);">
+    <div class="section-header">
+        <h2>Vendégeink mondták</h2>
+    </div>
+    <div id="reviews-grid" class="reviews-grid"></div>
+</section>
 
 <section id="contact" style="background: white; padding: 5rem 5vw; border-top: 1px solid var(--border); margin-top: 5rem;">
     <div style="max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4rem;">
@@ -498,6 +548,79 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchWeather();
 });
 
+function renderReviews(targetLang = 'hu') {
+    const container = document.getElementById('reviews-grid');
+    if (!container || !db.reviews) return;
+
+    const reviews = db.reviews
+        .filter(r => r.isVisible !== false)
+        .slice(0, 6);
+
+    if (reviews.length === 0) {
+        const section = document.getElementById('reviews-section');
+        if (section) section.style.display = 'none';
+        return;
+    }
+
+    container.innerHTML = reviews.map(r => `
+        <div class="review-card">
+            <div class="review-stars">${'★'.repeat(Number(r.rating || 5))}</div>
+
+            <p class="review-text" id="review-text-${r.id}" data-original="${encodeURIComponent(r.text || '')}">
+                “${r.text || ''}”
+            </p>
+
+            <button class="review-translate-btn" onclick="translateReview('${r.id}', '${targetLang}', this)">
+                Fordítás magyarra
+            </button>
+
+            <div class="review-name">— ${r.name}</div>
+        </div>
+    `).join('');
+}
+
+async function translateReview(id, targetLang, btn) {
+    const textEl = document.getElementById(`review-text-${id}`);
+    if (!textEl || !btn) return;
+
+    const original = decodeURIComponent(textEl.dataset.original || "");
+
+    if (btn.dataset.mode === "translated") {
+        textEl.innerText = `“${original}”`;
+        btn.innerText = "Fordítás magyarra";
+        btn.dataset.mode = "original";
+        return;
+    }
+
+    btn.disabled = true;
+    btn.innerText = "Fordítás...";
+
+    try {
+        const res = await fetch(`/api/translate-review/${id}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ targetLang })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.translated) {
+            throw new Error(data.error || "Fordítási hiba");
+        }
+
+        textEl.innerText = `“${data.translated}”`;
+        btn.innerText = "Eredeti szöveg";
+        btn.dataset.mode = "translated";
+
+    } catch (e) {
+        console.error(e);
+        alert("A fordítás nem sikerült.");
+        btn.innerText = "Fordítás magyarra";
+    } finally {
+        btn.disabled = false;
+    }
+}
+
 function renderIndexApartments() {
     const grid = document.getElementById('apartment-grid');
     const loaderContainer = document.getElementById('apt-list-container');
@@ -543,7 +666,10 @@ function renderIndexApartments() {
                 <div class="pillar-img" style="background-image: url('${apt.coverImage || ''}');"></div>
             </a>`;
     });
+    renderReviews('hu');
 }
+
+
 </script>
 </body>
 </html>
