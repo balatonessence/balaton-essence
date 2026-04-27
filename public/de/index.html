@@ -547,7 +547,7 @@ function renderReviews(targetLang = 'hu') {
             </p>
 
             <button class="review-translate-btn" onclick="translateReview('${r.id}', '${targetLang}', this)">
-                Fordítás magyarra
+                Übersetzung ins Deutsche
             </button>
 
             <div class="review-name">— ${r.name}</div>
@@ -563,7 +563,7 @@ async function translateReview(id, targetLang, btn) {
 
     if (btn.dataset.mode === "translated") {
         textEl.innerText = `“${original}”`;
-        btn.innerText = "Fordítás magyarra";
+        btn.innerText = "Übersetzung ins Deutsche";
         btn.dataset.mode = "original";
         return;
     }
