@@ -276,6 +276,23 @@
     const container = document.getElementById('todoContainer');
     const addForm = document.getElementById('addForm');
     
+    function getAdminToken() {
+    let token = sessionStorage.getItem('ADMIN_TOKEN');
+
+        if (!token) {
+            token = prompt('Admin token:');
+            if (token) sessionStorage.setItem('ADMIN_TOKEN', token);
+        }
+
+        return token || '';
+    }
+
+    function getJsonHeaders() {
+        return {
+            'Content-Type': 'application/json',
+            'x-admin-token': getAdminToken()
+        };
+    }
     // Popup változók
     const modal = document.getElementById('customModal');
     const confirmBtn = document.getElementById('confirmDeleteBtn');
@@ -284,7 +301,11 @@
     // Lista betöltése
     async function fetchTodos() {
         try {
-            const res = await fetch('/api/get-todos');
+            const res = await fetch('/api/get-todos', {
+                headers: {
+                    'x-admin-token': getAdminToken()
+                }
+            });
             if (!res.ok) throw new Error('Szerver hiba');
             const todos = await res.json();
             renderTodos(todos);
@@ -325,11 +346,15 @@
         btn.disabled = true;
 
         try {
-            await fetch('/api/add-todo', {
+            const res = await fetch('/api/add-todo', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getJsonHeaders(),
                 body: JSON.stringify({ text })
             });
+
+            if (!res.ok) {
+                throw new Error('Nincs jogosultság vagy szerverhiba');
+            }
             addForm.reset();
             fetchTodos();
         } catch (err) {
@@ -366,11 +391,15 @@
         confirmBtn.textContent = 'Törlés...';
 
         try {
-            await fetch('/api/delete-todo', {
+            const res = await fetch('/api/delete-todo', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: getJsonHeaders(),
                 body: JSON.stringify({ id: todoIdToDelete })
             });
+
+            if (!res.ok) {
+                throw new Error('Nincs jogosultság vagy szerverhiba');
+            }
             fetchTodos();
             closeModal();
         } catch (err) {
