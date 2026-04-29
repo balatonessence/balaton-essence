@@ -601,12 +601,33 @@
             if (el) el.innerText = text;
         };
 
-        setSafeText('apt-name', currentApt.name || 'Unknown Apartment');
-        setSafeText('apt-loc', currentApt.location || '');
+        setSafeText(
+            'apt-name',
+            currentApt.name_en ||
+            currentApt.nameEn ||
+            currentApt.nameEN ||
+            currentApt.name ||
+            'Unknown Apartment'
+        );
+        setSafeText(
+            'apt-loc',
+            currentApt.location_en ||
+            currentApt.locationEn ||
+            currentApt.locationEN ||
+            currentApt.location ||
+            ''
+        );
 
         const descEl = document.getElementById('apt-desc');
         if (descEl) {
-            descEl.innerText = currentApt.description_en || currentApt.description || 'No description available.';
+            descEl.innerText =
+                currentApt.description_en ||
+                currentApt.descriptionEn ||
+                currentApt.desc_en ||
+                currentApt.descEn ||
+                currentApt.descriptionEN ||
+                currentApt.description ||
+                'No description available.';
         }
 
         const priceTag = document.getElementById('apt-price');
