@@ -1207,58 +1207,132 @@ app.post('/api/sync', requireAdmin, async (req, res) => {
 
 app.get('/api/balaton-water-temp', async (req, res) => {
     try {
-        const response = await axios.get(
-            'https://www.vizugy.hu/vizmeres/balaton/adatok/napi_vizmeres.php',
+        const sources = [
             {
-                timeout: 10000,
-                headers: {
-                    'User-Agent': 'Mozilla/5.0 (Balaton Essence Website)'
+                name: 'balaton-vizhofok-fonyod',
+                url: 'https://balaton-vizhofok.hu/fonyod/',
+                parser: html => {
+                    const clean = String(html)
+                        .replace(/\s+/g, ' ')
+                        .replace(/&nbsp;/g, ' ');
+
+                    const patterns = [
+                        /Fonyód vízhőmérséklet[^0-9]{0,80}(\d{1,2}(?:[,.]\d)?)\s*°C/i,
+                        /vízhőmérséklet ma:[^0-9]{0,80}(\d{1,2}(?:[,.]\d)?)\s*°C/i,
+                        /(\d{1,2}(?:[,.]\d)?)\s*°C/i
+                    ];
+
+                    for (const pattern of patterns) {
+                        const match = clean.match(pattern);
+                        if (!match) continue;
+
+                        const num = Number(String(match[1]).replace(',', '.'));
+                        if (!Number.isNaN(num) && num > 0 && num < 40) {
+                            return num;
+                        }
+                    }
+
+                    return null;
+                }
+            },
+            {
+                name: 'vizugy-fonyod',
+                url: 'https://www.vizugy.hu/?AllomasVOA=164961A3-97AB-11D4-BB62-00508BA24287&mapData=OrasIdosor&mapModule=OpGrafikon',
+                parser: html => {
+                    const clean = String(html)
+                        .replace(/\s+/g, ' ')
+                        .replace(/&nbsp;/g, ' ');
+
+                    // Fonyód vízmérce sor: dátum + vízállás + vízhozam + felszíni vízhő
+                    // Ha a vízhő mező "-", nem fog találatot adni.
+                    const rowPattern = /(\d{4}\.\d{2}\.\d{2}\.\s+\d{2}:\d{2})\s+(-?\d+)\s+[-–]\s+(\d{1,2}(?:[,.]\d)?)/i;
+                    const match = clean.match(rowPattern);
+
+                    if (!match) return null;
+
+                    const num = Number(String(match[3]).replace(',', '.'));
+                    if (!Number.isNaN(num) && num > 0 && num < 40) {
+                        return num;
+                    }
+
+                    return null;
+                }
+            },
+            {
+                name: 'idokep-balaton-fallback',
+                url: 'https://www.idokep.hu/vizho',
+                parser: html => {
+                    const clean = String(html)
+                        .replace(/\s+/g, ' ')
+                        .replace(/&nbsp;/g, ' ');
+
+                    // Fonyód nincs mindig külön, ezért Siófok / Gyenesdiás / Révfülöp fallback lehet.
+                    const patterns = [
+                        /Balaton \(Siófok\):\s*(\d{1,2}(?:[,.]\d)?)\s*°C/i,
+                        /Balaton \(Gyenesdiás\):\s*(\d{1,2}(?:[,.]\d)?)\s*°C/i,
+                        /Balaton \(Révfülöp\):\s*(\d{1,2}(?:[,.]\d)?)\s*°C/i
+                    ];
+
+                    for (const pattern of patterns) {
+                        const match = clean.match(pattern);
+                        if (!match) continue;
+
+                        const num = Number(String(match[1]).replace(',', '.'));
+                        if (!Number.isNaN(num) && num > 0 && num < 40) {
+                            return num;
+                        }
+                    }
+
+                    return null;
                 }
             }
-        );
-
-        const html = String(response.data);
-
-        const patterns = [
-            /(\d{1,2},\d{1})\s*&deg;C/i,
-            /(\d{1,2}\.\d{1})\s*°C/i,
-            /(\d{1,2},\d{1})\s*°C/i,
-            /(\d{1,2})\s*°C/i
         ];
 
-        let found = null;
+        for (const source of sources) {
+            try {
+                const response = await axios.get(source.url, {
+                    timeout: 10000,
+                    headers: {
+                        'User-Agent': 'Mozilla/5.0 (Balaton Essence Website)',
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+                    }
+                });
 
-        for (const pattern of patterns) {
-            const match = html.match(pattern);
-            if (match) {
-                found = match[1].replace(',', '.');
-                break;
+                const value = source.parser(response.data);
+
+                if (value !== null) {
+                    return res.json({
+                        temp: `${Math.round(value)}°C`,
+                        value,
+                        available: true,
+                        location: 'Fonyód',
+                        source: source.name
+                    });
+                }
+            } catch (sourceErr) {
+                console.warn(`Vízhőfok forrás hiba [${source.name}]:`, sourceErr.message);
             }
-        }
-
-        if (!found) {
-            console.warn('Vízhőfok adat nem található a forrás HTML-ben, fallback érték használva.');
-            return res.json({
-                temp: 'N/A',
-                available: false,
-                fallback: true,
-                error: 'Vízhőfok adat jelenleg nem elérhető.'
-            });
         }
 
         return res.json({
-            temp: `${Math.round(parseFloat(found))}°C`,
-            available: true
+            temp: '—',
+            value: null,
+            available: false,
+            location: 'Fonyód',
+            source: null,
+            error: 'Fonyódi vízhőfok adat jelenleg nem elérhető.'
         });
 
     } catch (e) {
         console.error('Vízhőfok hiba:', e.message);
 
         return res.json({
-            temp: 'N/A',
+            temp: '—',
+            value: null,
             available: false,
-            fallback: true,
-            error: 'Vízhőfok adat jelenleg nem elérhető.'
+            location: 'Fonyód',
+            source: null,
+            error: 'Fonyódi vízhőfok adat jelenleg nem elérhető.'
         });
     }
 });
