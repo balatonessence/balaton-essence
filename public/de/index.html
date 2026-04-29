@@ -35,8 +35,26 @@
         }
 
         /* HEADER */
-        header { position: fixed; top: 40px; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(252, 251, 249, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); transition: 0.3s; }
-        
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(252, 251, 249, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            transition: 0.3s;
+        }
+
+        .page-spacer {
+            height: 92px;
+        }  
+              
         .logo-container {
             display: flex;
             flex-direction: column;
@@ -251,11 +269,11 @@
 
         .amp {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1em;
-            font-weight: 500;
-            margin: 0 6px;
-            display: inline-block;
-            transform: translateY(-2px);
+            font-style: normal;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin: 0 4px;
+            vertical-align: 0.02em;
         }
 
         .reviews-grid {
@@ -339,15 +357,15 @@
 </head>
 <body>
 
-<header style="position: fixed; top: 38px; left: 0; width: 100%; padding: 1rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);">
-    
+<header>
+
     <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1;">
         <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
         <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
     </a>
 
     <nav class="nav-links" style="display: flex; gap: 2rem;">
-        <a href="#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Apartments</a>
+        <a href="#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Unterkünfte</a>
         <a href="rolunk.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Über uns</a>
         <div class="nav-weather-pill" id="weather-widget" style="display: none;">
             <span id="weather-loader" class="weather-loader" style="display: none;"></span>
@@ -369,7 +387,7 @@
     </nav>
 </header>
 
-<div style="height: 110px;"></div>
+<div class="page-spacer"></div>
 
 <section class="hero">
     <div class="hero-content">

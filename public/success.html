@@ -127,7 +127,8 @@
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
-    const lang = urlParams.get('lang') || 'hu';
+    const rawLang = urlParams.get('lang') || 'hu';
+    const lang = ['hu', 'en', 'de'].includes(rawLang) ? rawLang : 'hu';
 
     const translations = {
         hu: {
@@ -193,18 +194,15 @@
                 `/api/finalize-booking?session_id=${encodeURIComponent(sessionId)}`
             );
 
-            if (!response.ok) {
-                showError();
+            const result = await response.json().catch(() => null);
+
+            if (!response.ok || !result || result.success !== true) {
+                console.error('Finalize booking failed:', result);
+                showError(result?.error);
                 return;
             }
 
-            const result = await response.json().catch(() => null);
-
-            if (result && result.success === true) {
-                showSuccess();
-            } else {
-                showError();
-            }
+            showSuccess();
         } catch (err) {
             console.error('Finalize booking error:', err);
             showError();
@@ -220,13 +218,15 @@
         document.getElementById('res-desc').innerText = t.succDesc;
     }
 
-    function showError() {
+    function showError(errorText = null) {
         document.getElementById('processing-ui').classList.add('hidden');
         document.getElementById('success-ui').classList.add('hidden');
         document.getElementById('error-ui').classList.remove('hidden');
 
         document.getElementById('err-title').innerText = t.errTitle;
-        document.getElementById('err-desc').innerText = t.errDesc;
+        document.getElementById('err-desc').innerText = errorText
+            ? `${t.errDesc} (${errorText})`
+            : t.errDesc;
     }
 
     finalize();

@@ -254,13 +254,13 @@
             gap: 4px;
         }
 
-        .amp {
+        .plain-amp {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1em;
-            font-weight: 500;
-            margin: 0 6px;
-            display: inline-block;
-            transform: translateY(-2px);
+            font-style: normal;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin: 0 4px;
+            vertical-align: 0.02em;
         }
 
         .reviews-grid {
@@ -322,6 +322,10 @@
             font-weight: 700;
         }
 
+        .page-spacer {
+            height: 92px;
+        }
+
         @media (max-width: 900px) {
             .reviews-grid {
                 grid-template-columns: 1fr;
@@ -344,8 +348,7 @@
 </head>
 <body>
 
-<header style="position: fixed; top: 38px; left: 0; width: 100%; padding: 1rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border);">
-    
+<header>    
     <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1;">
         <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
         <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
@@ -374,7 +377,7 @@
     </nav>
 </header>
 
-<div style="height: 110px;"></div>
+<div class="page-spacer"></div>
 
 <section class="hero">
     <div class="hero-content">
@@ -393,8 +396,9 @@
     <div class="pillars-grid">
         <div class="pillar-card">
             <div class="pillar-header">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">SUP <span class="amp">&</span> SUN</h3>
-                <a href="sun.html" class="btn-primary">CHECK</a>
+                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">
+                    SUP <span class="plain-amp">&amp;</span> SUN
+                </h3>                <a href="sun.html" class="btn-primary">CHECK</a>
             </div>
             <div class="pillar-img" style="background-image: url('../img/sunkartya.png');"></div>
         </div>
@@ -412,15 +416,13 @@
     <div class="section-header" style="padding-top: 8rem;">
         <h2>Premium Apartments</h2>
     </div>
-    <div id="apartment-grid" class="apt-grid"></div>
-</section>
-
-
-<div id="apt-list-container" style="min-height: 60vh; margin-top: 120px;">
-    <div style="text-align: center; padding: 10rem 5vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <div class="loader-spinner" style="width: 40px; height: 40px; border: 3px solid #eee; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <div id="apartment-grid" class="apt-grid">
+        <div class="loader-wrap">
+            <div class="loader-spinner"></div>
+            <div>Apartments loading...</div>
+        </div>
     </div>
-</div>
+</section>
 
 
 <section id="reviews-section" class="pillars-section" style="background: var(--bg);">
@@ -462,7 +464,7 @@
             <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Navigation</h4>
             <ul style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 2;">
                 <li><a href="index.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Apartments</a></li>
-                <li><a href="about-us.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">About Us</a></li>
+                <li><a href="rolunk.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">About Us</a></li>
                 <li><a href="#contact" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Contact</a></li>
                 <li><a href="#" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Terms & Conditions</a></li>
             </ul>
@@ -483,144 +485,209 @@
 
 
 <script src="../database.js?v=2.0"></script>
-<script src="figyelmeztetes.js"></script>
+<script src="../figyelmeztetes.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof initDatabase === "function") {
-        initDatabase(renderIndexApartments);
-    } else {
-        console.error("database.js failed to load!");
-    }
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        initApartments();
+        initWeather();
+        renderReviews();
+    });
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Balatonfüred koordinátái
-    const lat = 46.953;
-    const lon = 17.893;
-    const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-
-    async function fetchWeather() {
-        try {
-            // 1. Levegő
-            const airRes = await fetch(apiUrl);
-            const airData = await airRes.json();
-            document.getElementById('weather-temp').innerText =
-                `${Math.round(airData.current_weather.temperature)}°C`;
-
-            // 2. Víz
-            const waterRes = await fetch('/api/balaton-water-temp');
-            const waterData = await waterRes.json();
-            document.getElementById('water-temp-val').innerText = waterData.temp;
-
-            // 👉 MEGJELENÍTÉS CSAK SIKER ESETÉN
-            document.getElementById('weather-content').classList.remove('hidden');
-            document.getElementById('weather-widget').style.display = 'inline-flex';
-
-        } catch (error) {
-            console.error("Hiba:", error);
-
-            // 👉 ha hiba van → maradjon rejtve
-            document.getElementById('weather-widget').style.display = 'none';
+    function initApartments() {
+        if (typeof initDatabase === "function") {
+            initDatabase(renderIndexApartments);
+        } else {
+            console.error("database.js failed to load.");
+            showApartmentError("Apartments could not be loaded at the moment.");
         }
     }
 
-    fetchWeather();
-});
+    async function initWeather() {
+        const widget = document.getElementById('weather-widget');
+        const content = document.getElementById('weather-content');
+        const airTempEl = document.getElementById('weather-temp');
+        const waterTempEl = document.getElementById('water-temp-val');
 
-function getLang() {
-    if (location.pathname.startsWith('/en')) return 'en';
-    if (location.pathname.startsWith('/de')) return 'de';
-    return 'hu';
-}
+        if (!widget || !content || !airTempEl || !waterTempEl) return;
 
-async function renderReviews() {
-    const res = await fetch('/api/reviews');
-    const reviews = await res.json();
+        widget.style.display = 'none';
+        content.classList.add('hidden');
 
-    const container = document.getElementById('reviews-grid');
-    if (!container) return;
+        try {
+            const lat = 46.953;
+            const lon = 17.893;
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
 
-    const lang = getLang();
+            const [airRes, waterRes] = await Promise.all([
+                fetch(apiUrl),
+                fetch('/api/balaton-water-temp')
+            ]);
 
-    const visibleReviews = reviews
-        .filter(r => r.isVisible !== false)
-        .map(r => {
-            let text = "";
+            if (!airRes.ok || !waterRes.ok) {
+                throw new Error("Weather data unavailable.");
+            }
 
-            if (lang === 'hu') text = r.text_hu || "";
-            if (lang === 'en') text = r.text_en || "";
-            if (lang === 'de') text = r.text_de || "";
+            const airData = await airRes.json();
+            const waterData = await waterRes.json();
 
-            return { ...r, displayText: text };
-        })
-        .filter(r => r.displayText)
-        .slice(0, 6);
+            const airTemp = airData?.current_weather?.temperature;
+            const waterTemp = waterData?.temp;
 
-    if (visibleReviews.length === 0) {
-        const section = document.getElementById('reviews-section');
-        if (section) section.style.display = 'none';
-        return;
+            if (typeof airTemp !== 'number' || !waterTemp || waterTemp === '—') {
+                throw new Error("Incomplete weather data.");
+            }
+
+            airTempEl.innerText = `${Math.round(airTemp)}°C`;
+            waterTempEl.innerText = waterTemp;
+
+            content.classList.remove('hidden');
+            widget.style.display = 'inline-flex';
+        } catch (error) {
+            console.error("Weather error:", error);
+            widget.style.display = 'none';
+        }
     }
 
-    container.innerHTML = visibleReviews.map(r => `
-        <div class="review-card">
-            <div class="review-stars">${'★'.repeat(Number(r.rating || 5))}</div>
-            <p class="review-text">“${r.displayText}”</p>
-            <div class="review-name">— ${r.name}</div>
-        </div>
-    `).join('');
-}
+    async function renderReviews() {
+        const container = document.getElementById('reviews-grid');
+        const section = document.getElementById('reviews-section');
 
-renderReviews();
+        if (!container || !section) return;
 
-function renderIndexApartments() {
-    const grid = document.getElementById('apartment-grid');
-    const loaderContainer = document.getElementById('apt-list-container');
-    
-    if (!grid) return;
+        try {
+            const res = await fetch('/api/reviews');
 
-    if (!db.apartments || db.apartments.length === 0) {
-        if (loaderContainer) {
-            loaderContainer.innerHTML = `
-                <div style="text-align:center; padding: 6rem 5vw; color: #777; font-size: 0.9rem;">
-                    There are currently no available apartments.
+            if (!res.ok) {
+                throw new Error("Reviews unavailable.");
+            }
+
+            const reviews = await res.json();
+
+            const visibleReviews = (reviews || [])
+                .filter(r => r.isVisible !== false)
+                .map(r => ({
+                    ...r,
+                    displayText: r.text_en || ""
+                }))
+                .filter(r => r.displayText)
+                .slice(0, 6);
+
+            if (visibleReviews.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = visibleReviews.map(r => {
+                const rating = Math.min(5, Math.max(1, Number(r.rating || 5)));
+
+                return `
+                    <div class="review-card">
+                        <div class="review-stars">${'★'.repeat(rating)}</div>
+                        <p class="review-text">“${escapeHtml(r.displayText)}”</p>
+                        <div class="review-name">— ${escapeHtml(r.name || 'Guest')}</div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error("Review loading error:", error);
+            section.style.display = 'none';
+        }
+    }
+
+    function renderIndexApartments() {
+        const grid = document.getElementById('apartment-grid');
+
+        if (!grid) return;
+
+        if (!window.db || !Array.isArray(db.apartments) || db.apartments.length === 0) {
+            grid.innerHTML = `
+                <div class="loader-wrap">
+                    <div>There are currently no available apartments.</div>
                 </div>
             `;
-        }
-        return;
-    }
-
-    if (loaderContainer) loaderContainer.style.display = 'none';
-
-    grid.innerHTML = "";
-
-    db.apartments.forEach(apt => {
-        const info = getAptStatusAndPrice(apt, new Date()); 
-        let priceDisplay = "";
-
-        if (info.status === 'OPEN') {
-            priceDisplay = `${info.price.toLocaleString()} HUF / night`;
-        } else {
-            const minSeasonPrice = apt.seasons && apt.seasons.length > 0 
-                ? Math.min(...apt.seasons.map(s => s.price)) 
-                : (apt.price || 0);
-            priceDisplay = `Opening in April: from ${minSeasonPrice.toLocaleString()} HUF`;
+            return;
         }
 
-        grid.innerHTML += `
-            <a href="apartman.html?id=${apt.id}" class="pillar-card" style="text-decoration: none; color: inherit;">
+        grid.innerHTML = "";
+
+        db.apartments.forEach(apt => {
+            const info = typeof getAptStatusAndPrice === "function"
+                ? getAptStatusAndPrice(apt, new Date())
+                : { status: 'CLOSED', price: apt.price || 0 };
+
+            let priceDisplay = "";
+
+            if (info.status === 'OPEN') {
+                priceDisplay = `${Number(info.price || 0).toLocaleString('en-US')} HUF / night`;
+            } else {
+                const seasonPrices = Array.isArray(apt.seasons)
+                    ? apt.seasons.map(s => Number(s.price || 0)).filter(p => p > 0)
+                    : [];
+
+                const minSeasonPrice = seasonPrices.length > 0
+                    ? Math.min(...seasonPrices)
+                    : Number(apt.price || 0);
+
+                priceDisplay = minSeasonPrice > 0
+                    ? `Opening in April: from ${minSeasonPrice.toLocaleString('en-US')} HUF`
+                    : `Available soon`;
+            }
+
+            const card = document.createElement('a');
+            card.href = `apartman.html?id=${encodeURIComponent(apt.id)}`;
+            card.className = 'pillar-card';
+            card.style.textDecoration = 'none';
+            card.style.color = 'inherit';
+
+            card.innerHTML = `
                 <div class="pillar-header">
-                    <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">${apt.name}</h3>
-                    <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">${apt.location}</p>
-                    <p style="font-weight: 700; color: var(--accent); letter-spacing: 1px; margin-bottom: 2rem;">${priceDisplay}</p>
+                    <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">${escapeHtml(apt.name || 'Apartment')}</h3>
+                    <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">${escapeHtml(apt.location || '')}</p>
+                    <p style="font-weight: 700; color: var(--accent); letter-spacing: 1px; margin-bottom: 2rem;">${escapeHtml(priceDisplay)}</p>
                     <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem; display: inline-block;">Explore</span>
                 </div>
-                <div class="pillar-img" style="background-image: url('${apt.coverImage || ''}');"></div>
-            </a>`;
-    });
-    renderReviews('en');
-}
+                <div class="pillar-img" style="background-image: url('${safeUrl(apt.coverImage || '')}');"></div>
+            `;
 
+            grid.appendChild(card);
+        });
+    }
+
+    function showApartmentError(message) {
+        const grid = document.getElementById('apartment-grid');
+        if (!grid) return;
+
+        grid.innerHTML = `
+            <div class="loader-wrap">
+                <div>${escapeHtml(message)}</div>
+            </div>
+        `;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function safeUrl(value) {
+        const url = String(value || '').trim();
+
+        if (!url) return '';
+        if (url.startsWith('data:image/')) return url;
+        if (url.startsWith('../img/')) return url;
+        if (url.startsWith('/img/')) return url;
+        if (url.startsWith('https://')) return url;
+
+        if (url.startsWith('img/')) {
+            return `../${url}`;
+        }
+
+        return '';
+    }
 </script>
 </body>
 </html>

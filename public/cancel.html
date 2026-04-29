@@ -3,25 +3,126 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balaton Essence - Cancellation</title>
+    <title>Foglalás lemondása | Balaton Essence</title>
+
     <style>
-        :root { --primary: #5c7a4d; --dark: #2C3325; --danger: #8b0000; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f2; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: var(--dark); }
-        .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; max-width: 450px; width: 90%; border-top: 5px solid var(--primary); }
-        h2 { color: var(--primary); margin-bottom: 10px; }
-        .details { background: #f9fbf8; border: 1px solid #e0e0e0; border-radius: 8px; padding: 20px; text-align: left; margin: 20px 0; font-size: 14px; }
-        .btn-cancel { background-color: var(--danger); color: white; border: none; padding: 12px 25px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; transition: opacity 0.2s; }
-        .btn-cancel:hover { opacity: 0.8; }
-        .btn-cancel:disabled { background-color: #ccc; cursor: not-allowed; }
-        .success-icon { font-size: 50px; color: var(--primary); margin-bottom: 20px; }
-        .hidden { display: none; }
-        .error-text { color: var(--danger); font-weight: bold; }
+        :root {
+            --primary: #5c7a4d;
+            --dark: #2C3325;
+            --danger: #8b0000;
+            --bg: #f4f7f2;
+            --border: #e0e0e0;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            color: var(--dark);
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center;
+            max-width: 480px;
+            width: 100%;
+            border-top: 5px solid var(--primary);
+        }
+
+        h2 {
+            color: var(--primary);
+            margin: 0 0 10px;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .details {
+            background: #f9fbf8;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: left;
+            margin: 20px 0;
+            font-size: 14px;
+            line-height: 1.7;
+        }
+
+        .btn-cancel {
+            background-color: var(--danger);
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: opacity 0.2s;
+        }
+
+        .btn-cancel:hover {
+            opacity: 0.85;
+        }
+
+        .btn-cancel:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .success-icon {
+            font-size: 52px;
+            color: var(--primary);
+            margin-bottom: 20px;
+        }
+
+        .error-icon {
+            color: var(--danger);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .status {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .error-text {
+            color: var(--danger);
+            font-weight: bold;
+        }
+
+        .back-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
-        <div id="status-msg">Loading... / Betöltés...</div>
-        
+        <div id="status-msg" class="status">Betöltés...</div>
+
         <div id="confirmation-ui" class="hidden">
             <h2 id="title"></h2>
             <p id="msg"></p>
@@ -34,122 +135,200 @@
             <h2 id="result-title"></h2>
             <p id="result-msg"></p>
             <br>
-            <a href="/" id="back-link" style="color: var(--primary); text-decoration: none; font-weight: bold;"></a>
+            <a href="/" id="back-link" class="back-link"></a>
         </div>
     </div>
 
     <script>
         const urlParams = new URLSearchParams(window.location.search);
+
         const bookingId = urlParams.get('id');
-        const lang = urlParams.get('lang') || 'hu';
+        const cancelToken = urlParams.get('token');
+
+        const rawLang = urlParams.get('lang') || 'hu';
+        const lang = ['hu', 'en', 'de'].includes(rawLang) ? rawLang : 'hu';
 
         const dict = {
-            hu: { 
+            hu: {
+                pageTitle: "Foglalás lemondása | Balaton Essence",
                 loading: "Adatok betöltése...",
-                errorId: "Hiba: Hiányzó azonosító.",
-                errorNotFound: "A foglalás már nem található vagy lemondták.",
-                errorNet: "Hálózati hiba történt.",
-                title: "Foglalás lemondása", 
-                msg: "Biztosan le szeretné mondani az alábbi foglalást?", 
-                btn: "Végleges lemondás", 
+                errorId: "Hiba: hiányzó foglalási azonosító.",
+                errorToken: "Hiba: hiányzó vagy érvénytelen lemondási token.",
+                errorNotFound: "A foglalás már nem található vagy már lemondásra került.",
+                errorNet: "Hálózati hiba történt. Kérjük, próbáld újra később.",
+                title: "Foglalás lemondása",
+                msg: "Biztosan le szeretnéd mondani az alábbi foglalást?",
+                btn: "Végleges lemondás",
                 processing: "Folyamatban...",
-                success: "Sikeresen lemondva", 
-                resultMsg: "A foglalást töröltük a rendszerünkből. Visszaigazoló e-mailt küldtünk.", 
-                back: "Vissza a főoldalra" 
+                success: "Sikeresen lemondva",
+                resultMsg: "A foglalást töröltük a rendszerünkből. A visszaigazolást elküldtük e-mailben.",
+                back: "Vissza a főoldalra",
+                homeUrl: "/",
+                apt: "Apartman",
+                date: "Időszak",
+                guest: "Vendég"
             },
-            en: { 
+            en: {
+                pageTitle: "Cancel Booking | Balaton Essence",
                 loading: "Loading data...",
-                errorId: "Error: Missing ID.",
+                errorId: "Error: missing booking ID.",
+                errorToken: "Error: missing or invalid cancellation token.",
                 errorNotFound: "Booking not found or already cancelled.",
-                errorNet: "Network error occurred.",
-                title: "Cancel Booking", 
-                msg: "Are you sure you want to cancel the following booking?", 
-                btn: "Confirm Cancellation", 
+                errorNet: "Network error occurred. Please try again later.",
+                title: "Cancel Booking",
+                msg: "Are you sure you want to cancel the following booking?",
+                btn: "Confirm Cancellation",
                 processing: "Processing...",
-                success: "Cancelled successfully", 
-                resultMsg: "The booking has been removed from our system. A confirmation email has been sent.", 
-                back: "Back to home" 
+                success: "Cancelled successfully",
+                resultMsg: "The booking has been removed from our system. A confirmation email has been sent.",
+                back: "Back to home",
+                homeUrl: "/en/",
+                apt: "Apartment",
+                date: "Period",
+                guest: "Guest"
             },
-            de: { 
+            de: {
+                pageTitle: "Buchung stornieren | Balaton Essence",
                 loading: "Daten werden geladen...",
-                errorId: "Fehler: Fehlende ID.",
+                errorId: "Fehler: fehlende Buchungs-ID.",
+                errorToken: "Fehler: fehlender oder ungültiger Stornierungstoken.",
                 errorNotFound: "Buchung nicht gefunden oder bereits storniert.",
-                errorNet: "Netzwerkfehler aufgetreten.",
-                title: "Stornierung", 
-                msg: "Sind Sie sicher, dass Sie diese Buchung stornieren möchten?", 
-                btn: "Stornierung bestätigen", 
+                errorNet: "Netzwerkfehler aufgetreten. Bitte versuchen Sie es später erneut.",
+                title: "Buchung stornieren",
+                msg: "Sind Sie sicher, dass Sie diese Buchung stornieren möchten?",
+                btn: "Stornierung bestätigen",
                 processing: "Wird bearbeitet...",
-                success: "Erfolgreich storniert", 
-                resultMsg: "Die Buchung wurde aus unserem System gelöscht. Eine Bestätigungs-E-Mail wurde gesendet.", 
-                back: "Zurück zur Startseite" 
+                success: "Erfolgreich storniert",
+                resultMsg: "Die Buchung wurde aus unserem System gelöscht. Eine Bestätigungs-E-Mail wurde gesendet.",
+                back: "Zurück zur Startseite",
+                homeUrl: "/de/",
+                apt: "Apartment",
+                date: "Zeitraum",
+                guest: "Gast"
             }
         };
 
         const t = dict[lang] || dict.hu;
 
+        document.documentElement.lang = lang;
+        document.title = t.pageTitle;
+
+        const statusEl = document.getElementById('status-msg');
+        const confirmationUi = document.getElementById('confirmation-ui');
+        const resultUi = document.getElementById('result-ui');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const backLink = document.getElementById('back-link');
+
+        backLink.innerText = t.back;
+        backLink.href = t.homeUrl;
+
+        function showStatus(message, isError = false) {
+            statusEl.innerText = message;
+            statusEl.className = isError ? "error-text" : "status";
+            statusEl.classList.remove('hidden');
+        }
+
+        function showResult(title, message, isError = false) {
+            statusEl.classList.add('hidden');
+            confirmationUi.classList.add('hidden');
+            resultUi.classList.remove('hidden');
+
+            const icon = document.getElementById('result-icon');
+            icon.innerText = isError ? "✕" : "✓";
+            icon.className = isError ? "success-icon error-icon" : "success-icon";
+
+            document.getElementById('result-title').innerText = title;
+            document.getElementById('result-msg').innerText = message;
+        }
+
         async function loadBookingData() {
-            const statusEl = document.getElementById('status-msg');
-            statusEl.innerText = t.loading;
+            showStatus(t.loading);
 
             if (!bookingId) {
-                statusEl.innerText = t.errorId;
-                statusEl.className = "error-text";
+                showStatus(t.errorId, true);
+                return;
+            }
+
+            if (!cancelToken) {
+                showStatus(t.errorToken, true);
                 return;
             }
 
             try {
                 const res = await fetch('/api/get-db-content');
-                const db = await res.json();
-                const booking = db.bookings.find(b => String(b.id) === String(bookingId));
 
-                if (!booking) {
-                    statusEl.innerText = t.errorNotFound;
-                    statusEl.className = "error-text";
+                if (!res.ok) {
+                    showStatus(t.errorNet, true);
                     return;
                 }
 
-                // UI feltöltése adatokkal
+                const db = await res.json();
+                const booking = (db.bookings || []).find(b => String(b.id) === String(bookingId));
+
+                if (!booking) {
+                    showStatus(t.errorNotFound, true);
+                    return;
+                }
+
                 document.getElementById('booking-info').innerHTML = `
-                    <strong>${booking.aptName}</strong><br>
-                    ${booking.checkIn} — ${booking.checkOut}<br>
-                    ${booking.guestName}
+                    <strong>${t.apt}:</strong> ${escapeHtml(booking.aptName || "-")}<br>
+                    <strong>${t.date}:</strong> ${escapeHtml(booking.checkIn || "-")} — ${escapeHtml(booking.checkOut || booking.end || "-")}<br>
+                    <strong>${t.guest}:</strong> ${escapeHtml(booking.guestName || "-")}
                 `;
 
                 document.getElementById('title').innerText = t.title;
                 document.getElementById('msg').innerText = t.msg;
-                document.getElementById('cancel-btn').innerText = t.btn;
-                document.getElementById('back-link').innerText = t.back;
-                
+                cancelBtn.innerText = t.btn;
+
                 statusEl.classList.add('hidden');
-                document.getElementById('confirmation-ui').classList.remove('hidden');
+                confirmationUi.classList.remove('hidden');
             } catch (e) {
-                statusEl.innerText = t.errorNet;
-                statusEl.className = "error-text";
+                console.error("Cancel page load error:", e);
+                showStatus(t.errorNet, true);
             }
         }
 
         async function confirmCancel() {
-            const btn = document.getElementById('cancel-btn');
-            btn.disabled = true;
-            btn.innerText = t.processing;
+            if (!bookingId || !cancelToken) {
+                showResult(t.errorId, t.errorToken, true);
+                return;
+            }
+
+            cancelBtn.disabled = true;
+            cancelBtn.innerText = t.processing;
 
             try {
-                const res = await fetch(`/api/cancel-booking/${bookingId}`);
-                if (res.ok) {
-                    document.getElementById('confirmation-ui').classList.add('hidden');
-                    document.getElementById('result-ui').classList.remove('hidden');
-                    document.getElementById('result-title').innerText = t.success;
-                    document.getElementById('result-msg').innerText = t.resultMsg;
-                } else {
-                    alert(t.errorNet);
-                    btn.disabled = false;
-                    btn.innerText = t.btn;
+                const url = `/api/cancel-booking/${encodeURIComponent(bookingId)}?token=${encodeURIComponent(cancelToken)}`;
+                const res = await fetch(url);
+                const result = await res.json().catch(() => null);
+
+                if (!res.ok) {
+                    showResult(
+                        t.errorTitle || t.title,
+                        result?.error || t.errorNet,
+                        true
+                    );
+                    cancelBtn.disabled = false;
+                    cancelBtn.innerText = t.btn;
+                    return;
                 }
+
+                showResult(t.success, t.resultMsg, false);
             } catch (e) {
-                alert(t.errorNet);
-                btn.disabled = false;
-                btn.innerText = t.btn;
+                console.error("Cancel request error:", e);
+                showResult(t.title, t.errorNet, true);
+                cancelBtn.disabled = false;
+                cancelBtn.innerText = t.btn;
             }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
         }
 
         loadBookingData();

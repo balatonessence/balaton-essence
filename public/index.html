@@ -14,28 +14,55 @@
     <meta property="og:title" content="Balaton Essence | Luxus Apartman és SUP bérlés">
     <meta property="og:description" content="Prémium szállás és SUP élmények a Balatonnál. Foglaljon most!">
     <meta property="og:image" content="https://balatonessence.com/img/hatter.png">
+
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
-    
-    
+
     <style>
         :root { 
-            --bg: #FCFBF9; --bg-alt: #F4F2EC; --text: #2C3325; --text-light: #6A7063;  
-            --accent: #5C7A4D; --accent-hover: #48613A; --border: #E3E0D8; --shadow: rgba(44, 51, 37, 0.05);
+            --bg: #FCFBF9;
+            --bg-alt: #F4F2EC;
+            --text: #2C3325;
+            --text-light: #6A7063;
+            --accent: #5C7A4D;
+            --accent-hover: #48613A;
+            --border: #E3E0D8;
+            --shadow: rgba(44, 51, 37, 0.05);
             --warning: #B0413E;
         }
         
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-
-        /* FEJLESZTÉSI BANNER */
-        .dev-banner {
-            background: var(--warning); color: white; text-align: center; padding: 12px 5vw;
-            font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; position: fixed;
-            top: 0; left: 0; width: 100%; z-index: 2000; line-height: 1.4;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        /* HEADER */
-        header { position: fixed; top: 40px; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(252, 251, 249, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); transition: 0.3s; }
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(252, 251, 249, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            transition: 0.3s;
+        }
         
         .logo-container {
             display: flex;
@@ -52,6 +79,7 @@
             letter-spacing: 2px;
         }
 
+        .logo-subtitle,
         .logo-sub {
             font-family: 'Montserrat', sans-serif;
             font-size: 0.65rem;
@@ -62,8 +90,12 @@
             margin-top: 4px;
         }
 
-        nav { display: flex; gap: 2rem; align-items: center; }
-        /* Navigációs linkek alapértelmezett stílusának felülírása */
+        nav {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
         .nav-links a {
             text-decoration: none !important;
             color: #1A1A1A !important;
@@ -74,103 +106,178 @@
             transition: color 0.3s ease;
         }
 
-        /* Hover (rámutatás) effektus */
         .nav-links a:hover {
-            color: #5c7a4d !important; /* Vagy a var(--accent) színed */
+            color: var(--accent) !important;
         }
         
-        .btn-primary { background: var(--accent); color: white; border: 1px solid var(--accent); padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.4s; text-decoration: none; display: inline-block; }
-        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2); }
-
-        /* HERO */
-.hero {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    padding: 0 5vw;
-    position: relative;
-    overflow: hidden;
-    background: none;
-}
-
-.hero::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: url('img/hatter.png') center/cover no-repeat;
-    filter: contrast(1.2) brightness(1.08) saturate(1.8);
-    z-index: 0;
-}
-
-.hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        to right,
-        rgba(252,251,249, 1) 0%,
-        rgba(252,251,249, 0.85) 45%,
-        rgba(252,251,249, 0) 100%
-    );
-    z-index: 1;
-}
-
-.hero-content {
-    max-width: 650px;
-    margin-top: 5rem;
-    position: relative;
-    z-index: 2;
-}
-
-.hero-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(3rem, 5vw, 4.5rem);
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
-    color: var(--text);
-}
-        
-
-        /* PILLARS */
-        .pillars-section { padding: 8rem 5vw; background: var(--bg); max-width: 1600px; margin: 0 auto; }
-        .section-header { text-align: center; margin-bottom: 5rem; }
-        .section-header h2 { font-family: 'Playfair Display'; font-size: 3rem; color: var(--text); font-style: italic; }
-
-        .pillars-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 4rem; }
-        .pillar-card { background: white; border: 1px solid var(--border); box-shadow: 0 15px 40px var(--shadow); transition: 0.4s; text-align: center; overflow: hidden; display: flex; flex-direction: column; }
-        .pillar-card:hover { transform: translateY(-10px); }
-        .pillar-header { padding: 4rem 2rem; flex-grow: 1; }
-        .pillar-img { width: 100%; height: 350px; background-size: cover; background-position: center; }
-
-        .apt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 4rem; margin-top: 2rem; }
-
-
-        /* Logó link stílusának felülírása */
-        .site-header .logo-container {
-            text-decoration: none !important;
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: 1px solid var(--accent);
+            padding: 0.8rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.7rem;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            transition: 0.4s;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .site-header .logo-title {
-            color: #1A1A1A !important; /* A "BALATON" felirat színe (sötétszürke/fekete) */
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2);
         }
 
-        .site-header .logo-subtitle {
-            color: #5c7a4d !important; /* Az "Essence" felirat színe (zöldes akcentus) */
+        .page-spacer {
+            height: 92px;
         }
-        /* Nyelvválasztó konténer */
+
+        .hero {
+            min-height: calc(100vh - 92px);
+            display: flex;
+            align-items: center;
+            padding: 0 5vw;
+            position: relative;
+            overflow: hidden;
+            background: none;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url('img/hatter.png') center/cover no-repeat;
+            filter: contrast(1.2) brightness(1.08) saturate(1.8);
+            z-index: 0;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to right,
+                rgba(252,251,249, 1) 0%,
+                rgba(252,251,249, 0.85) 45%,
+                rgba(252,251,249, 0) 100%
+            );
+            z-index: 1;
+        }
+
+        .hero-content {
+            max-width: 650px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 5vw, 4.5rem);
+            line-height: 1.1;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+
+        .pillars-section {
+            padding: 8rem 5vw;
+            background: var(--bg);
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 5rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 4vw, 3rem);
+            color: var(--text);
+            font-style: italic;
+        }
+
+        .pillars-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 4rem;
+        }
+
+        .pillar-card {
+            background: white;
+            border: 1px solid var(--border);
+            box-shadow: 0 15px 40px var(--shadow);
+            transition: 0.4s;
+            text-align: center;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+        }
+
+        .pillar-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .pillar-header {
+            padding: 4rem 2rem;
+            flex-grow: 1;
+        }
+
+        .pillar-img {
+            width: 100%;
+            height: 350px;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--bg-alt);
+        }
+
+        .apt-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 4rem;
+            margin-top: 2rem;
+            min-height: 180px;
+        }
+
+        .loader-wrap {
+            text-align: center;
+            padding: 5rem 5vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            grid-column: 1 / -1;
+        }
+
+        .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #eee;
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
         .lang-dropdown {
             position: relative;
             display: inline-block;
             margin-left: 1.5rem;
         }
 
-        /* Fő gomb */
         .lang-btn {
             background: none;
             border: none;
             font-family: 'Montserrat', sans-serif;
             font-size: 0.75rem;
-            font-weight: 500;
+            font-weight: 600;
             letter-spacing: 1px;
             color: var(--text);
             cursor: pointer;
@@ -182,15 +289,14 @@
         }
 
         .arrow {
-            width: 0; 
-            height: 0; 
+            width: 0;
+            height: 0;
             border-left: 4px solid transparent;
             border-right: 4px solid transparent;
             border-top: 4px solid var(--text);
             transition: 0.3s;
         }
 
-        /* Legördülő rész */
         .lang-content {
             display: none;
             position: absolute;
@@ -205,21 +311,22 @@
         }
 
         .lang-content a {
-            color: var(--text);
+            color: var(--text) !important;
             padding: 12px 16px;
             text-decoration: none;
             display: block;
             font-size: 0.7rem;
             transition: 0.3s;
             text-align: left;
+            text-transform: none;
+            letter-spacing: 0;
         }
 
         .lang-content a:hover {
             background-color: var(--bg-alt);
-            color: var(--accent);
+            color: var(--accent) !important;
         }
 
-        /* Hover esemény */
         .lang-dropdown:hover .lang-content {
             display: block;
             animation: fadeIn 0.2s ease-out;
@@ -229,34 +336,27 @@
             transform: rotate(180deg);
         }
 
-        /* Vékony Kapszula Stílusok */
-
         #weather-widget {
             display: none;
         }
         
         .nav-weather-pill {
-            background-color: rgba(255, 255, 255, 0.6); /* Enyhén átlátszó, hogy szép legyen */
+            background-color: rgba(255, 255, 255, 0.6);
             border: 1px solid #e2e8df;
-            border-radius: 50px; /* Eztől lesz kapszula formájú */
+            border-radius: 50px;
             padding: 6px 16px;
             display: inline-flex;
             align-items: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 15px;
-            margin: 0 15px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.85rem;
+            margin: 0 5px;
             height: fit-content;
-        }
-
-        .weather-loader {
-            font-size: 13px;
-            color: #888;
         }
 
         .weather-pill-content {
             display: flex;
             align-items: center;
-            gap: 8px; /* Távolság az elemek között */
+            gap: 8px;
         }
 
         .weather-pill-content.hidden {
@@ -265,7 +365,7 @@
 
         .air-temp {
             font-weight: bold;
-            color: #5c7a4d; /* Essence zöld */
+            color: var(--accent);
         }
 
         .weather-divider {
@@ -275,19 +375,10 @@
 
         .water-temp {
             font-weight: bold;
-            color: #0077b6; /* Szép Balaton-kék */
+            color: #0077b6;
             display: flex;
             align-items: center;
             gap: 4px;
-        }
-
-        .amp {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.1em;
-            font-weight: 500;
-            margin: 0 6px;
-            display: inline-block;
-            transform: translateY(-2px);
         }
 
         .reviews-grid {
@@ -349,9 +440,107 @@
             font-weight: 700;
         }
 
+        .contact-section {
+            background: white;
+            padding: 5rem 5vw;
+            border-top: 1px solid var(--border);
+            margin-top: 5rem;
+        }
+
+        .contact-grid {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 4rem;
+        }
+
+        .contact-section h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .contact-section ul {
+            list-style: none;
+            padding: 0;
+            font-size: 0.85rem;
+            line-height: 2;
+        }
+
+        .contact-section a {
+            text-decoration: none;
+            color: #666;
+            transition: 0.3s;
+        }
+
+        .contact-section a:hover {
+            color: var(--accent);
+        }
+
+        footer {
+            background: var(--accent);
+            padding: 6rem 5vw;
+            color: white;
+            text-align: center;
+        }
+
+        footer .logo-sub {
+            color: rgba(255,255,255,0.75) !important;
+        }
+
         @media (max-width: 900px) {
+            nav {
+                gap: 1rem;
+            }
+
             .reviews-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .apt-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .plain-amp {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: normal;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin: 0 4px;
+            vertical-align: 0.02em;
+        }
+
+        @media (max-width: 720px) {
+            header {
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: flex-end;
+                gap: 0.8rem;
+            }
+
+            .nav-weather-pill {
+                order: 5;
+                width: 100%;
+                justify-content: center;
+                margin: 0;
+            }
+
+            .hero::after {
+                background: rgba(252,251,249,0.82);
+            }
+
+            .pillars-section {
+                padding: 5rem 5vw;
+            }
+
+            .pillar-header {
+                padding: 3rem 1.5rem;
             }
         }
 
@@ -359,8 +548,6 @@
             from { opacity: 0; transform: translateY(5px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        footer { background: var(--accent); padding: 6rem 5vw; color: white; text-align: center; }
 
         @keyframes spin {
             0% { transform: rotate(0deg); }
@@ -370,20 +557,20 @@
 
     <link rel="stylesheet" href="mobile.css?v=2">
 </head>
+
 <body>
 
 <header class="site-header">
-    <a href="index.html" class="logo-container">
+    <a href="index.html" class="logo-container" aria-label="Balaton Essence főoldal">
         <span class="logo-title">BALATON</span>
         <span class="logo-subtitle">Essence</span>
     </a>
 
-    <nav class="nav-links">
+    <nav class="nav-links" aria-label="Fő navigáció">
         <a href="#apartments">Apartmanok</a>
         <a href="rolunk.html">Rólunk</a>
         
-        <div class="nav-weather-pill" id="weather-widget" style="display: none;">
-            <span id="weather-loader" class="weather-loader" style="display: none;"></span>
+        <div class="nav-weather-pill" id="weather-widget">
             <div id="weather-content" class="weather-pill-content hidden">
                 <span id="weather-icon" title="Levegő">☀️</span>
                 <span id="weather-temp" class="air-temp"></span>
@@ -393,7 +580,7 @@
         </div>
 
         <div class="lang-dropdown">
-            <button class="lang-btn">HU <span class="arrow"></span></button>
+            <button class="lang-btn" type="button">HU <span class="arrow"></span></button>
             <div class="lang-content">
                 <a href="index.html" class="active">Magyar</a>
                 <a href="./en/index.html">English</a>
@@ -403,11 +590,11 @@
     </nav>
 </header>
 
-<div style="height: 110px;"></div>
+<div class="page-spacer"></div>
 
 <section class="hero">
     <div class="hero-content">
-        <h1 class="hero-title" aria-label="Balaton Essence - Prémium apartmankezelés és szállásfoglalás a Balaton környékén">
+        <h1 class="hero-title">
             A Balaton esszenciája — <br>
             <i>élmény, amit megérzel</i>.
         </h1>
@@ -419,18 +606,22 @@
     <div class="section-header">
         <h2>Essence Életérzés</h2>
     </div>
+
     <div class="pillars-grid">
         <div class="pillar-card">
             <div class="pillar-header">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">SUP <span class="amp">&</span> SUN</h3>
-                <a href="sun.html" class="btn-primary">MEGNÉZEM</a>
+                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">
+                    SUP <span class="plain-amp">&amp;</span> SUN
+                </h3>
+                <a href="sun.html" class="btn-primary">Megnézem</a>
             </div>
             <div class="pillar-img" style="background-image: url('img/sunkartya.png');"></div>
         </div>
+
         <div class="pillar-card">
             <div class="pillar-header">
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">MOMENTS</h3>
-                <a href="morning.html" class="btn-primary">MEGNÉZEM</a>
+                <a href="morning.html" class="btn-primary">Megnézem</a>
             </div>
             <div class="pillar-img" style="background-image: url('img/moments.png');"></div>
         </div>
@@ -441,14 +632,14 @@
     <div class="section-header" style="padding-top: 8rem;">
         <h2>Prémium Apartmanok</h2>
     </div>
-    <div id="apartment-grid" class="apt-grid"></div>
-</section>
 
-<div id="apt-list-container" style="min-height: 60vh; margin-top: 120px;">
-    <div style="text-align: center; padding: 10rem 5vw; display: flex; flex-direction: column; align-items: center; justify-content: center;">
-        <div class="loader-spinner" style="width: 40px; height: 40px; border: 3px solid #eee; border-top: 3px solid var(--accent); border-radius: 50%; animation: spin 1s linear infinite;"></div>
+    <div id="apartment-grid" class="apt-grid">
+        <div class="loader-wrap">
+            <div class="loader-spinner"></div>
+            <div>Apartmanok betöltése...</div>
+        </div>
     </div>
-</div>
+</section>
 
 <section id="reviews-section" class="pillars-section" style="background: var(--bg);">
     <div class="section-header">
@@ -457,215 +648,291 @@
     <div id="reviews-grid" class="reviews-grid"></div>
 </section>
 
-<section id="contact" style="background: white; padding: 5rem 5vw; border-top: 1px solid var(--border); margin-top: 5rem;">
-    <div style="max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4rem;">
-        
+<section id="contact" class="contact-section">
+    <div class="contact-grid">
         <div>
-            <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1; margin-bottom: 1.5rem;">
-                <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
-                <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+            <a href="index.html" class="logo-container" style="margin-bottom: 1.5rem;">
+                <span class="logo-title">BALATON</span>
+                <span class="logo-subtitle">Essence</span>
             </a>
+
             <p style="font-size: 0.85rem; color: #666; line-height: 1.8; margin-top: 1rem;">
                 Prémium apartmanok és felejthetetlen élmények a Balaton északi és déli partján. Gondoskodunk a kényelméről, hogy Önnek csak a pihenésre kelljen koncentrálnia.
             </p>
         </div>
 
         <div>
-            <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Kapcsolat</h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 2;">
+            <h4>Kapcsolat</h4>
+            <ul>
                 <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
                     <span style="color: var(--accent);">📍</span> 8640 Fonyód
                 </li>
                 <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <span style="color: var(--accent);">📞</span> +36 20 499 5484
+                    <span style="color: var(--accent);">📞</span>
+                    <a href="tel:+36204995484">+36 20 499 5484</a>
                 </li>
                 <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <span style="color: var(--accent);">✉️</span> info@balatonessence.com
+                    <span style="color: var(--accent);">✉️</span>
+                    <a href="mailto:info@balatonessence.com">info@balatonessence.com</a>
                 </li>
             </ul>
         </div>
 
         <div>
-            <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Navigáció</h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 2;">
-                <li><a href="index.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Apartmanok</a></li>
-                <li><a href="rolunk.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Rólunk</a></li>
-                <li><a href="#contact" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Kapcsolat</a></li>
-                <li><a href="#" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Általános Szerződési Feltételek</a></li>
+            <h4>Navigáció</h4>
+            <ul>
+                <li><a href="#apartments">Apartmanok</a></li>
+                <li><a href="rolunk.html">Rólunk</a></li>
+                <li><a href="#contact">Kapcsolat</a></li>
+                <li><a href="aszf.html">Általános Szerződési Feltételek</a></li>
             </ul>
         </div>
-
     </div>
 </section>
 
 <footer>
     <div class="logo-container" style="display: flex; flex-direction: column; line-height: 1.1;">
-    <span class="logo-title" style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: 2px;">BALATON ESSENCE</span>
-    <span class="logo-sub" style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+        <span class="logo-title" style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: 2px;">BALATON ESSENCE</span>
+        <span class="logo-sub">Essence</span>
     </div>
-    <p style="font-size: 0.8rem; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase;">Élmény, amit megérzel.</p>
-    <p style="margin-top: 4rem; font-size: 0.7rem; opacity: 0.5;">&copy; 2026 Essence Balaton. Minden jog fenntartva.</p>
+
+    <p style="font-size: 0.8rem; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase; margin-top: 1.5rem;">Élmény, amit megérzel.</p>
+    <p style="margin-top: 4rem; font-size: 0.7rem; opacity: 0.5;">&copy; 2026 Balaton Essence. Minden jog fenntartva.</p>
 </footer>
 
 <script type="application/ld+json">
 {
-  "@context": "https://schema.org",
-  "@type": "RealEstateAgent", 
-  "name": "Balaton Essence",
-  "description": "Prémium apartmankezelés és SUP bérlés a Balaton több pontján. 15-20 exkluzív szálláshely Siófoktól Badacsonyig.",
-  "url": "https://balatonessence.com",
-  "address": {
-    "@type": "PostalAddress",
-    "addressRegion": "Balaton",
-    "addressCountry": "HU"
-  },
-  "areaServed": [
-    "Siófok", "Balatonszemes", "Fonyód", "Balatonederics" 
-  ]
+    "@context": "https://schema.org",
+    "@type": "RealEstateAgent",
+    "name": "Balaton Essence",
+    "description": "Prémium apartmankezelés és SUP bérlés a Balaton több pontján.",
+    "url": "https://balatonessence.com",
+    "address": {
+        "@type": "PostalAddress",
+        "addressRegion": "Balaton",
+        "addressCountry": "HU"
+    },
+    "areaServed": [
+        "Siófok",
+        "Balatonszemes",
+        "Fonyód",
+        "Balatonederics"
+    ]
 }
 </script>
 
 <script src="database.js?v=2.0"></script>
 <script src="figyelmeztetes.js"></script>
+
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    if (typeof initDatabase === "function") {
-        initDatabase(renderIndexApartments);
-    } else {
-        console.error("A database.js nem töltődött be!");
-    }
-});
+    document.addEventListener('DOMContentLoaded', () => {
+        initApartments();
+        initWeather();
+        renderReviews();
+    });
 
-document.addEventListener('DOMContentLoaded', () => {
-    // Balatonfüred koordinátái
-    const lat = 46.953;
-    const lon = 17.893;
-    const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
-
-    async function fetchWeather() {
-        try {
-            // 1. Levegő
-            const airRes = await fetch(apiUrl);
-            const airData = await airRes.json();
-            document.getElementById('weather-temp').innerText =
-                `${Math.round(airData.current_weather.temperature)}°C`;
-
-            // 2. Víz
-            const waterRes = await fetch('/api/balaton-water-temp');
-            const waterData = await waterRes.json();
-            document.getElementById('water-temp-val').innerText = waterData.temp;
-
-            // 👉 MEGJELENÍTÉS CSAK SIKER ESETÉN
-            document.getElementById('weather-content').classList.remove('hidden');
-            document.getElementById('weather-widget').style.display = 'inline-flex';
-
-        } catch (error) {
-            console.error("Hiba:", error);
-
-            // 👉 ha hiba van → maradjon rejtve
-            document.getElementById('weather-widget').style.display = 'none';
+    function initApartments() {
+        if (typeof initDatabase === "function") {
+            initDatabase(renderIndexApartments);
+        } else {
+            console.error("A database.js nem töltődött be.");
+            showApartmentError("Az apartmanok betöltése jelenleg nem sikerült.");
         }
     }
 
-    fetchWeather();
-});
+    async function initWeather() {
+        const widget = document.getElementById('weather-widget');
+        const content = document.getElementById('weather-content');
+        const airTempEl = document.getElementById('weather-temp');
+        const waterTempEl = document.getElementById('water-temp-val');
 
-function getLang() {
-    if (location.pathname.startsWith('/en')) return 'en';
-    if (location.pathname.startsWith('/de')) return 'de';
-    return 'hu';
-}
+        if (!widget || !content || !airTempEl || !waterTempEl) return;
 
-async function renderReviews() {
-    const res = await fetch('/api/reviews');
-    const reviews = await res.json();
+        widget.style.display = 'none';
+        content.classList.add('hidden');
 
-    const container = document.getElementById('reviews-grid');
-    if (!container) return;
+        try {
+            const lat = 46.953;
+            const lon = 17.893;
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`;
 
-    const lang = getLang();
+            const [airRes, waterRes] = await Promise.all([
+                fetch(apiUrl),
+                fetch('/api/balaton-water-temp')
+            ]);
 
-    const visibleReviews = reviews
-        .filter(r => r.isVisible !== false)
-        .map(r => {
-            let text = "";
+            if (!airRes.ok || !waterRes.ok) {
+                throw new Error("Időjárás adat nem elérhető.");
+            }
 
-            if (lang === 'hu') text = r.text_hu || "";
-            if (lang === 'en') text = r.text_en || "";
-            if (lang === 'de') text = r.text_de || "";
+            const airData = await airRes.json();
+            const waterData = await waterRes.json();
 
-            return { ...r, displayText: text };
-        })
-        .filter(r => r.displayText)
-        .slice(0, 6);
+            const airTemp = airData?.current_weather?.temperature;
+            const waterTemp = waterData?.temp;
 
-    if (visibleReviews.length === 0) {
-        const section = document.getElementById('reviews-section');
-        if (section) section.style.display = 'none';
-        return;
+            if (typeof airTemp !== 'number' || !waterTemp || waterTemp === '—') {
+                throw new Error("Hiányos időjárás adat.");
+            }
+
+            airTempEl.innerText = `${Math.round(airTemp)}°C`;
+            waterTempEl.innerText = waterTemp;
+
+            content.classList.remove('hidden');
+            widget.style.display = 'inline-flex';
+        } catch (error) {
+            console.error("Időjárás hiba:", error);
+            widget.style.display = 'none';
+        }
     }
 
-    container.innerHTML = visibleReviews.map(r => `
-        <div class="review-card">
-            <div class="review-stars">${'★'.repeat(Number(r.rating || 5))}</div>
-            <p class="review-text">“${r.displayText}”</p>
-            <div class="review-name">— ${r.name}</div>
-        </div>
-    `).join('');
-}
+    function getLang() {
+        if (location.pathname.startsWith('/en')) return 'en';
+        if (location.pathname.startsWith('/de')) return 'de';
+        return 'hu';
+    }
 
-renderReviews();
+    async function renderReviews() {
+        const container = document.getElementById('reviews-grid');
+        const section = document.getElementById('reviews-section');
 
+        if (!container || !section) return;
 
+        try {
+            const res = await fetch('/api/reviews');
 
-function renderIndexApartments() {
-    const grid = document.getElementById('apartment-grid');
-    const loaderContainer = document.getElementById('apt-list-container');
-    
-    if (!grid) return;
+            if (!res.ok) {
+                throw new Error("Vélemények nem elérhetők.");
+            }
 
-    if (!db.apartments || db.apartments.length === 0) {
-        if (loaderContainer) {
-            loaderContainer.innerHTML = `
-                <div style="text-align:center; padding: 6rem 5vw; color: #777; font-size: 0.9rem;">
-                    Jelenleg nincs elérhető apartman.
+            const reviews = await res.json();
+            const lang = getLang();
+
+            const visibleReviews = (reviews || [])
+                .filter(r => r.isVisible !== false)
+                .map(r => {
+                    let text = "";
+
+                    if (lang === 'hu') text = r.text_hu || "";
+                    if (lang === 'en') text = r.text_en || "";
+                    if (lang === 'de') text = r.text_de || "";
+
+                    return { ...r, displayText: text };
+                })
+                .filter(r => r.displayText)
+                .slice(0, 6);
+
+            if (visibleReviews.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            container.innerHTML = visibleReviews.map(r => {
+                const rating = Math.min(5, Math.max(1, Number(r.rating || 5)));
+
+                return `
+                    <div class="review-card">
+                        <div class="review-stars">${'★'.repeat(rating)}</div>
+                        <p class="review-text">“${escapeHtml(r.displayText)}”</p>
+                        <div class="review-name">— ${escapeHtml(r.name || 'Vendég')}</div>
+                    </div>
+                `;
+            }).join('');
+        } catch (error) {
+            console.error("Review betöltési hiba:", error);
+            section.style.display = 'none';
+        }
+    }
+
+    function renderIndexApartments() {
+        const grid = document.getElementById('apartment-grid');
+
+        if (!grid) return;
+
+        if (!window.db || !Array.isArray(db.apartments) || db.apartments.length === 0) {
+            grid.innerHTML = `
+                <div class="loader-wrap">
+                    <div>Jelenleg nincs elérhető apartman.</div>
                 </div>
             `;
-        }
-        return;
-    }
-
-    if (loaderContainer) loaderContainer.style.display = 'none';
-
-    grid.innerHTML = "";
-
-    db.apartments.forEach(apt => {
-        const info = getAptStatusAndPrice(apt, new Date()); 
-        let priceDisplay = "";
-
-        if (info.status === 'OPEN') {
-            priceDisplay = `${info.price.toLocaleString()} Ft / éj`;
-        } else {
-            const minSeasonPrice = apt.seasons && apt.seasons.length > 0 
-                ? Math.min(...apt.seasons.map(s => s.price)) 
-                : (apt.price || 0);
-            priceDisplay = `Nyitás áprilisban: ${minSeasonPrice.toLocaleString()} Ft-tól`;
+            return;
         }
 
-        grid.innerHTML += `
-            <a href="apartman.html?id=${apt.id}" class="pillar-card" style="text-decoration: none; color: inherit;">
+        grid.innerHTML = "";
+
+        db.apartments.forEach(apt => {
+            const info = typeof getAptStatusAndPrice === "function"
+                ? getAptStatusAndPrice(apt, new Date())
+                : { status: 'CLOSED', price: apt.price || 0 };
+
+            let priceDisplay = "";
+
+            if (info.status === 'OPEN') {
+                priceDisplay = `${Number(info.price || 0).toLocaleString('hu-HU')} Ft / éj`;
+            } else {
+                const seasonPrices = Array.isArray(apt.seasons)
+                    ? apt.seasons.map(s => Number(s.price || 0)).filter(p => p > 0)
+                    : [];
+
+                const minSeasonPrice = seasonPrices.length > 0
+                    ? Math.min(...seasonPrices)
+                    : Number(apt.price || 0);
+
+                priceDisplay = minSeasonPrice > 0
+                    ? `Nyitás áprilisban: ${minSeasonPrice.toLocaleString('hu-HU')} Ft-tól`
+                    : `Hamarosan foglalható`;
+            }
+
+            const card = document.createElement('a');
+            card.href = `apartman.html?id=${encodeURIComponent(apt.id)}`;
+            card.className = 'pillar-card';
+
+            card.innerHTML = `
                 <div class="pillar-header">
-                    <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">${apt.name}</h3>
-                    <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">${apt.location}</p>
-                    <p style="font-weight: 700; color: var(--accent); letter-spacing: 1px; margin-bottom: 2rem;">${priceDisplay}</p>
+                    <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">${escapeHtml(apt.name || 'Apartman')}</h3>
+                    <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">${escapeHtml(apt.location || '')}</p>
+                    <p style="font-weight: 700; color: var(--accent); letter-spacing: 1px; margin-bottom: 2rem;">${escapeHtml(priceDisplay)}</p>
                     <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem; display: inline-block;">Felfedezés</span>
                 </div>
-                <div class="pillar-img" style="background-image: url('${apt.coverImage || ''}');"></div>
-            </a>`;
-    }); 
-}
+                <div class="pillar-img" style="background-image: url('${safeUrl(apt.coverImage || '')}');"></div>
+            `;
 
+            grid.appendChild(card);
+        });
+    }
 
+    function showApartmentError(message) {
+        const grid = document.getElementById('apartment-grid');
+        if (!grid) return;
+
+        grid.innerHTML = `
+            <div class="loader-wrap">
+                <div>${escapeHtml(message)}</div>
+            </div>
+        `;
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function safeUrl(value) {
+        const url = String(value || '').trim();
+
+        if (!url) return '';
+        if (url.startsWith('data:image/')) return url;
+        if (url.startsWith('img/')) return url;
+        if (url.startsWith('/img/')) return url;
+        if (url.startsWith('https://')) return url;
+
+        return '';
+    }
 </script>
+
 </body>
 </html>
