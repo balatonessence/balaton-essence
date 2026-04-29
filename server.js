@@ -1209,30 +1209,52 @@ app.get('/api/balaton-water-temp', async (req, res) => {
     try {
         const response = await axios.get(
             'https://www.vizugy.hu/vizmeres/balaton/adatok/napi_vizmeres.php',
-            { timeout: 10000 }
+            {
+                timeout: 10000,
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Balaton Essence Website)'
+                }
+            }
         );
 
-        const html = response.data;
-        const match = String(html).match(/(\d{1,2},\d{1})\s*&deg;C/);
+        const html = String(response.data);
 
-        if (!match) {
-            return res.status(503).json({
-                temp: null,
+        const patterns = [
+            /(\d{1,2},\d{1})\s*&deg;C/i,
+            /(\d{1,2}\.\d{1})\s*°C/i,
+            /(\d{1,2},\d{1})\s*°C/i,
+            /(\d{1,2})\s*°C/i
+        ];
+
+        let found = null;
+
+        for (const pattern of patterns) {
+            const match = html.match(pattern);
+            if (match) {
+                found = match[1].replace(',', '.');
+                break;
+            }
+        }
+
+        if (!found) {
+            console.warn('Vízhőfok adat nem található a forrás HTML-ben.');
+            return res.json({
+                temp: '—',
                 available: false,
                 error: 'Vízhőfok adat jelenleg nem elérhető.'
             });
         }
 
-        const temp = match[1].replace(',', '.');
-
-        res.json({
-            temp: `${Math.round(parseFloat(temp))}°C`,
+        return res.json({
+            temp: `${Math.round(parseFloat(found))}°C`,
             available: true
         });
+
     } catch (e) {
-        console.error('Vízhőfok hiba:', e);
-        res.status(503).json({
-            temp: null,
+        console.error('Vízhőfok hiba:', e.message);
+
+        return res.json({
+            temp: '—',
             available: false,
             error: 'Vízhőfok adat jelenleg nem elérhető.'
         });
