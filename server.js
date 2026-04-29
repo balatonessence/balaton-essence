@@ -1237,10 +1237,11 @@ app.get('/api/balaton-water-temp', async (req, res) => {
         }
 
         if (!found) {
-            console.warn('Vízhőfok adat nem található a forrás HTML-ben.');
+            console.warn('Vízhőfok adat nem található a forrás HTML-ben, fallback érték használva.');
             return res.json({
-                temp: '—',
+                temp: 'N/A',
                 available: false,
+                fallback: true,
                 error: 'Vízhőfok adat jelenleg nem elérhető.'
             });
         }
@@ -1254,8 +1255,9 @@ app.get('/api/balaton-water-temp', async (req, res) => {
         console.error('Vízhőfok hiba:', e.message);
 
         return res.json({
-            temp: '—',
+            temp: 'N/A',
             available: false,
+            fallback: true,
             error: 'Vízhőfok adat jelenleg nem elérhető.'
         });
     }
