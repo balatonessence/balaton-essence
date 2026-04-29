@@ -4,108 +4,375 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apartment Details | Balaton Essence</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+
     <style>
-        :root { 
-            --bg: #FCFBF9; --text: #2C3325; --text-light: #6A7063;  
-            --accent: #5c7a4d33; --border: #E3E0D8; --warning: #B0413E;
+        :root {
+            --bg: #FCFBF9;
+            --text: #2C3325;
+            --text-light: #6A7063;
+            --accent: #5C7A4D;
+            --accent-soft: #5c7a4d33;
+            --border: #E3E0D8;
+            --warning: #B0413E;
             --shadow: rgba(44, 51, 37, 0.08);
             --transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); padding-top: 40px; -webkit-font-smoothing: antialiased; }
 
-        .dev-banner {
-            background: var(--warning); color: white; text-align: center; padding: 10px 5vw;
-            font-size: 0.7rem; font-weight: 600; letter-spacing: 1px; position: fixed;
-            top: 0; left: 0; width: 100%; z-index: 3000; text-transform: uppercase;
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
 
-        header { position: fixed; top: 40px; left: 0; width: 100%; padding: 1.5rem 5vw; background: rgba(252, 251, 249, 0.96); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); z-index: 1000; display: flex; justify-content: space-between; align-items: center; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding-top: 40px;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        main { max-width: 1300px; margin: 160px auto 100px; padding: 0 5vw; }
-        
-        .apt-container { display: grid; grid-template-columns: 1fr; gap: 3rem; }
-        @media (min-width: 992px) { .apt-container { grid-template-columns: 1.6fr 1fr; gap: 6rem; } }
+        header {
+            position: fixed;
+            top: 40px;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 5vw;
+            background: rgba(252, 251, 249, 0.96);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-        .apt-title { font-family: 'Playfair Display'; font-size: clamp(2.8rem, 5vw, 4.5rem); font-style: italic; margin-bottom: 0.5rem; line-height: 1.1; color: var(--text); }
-        .apt-location-tag { text-transform: uppercase; letter-spacing: 3px; color: #5c7a4d; font-weight: 600; font-size: 0.7rem; margin-bottom: 1rem; }
+        main {
+            max-width: 1300px;
+            margin: 160px auto 100px;
+            padding: 0 5vw;
+        }
 
-        .main-image-wrapper { 
-            margin: 3.5rem 0; 
-            box-shadow: 0 40px 80px rgba(44, 51, 37, 0.1); 
-            border-radius: 2px; 
+        .apt-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 3rem;
+        }
+
+        @media (min-width: 992px) {
+            .apt-container {
+                grid-template-columns: 1.6fr 1fr;
+                gap: 6rem;
+            }
+        }
+
+        .apt-title {
+            font-family: 'Playfair Display';
+            font-size: clamp(2.8rem, 5vw, 4.5rem);
+            font-style: italic;
+            margin-bottom: 0.5rem;
+            line-height: 1.1;
+            color: var(--text);
+        }
+
+        .apt-location-tag {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent);
+            font-weight: 600;
+            font-size: 0.7rem;
+            margin-bottom: 1rem;
+        }
+
+        .main-image-wrapper {
+            margin: 3.5rem 0;
+            box-shadow: 0 40px 80px rgba(44, 51, 37, 0.1);
+            border-radius: 2px;
             overflow: hidden;
             background: #eee;
             aspect-ratio: 16 / 10;
         }
-        
-        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin-top: 5rem; }
-        .img-container { background: #eee; border-radius: 2px; overflow: hidden; aspect-ratio: 4 / 3; }
-        .gallery-img { width: 100%; height: 100%; object-fit: cover; cursor: pointer; transition: var(--transition); display: block; opacity: 1; transform: translateY(0); }
-        .gallery-img:hover { transform: scale(1.03); opacity: 0.9; }
 
-        .booking-card { 
-            background: white; border: 1px solid var(--border); padding: 3.5rem 3rem; 
-            position: sticky; top: 180px; box-shadow: 0 30px 60px rgba(0,0,0,0.04); border-radius: 4px;
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            margin-top: 5rem;
         }
-        
-        .price-tag { font-size: 1.6rem; font-weight: 300; color: var(--text-light); margin-bottom: 2rem; }
-        .price-num { font-weight: 600; color: var(--text); }
 
-        .btn-booking { 
-            width: 100%; background: #2C3325; color: white; border: none; padding: 1.3rem; 
-            border-radius: 50px; font-weight: 700; text-transform: uppercase; 
-            cursor: pointer; margin-top: 2rem; letter-spacing: 2px; font-size: 0.7rem; transition: var(--transition);
+        .img-container {
+            background: #eee;
+            border-radius: 2px;
+            overflow: hidden;
+            aspect-ratio: 4 / 3;
         }
-        .btn-booking:disabled { background: #EAE8E2; color: #888; cursor: not-allowed; }
 
-        .dev-status { color: var(--warning); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; line-height: 1.6; display: flex; align-items: center; gap: 8px; }
+        .gallery-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: var(--transition);
+            display: block;
+            opacity: 1;
+            transform: translateY(0);
+        }
 
-        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 15, 8, 0.98); z-index: 99999; display: none; justify-content: center; align-items: center; opacity: 0; transition: opacity 0.5s ease; }
-        .lightbox.active { opacity: 1; display: flex !important; }
-        
-        .lightbox-img { max-width: 90%; max-height: 85vh; object-fit: contain; box-shadow: 0 50px 100px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1); }
-        .lightbox-close { position: absolute; top: 2.5rem; right: 2.5rem; color: white; font-size: 1.8rem; cursor: pointer; z-index: 100001; }
-        .lightbox-nav { position: absolute; color: white; font-size: 4rem; cursor: pointer; padding: 2rem; user-select: none; opacity: 0.3; transition: 0.3s; }
-        .lightbox-nav:hover { opacity: 1; }
-        .nav-prev { left: 0; } .nav-next { right: 0; }
+        .gallery-img:hover {
+            transform: scale(1.03);
+            opacity: 0.9;
+        }
 
-        .cal-day { padding: 12px 0; cursor: pointer; text-align: center; font-size: 0.9rem; border-radius: 4px; transition: 0.2s; }
-        .cal-day:hover:not(.empty):not(.past):not(.booked) { background: #f0f5ec; color: #5c7a4d; }
-        .cal-day.past { color: #ccc; cursor: not-allowed; }
-        .cal-day.booked { background-color: #ffeaea !important; color: #e74c3c !important; text-decoration: line-through; cursor: not-allowed; opacity: 0.7; }
-        .selected-start, .selected-end { background: #5c7a4d !important; color: white !important; font-weight: bold; }
-        .selected-range { background: rgba(92, 122, 77, 0.1) !important; color: #5c7a4d; }
+        .booking-card {
+            background: white;
+            border: 1px solid var(--border);
+            padding: 3.5rem 3rem;
+            position: sticky;
+            top: 180px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.04);
+            border-radius: 4px;
+        }
 
-        .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 100000; backdrop-filter: blur(5px); }
-        .modal-content { background: white; padding: 30px; border-radius: 20px; text-align: center; max-width: 350px; width: 90%; }
-        .success-icon { width: 60px; height: 60px; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; margin: 0 auto 15px; }
-        /* Minden gomb, ami megkapja a btn-main osztályt */
-        .btn-main {
-            background-color: #5c7a4d !important; /* A Balaton Essence zöldje */
-            color: white !important;               /* Fehér szöveg */
-            border: none !important;
-            padding: 10px 25px !important;
-            border-radius: 5px !important;
-            font-weight: bold !important;
-            cursor: pointer !important;
-            font-size: 16px !important;
-            transition: background-color 0.2s ease;
-            display: inline-block;
+        .price-tag {
+            font-size: 1.6rem;
+            font-weight: 300;
+            color: var(--text-light);
+            margin-bottom: 2rem;
+        }
+
+        .price-num {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .btn-booking {
+            width: 100%;
+            background: #EAE8E2;
+            color: #888;
+            border: none;
+            padding: 1.3rem;
+            border-radius: 50px;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-top: 2rem;
+            letter-spacing: 2px;
+            font-size: 0.7rem;
+            transition: var(--transition);
+        }
+
+        .btn-booking:not(:disabled) {
+            cursor: pointer;
+        }
+
+        .dev-status {
+            color: var(--warning);
+            font-weight: 600;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.6;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .lightbox {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 15, 8, 0.98);
+            z-index: 4000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+
+        .lightbox.active {
+            opacity: 1;
+            display: flex;
+        }
+
+        .lightbox-img {
+            max-width: 90%;
+            max-height: 85vh;
+            object-fit: contain;
+            box-shadow: 0 50px 100px rgba(0, 0, 0, 0.5);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 2.5rem;
+            right: 2.5rem;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: 0.3s;
+            z-index: 10001;
+        }
+
+        .lightbox-close:hover {
+            opacity: 1;
+            transform: rotate(90deg);
+        }
+
+        .lightbox-nav {
+            position: absolute;
+            color: white;
+            font-size: 4rem;
+            cursor: pointer;
+            padding: 2rem;
+            user-select: none;
+            opacity: 0.3;
+            transition: 0.3s;
+            font-family: serif;
+        }
+
+        .lightbox-nav:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-prev {
+            left: 0;
+        }
+
+        .nav-next {
+            right: 0;
+        }
+
+        .cal-day {
+            padding: 12px 0;
+            cursor: pointer;
             text-align: center;
+            font-size: 0.9rem;
+            border-radius: 4px;
+            transition: 0.2s;
+            border: 1px solid transparent;
         }
 
-        .btn-main:hover {
-            background-color: #4a633e !important; /* Hover esetén sötétebb zöld */
+        .cal-day:hover:not(.empty):not(.past):not(.booked) {
+            background: #f0f5ec;
+            color: var(--accent);
         }
 
-        #main-content { animation: fadeInPage 1s ease forwards; }
-        @keyframes fadeInPage { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .cal-day.past {
+            color: #ccc;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        .cal-day.booked {
+            background-color: #ffeaea !important;
+            color: #e74c3c !important;
+            text-decoration: line-through;
+            cursor: not-allowed;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .selected-start,
+        .selected-end {
+            background: var(--accent) !important;
+            color: white !important;
+            font-weight: bold;
+            text-decoration: none !important;
+        }
+
+        .selected-range {
+            background: var(--accent-soft) !important;
+            color: var(--accent);
+        }
+
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 350px;
+            width: 90%;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            animation: popupAnim 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .success-icon {
+            width: 60px;
+            height: 60px;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            margin: 0 auto 15px;
+            transition: background 0.3s;
+        }
+
+        .btn-main {
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            width: 100%;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+
+        @keyframes popupAnim {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        #main-content {
+            animation: fadeInPage 1s ease forwards;
+        }
+
+        @keyframes fadeInPage {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
+
     <link rel="stylesheet" href="../mobile.css">
 </head>
+
 <body>
 
 <header>
@@ -115,8 +382,8 @@
     </a>
 
     <nav class="nav-links" style="display: flex; gap: 2rem;">
-        <a href="index.html#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;">Apartments</a>
-        <a href="rolunk.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px;">About us</a>
+        <a href="index.html#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Apartments</a>
+        <a href="rolunk.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">About us</a>
     </nav>
 </header>
 
@@ -125,10 +392,13 @@
         <div>
             <p id="apt-loc" class="apt-location-tag"></p>
             <h1 id="apt-name" class="apt-title"></h1>
+
             <div class="main-image-wrapper">
-                <img id="apt-main-img" src="" class="gallery-img" onclick="openLightbox(0)">
+                <img id="apt-main-img" src="" class="gallery-img" onclick="openLightbox(0)" alt="">
             </div>
+
             <div id="apt-gallery" class="gallery-grid"></div>
+
             <div id="apt-desc" style="margin-top: 1.5rem; font-size: 1.1rem; line-height: 1.6; color: #555;"></div>
         </div>
 
@@ -136,37 +406,52 @@
             <div class="booking-card">
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; font-style: italic;">Booking</h3>
                 <p id="apt-price" class="price-tag"></p>
+
                 <div class="dev-status">
                     <span></span>
                     <span></span>
                 </div>
+
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0;">
-                <button class="btn-booking" id="booking-btn" disabled>SEND INQUIRY</button>
+
+                <button class="btn-booking" id="booking-btn" disabled>BOOK NOW</button>
             </div>
         </div>
     </div>
 </main>
 
-<div id="booking-modal" class="lightbox">
-    <div style="background: white; width: 90%; max-width: 500px; padding: 2.5rem; border-radius: 8px; position: relative; max-height: 90vh; overflow-y: auto; z-index: 100000;">
-        <span class="lightbox-close" onclick="closeBookingModal()" style="color: #999; top: 1.5rem; right: 1.5rem; position: absolute; font-size: 1.5rem;">✕</span>
+<div id="booking-modal" class="lightbox" style="display: none; align-items: center; justify-content: center; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 9999;">
+    <div style="background: white; width: 90%; max-width: 500px; padding: 2.5rem; border-radius: 8px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.2);">
+
+        <span class="lightbox-close" onclick="closeBookingModal()" style="position: absolute; top: 1.5rem; right: 1.5rem; cursor: pointer; font-size: 1.2rem; color: #999;">✕</span>
+
         <h2 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 0.5rem;">Booking Details</h2>
-        <p id="modal-apt-name" style="color: #5c7a4d; font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 2rem;"></p>
+        <p id="modal-apt-name" style="color: var(--accent); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 2rem;"></p>
 
         <div style="margin-bottom: 1.5rem;">
-            <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 10px;">Select Dates</label>
-            <div id="custom-calendar" style="border: 1px solid var(--border); padding: 15px; border-radius: 4px;">
+            <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 10px; color: var(--text-light);">Select dates</label>
+
+            <div id="custom-calendar" style="border: 1px solid var(--border); padding: 15px; border-radius: 4px; background: #fff;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <button onclick="changeMonth(-1)" style="border:none; background:none; cursor:pointer;">‹</button>
-                    <div id="calendar-month-year" style="font-weight: 700;"></div>
-                    <button onclick="changeMonth(1)" style="border:none; background:none; cursor:pointer;">›</button>
+                    <button onclick="changeMonth(-1)" style="border:none; background:none; cursor:pointer; font-size: 1.2rem; color: var(--accent);">‹</button>
+                    <div id="calendar-month-year" style="font-weight: 700; font-family: 'Playfair Display';"></div>
+                    <button onclick="changeMonth(1)" style="border:none; background:none; cursor:pointer; font-size: 1.2rem; color: var(--accent);">›</button>
                 </div>
+
                 <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.6rem; font-weight: 700; color: #999; margin-bottom: 10px;">
-                    <div>MO</div><div>TU</div><div>WE</div><div>TH</div><div>FR</div><div>SA</div><div>SU</div>
+                    <div>MO</div>
+                    <div>TU</div>
+                    <div>WE</div>
+                    <div>TH</div>
+                    <div>FR</div>
+                    <div>SA</div>
+                    <div>SU</div>
                 </div>
+
                 <div id="calendar-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;"></div>
             </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.8rem; background: #f9f9f9; padding: 10px;">
+
+            <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.8rem; background: var(--bg); padding: 10px; border-radius: 4px;">
                 <span>Arrival: <strong id="display-start">-</strong></span>
                 <span>Departure: <strong id="display-end">-</strong></span>
             </div>
@@ -176,28 +461,35 @@
         <input type="hidden" id="book-end">
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 1.5rem; align-items: center;">
-            <div>
+            <div class="form-group">
                 <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 5px;">Guests</label>
-                <select id="book-guests" onchange="calculateStay()" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border);"></select>
+                <select id="book-guests" onchange="calculateStay()" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';"></select>
             </div>
-            <div id="stay-info" style="font-size: 0.8rem; color: #5c7a4d; font-weight: 600; padding-top: 15px;">Select dates!</div>
+
+            <div id="stay-info" style="font-size: 0.8rem; color: var(--accent); font-weight: 600; padding-top: 15px;">
+                Select dates!
+            </div>
         </div>
 
         <div style="display: grid; gap: 12px; margin-bottom: 1.5rem;">
-            <input type="text" id="book-name" placeholder="Full Name" style="width: 100%; padding: 1rem; border: 1px solid var(--border);">
+            <input type="text" id="book-name" placeholder="Full name" autocomplete="name" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                <input type="email" id="book-email" placeholder="Email Address">
-                <input type="tel" id="book-phone" placeholder="Phone Number">
+                <input type="email" id="book-email" placeholder="Email address" autocomplete="email" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
+                <input type="tel" id="book-phone" placeholder="Phone number" autocomplete="tel" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
             </div>
-            <textarea id="book-msg" placeholder="Note (optional)" rows="2" style="width: 100%; padding: 1rem; border: 1px solid var(--border);"></textarea>
+
+            <textarea id="book-msg" placeholder="Note (optional)" rows="2" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat'; resize: none;"></textarea>
         </div>
 
-        <div id="total-price-box" style="background: #f9f9f9; padding: 1.2rem; text-align: right; margin-bottom: 1.5rem; border-left: 4px solid #5c7a4d;">
-            <span style="font-size: 0.7rem; text-transform: uppercase;">Estimated Total:</span>
-            <div id="grand-total" style="font-size: 2rem; font-weight: 700;">0 Ft</div>
+        <div id="total-price-box" style="background: var(--bg); padding: 1.2rem; text-align: right; margin-bottom: 1.5rem; border-radius: 4px; border-left: 4px solid var(--accent);">
+            <span style="font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; display: block;">Estimated total:</span>
+            <div id="grand-total" style="font-size: 2rem; font-weight: 700; font-family: 'Playfair Display';">0 Ft</div>
         </div>
 
-        <button onclick="sendBookingRequest()" id="submit-booking-btn" class="btn-booking" style="opacity: 0.5;">Select dates!</button>
+        <button onclick="sendBookingRequest()" id="submit-booking-btn" class="btn-booking" style="width: 100%; padding: 1.2rem; border-radius: 50px; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; transition: 0.3s; opacity: 0.5;" disabled>
+            Select dates!
+        </button>
     </div>
 </div>
 
@@ -212,259 +504,780 @@
 
 <div id="lightbox" class="lightbox" onclick="closeLightbox()">
     <span class="lightbox-close">✕</span>
-    <span class="lightbox-nav nav-prev">‹</span>
-    <img id="lightbox-img" class="lightbox-img" src="" onclick="event.stopPropagation()">
-    <span class="lightbox-nav nav-next">›</span>
+    <span class="lightbox-nav nav-prev" onclick="event.stopPropagation(); changeImage(-1)">‹</span>
+    <img id="lightbox-img" class="lightbox-img" src="" onclick="event.stopPropagation()" alt="">
+    <span class="lightbox-nav nav-next" onclick="event.stopPropagation(); changeImage(1)">›</span>
 </div>
 
 <script src="../database.js?v=16.1"></script>
 <script src="https://js.stripe.com/v3/"></script>
 <script src="../figyelmeztetes.js"></script>
+
 <script>
     let currentApt = null;
     let allImages = [];
     let currentIndex = 0;
+
     let calDate = new Date();
     let selectedStart = null;
     let selectedEnd = null;
 
+    const STRIPE_PUBLISHABLE_KEY = 'pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0';
+
     document.addEventListener('DOMContentLoaded', async () => {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
-        
+
         await initDatabase(() => {
             currentApt = db.apartments.find(a => String(a.id) === String(id));
+
             if (currentApt) {
-                // Képek betöltése a memóriába a lépegetéshez
                 allImages = [];
-                if (currentApt.coverImage) allImages.push(currentApt.coverImage);
-                if (currentApt.galleryImages) allImages.push(...currentApt.galleryImages);
+
+                if (currentApt.coverImage) {
+                    allImages.push(currentApt.coverImage);
+                }
+
+                if (Array.isArray(currentApt.galleryImages)) {
+                    allImages.push(...currentApt.galleryImages);
+                }
 
                 renderDetails();
-                setupLightboxEvents(); 
-                document.getElementById('main-content').style.display = 'block';
+                updateSEO(currentApt.name || 'Apartment', currentApt.location || 'Lake Balaton');
+
+                const mainContent = document.getElementById('main-content');
+                if (mainContent) {
+                    mainContent.style.display = 'block';
+                }
             } else {
-                window.location.href = "../index.html";
+                window.location.href = 'index.html';
             }
         });
     });
 
-    function setupLightboxEvents() {
-        const prevBtn = document.querySelector('.nav-prev');
-        const nextBtn = document.querySelector('.nav-next');
-        const closeBtn = document.querySelector('.lightbox-close');
-
-        if (prevBtn) prevBtn.onclick = (e) => { e.stopPropagation(); changeImage(-1); };
-        if (nextBtn) nextBtn.onclick = (e) => { e.stopPropagation(); changeImage(1); };
-        if (closeBtn) closeBtn.onclick = closeLightbox;
-
-        document.addEventListener('keydown', (e) => {
-            const lb = document.getElementById('lightbox');
-            if (lb && lb.style.display === 'flex') {
-                if (e.key === "ArrowLeft") changeImage(-1);
-                if (e.key === "ArrowRight") changeImage(1);
-                if (e.key === "Escape") closeLightbox();
-            }
-        });
+    function getLocalDateString(date) {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
-    async function renderDetails() {
-        if (!currentApt) return;
-        
-        // Nyelv és UI fordítások
-        let lang = window.location.href.includes('/de/') ? 'de' : 'en';
-        const today = new Date();
-        const info = getAptStatusAndPrice(currentApt, today);
-        
-        document.getElementById('apt-name').innerText = currentApt.name || "";
-        document.getElementById('apt-loc').innerText = currentApt.location || "";
-        
-        const priceTag = document.getElementById('apt-price');
-        const bookingBtn = document.getElementById('booking-btn');
+    function parseLocalDate(dateStr) {
+        if (!dateStr) return null;
 
-        if (info.status === 'OPEN') {
-            priceTag.innerHTML = `<span class="price-num">${info.price.toLocaleString()} Ft</span> / ${lang === 'de' ? 'Nacht' : 'night'}`;
-            bookingBtn.onclick = openBookingModal;
-            bookingBtn.disabled = false;
+        const parts = String(dateStr).split('-').map(Number);
+
+        if (parts.length !== 3 || parts.some(Number.isNaN)) {
+            return null;
         }
 
-        // Főkép
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function formatDisplayDate(dateStr) {
+        if (!dateStr) return '-';
+
+        const d = parseLocalDate(dateStr);
+
+        if (!d || isNaN(d.getTime())) {
+            return dateStr;
+        }
+
+        return new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: 'numeric'
+        }).format(d);
+    }
+
+    function renderDetails() {
+        if (!currentApt) return;
+
+        const today = new Date();
+        const info = getAptStatusAndPrice(currentApt, today);
+
+        const setSafeText = (id, text) => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = text;
+        };
+
+        setSafeText('apt-name', currentApt.name || 'Unknown Apartment');
+        setSafeText('apt-loc', currentApt.location || '');
+
+        const descEl = document.getElementById('apt-desc');
+        if (descEl) {
+            descEl.innerText = currentApt.description_en || currentApt.description || 'No description available.';
+        }
+
+        const priceTag = document.getElementById('apt-price');
+        const bookingBtn = document.getElementById('booking-btn');
+        const statusMsg = document.querySelector('.dev-status span:last-child');
+
+        if (info.status === 'OPEN') {
+            if (priceTag) {
+                priceTag.innerHTML = `<span class="price-num">${Number(info.price || 0).toLocaleString('hu-HU')} Ft</span> / night`;
+            }
+
+            if (bookingBtn) {
+                bookingBtn.innerText = 'Book now';
+                bookingBtn.disabled = false;
+                bookingBtn.style.opacity = '1';
+                bookingBtn.style.cursor = 'pointer';
+                bookingBtn.onclick = openBookingModal;
+            }
+
+            if (statusMsg) {
+                statusMsg.innerHTML = `
+                    <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
+                        <p><strong>Current period:</strong> ${info.label || '-'}</p>
+                        <p><strong>Capacity:</strong> max. ${info.maxGuests || '-'} guests</p>
+                        <p><strong>Minimum stay:</strong> ${info.minNights || '-'} nights</p>
+                    </div>
+                `;
+            }
+        } else {
+            if (priceTag) {
+                priceTag.innerHTML = `<span style="color:var(--warning)">Out of season</span>`;
+            }
+
+            if (bookingBtn) {
+                bookingBtn.innerText = 'Currently closed';
+                bookingBtn.disabled = true;
+                bookingBtn.style.opacity = '0.5';
+                bookingBtn.onclick = null;
+            }
+
+            if (statusMsg) {
+                statusMsg.innerText = 'The apartment welcomes guests between April 1 and September 30.';
+            }
+        }
+
         const mainImg = document.getElementById('apt-main-img');
+
         if (mainImg && currentApt.coverImage) {
             mainImg.src = currentApt.coverImage;
+            mainImg.alt = currentApt.name || 'Balaton Essence apartment';
             mainImg.onclick = () => openLightbox(0);
         }
 
-        // Galéria generálás
         const gal = document.getElementById('apt-gallery');
-        if (gal && currentApt.galleryImages) {
-            gal.innerHTML = currentApt.galleryImages.map((img, idx) => `
-                <div class="img-container">
-                    <img src="${img}" class="gallery-img" data-idx="${idx + 1}" loading="lazy">
-                </div>`).join('');
+        const gImgs = Array.isArray(currentApt.galleryImages) ? currentApt.galleryImages : [];
 
-            gal.querySelectorAll('.gallery-img').forEach(img => {
-                img.addEventListener('click', (e) => {
-                    openLightbox(parseInt(e.target.getAttribute('data-idx')));
-                });
+        if (gal) {
+            gal.innerHTML = '';
+
+            gImgs.forEach((imgSrc, idx) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'img-container';
+
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.className = 'gallery-img';
+                img.loading = 'lazy';
+                img.alt = `${currentApt.name || 'Apartment'} gallery ${idx + 1}`;
+                img.onclick = () => openLightbox(idx + 1);
+
+                wrapper.appendChild(img);
+                gal.appendChild(wrapper);
             });
         }
     }
 
     function openLightbox(index) {
-        if (!allImages.length) return;
-        currentIndex = index;
-        document.getElementById('lightbox-img').src = allImages[currentIndex];
-        const lb = document.getElementById('lightbox');
-        lb.style.display = 'flex';
-        setTimeout(() => lb.classList.add('active'), 10);
-        document.body.style.overflow = 'hidden';
-    }
+        if (!allImages || allImages.length === 0) return;
 
-    function changeImage(dir) {
-        if (!allImages.length) return;
-        currentIndex = (currentIndex + dir + allImages.length) % allImages.length;
-        document.getElementById('lightbox-img').src = allImages[currentIndex];
+        currentIndex = index;
+
+        const lbImg = document.getElementById('lightbox-img');
+        const lb = document.getElementById('lightbox');
+
+        if (lbImg && lb) {
+            lbImg.src = allImages[currentIndex];
+            lb.style.display = 'flex';
+
+            setTimeout(() => {
+                lb.classList.add('active');
+            }, 10);
+
+            document.body.style.overflow = 'hidden';
+        }
     }
 
     function closeLightbox() {
         const lb = document.getElementById('lightbox');
+        if (!lb) return;
+
         lb.classList.remove('active');
-        setTimeout(() => { lb.style.display = 'none'; document.body.style.overflow = 'auto'; }, 500);
+
+        setTimeout(() => {
+            lb.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }, 500);
     }
 
-    // FOGLALÁS ÉS NAPTÁR LOGIKA
-    function openBookingModal() {
-        const modal = document.getElementById('booking-modal');
-        document.getElementById('modal-apt-name').innerText = currentApt.name;
-        selectedStart = null; selectedEnd = null;
-        document.getElementById('book-start').value = "";
-        document.getElementById('book-end').value = "";
-        document.getElementById('display-start').innerText = "-";
-        document.getElementById('display-end').innerText = "-";
-        
-        const guestSelect = document.getElementById('book-guests');
-        const maxAllowed = currentApt.maxGuests || 2;
-        guestSelect.innerHTML = "";
-        for (let i = 2; i <= maxAllowed; i++) {
-            guestSelect.innerHTML += `<option value="${i}">${i === 2 ? '1-2 Persons' : i + ' Persons'}</option>`;
+    function changeImage(dir) {
+        if (!allImages || allImages.length === 0) return;
+
+        currentIndex = (currentIndex + dir + allImages.length) % allImages.length;
+
+        const lbImg = document.getElementById('lightbox-img');
+        if (lbImg) {
+            lbImg.src = allImages[currentIndex];
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        const lb = document.getElementById('lightbox');
+
+        if (lb && (lb.style.display === 'flex' || lb.classList.contains('active'))) {
+            if (e.key === 'ArrowLeft') changeImage(-1);
+            if (e.key === 'ArrowRight') changeImage(1);
+            if (e.key === 'Escape') closeLightbox();
         }
 
+        const bookingModal = document.getElementById('booking-modal');
+
+        if (bookingModal && bookingModal.classList.contains('active') && e.key === 'Escape') {
+            closeBookingModal();
+        }
+    });
+
+    function openBookingModal() {
+        if (!currentApt) return;
+
+        const modal = document.getElementById('booking-modal');
+        const modalAptName = document.getElementById('modal-apt-name');
+
+        if (modalAptName) {
+            modalAptName.innerText = currentApt.name || '';
+        }
+
+        selectedStart = null;
+        selectedEnd = null;
+
+        document.getElementById('book-start').value = '';
+        document.getElementById('book-end').value = '';
+        document.getElementById('display-start').innerText = '-';
+        document.getElementById('display-end').innerText = '-';
+
+        const guestSelect = document.getElementById('book-guests');
+        const today = new Date();
+        const info = getAptStatusAndPrice(currentApt, today);
+        const maxAllowed = Number(info.maxGuests || currentApt.maxGuests || 2);
+
+        guestSelect.innerHTML = '';
+
+        for (let i = 2; i <= maxAllowed; i++) {
+            const label = i === 2 ? '1-2 guests' : `${i} guests`;
+            guestSelect.innerHTML += `<option value="${i}">${label}</option>`;
+        }
+
+        if (!guestSelect.innerHTML) {
+            guestSelect.innerHTML = '<option value="2">1-2 guests</option>';
+        }
+
+        const nameInput = document.getElementById('book-name');
+        const emailInput = document.getElementById('book-email');
+        const phoneInput = document.getElementById('book-phone');
+        const msgInput = document.getElementById('book-msg');
+
+        if (nameInput) nameInput.value = '';
+        if (emailInput) emailInput.value = '';
+        if (phoneInput) phoneInput.value = '';
+        if (msgInput) msgInput.value = '';
+
         modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('active'), 10);
+
+        setTimeout(() => {
+            modal.classList.add('active');
+        }, 10);
+
         document.body.style.overflow = 'hidden';
+
+        calDate = new Date();
         renderCalendar();
         calculateStay();
     }
 
     function closeBookingModal() {
         const modal = document.getElementById('booking-modal');
-        if (modal) {
-            modal.classList.remove('active');
-            setTimeout(() => { modal.style.display = 'none'; document.body.style.overflow = 'auto'; }, 400);
+        if (!modal) return;
+
+        modal.classList.remove('active');
+
+        setTimeout(() => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }, 400);
+    }
+
+    window.addEventListener('click', function(event) {
+        const modal = document.getElementById('booking-modal');
+
+        if (event.target === modal) {
+            closeBookingModal();
         }
+    });
+
+    function getReservedDatesSet() {
+        const bookings = (db.bookings || []).filter(b => String(b.aptId) === String(currentApt.id));
+        const reservedDates = new Set();
+
+        bookings.forEach(b => {
+            const startRaw = b.checkIn || b.start;
+            const endRaw = b.checkOut || b.end;
+
+            const curr = parseLocalDate(startRaw);
+            const last = parseLocalDate(endRaw);
+
+            if (!curr || !last || isNaN(curr.getTime()) || isNaN(last.getTime())) {
+                return;
+            }
+
+            while (curr < last) {
+                reservedDates.add(getLocalDateString(curr));
+                curr.setDate(curr.getDate() + 1);
+            }
+        });
+
+        return reservedDates;
+    }
+
+    function getBlockedDatesSet() {
+        const blockedDates = new Set(Array.isArray(currentApt.disabledDates) ? currentApt.disabledDates : []);
+        const reservedDates = getReservedDatesSet();
+
+        reservedDates.forEach(date => blockedDates.add(date));
+
+        return blockedDates;
+    }
+
+    function hasBlockedDateInRange(startStr, endStr) {
+        const blockedDates = getBlockedDatesSet();
+
+        const curr = parseLocalDate(startStr);
+        const last = parseLocalDate(endStr);
+
+        if (!curr || !last || isNaN(curr.getTime()) || isNaN(last.getTime())) {
+            return true;
+        }
+
+        while (curr < last) {
+            const currStr = getLocalDateString(curr);
+
+            if (blockedDates.has(currStr)) {
+                return true;
+            }
+
+            curr.setDate(curr.getDate() + 1);
+        }
+
+        return false;
     }
 
     function renderCalendar() {
         const daysContainer = document.getElementById('calendar-days');
         const monthYearLabel = document.getElementById('calendar-month-year');
+
+        if (!daysContainer || !monthYearLabel) return;
+
         const year = calDate.getFullYear();
         const month = calDate.getMonth();
-        const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(calDate);
+
+        const monthName = new Intl.DateTimeFormat('en-US', {
+            month: 'long'
+        }).format(calDate);
+
         monthYearLabel.innerText = `${monthName} ${year}`;
-        
+
         const firstDay = new Date(year, month, 1).getDay();
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const startOffset = firstDay === 0 ? 6 : firstDay - 1;
-        const todayStr = new Date().toISOString().split('T')[0];
-        
-        const reservedDates = new Set();
-        (db.bookings || []).filter(b => String(b.aptId) === String(currentApt.id)).forEach(b => {
-            let curr = new Date(b.checkIn || b.start);
-            let last = new Date(b.checkOut || b.end);
-            while (curr < last) { reservedDates.add(curr.toISOString().split('T')[0]); curr.setDate(curr.getDate() + 1); }
-        });
 
-        let html = "";
-        for (let i = 0; i < startOffset; i++) html += `<div class="cal-day empty"></div>`;
+        const todayStr = getLocalDateString(new Date());
+        const blockedDates = getBlockedDatesSet();
+
+        let htmlContent = '';
+
+        for (let i = 0; i < startOffset; i++) {
+            htmlContent += `<div class="cal-day empty"></div>`;
+        }
+
         for (let d = 1; d <= daysInMonth; d++) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-            let className = "cal-day";
-            let onClick = `onclick="selectDate('${dateStr}')"`;
-            if (reservedDates.has(dateStr)) { className += " booked"; onClick = ""; }
-            if (dateStr < todayStr) className += " past";
-            if (selectedStart === dateStr) className += " selected-start";
-            if (selectedEnd === dateStr) className += " selected-end";
-            if (selectedStart && selectedEnd && dateStr > selectedStart && dateStr < selectedEnd) className += " selected-range";
-            html += `<div class="${className}" ${onClick}>${d}</div>`;
+
+            let className = 'cal-day';
+            let onClickAttr = `onclick="selectDate('${dateStr}')"`;
+
+            if (dateStr < todayStr) {
+                className += ' past';
+                onClickAttr = '';
+            }
+
+            if (blockedDates.has(dateStr)) {
+                className += ' booked';
+                onClickAttr = '';
+            }
+
+            if (selectedStart && dateStr === selectedStart) {
+                className += ' selected-start';
+            }
+
+            if (selectedEnd && dateStr === selectedEnd) {
+                className += ' selected-end';
+            }
+
+            if (selectedStart && selectedEnd && dateStr > selectedStart && dateStr < selectedEnd) {
+                className += ' selected-range';
+            }
+
+            htmlContent += `<div class="${className}" ${onClickAttr}>${d}</div>`;
         }
-        daysContainer.innerHTML = html;
+
+        daysContainer.innerHTML = htmlContent;
     }
 
     function selectDate(dateStr) {
-        if (!selectedStart || (selectedStart && selectedEnd)) { selectedStart = dateStr; selectedEnd = null; }
-        else if (dateStr > selectedStart) { selectedEnd = dateStr; }
-        else { selectedStart = dateStr; selectedEnd = null; }
-        document.getElementById('book-start').value = selectedStart || "";
-        document.getElementById('book-end').value = selectedEnd || "";
-        document.getElementById('display-start').innerText = selectedStart || "-";
-        document.getElementById('display-end').innerText = selectedEnd || "-";
+        const todayStr = getLocalDateString(new Date());
+
+        if (dateStr < todayStr) {
+            return;
+        }
+
+        if (!selectedStart || (selectedStart && selectedEnd)) {
+            selectedStart = dateStr;
+            selectedEnd = null;
+        } else if (dateStr > selectedStart) {
+            if (hasBlockedDateInRange(selectedStart, dateStr)) {
+                showSuccess(
+                    'Unavailable period',
+                    'The selected period contains a booked or blocked date.',
+                    'error'
+                );
+
+                selectedStart = null;
+                selectedEnd = null;
+            } else {
+                selectedEnd = dateStr;
+            }
+        } else {
+            selectedStart = dateStr;
+            selectedEnd = null;
+        }
+
+        document.getElementById('book-start').value = selectedStart || '';
+        document.getElementById('book-end').value = selectedEnd || '';
+        document.getElementById('display-start').innerText = selectedStart ? formatDisplayDate(selectedStart) : '-';
+        document.getElementById('display-end').innerText = selectedEnd ? formatDisplayDate(selectedEnd) : '-';
+
         renderCalendar();
         calculateStay();
     }
 
-    function changeMonth(dir) { calDate.setMonth(calDate.getMonth() + dir); renderCalendar(); }
+    function changeMonth(dir) {
+        calDate.setMonth(calDate.getMonth() + dir);
+        renderCalendar();
+    }
 
     function calculateStay() {
         const startVal = document.getElementById('book-start').value;
         const endVal = document.getElementById('book-end').value;
+
+        const guestSelect = document.getElementById('book-guests');
+        const guests = parseInt(guestSelect.value, 10) || 2;
+
         const btn = document.getElementById('submit-booking-btn');
         const totalBox = document.getElementById('grand-total');
-        if (!startVal || !endVal) { totalBox.innerText = "0 Ft"; btn.disabled = true; return; }
-        const start = new Date(startVal); const end = new Date(endVal);
-        const nights = Math.ceil((end - start) / 86400000);
-        let total = 0; let minN = 1;
-        for (let i = 0; i < nights; i++) {
-            let d = new Date(start); d.setDate(d.getDate() + i);
-            const info = getAptStatusAndPrice(currentApt, d, parseInt(document.getElementById('book-guests').value));
-            if (info.status === 'OPEN') { total += info.price; if (info.minNights > minN) minN = info.minNights; }
-            else { totalBox.innerText = "-"; btn.disabled = true; return; }
+        const infoText = document.getElementById('stay-info');
+
+        btn.disabled = true;
+        btn.style.opacity = '0.5';
+        btn.style.background = '#EAE8E2';
+        btn.style.color = '#888';
+
+        if (!startVal || !endVal) {
+            infoText.innerText = 'Select arrival and departure dates.';
+            totalBox.innerText = '0 Ft';
+            btn.innerText = 'Select dates!';
+            return;
         }
-        totalBox.innerText = total.toLocaleString() + " Ft";
-        btn.disabled = nights < minN;
+
+        const start = parseLocalDate(startVal);
+        const end = parseLocalDate(endVal);
+
+        if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
+            infoText.innerText = 'Invalid date selection.';
+            totalBox.innerText = '0 Ft';
+            btn.innerText = 'Invalid dates';
+            return;
+        }
+
+        if (hasBlockedDateInRange(startVal, endVal)) {
+            infoText.innerHTML = `<span style="color:var(--warning)">The selected period contains a booked or blocked date.</span>`;
+            totalBox.innerText = '0 Ft';
+            btn.innerText = 'Unavailable';
+            btn.style.background = 'var(--warning)';
+            btn.style.color = 'white';
+            return;
+        }
+
+        const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+        let total = 0;
+        let minNightsRequired = 1;
+
+        for (let i = 0; i < nights; i++) {
+            const currentDay = new Date(start);
+            currentDay.setDate(currentDay.getDate() + i);
+
+            const info = getAptStatusAndPrice(currentApt, currentDay, guests);
+
+            if (info.status === 'OPEN') {
+                total += Number(info.price || 0);
+
+                if (Number(info.minNights || 1) > minNightsRequired) {
+                    minNightsRequired = Number(info.minNights || 1);
+                }
+            } else {
+                infoText.innerHTML = `<span style="color:var(--warning)">The apartment is closed on the selected dates.</span>`;
+                totalBox.innerText = 'Closed';
+                btn.innerText = 'Unavailable';
+                btn.style.background = 'var(--warning)';
+                btn.style.color = 'white';
+                return;
+            }
+        }
+
+        totalBox.innerText = `${total.toLocaleString('hu-HU')} Ft`;
+
+        if (nights < minNightsRequired) {
+            infoText.innerHTML = `<span style="color:var(--warning)">Minimum stay is ${minNightsRequired} nights in this period.</span>`;
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.background = 'var(--warning)';
+            btn.style.color = 'white';
+            btn.innerText = `Min. ${minNightsRequired} nights required`;
+            return;
+        }
+
+        infoText.innerHTML = `<strong>${nights} nights</strong> selected.`;
+        btn.disabled = false;
+        btn.style.opacity = '1';
+        btn.style.background = 'var(--accent)';
+        btn.style.color = 'white';
+        btn.innerText = 'Send booking';
+    }
+
+    function isValidEmail(email) {
+        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '').trim());
     }
 
     async function sendBookingRequest() {
+        const submitBtn = document.getElementById('submit-booking-btn');
         const totalElement = document.getElementById('grand-total');
-        let cleanNumber = parseInt(totalElement.innerText.replace(/[^0-9]/g, '')) || 0;
+
+        let cleanNumber = 0;
+
+        if (totalElement) {
+            const rawValue = totalElement.innerText;
+            cleanNumber = parseInt(rawValue.replace(/[^0-9]/g, ''), 10) || 0;
+        }
+
         const data = {
             aptId: currentApt.id,
             aptName: currentApt.name,
-            guestName: document.getElementById('book-name').value,
-            email: document.getElementById('book-email').value,
-            phone: document.getElementById('book-phone').value,
+            guestName: document.getElementById('book-name').value.trim(),
+            email: document.getElementById('book-email').value.trim(),
+            phone: document.getElementById('book-phone').value.trim(),
             checkIn: document.getElementById('book-start').value,
             checkOut: document.getElementById('book-end').value,
             guests: document.getElementById('book-guests').value,
             totalPrice: cleanNumber,
-            lang: 'en'
+            msg: document.getElementById('book-msg').value.trim(),
+            lang: 'en',
+            source: 'Website (EN)'
         };
-        const submitBtn = document.getElementById('submit-booking-btn');
-        submitBtn.disabled = true;
-        submitBtn.innerText = "Redirecting...";
+
+        if (!data.guestName || !data.email || !data.phone) {
+            showSuccess(
+                'Missing details',
+                'Please enter your name, email address and phone number.',
+                'error'
+            );
+            return;
+        }
+
+        if (!isValidEmail(data.email)) {
+            showSuccess(
+                'Invalid email',
+                'Please check your email address.',
+                'error'
+            );
+            return;
+        }
+
+        if (!data.checkIn || !data.checkOut) {
+            showSuccess(
+                'Missing dates',
+                'Please select arrival and departure dates.',
+                'error'
+            );
+            return;
+        }
+
+        if (hasBlockedDateInRange(data.checkIn, data.checkOut)) {
+            showSuccess(
+                'Unavailable period',
+                'The selected period contains a booked or blocked date.',
+                'error'
+            );
+            return;
+        }
+
+        if (data.totalPrice <= 0) {
+            showSuccess(
+                'Invalid amount',
+                'The booking amount could not be calculated. Please choose another date or refresh the page.',
+                'error'
+            );
+            return;
+        }
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.style.opacity = '0.6';
+            submitBtn.innerText = 'Redirecting to payment...';
+        }
+
         try {
             const res = await fetch('/api/create-checkout-session', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(data)
             });
+
             const session = await res.json();
-            const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0'); 
-            await stripe.redirectToCheckout({ sessionId: session.id });
+
+            if (!res.ok || session.error) {
+                showSuccess(
+                    'Error',
+                    session.error || 'Could not start payment.',
+                    'error'
+                );
+
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.innerText = 'Send booking';
+                }
+
+                return;
+            }
+
+            if (!session.id) {
+                showSuccess(
+                    'Error',
+                    'Stripe session ID is missing.',
+                    'error'
+                );
+
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.innerText = 'Send booking';
+                }
+
+                return;
+            }
+
+            const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+
+            const redirectResult = await stripe.redirectToCheckout({
+                sessionId: session.id
+            });
+
+            if (redirectResult.error) {
+                showSuccess(
+                    'Stripe error',
+                    redirectResult.error.message || 'Could not redirect to payment.',
+                    'error'
+                );
+
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.style.opacity = '1';
+                    submitBtn.innerText = 'Send booking';
+                }
+            }
         } catch (e) {
-            submitBtn.disabled = false;
+            console.error(e);
+
+            showSuccess(
+                'Error',
+                'A network error occurred while starting the payment.',
+                'error'
+            );
+
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
+                submitBtn.innerText = 'Send booking';
+            }
         }
     }
+
+    function showSuccess(title, message, type = 'success', callback) {
+        const modal = document.getElementById('custom-alert');
+        const iconCircle = document.getElementById('alert-icon-circle');
+        const btn = document.getElementById('alert-btn');
+        const titleEl = document.getElementById('alert-title');
+        const msgEl = document.getElementById('alert-msg');
+
+        titleEl.innerText = title;
+        msgEl.innerText = message;
+        window.alertCallback = callback;
+
+        if (type === 'error') {
+            iconCircle.innerText = '✕';
+            iconCircle.style.background = '#e74c3c';
+            btn.style.background = '#e74c3c';
+        } else {
+            iconCircle.innerText = '✓';
+            iconCircle.style.background = '#27ae60';
+            btn.style.background = '#27ae60';
+        }
+
+        modal.style.display = 'flex';
+    }
+
+    function closeCustomAlert() {
+        document.getElementById('custom-alert').style.display = 'none';
+
+        if (window.alertCallback) {
+            window.alertCallback();
+            window.alertCallback = null;
+        }
+    }
+
+    function updateSEO(apartmentName, location) {
+        document.title = `${apartmentName} - Luxury Apartment ${location} | Balaton Essence`;
+
+        let metaDesc = document.querySelector('meta[name="description"]');
+
+        if (!metaDesc) {
+            metaDesc = document.createElement('meta');
+            metaDesc.setAttribute('name', 'description');
+            document.head.appendChild(metaDesc);
+        }
+
+        metaDesc.setAttribute(
+            'content',
+            `Book your stay at ${apartmentName} in ${location}. Premium Balaton accommodation, beach equipment rental and peaceful lakeside experience.`
+        );
+    }
 </script>
+
 </body>
 </html>
