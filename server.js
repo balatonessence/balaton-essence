@@ -369,6 +369,7 @@ async function sendAdminBookingEmail(newB) {
                     <div style="padding: 20px;">
                         <p><strong>Vendég:</strong> ${escapeHtml(newB.guestName)}</p>
                         <p><strong>Email:</strong> ${escapeHtml(newB.email)}</p>
+                        <p><strong>Telefon:</strong> ${escapeHtml(newB.phone || newB.tel || newB.telefon || '-')}</p>
                         <p><strong>Apartman:</strong> ${escapeHtml(newB.aptName)}</p>
                         <p><strong>Időpont:</strong> ${escapeHtml(newB.checkIn)} — ${escapeHtml(newB.checkOut)}</p>
                         <p><strong>Befizetett előleg:</strong> ${formatMoney(newB.paidDeposit)} Ft</p>
@@ -390,6 +391,47 @@ async function sendGuestBookingEmail(req, newB) {
     const balance = Number(newB.totalPrice || 0) - Number(newB.paidDeposit || 0);
 
     const cancelUrl = `https://${req.get('host')}/cancel.html?id=${encodeURIComponent(newB.id)}&token=${encodeURIComponent(newB.cancelToken || '')}&lang=${guestLang}`;
+    const breakfastUrl = `https://${req.get('host')}/morningorder.html?id=${encodeURIComponent(newB.id)}&lang=${guestLang}`;
+
+    const sunPath = guestLang === 'en'
+        ? '/en/sun.html'
+        : guestLang === 'de'
+            ? '/de/sun.html'
+            : '/sun.html';
+
+    const sunUrl = `https://${req.get('host')}${sunPath}?id=${encodeURIComponent(newB.id)}&lang=${guestLang}`;
+
+    const extraTexts = {
+        hu: {
+            title: 'Tegye még kényelmesebbé a pihenést',
+            breakfastTitle: 'Reggeli rendelés',
+            breakfastText: 'Rendeljen kényelmesen reggelit a foglalásához.',
+            breakfastBtn: 'Reggeli rendelése',
+            sunTitle: 'SUP & strandfelszerelés',
+            sunText: 'Foglaljon SUP-ot, napozószéket vagy napernyőt a balatoni napokhoz.',
+            sunBtn: 'Strandfelszerelés foglalása'
+        },
+        en: {
+            title: 'Make your stay even more comfortable',
+            breakfastTitle: 'Breakfast order',
+            breakfastText: 'Order breakfast easily for your stay.',
+            breakfastBtn: 'Order breakfast',
+            sunTitle: 'SUP & beach equipment',
+            sunText: 'Book SUP, sunbeds or parasols for your days at Lake Balaton.',
+            sunBtn: 'Book beach equipment'
+        },
+        de: {
+            title: 'Machen Sie Ihren Aufenthalt noch komfortabler',
+            breakfastTitle: 'Frühstücksbestellung',
+            breakfastText: 'Bestellen Sie bequem Frühstück für Ihren Aufenthalt.',
+            breakfastBtn: 'Frühstück bestellen',
+            sunTitle: 'SUP & Strandausrüstung',
+            sunText: 'Buchen Sie SUP, Sonnenliegen oder Sonnenschirme für Ihre Tage am Plattensee.',
+            sunBtn: 'Strandausrüstung buchen'
+        }
+    };
+
+    const extraT = extraTexts[guestLang] || extraTexts.hu;
 
     try {
         await resend.emails.send({
@@ -423,7 +465,35 @@ async function sendGuestBookingEmail(req, newB) {
                             <h4 style="margin-top: 0; margin-bottom: 8px; color: #8a6d3b; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px;">${escapeHtml(t.policyTitle)}</h4>
                             <p style="margin: 0; line-height: 1.5; font-size: 13px; color: #66512c;">${escapeHtml(t.policyText)}</p>
                         </div>
+                        <div style="background-color: #f9fbf8; border: 1px solid #e2e8df; border-radius: 8px; padding: 25px; margin: 30px 0;">
+                            <h3 style="margin-top: 0; color: #5c7a4d; border-bottom: 2px solid #e2e8df; padding-bottom: 10px; font-weight: 600;">
+                                ${escapeHtml(extraT.title)}
+                            </h3>
 
+                            <div style="padding: 15px 0; border-bottom: 1px solid #e2e8df;">
+                                <p style="margin: 0 0 6px 0; font-weight: bold; color: #2C3325;">
+                                    ${escapeHtml(extraT.breakfastTitle)}
+                                </p>
+                                <p style="margin: 0 0 14px 0; color: #666666; font-size: 14px; line-height: 1.5;">
+                                    ${escapeHtml(extraT.breakfastText)}
+                                </p>
+                                <a href="${breakfastUrl}" style="display: inline-block; background-color: #5c7a4d; color: #ffffff; text-decoration: none; padding: 10px 22px; border-radius: 20px; font-weight: 600; font-size: 13px;">
+                                    ${escapeHtml(extraT.breakfastBtn)}
+                                </a>
+                            </div>
+
+                            <div style="padding: 15px 0 0 0;">
+                                <p style="margin: 0 0 6px 0; font-weight: bold; color: #2C3325;">
+                                    ${escapeHtml(extraT.sunTitle)}
+                                </p>
+                                <p style="margin: 0 0 14px 0; color: #666666; font-size: 14px; line-height: 1.5;">
+                                    ${escapeHtml(extraT.sunText)}
+                                </p>
+                                <a href="${sunUrl}" style="display: inline-block; background-color: #5c7a4d; color: #ffffff; text-decoration: none; padding: 10px 22px; border-radius: 20px; font-weight: 600; font-size: 13px;">
+                                    ${escapeHtml(extraT.sunBtn)}
+                                </a>
+                            </div>
+                        </div>
                         <div style="text-align: center; margin-top: 40px;">
                             <a href="${cancelUrl}" style="display: inline-block; background-color: transparent; border: 1px solid #d9534f; color: #d9534f; text-decoration: none; padding: 10px 25px; border-radius: 20px; font-weight: 600; font-size: 13px;">${escapeHtml(t.cancelBtn)}</a>
                         </div>
@@ -924,9 +994,10 @@ app.post('/api/order', async (req, res) => {
                 html: `
                     <h2>Új ${order.type === 'BREAKFAST' ? 'reggeli' : 'felszerelés'} rendelés</h2>
                     <p><strong>Státusz:</strong> ${order.method === 'cash' ? 'Helyszíni fizetés' : 'Online fizetésre vár'}</p>
-                    <p><strong>Vendég:</strong> ${escapeHtml(order.guestName)} (${escapeHtml(order.email)})</p>
-                    <p><strong>Apartman:</strong> ${escapeHtml(order.apartment)}</p>
-                    <p><strong>Tételek:</strong> ${escapeHtml(order.items)}</p>
+                    <p><strong>Vendég:</strong> ${escapeHtml(data.guestName)} (${escapeHtml(data.email)})</p>
+                    <p><strong>Telefon:</strong> ${escapeHtml(data.phone || data.tel || data.telefon || '-')}</p>
+                    <p><strong>Apartman:</strong> ${escapeHtml(data.apartment)}</p>
+                    <p><strong>Tételek:</strong> ${escapeHtml(data.items)}</p>
                     <p><strong>Idő:</strong> ${escapeHtml(order.start)} — ${escapeHtml(order.end)} (${escapeHtml(order.days)} nap)</p>
                     <p><strong>Összeg:</strong> ${formatMoney(amount)} Ft</p>
                     <p><strong>Fizetés:</strong> ${order.method === 'cash' ? 'Helyszíni KP' : 'Online kártya'}</p>`
