@@ -154,6 +154,99 @@ function ensureDbShape(db) {
     if (!Array.isArray(db.todos)) db.todos = [];
     if (!Array.isArray(db.pendingBookings)) db.pendingBookings = [];
 
+    if (!db.services || typeof db.services !== 'object') db.services = {};
+
+    if (!Array.isArray(db.services.sun)) {
+        db.services.sun = [
+            {
+                id: 'sup',
+                name_hu: 'SUP',
+                name_en: 'SUP',
+                name_de: 'SUP',
+                price: 5900,
+                unit_hu: 'nap',
+                unit_en: 'day',
+                unit_de: 'Tag',
+                description_hu: '',
+                description_en: '',
+                description_de: '',
+                image: 'img/sup.png',
+                active: true
+            },
+            {
+                id: 'sunbed',
+                name_hu: 'Napozószék',
+                name_en: 'Sunbed',
+                name_de: 'Sonnenliege',
+                price: 1500,
+                unit_hu: 'nap',
+                unit_en: 'day',
+                unit_de: 'Tag',
+                description_hu: '',
+                description_en: '',
+                description_de: '',
+                image: 'img/napozoszek.png',
+                active: true
+            },
+            {
+                id: 'umbrella',
+                name_hu: 'Napernyő',
+                name_en: 'Parasol',
+                name_de: 'Sonnenschirm',
+                price: 1000,
+                unit_hu: 'nap',
+                unit_en: 'day',
+                unit_de: 'Tag',
+                description_hu: '',
+                description_en: '',
+                description_de: '',
+                image: 'img/napernyo.png',
+                active: true
+            }
+        ];
+    }
+
+    if (!Array.isArray(db.services.moments)) {
+        db.services.moments = [
+            {
+                id: 'breakfast_plate',
+                name_hu: 'Reggeli tál',
+                name_en: 'Breakfast plate',
+                name_de: 'Frühstücksplatte',
+                price: 4200,
+                description_hu: 'Friss péksütemények, válogatott felvágottak és sajtok, szezonális zöldségek, gyümölcsök és apró finomságok. Kényelmes, bőséges reggeli, amely tökéletes indítása a napnak. A tál összeállítása szezonálisan változhat.',
+                description_en: 'Fresh pastries, a selection of cold cuts and cheeses, seasonal vegetables, fruits, and small treats. A comfortable, hearty breakfast that is the perfect way to start your day. The contents of the platter may vary depending on the season.',
+                description_de: 'Frisches Gebäck, ausgewählte Wurst- und Käsesorten, Gemüse und Obst der Saison sowie kleine Köstlichkeiten. Ein gemütliches, reichhaltiges Frühstück, das den Tag perfekt einläutet. Die Zusammensetzung der Platte kann je nach Saison variieren.',
+                image: 'img/Reggeli tál.png',
+                active: true
+            },
+            {
+                id: 'cheese_plate',
+                name_hu: 'Sajttál',
+                name_en: 'Cheese plate',
+                name_de: 'Käseplatte',
+                price: 4800,
+                description_hu: 'Gondosan válogatott sajtok, friss gyümölcsök és harmonizáló kiegészítők elegáns tálalásban, egy palack dél-balatoni borral kiegészítve. Tökéletes választás egy nyugodt estéhez vagy különleges pillanathoz. A tál összeállítása szezonálisan változhat.',
+                description_en: 'Carefully selected cheeses, fresh fruits, and complementary accompaniments, elegantly presented and paired with a bottle of wine from the southern Balaton region. The perfect choice for a relaxing evening or a special occasion. The contents of the platter may vary seasonally.',
+                description_de: 'Sorgfältig ausgewählte Käsesorten, frisches Obst und dazu passende Beilagen, elegant angerichtet und ergänzt durch eine Flasche Wein aus dem südlichen Balaton. Die perfekte Wahl für einen ruhigen Abend oder einen besonderen Moment. Die Zusammensetzung der Platte kann je nach Saison variieren.',
+                image: 'img/Sajttál.png',
+                active: true
+            },
+            {
+                id: 'celebration_plate',
+                name_hu: 'Ünnepi tál',
+                name_en: 'Festive plate',
+                name_de: 'Festliche Platte',
+                price: 4800,
+                description_hu: 'Egy üveg Prosecco, két szelet desszert és gondosan válogatott kiegészítők egy elegáns, meghitt pillanathoz. Ideális választás ünnepléshez, romantikus estékhez vagy évfordulóhoz. A tál összeállítása szezonálisan változhat.',
+                description_en: 'A bottle of Prosecco, two dessert slices, and carefully selected accompaniments for an elegant, intimate moment. The perfect choice for celebrations, romantic evenings, or anniversaries. The contents of the platter may vary by season.',
+                description_de: 'Eine Flasche Prosecco, zwei Dessertstücke und sorgfältig ausgewählte Beilagen für einen eleganten, gemütlichen Moment. Die ideale Wahl für Feierlichkeiten, romantische Abende oder Jahrestage. Die Zusammenstellung der Platte kann je nach Saison variieren.',
+                image: 'img/Születésnap, évforduló.png',
+                active: true
+            }
+        ];
+    }
+
     return db;
 }
 
@@ -569,6 +662,76 @@ app.get('/api/get-db-content', async (req, res) => {
     }
 });
 
+function sanitizeServiceItem(item) {
+    return {
+        id: String(item.id || '').trim(),
+        name_hu: String(item.name_hu || '').trim(),
+        name_en: String(item.name_en || '').trim(),
+        name_de: String(item.name_de || '').trim(),
+        price: Math.max(0, Math.round(Number(item.price || 0))),
+        unit_hu: String(item.unit_hu || '').trim(),
+        unit_en: String(item.unit_en || '').trim(),
+        unit_de: String(item.unit_de || '').trim(),
+        description_hu: String(item.description_hu || '').trim(),
+        description_en: String(item.description_en || '').trim(),
+        description_de: String(item.description_de || '').trim(),
+        image: String(item.image || '').trim(),
+        active: item.active !== false
+    };
+}
+
+app.get('/api/services', async (req, res) => {
+    try {
+        const db = await getDbContent();
+
+        res.json({
+            success: true,
+            services: db.services || { sun: [], moments: [] }
+        });
+    } catch (err) {
+        console.error('Services lekérési hiba:', err);
+        res.status(500).json({ error: 'Hiba a szolgáltatások lekérésekor.' });
+    }
+});
+
+app.post('/api/admin/services', requireAdmin, async (req, res) => {
+    try {
+        const incoming = req.body?.services || req.body;
+
+        if (!incoming || typeof incoming !== 'object') {
+            return res.status(400).json({ error: 'Hiányzó szolgáltatás adatok.' });
+        }
+
+        const sun = Array.isArray(incoming.sun)
+            ? incoming.sun.map(sanitizeServiceItem).filter(item => item.id)
+            : [];
+
+        const moments = Array.isArray(incoming.moments)
+            ? incoming.moments.map(sanitizeServiceItem).filter(item => item.id)
+            : [];
+
+        await updateDbContent(async db => {
+            db.services = {
+                sun,
+                moments
+            };
+
+            return db;
+        });
+
+        res.json({
+            success: true,
+            services: {
+                sun,
+                moments
+            }
+        });
+    } catch (err) {
+        console.error('Services mentési hiba:', err);
+        res.status(500).json({ error: 'Hiba a szolgáltatások mentésekor.' });
+    }
+});
+
 app.post('/api/save', requireAdmin, async (req, res) => {
     try {
         await saveDbContent(req.body);
@@ -579,6 +742,76 @@ app.post('/api/save', requireAdmin, async (req, res) => {
     }
 });
 
+
+app.get('/api/services', async (req, res) => {
+    try {
+        const db = await getDbContent();
+
+        res.json({
+            success: true,
+            services: db.services || { sun: [], moments: [] }
+        });
+    } catch (err) {
+        console.error('Services lekérési hiba:', err);
+        res.status(500).json({ error: 'Hiba a szolgáltatások lekérésekor.' });
+    }
+});
+
+function sanitizeServiceItem(item) {
+    return {
+        id: String(item.id || '').trim(),
+        name_hu: String(item.name_hu || '').trim(),
+        name_en: String(item.name_en || '').trim(),
+        name_de: String(item.name_de || '').trim(),
+        price: Math.max(0, Math.round(Number(item.price || 0))),
+        unit_hu: String(item.unit_hu || '').trim(),
+        unit_en: String(item.unit_en || '').trim(),
+        unit_de: String(item.unit_de || '').trim(),
+        description_hu: String(item.description_hu || '').trim(),
+        description_en: String(item.description_en || '').trim(),
+        description_de: String(item.description_de || '').trim(),
+        image: String(item.image || '').trim(),
+        active: item.active !== false
+    };
+}
+
+app.post('/api/admin/services', requireAdmin, async (req, res) => {
+    try {
+        const incoming = req.body?.services || req.body;
+
+        if (!incoming || typeof incoming !== 'object') {
+            return res.status(400).json({ error: 'Hiányzó szolgáltatás adatok.' });
+        }
+
+        const sun = Array.isArray(incoming.sun)
+            ? incoming.sun.map(sanitizeServiceItem).filter(item => item.id)
+            : [];
+
+        const moments = Array.isArray(incoming.moments)
+            ? incoming.moments.map(sanitizeServiceItem).filter(item => item.id)
+            : [];
+
+        await updateDbContent(async db => {
+            db.services = {
+                sun,
+                moments
+            };
+
+            return db;
+        });
+
+        res.json({
+            success: true,
+            services: {
+                sun,
+                moments
+            }
+        });
+    } catch (err) {
+        console.error('Services mentési hiba:', err);
+        res.status(500).json({ error: 'Hiba a szolgáltatások mentésekor.' });
+    }
+});
 // -----------------------------------------------------------------------------
 // API - STRIPE BOOKING CHECKOUT
 // -----------------------------------------------------------------------------

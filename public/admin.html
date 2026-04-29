@@ -355,6 +355,68 @@
             border-left: 5px solid #298538;
             position: relative;
         }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 18px;
+        }
+
+        .service-card {
+            background: #fafafa;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .service-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 14px;
+        }
+
+        .service-card-title {
+            font-weight: 800;
+            color: var(--essence);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 1px;
+        }
+
+        .service-fields {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+        }
+
+        .service-fields.full {
+            grid-template-columns: 1fr;
+        }
+
+        .service-fields textarea {
+            min-height: 90px;
+        }
+
+        .service-active-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: #666;
+        }
+
+        .service-active-row input {
+            width: auto;
+        }
+
+        @media (max-width: 900px) {
+            .service-fields {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 
@@ -428,6 +490,23 @@
             </thead>
             <tbody id="rent-table-body"></tbody>
         </table>
+    </div>
+
+    <div class="section">
+        <div class="section-header">
+            <h2>Szolgáltatások / Árak</h2>
+            <button class="btn-cta" onclick="saveServices()">Szolgáltatások mentése</button>
+        </div>
+
+        <div style="margin-bottom: 2rem;">
+            <h3 style="font-family:'Playfair Display'; margin-bottom: 1rem;">SUP & SUN</h3>
+            <div id="services-sun-container" class="service-grid"></div>
+        </div>
+
+        <div>
+            <h3 style="font-family:'Playfair Display'; margin-bottom: 1rem;">Moments / Reggeli tálak</h3>
+            <div id="services-moments-container" class="service-grid"></div>
+        </div>
     </div>
 
     <div class="section">
@@ -1163,9 +1242,14 @@
         if (!Array.isArray(db.breakfasts)) db.breakfasts = [];
         if (!Array.isArray(db.reviews)) db.reviews = [];
 
+        if (!db.services || typeof db.services !== 'object') db.services = {};
+        if (!Array.isArray(db.services.sun)) db.services.sun = [];
+        if (!Array.isArray(db.services.moments)) db.services.moments = [];
+
         renderBookings();
         renderBreakfasts();
         renderExtras();
+        renderServices();
         renderApartments();
         renderOwners();
         renderReviews();
@@ -1372,6 +1456,164 @@
                 </div>
             `;
         }).join('');
+    }
+
+    function renderServices() {
+        renderServiceGroup('sun', 'services-sun-container');
+        renderServiceGroup('moments', 'services-moments-container');
+    }
+
+    function renderServiceGroup(groupKey, containerId) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+
+        const services = db.services?.[groupKey] || [];
+
+        if (services.length === 0) {
+            container.innerHTML = `
+                <div style="padding:1.5rem; background:#fafafa; border:1px dashed #ddd; border-radius:10px; color:#777;">
+                    Nincs még szolgáltatás ebben a kategóriában.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = services.map((item, index) => {
+            const isSun = groupKey === 'sun';
+
+            return `
+                <div class="service-card" data-service-group="${escapeHtml(groupKey)}" data-service-index="${index}">
+                    <div class="service-card-header">
+                        <div>
+                            <div class="service-card-title">${escapeHtml(item.id || 'service')}</div>
+                            <div style="font-size:0.75rem; color:#777;">${escapeHtml(item.name_hu || '')}</div>
+                        </div>
+
+                        <label class="service-active-row">
+                            <input type="checkbox" class="svc-active" ${item.active !== false ? 'checked' : ''}>
+                            Aktív
+                        </label>
+                    </div>
+
+                    <div class="service-fields">
+                        <div class="form-group">
+                            <label>Név HU</label>
+                            <input type="text" class="svc-name-hu" value="${escapeHtml(item.name_hu || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label>Név EN</label>
+                            <input type="text" class="svc-name-en" value="${escapeHtml(item.name_en || '')}">
+                        </div>
+                        <div class="form-group">
+                            <label>Név DE</label>
+                            <input type="text" class="svc-name-de" value="${escapeHtml(item.name_de || '')}">
+                        </div>
+                    </div>
+
+                    <div class="service-fields">
+                        <div class="form-group">
+                            <label>Ár / fő vagy nap</label>
+                            <input type="number" class="svc-price" value="${escapeHtml(item.price || 0)}">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Kép útvonal</label>
+                            <input type="text" class="svc-image" value="${escapeHtml(item.image || '')}" placeholder="img/sup.png">
+                        </div>
+
+                        ${isSun ? `
+                            <div class="form-group">
+                                <label>Egység HU / EN / DE</label>
+                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                                    <input type="text" class="svc-unit-hu" value="${escapeHtml(item.unit_hu || '')}" placeholder="nap">
+                                    <input type="text" class="svc-unit-en" value="${escapeHtml(item.unit_en || '')}" placeholder="day">
+                                    <input type="text" class="svc-unit-de" value="${escapeHtml(item.unit_de || '')}" placeholder="Tag">
+                                </div>
+                            </div>
+                        ` : `
+                            <input type="hidden" class="svc-unit-hu" value="${escapeHtml(item.unit_hu || '')}">
+                            <input type="hidden" class="svc-unit-en" value="${escapeHtml(item.unit_en || '')}">
+                            <input type="hidden" class="svc-unit-de" value="${escapeHtml(item.unit_de || '')}">
+                        `}
+                    </div>
+
+                    <div class="service-fields">
+                        <div class="form-group">
+                            <label>Leírás HU</label>
+                            <textarea class="svc-desc-hu">${escapeHtml(item.description_hu || '')}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Leírás EN</label>
+                            <textarea class="svc-desc-en">${escapeHtml(item.description_en || '')}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>Leírás DE</label>
+                            <textarea class="svc-desc-de">${escapeHtml(item.description_de || '')}</textarea>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function collectServicesFromAdmin() {
+        const result = {
+            sun: collectServiceGroupFromAdmin('sun'),
+            moments: collectServiceGroupFromAdmin('moments')
+        };
+
+        return result;
+    }
+
+    function collectServiceGroupFromAdmin(groupKey) {
+        const cards = document.querySelectorAll(`[data-service-group="${groupKey}"]`);
+
+        return Array.from(cards).map(card => {
+            const index = Number(card.dataset.serviceIndex);
+            const original = db.services?.[groupKey]?.[index] || {};
+
+            return {
+                id: original.id,
+                name_hu: card.querySelector('.svc-name-hu')?.value.trim() || '',
+                name_en: card.querySelector('.svc-name-en')?.value.trim() || '',
+                name_de: card.querySelector('.svc-name-de')?.value.trim() || '',
+                price: Number(card.querySelector('.svc-price')?.value || 0),
+                unit_hu: card.querySelector('.svc-unit-hu')?.value.trim() || '',
+                unit_en: card.querySelector('.svc-unit-en')?.value.trim() || '',
+                unit_de: card.querySelector('.svc-unit-de')?.value.trim() || '',
+                description_hu: card.querySelector('.svc-desc-hu')?.value.trim() || '',
+                description_en: card.querySelector('.svc-desc-en')?.value.trim() || '',
+                description_de: card.querySelector('.svc-desc-de')?.value.trim() || '',
+                image: card.querySelector('.svc-image')?.value.trim() || '',
+                active: card.querySelector('.svc-active')?.checked === true
+            };
+        });
+    }
+
+    async function saveServices() {
+        const services = collectServicesFromAdmin();
+
+        try {
+            const res = await fetch('/api/admin/services', {
+                method: 'POST',
+                headers: getAdminHeaders(),
+                body: JSON.stringify({ services })
+            });
+
+            const result = await res.json().catch(() => ({}));
+
+            if (!res.ok || result.success !== true) {
+                alert(result.error || 'Nem sikerült menteni a szolgáltatásokat.');
+                return;
+            }
+
+            db.services = result.services || services;
+            renderServices();
+            showSaveToast();
+        } catch (err) {
+            console.error('Szolgáltatások mentési hiba:', err);
+            alert('Nem sikerült elérni a szervert.');
+        }
     }
 
     function drawChart(p, c, l) {
