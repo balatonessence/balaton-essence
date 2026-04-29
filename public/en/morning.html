@@ -222,25 +222,29 @@
 <script>
     let currentQty = 1;
     let calendar;
+
     const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0');
+
     const momentDescriptions = {
         "Breakfast plate": `
-            Fresh pastries, a selection of cold cuts and cheeses, seasonal vegetables, fruits, and small treats. A comfortable, hearty breakfast that’s the perfect way to start your day. 
+            Fresh pastries, a selection of cold cuts and cheeses, seasonal vegetables, fruits, and small treats. A comfortable, hearty breakfast that is the perfect way to start your day.
             The contents of the platter may vary depending on the season.
         `,
         "Cheese plate": `
             Carefully selected cheeses, fresh fruits, and complementary accompaniments, elegantly presented and paired with a bottle of wine from the southern Balaton region. The perfect choice for a relaxing evening or a special occasion.
-            The contents of the platter may vary seasonally.
+            The contents of the platter may vary depending on the season.
         `,
         "Festive plate": `
-            A glass of Prosecco, two dessert slices, and carefully selected accompaniments for an elegant, intimate moment. The perfect choice for celebrations, romantic evenings, or anniversaries.
-            The contents of the platter may vary by season.
+            A bottle of Prosecco, two dessert slices, and carefully selected accompaniments for an elegant, intimate moment. The perfect choice for celebrations, romantic evenings, or anniversaries.
+            The contents of the platter may vary depending on the season.
         `
     };
 
     document.addEventListener('DOMContentLoaded', async function() {
         const urlParams = new URLSearchParams(window.location.search);
         const bookingId = urlParams.get('id');
+        const bookingToken = urlParams.get('token') || '';
+
         const infoBox = document.getElementById('order-info-box');
         const formGroups = document.querySelectorAll('.form-group');
         const submitBtn = document.querySelector('.btn-submit');
@@ -249,50 +253,69 @@
             infoBox.innerHTML = `
                 <div style="background: #f4f7f2; border: 1px dashed #5c7a4d; padding: 25px; text-align: center; border-radius: 8px;">
                     <p style="color: #5c7a4d; font-weight: 700; font-size: 1.1rem; margin-bottom: 10px;">Dear Guest!</p>
-                    <p style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">It can only be ordered by guests with a valid accommodation booking in our apartments in Fonyód.</p>
+                    <p style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">This service is available only for guests with a valid accommodation booking in our Fonyód apartments.</p>
                     <a href="index.html#apartments" style="display: inline-block; background: #5c7a4d; color: white; text-decoration: none; padding: 12px 25px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Book your stay here</a>
-                </div>`;
+                </div>
+            `;
+
             infoBox.style.display = 'block';
             formGroups.forEach(group => group.style.display = 'none');
-            if(submitBtn) submitBtn.style.display = 'none';
+            if (submitBtn) submitBtn.style.display = 'none';
             return;
         }
 
         try {
-            const res = await fetch(`/api/verify-booking/${bookingId}`);
+            const res = await fetch(`/api/verify-booking/${encodeURIComponent(bookingId)}?token=${encodeURIComponent(bookingToken)}`);
             const data = await res.json();
 
-            if (data.valid) {
-                document.getElementById('m-name').value = data.guestName;
+            if (res.ok && data.valid) {
+                document.getElementById('m-name').value = data.guestName || '';
                 document.getElementById('m-name').readOnly = true;
-                document.getElementById('m-email').value = data.email;
+
+                document.getElementById('m-email').value = data.email || '';
                 document.getElementById('m-email').readOnly = true;
-                
+
+                if (data.phone) {
+                    document.getElementById('m-phone').value = data.phone;
+                }
+
                 const select = document.getElementById('m-apt-select');
-                select.innerHTML = `<option value="${data.aptName}">${data.aptName}</option>`;
+                select.innerHTML = `<option value="${escapeHtmlForOption(data.aptName || '')}">${escapeHtmlForOption(data.aptName || '')}</option>`;
                 select.disabled = true;
             } else {
-                showSuccess("Error!", "Invalid booking ID.", "error");
-                if(submitBtn) submitBtn.disabled = true;
+                showSuccess("Error!", data.error || "Invalid booking ID.", "error");
+                if (submitBtn) submitBtn.disabled = true;
             }
         } catch (e) {
             console.error(e);
+            showSuccess("Error!", "Could not verify your booking.", "error");
+            if (submitBtn) submitBtn.disabled = true;
         }
 
         calendar = flatpickr("#m-date", {
             dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "F j, Y",
             minDate: new Date().fp_incr(1)
         });
     });
 
+    function escapeHtmlForOption(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     function openMorningModal(itemName) {
         currentQty = 1;
+
         document.getElementById('qty-num').innerText = currentQty;
         document.getElementById('m-item-type').value = itemName;
         document.getElementById('m-title').innerText = itemName;
-
-        document.getElementById('m-desc').innerText =
-            momentDescriptions[itemName] || "";
+        document.getElementById('m-desc').innerText = momentDescriptions[itemName] || "";
 
         const modal = document.getElementById('morning-modal');
         modal.style.display = 'flex';
@@ -302,7 +325,9 @@
     function closeMorningModal() {
         const modal = document.getElementById('morning-modal');
         modal.classList.remove('active');
-        setTimeout(() => modal.style.display = 'none', 400);
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 400);
     }
 
     function updateQty(val) {
@@ -312,36 +337,45 @@
 
     async function submitMorning() {
         const apt = document.getElementById('m-apt-select').value;
-        const phone = document.getElementById('m-phone').value;
-        const name = document.getElementById('m-name').value;
-        const email = document.getElementById('m-email').value;
+        const phone = document.getElementById('m-phone').value.trim();
+        const name = document.getElementById('m-name').value.trim();
+        const email = document.getElementById('m-email').value.trim();
         const date = document.getElementById('m-date').value;
-        const type = document.getElementById('m-item-type').value;
-        const method = document.querySelector('input[name="m-payment"]:checked').value;
+        const itemType = document.getElementById('m-item-type').value;
+        const method = document.querySelector('input[name="m-payment"]:checked')?.value || 'cash';
 
-        if(!apt || !name || !date || !phone || !email) {
+        if (!apt || !name || !date || !phone || !email || !itemType) {
             return showSuccess("Error!", "Please fill in all fields!", "error");
         }
 
-        const pricePerUnit = type === 'Breakfast plate' ? 4200 : 4800;
+        const pricePerUnit = itemType === 'Breakfast plate' ? 4200 : 4800;
         const totalAmount = currentQty * pricePerUnit;
 
         const payload = {
             type: 'BREAKFAST',
             guestName: name,
             email: email,
+            phone: phone,
+            apartment: apt,
             start: date,
             end: date,
-            apartment: apt,
-            phone: phone,
+            days: 1,
+            guests: currentQty,
             amount: totalAmount,
+            totalPrice: totalAmount,
             method: method,
             lang: 'en',
-            details: `Breakfast: ${type} | Persons: ${currentQty}`
+            items: `${itemType} × ${currentQty} person${currentQty > 1 ? 's' : ''}`
         };
 
+        const submitBtn = document.querySelector('.btn-submit');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = method === 'card' ? 'Redirecting to payment...' : 'Sending order...';
+        }
+
         try {
-            const res = await fetch('/api/order', { 
+            const res = await fetch('/api/order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -349,18 +383,30 @@
 
             const result = await res.json();
 
-            if(res.ok) {
+            if (res.ok) {
                 closeMorningModal();
+
                 if (method === 'card' && result.stripeSessionId) {
                     await stripe.redirectToCheckout({ sessionId: result.stripeSessionId });
                 } else {
-                    showSuccess("Success!", `Breakfast order recorded. Payable on site: ${totalAmount.toLocaleString()} HUF.`, "success", () => location.reload());
+                    showSuccess(
+                        "Success!",
+                        `Breakfast order recorded. Payable on site: ${totalAmount.toLocaleString()} HUF.`,
+                        "success",
+                        () => location.reload()
+                    );
                 }
             } else {
-                showSuccess("Error!", result.error, "error");
+                showSuccess("Error!", result.error || "Order could not be saved.", "error");
             }
         } catch (e) {
+            console.error(e);
             showSuccess("Error!", "Network error occurred.", "error");
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Place Order';
+            }
         }
     }
 
@@ -368,6 +414,7 @@
         const modal = document.getElementById('custom-alert');
         const iconCircle = document.getElementById('alert-icon-circle');
         const btn = document.getElementById('alert-btn');
+
         document.getElementById('alert-title').innerText = title;
         document.getElementById('alert-msg').innerText = message;
         window.alertCallback = callback;
@@ -381,12 +428,17 @@
             iconCircle.style.background = '#27ae60';
             btn.style.background = '#27ae60';
         }
+
         modal.style.display = 'flex';
     }
 
     function closeCustomAlert() {
         document.getElementById('custom-alert').style.display = 'none';
-        if (window.alertCallback) window.alertCallback();
+
+        if (window.alertCallback) {
+            window.alertCallback();
+            window.alertCallback = null;
+        }
     }
 </script>
 </body>

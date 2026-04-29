@@ -211,19 +211,20 @@
 <script>
     let currentQty = 1;
     let calendar;
+
     const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0');
 
     const momentDescriptions = {
         "Frühstücksplatte": `
-            Frisches Gebäck, ausgewählte Wurst- und Käsesorten, Gemüse und Obst der Saison sowie kleine Köstlichkeiten. Ein gemütliches, reichhaltiges Frühstück, das den Tag perfekt einläutet. 
+            Frisches Gebäck, ausgewählte Wurst- und Käsesorten, Gemüse und Obst der Saison sowie kleine Köstlichkeiten. Ein gemütliches, reichhaltiges Frühstück, das den Tag perfekt einläutet.
             Die Zusammensetzung der Platte kann je nach Saison variieren.
         `,
         "Käseplatte": `
-            Sorgfältig ausgewählte Käsesorten, frisches Obst und dazu passende Beilagen, elegant angerichtet und ergänzt durch eine Flasche Wein aus dem südlichen Balaton. Die perfekte Wahl für einen ruhigen Abend oder einen besonderen Moment. 
+            Sorgfältig ausgewählte Käsesorten, frisches Obst und dazu passende Beilagen, elegant angerichtet und ergänzt durch eine Flasche Wein aus dem südlichen Balaton. Die perfekte Wahl für einen ruhigen Abend oder einen besonderen Moment.
             Die Zusammensetzung der Platte kann je nach Saison variieren.
         `,
         "Festliche Platte": `
-            Ein Glas Prosecco, zwei Dessertstücke und sorgfältig ausgewählte Beilagen für einen eleganten, gemütlichen Moment. Die ideale Wahl für Feierlichkeiten, romantische Abende oder Jahrestage.
+            Eine Flasche Prosecco, zwei Dessertstücke und sorgfältig ausgewählte Beilagen für einen eleganten, gemütlichen Moment. Die ideale Wahl für Feierlichkeiten, romantische Abende oder Jahrestage.
             Die Zusammenstellung der Platte kann je nach Saison variieren.
         `
     };
@@ -231,6 +232,8 @@
     document.addEventListener('DOMContentLoaded', async function() {
         const urlParams = new URLSearchParams(window.location.search);
         const bookingId = urlParams.get('id');
+        const bookingToken = urlParams.get('token') || '';
+
         const infoBox = document.getElementById('order-info-box');
         const formGroups = document.querySelectorAll('.form-group');
         const submitBtn = document.querySelector('.btn-submit');
@@ -239,51 +242,70 @@
             infoBox.innerHTML = `
                 <div style="background: #f4f7f2; border: 1px dashed #5c7a4d; padding: 25px; text-align: center; border-radius: 8px;">
                     <p style="color: #5c7a4d; font-weight: 700; font-size: 1.1rem; margin-bottom: 10px;">Lieber Gast!</p>
-                    <p style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">Das Frühstück kann nur von Gästen mit einer gültigen Unterkunftsbuchung in unseren Apartments in Fonyód bestellt werden.</p>
+                    <p style="font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">Diese Leistung kann nur von Gästen mit einer gültigen Unterkunftsbuchung in unseren Apartments in Fonyód bestellt werden.</p>
                     <a href="index.html#apartments" style="display: inline-block; background: #5c7a4d; color: white; text-decoration: none; padding: 12px 25px; border-radius: 50px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Hier Aufenthalt buchen</a>
-                </div>`;
+                </div>
+            `;
+
             infoBox.style.display = 'block';
             formGroups.forEach(group => group.style.display = 'none');
-            if(submitBtn) submitBtn.style.display = 'none';
+            if (submitBtn) submitBtn.style.display = 'none';
             return;
         }
 
         try {
-            const res = await fetch(`/api/verify-booking/${bookingId}`);
+            const res = await fetch(`/api/verify-booking/${encodeURIComponent(bookingId)}?token=${encodeURIComponent(bookingToken)}`);
             const data = await res.json();
 
-            if (data.valid) {
-                document.getElementById('m-name').value = data.guestName;
+            if (res.ok && data.valid) {
+                document.getElementById('m-name').value = data.guestName || '';
                 document.getElementById('m-name').readOnly = true;
-                document.getElementById('m-email').value = data.email;
+
+                document.getElementById('m-email').value = data.email || '';
                 document.getElementById('m-email').readOnly = true;
-                
+
+                if (data.phone) {
+                    document.getElementById('m-phone').value = data.phone;
+                }
+
                 const select = document.getElementById('m-apt-select');
-                select.innerHTML = `<option value="${data.aptName}">${data.aptName}</option>`;
+                select.innerHTML = `<option value="${escapeHtmlForOption(data.aptName || '')}">${escapeHtmlForOption(data.aptName || '')}</option>`;
                 select.disabled = true;
             } else {
-                showSuccess("Fehler!", "Ungültige Buchungs-ID.", "error");
-                if(submitBtn) submitBtn.disabled = true;
+                showSuccess("Fehler!", data.error || "Ungültige Buchungs-ID.", "error");
+                if (submitBtn) submitBtn.disabled = true;
             }
         } catch (e) {
             console.error(e);
+            showSuccess("Fehler!", "Die Buchung konnte nicht überprüft werden.", "error");
+            if (submitBtn) submitBtn.disabled = true;
         }
 
         calendar = flatpickr("#m-date", {
             locale: "de",
             dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "d. F Y",
             minDate: new Date().fp_incr(1)
         });
     });
 
+    function escapeHtmlForOption(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
     function openMorningModal(itemName) {
         currentQty = 1;
+
         document.getElementById('qty-num').innerText = currentQty;
         document.getElementById('m-item-type').value = itemName;
         document.getElementById('m-title').innerText = itemName;
-
-        document.getElementById('m-desc').innerText =
-            momentDescriptions[itemName] || "";
+        document.getElementById('m-desc').innerText = momentDescriptions[itemName] || "";
 
         const modal = document.getElementById('morning-modal');
         modal.style.display = 'flex';
@@ -293,7 +315,9 @@
     function closeMorningModal() {
         const modal = document.getElementById('morning-modal');
         modal.classList.remove('active');
-        setTimeout(() => modal.style.display = 'none', 400);
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 400);
     }
 
     function updateQty(val) {
@@ -303,36 +327,45 @@
 
     async function submitMorning() {
         const apt = document.getElementById('m-apt-select').value;
-        const phone = document.getElementById('m-phone').value;
-        const name = document.getElementById('m-name').value;
-        const email = document.getElementById('m-email').value;
+        const phone = document.getElementById('m-phone').value.trim();
+        const name = document.getElementById('m-name').value.trim();
+        const email = document.getElementById('m-email').value.trim();
         const date = document.getElementById('m-date').value;
-        const type = document.getElementById('m-item-type').value;
-        const method = document.querySelector('input[name="m-payment"]:checked').value;
+        const itemType = document.getElementById('m-item-type').value;
+        const method = document.querySelector('input[name="m-payment"]:checked')?.value || 'cash';
 
-        if(!apt || !name || !date || !phone || !email) {
+        if (!apt || !name || !date || !phone || !email || !itemType) {
             return showSuccess("Fehler!", "Bitte füllen Sie alle Felder aus!", "error");
         }
 
-        const pricePerUnit = type === 'Frühstücksplatte' ? 4200 : 4800;
+        const pricePerUnit = itemType === 'Frühstücksplatte' ? 4200 : 4800;
         const totalAmount = currentQty * pricePerUnit;
 
         const payload = {
             type: 'BREAKFAST',
             guestName: name,
             email: email,
+            phone: phone,
+            apartment: apt,
             start: date,
             end: date,
-            apartment: apt,
-            phone: phone,
+            days: 1,
+            guests: currentQty,
             amount: totalAmount,
+            totalPrice: totalAmount,
             method: method,
             lang: 'de',
-            details: `Frühstück: ${type} | Personen: ${currentQty}`
+            items: `${itemType} × ${currentQty} Person${currentQty > 1 ? 'en' : ''}`
         };
 
+        const submitBtn = document.querySelector('.btn-submit');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = method === 'card' ? 'Weiterleitung zur Zahlung...' : 'Bestellung wird gesendet...';
+        }
+
         try {
-            const res = await fetch('/api/order', { 
+            const res = await fetch('/api/order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -340,18 +373,30 @@
 
             const result = await res.json();
 
-            if(res.ok) {
+            if (res.ok) {
                 closeMorningModal();
+
                 if (method === 'card' && result.stripeSessionId) {
                     await stripe.redirectToCheckout({ sessionId: result.stripeSessionId });
                 } else {
-                    showSuccess("Erfolgreiche Bestellung!", `Frühstück wurde registriert. Vor Ort zu zahlen: ${totalAmount.toLocaleString()} HUF.`, "success", () => location.reload());
+                    showSuccess(
+                        "Erfolgreiche Bestellung!",
+                        `Die Bestellung wurde registriert. Vor Ort zu zahlen: ${totalAmount.toLocaleString()} HUF.`,
+                        "success",
+                        () => location.reload()
+                    );
                 }
             } else {
-                showSuccess("Fehler!", result.error, "error");
+                showSuccess("Fehler!", result.error || "Die Bestellung konnte nicht gespeichert werden.", "error");
             }
         } catch (e) {
+            console.error(e);
             showSuccess("Fehler!", "Netzwerkfehler aufgetreten.", "error");
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Bestellung aufgeben';
+            }
         }
     }
 
@@ -359,6 +404,7 @@
         const modal = document.getElementById('custom-alert');
         const iconCircle = document.getElementById('alert-icon-circle');
         const btn = document.getElementById('alert-btn');
+
         document.getElementById('alert-title').innerText = title;
         document.getElementById('alert-msg').innerText = message;
         window.alertCallback = callback;
@@ -372,12 +418,17 @@
             iconCircle.style.background = '#27ae60';
             btn.style.background = '#27ae60';
         }
+
         modal.style.display = 'flex';
     }
 
     function closeCustomAlert() {
         document.getElementById('custom-alert').style.display = 'none';
-        if (window.alertCallback) window.alertCallback();
+
+        if (window.alertCallback) {
+            window.alertCallback();
+            window.alertCallback = null;
+        }
     }
 </script>
 </body>

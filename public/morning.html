@@ -242,6 +242,7 @@
     document.addEventListener('DOMContentLoaded', async function() {
         const urlParams = new URLSearchParams(window.location.search);
         const bookingId = urlParams.get('id');
+        const bookingToken = urlParams.get('token') || '';
         const infoBox = document.getElementById('order-info-box');
         const formGroups = document.querySelectorAll('.form-group');
         const submitBtn = document.querySelector('.btn-submit');
@@ -260,7 +261,7 @@
         }
 
         try {
-            const res = await fetch(`/api/verify-booking/${bookingId}`);
+            const res = await fetch(`/api/verify-booking/${encodeURIComponent(bookingId)}?token=${encodeURIComponent(bookingToken)}`);
             const data = await res.json();
 
             if (data.valid) {
@@ -282,7 +283,9 @@
 
         calendar = flatpickr("#m-date", {
             locale: "hu",
-            dateFormat: "Y. m. d.",
+            dateFormat: "Y-m-d",
+            altInput: true,
+            altFormat: "Y. m. d.",
             minDate: new Date().fp_incr(1)
         });
     });
@@ -332,14 +335,17 @@
             type: 'BREAKFAST',
             guestName: name,
             email: email,
+            phone: phone,
+            apartment: apt,
             start: date,
             end: date,
-            apartment: apt,
-            phone: phone,
+            days: 1,
+            guests: currentQty,
             amount: totalAmount,
+            totalPrice: totalAmount,
             method: method,
             lang: 'hu',
-            details: `Reggeli: ${type} | Fő: ${currentQty}`
+            items: `${type} × ${currentQty} fő`
         };
 
         try {

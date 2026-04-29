@@ -770,6 +770,62 @@ app.get('/api/cancel-booking/:id', async (req, res) => {
     }
 });
 
+app.get('/api/verify-booking/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { token } = req.query;
+
+        const db = await getDbContent();
+
+        const booking = (db.bookings || []).find(b =>
+            String(b.id) === String(id)
+        );
+
+        if (!booking) {
+            return res.status(404).json({
+                valid: false,
+                error: 'Foglalás nem található.'
+            });
+        }
+
+        if (booking.cancelToken && token && booking.cancelToken !== token) {
+            return res.status(403).json({
+                valid: false,
+                error: 'Érvénytelen foglalási token.'
+            });
+        }
+
+        // Csak aktív, megerősített foglalást engedünk
+        if (booking.status && booking.status !== 'confirmed') {
+            return res.status(400).json({
+                valid: false,
+                error: 'A foglalás nem aktív.'
+            });
+        }
+
+        res.json({
+            valid: true,
+            id: booking.id,
+            guestName: booking.guestName || '',
+            email: booking.email || '',
+            phone: booking.phone || '',
+            aptId: booking.aptId || '',
+            aptName: booking.aptName || '',
+            checkIn: booking.checkIn || '',
+            checkOut: booking.checkOut || '',
+            lang: normalizeLang(booking.lang || 'hu')
+        });
+    } catch (e) {
+        console.error('Foglalás ellenőrzési hiba:', e);
+        res.status(500).json({
+            valid: false,
+            error: 'Szerverhiba a foglalás ellenőrzésekor.'
+        });
+    }
+});
+
+
+
 // -----------------------------------------------------------------------------
 // API - EXTRA / BREAKFAST ORDERS
 // -----------------------------------------------------------------------------
@@ -820,7 +876,7 @@ app.post('/api/order', async (req, res) => {
                 String(b.aptName || '') === apartmentName &&
                 String(b.email || '').toLowerCase() === String(data.email || '').toLowerCase() &&
                 new Date(data.start) >= new Date(b.checkIn) &&
-                new Date(data.start) <= new Date(b.checkOut)
+                new Date(data.start) < new Date(b.checkOut)
             );
 
             if (!hasBooking) {
