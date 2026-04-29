@@ -412,6 +412,15 @@
             width: auto;
         }
 
+        .plain-amp {
+            font-family: 'Cormorant Garamond', serif;
+            font-style: normal;
+            font-weight: 600;
+            font-size: 0.9em;
+            margin: 0 4px;
+            vertical-align: 0.02em;
+        }
+
         @media (max-width: 900px) {
             .service-fields {
                 grid-template-columns: 1fr;
@@ -499,12 +508,16 @@
         </div>
 
         <div style="margin-bottom: 2rem;">
-            <h3 style="font-family:'Playfair Display'; margin-bottom: 1rem;">SUP & SUN</h3>
+                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">
+                    SUP <span class="plain-amp">&amp;</span> SUN
+                </h3>
             <div id="services-sun-container" class="service-grid"></div>
         </div>
 
         <div>
-            <h3 style="font-family:'Playfair Display'; margin-bottom: 1rem;">Moments / Reggeli tálak</h3>
+            <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">
+                    Moments / Reggeli tálak
+                </h3>
             <div id="services-moments-container" class="service-grid"></div>
         </div>
     </div>
