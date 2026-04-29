@@ -76,6 +76,13 @@
             letter-spacing: 2px; cursor: pointer; width: 100%; margin-top: 1rem; 
         }
 
+        .moment-desc {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 1rem 0;
+        }
+
         /* Success/Error Modal */
         .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; }
         .custom-modal .modal-content { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
@@ -101,16 +108,27 @@
 
 <main>
     <div class="breakfast-grid">
-        <div class="pillar-card" onclick="openMorningModal('Mediterrán Tál')">
-            <div class="pillar-header"><h3>MORNING MOMENT - Reggeli tál</h3><span class="price-tag">4 200 FT / FŐ</span></div>
+        <div class="pillar-card" onclick="openMorningModal('Reggeli tál')">
+            <div class="pillar-header">
+                <h3>MORNING MOMENT - Reggeli tál</h3>
+                <span class="price-tag">4 200 FT / FŐ</span>
+            </div>
             <div class="pillar-img" style="background-image: url('img/Reggeli\ tál.png');"></div>
         </div>
-        <div class="pillar-card" onclick="openMorningModal('Termelői Tál')">
-            <div class="pillar-header"><h3>WINE & CHEESE MOMENT - Sajttál</h3><span class="price-tag">4 800 FT / FŐ</span></div>
+
+        <div class="pillar-card" onclick="openMorningModal('Sajttál')">
+            <div class="pillar-header">
+                <h3>WINE & CHEESE MOMENT - Sajttál</h3>
+                <span class="price-tag">4 800 FT / FŐ</span>
+            </div>
             <div class="pillar-img" style="background-image: url('img/Sajttál.png');"></div>
         </div>
-        <div class="pillar-card" onclick="openMorningModal('Termelői Tál')">
-            <div class="pillar-header"><h3>CELEBRATION MOMENT- Születésnap/Évforduló</h3><span class="price-tag">4 800 FT / FŐ</span></div>
+
+        <div class="pillar-card" onclick="openMorningModal('Ünnepi tál')">
+            <div class="pillar-header">
+                <h3>CELEBRATION MOMENT - Születésnap/Évforduló</h3>
+                <span class="price-tag">4 800 FT / FŐ</span>
+            </div>
             <div class="pillar-img" style="background-image: url('img/Születésnap\,\ évforduló.png');"></div>
         </div>
     </div>
@@ -120,6 +138,15 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <span class="close-modal" onclick="closeMorningModal()">✕</span>
         <h2 id="m-title" class="modal-title">Reggeli</h2>
+
+        <p id="m-desc" style="
+            font-size: 0.9rem;
+            color: #6A7063;
+            line-height: 1.7;
+            margin: -1.2rem 0 2rem;
+            text-align: center;
+        "></p>
+
         <div id="order-info-box" style="display: none; margin-bottom: 25px;"></div>
         
         <div class="form-group">
@@ -197,6 +224,20 @@
     let currentQty = 1;
     let calendar;
     const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0');
+    const momentDescriptions = {
+        "Reggeli tál": `
+            Friss péksütemények, válogatott felvágottak és sajtok, szezonális zöldségek, gyümölcsök és apró finomságok. Kényelmes, bőséges reggeli, amely tökéletes indítása a napnak. 
+            A tál összeállítása szezonálisan változhat.
+        `,
+        "Sajttál": `
+            Gondosan válogatott sajtok, friss gyümölcsök és harmonizáló kiegészítők elegáns tálalásban, egy palack dél-balatoni borral kiegészítve. Tökéletes választás egy nyugodt estéhez vagy különleges pillanathoz. 
+            A tál összeállítása szezonálisan változhat.
+        `,
+        "Ünnepi tál": `
+            Egy üveg Prosecco, két szelet desszert és gondosan válogatott kiegészítők egy elegáns, meghitt pillanathoz. Ideális választás ünnepléshez, romantikus estékhez vagy évfordulóhoz.
+            A tál összeállítása szezonálisan változhat.
+        `
+    };
 
     document.addEventListener('DOMContentLoaded', async function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -251,6 +292,10 @@
         document.getElementById('qty-num').innerText = currentQty;
         document.getElementById('m-item-type').value = itemName;
         document.getElementById('m-title').innerText = itemName;
+
+        document.getElementById('m-desc').innerText =
+            momentDescriptions[itemName] || "";
+
         const modal = document.getElementById('morning-modal');
         modal.style.display = 'flex';
         setTimeout(() => modal.classList.add('active'), 10);
@@ -280,7 +325,7 @@
             return showSuccess("Hiba!", "Minden mező kitöltése kötelező!", "error");
         }
 
-        const pricePerUnit = type === 'Mediterrán Tál' ? 4200 : 4800;
+        const pricePerUnit = type === 'Reggeli tál' ? 4200 : 4800;
         const totalAmount = currentQty * pricePerUnit;
 
         const payload = {

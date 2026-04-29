@@ -76,6 +76,13 @@
             letter-spacing: 2px; cursor: pointer; width: 100%; margin-top: 1rem; 
         }
 
+        .moment-desc {
+            font-size: 0.85rem;
+            color: var(--text-light);
+            line-height: 1.6;
+            margin: 1rem 0;
+        }
+
         .custom-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; }
         .custom-modal .modal-content { background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; width: 90%; box-shadow: 0 15px 30px rgba(0,0,0,0.2); }
         .success-icon { width: 80px; height: 80px; background: #27ae60; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 40px; margin: 0 auto 20px; }
@@ -101,17 +108,28 @@
 
 <main>
     <div class="breakfast-grid">
-        <div class="pillar-card" onclick="openMorningModal('Mediterranean Tray')">
-            <div class="pillar-header"><h3>MORNING MOMENT - Breakfast platter</h3><span class="price-tag">4 200 HUF / PERSON</span></div>
-            <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1535844177020-bce7ffe4e1c5?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');"></div>
+        <div class="pillar-card" onclick="openMorningModal('Breakfast plate')">
+            <div class="pillar-header">
+                <h3>MORNING MOMENT - Breakfast plate</h3>
+                <span class="price-tag">4 200 FT / person</span>
+            </div>
+            <div class="pillar-img" style="background-image: url('../img/Reggeli\ tál.png');"></div>
         </div>
-        <div class="pillar-card" onclick="openMorningModal('Local Producer Tray')">
-            <div class="pillar-header"><h3>WINE & CHEESE MOMENT - Cheese plate </h3><span class="price-tag">4 800 HUF / PERSON</span></div>
-            <div class="pillar-img" style="background-image: url('https://plus.unsplash.com/premium_photo-1700145523789-764a456e6034?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');"></div>
+
+        <div class="pillar-card" onclick="openMorningModal('Cheese plate')">
+            <div class="pillar-header">
+                <h3>WINE & CHEESE MOMENT - Cheese plate</h3>
+                <span class="price-tag">4 800 FT / person</span>
+            </div>
+            <div class="pillar-img" style="background-image: url('../img/Sajttál.png');"></div>
         </div>
-        <div class="pillar-card" onclick="openMorningModal('Local Producer Tray')">
-            <div class="pillar-header"><h3>CELEBRATION MOMENT- Birthday/Anniversary</h3><span class="price-tag">4 800 HUF / PERSON</span></div>
-            <div class="pillar-img" style="background-image: url('https://images.unsplash.com/photo-1755677173625-0d54dba6a20b?q=80&w=757&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D');"></div>
+
+        <div class="pillar-card" onclick="openMorningModal('Festive plate')">
+            <div class="pillar-header">
+                <h3>CELEBRATION MOMENT - Festive plate</h3>
+                <span class="price-tag">4 800 FT / person</span>
+            </div>
+            <div class="pillar-img" style="background-image: url('../img/Születésnap\,\ évforduló.png');"></div>
         </div>
     </div>
 </main>
@@ -120,6 +138,15 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <span class="close-modal" onclick="closeMorningModal()">✕</span>
         <h2 id="m-title" class="modal-title">Breakfast</h2>
+
+        <p id="m-desc" style="
+            font-size: 0.9rem;
+            color: #6A7063;
+            line-height: 1.7;
+            margin: -1.2rem 0 2rem;
+            text-align: center;
+        "></p>
+
         <div id="order-info-box" style="display: none; margin-bottom: 25px;"></div>
         
         <div class="form-group">
@@ -196,6 +223,20 @@
     let currentQty = 1;
     let calendar;
     const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0');
+    const momentDescriptions = {
+        "Breakfast plate": `
+            Fresh pastries, a selection of cold cuts and cheeses, seasonal vegetables, fruits, and small treats. A comfortable, hearty breakfast that’s the perfect way to start your day. 
+            The contents of the platter may vary depending on the season.
+        `,
+        "Cheese plate": `
+            Carefully selected cheeses, fresh fruits, and complementary accompaniments, elegantly presented and paired with a bottle of wine from the southern Balaton region. The perfect choice for a relaxing evening or a special occasion.
+            The contents of the platter may vary seasonally.
+        `,
+        "Festive plate": `
+            A glass of Prosecco, two dessert slices, and carefully selected accompaniments for an elegant, intimate moment. The perfect choice for celebrations, romantic evenings, or anniversaries.
+            The contents of the platter may vary by season.
+        `
+    };
 
     document.addEventListener('DOMContentLoaded', async function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -249,6 +290,10 @@
         document.getElementById('qty-num').innerText = currentQty;
         document.getElementById('m-item-type').value = itemName;
         document.getElementById('m-title').innerText = itemName;
+
+        document.getElementById('m-desc').innerText =
+            momentDescriptions[itemName] || "";
+
         const modal = document.getElementById('morning-modal');
         modal.style.display = 'flex';
         setTimeout(() => modal.classList.add('active'), 10);
