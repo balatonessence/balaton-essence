@@ -3,84 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title data-i18n="title">Reggeli Rendelés | Balaton Essence</title>
-    
+    <title>Reggeli rendelés | Balaton Essence</title>
+
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://js.stripe.com/v3/"></script>
 
     <style>
         :root {
-            --primary-color: #5c7a4d;    /* Elegáns zsálya/erdőzöld */
+            --primary-color: #5c7a4d;
             --primary-light: #769764;
-            --accent-color: #d4a373;     /* Meleg homok/arany */
-            --bg-color: #f4f3ef;         /* Törtfehér háttér */
-            --text-dark: #2c3325;        /* Mély olajzöld */
+            --accent-color: #d4a373;
+            --bg-color: #f4f3ef;
+            --text-dark: #2c3325;
             --text-light: #6a7063;
             --surface: rgba(255, 255, 255, 0.85);
             --border: #e3e0d8;
+            --danger: #dc3545;
         }
 
-        body { 
-            background-color: var(--bg-color); 
-            background-image: 
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image:
                 radial-gradient(at 0% 0%, rgba(212, 163, 115, 0.1) 0px, transparent 50%),
                 radial-gradient(at 100% 100%, rgba(92, 122, 77, 0.1) 0px, transparent 50%);
-            display: flex; justify-content: center; align-items: center; 
-            min-height: 100vh; margin: 0; padding: 40px 20px;
-            font-family: 'Montserrat', sans-serif; 
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 40px 20px;
+            font-family: 'Montserrat', sans-serif;
             color: var(--text-dark);
         }
 
-        .container { 
-            background: var(--surface); 
+        .container {
+            background: var(--surface);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            width: 100%; max-width: 580px; 
-            padding: 50px 45px; 
-            border-radius: 24px; 
-            box-shadow: 0 20px 40px rgba(44, 51, 37, 0.08), inset 0 1px 0 rgba(255,255,255,0.6); 
-            box-sizing: border-box;
+            width: 100%;
+            max-width: 580px;
+            padding: 50px 45px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px rgba(44, 51, 37, 0.08), inset 0 1px 0 rgba(255,255,255,0.6);
             border: 1px solid rgba(255, 255, 255, 0.5);
         }
-        
-        /* Nyelvválasztó */
-        .lang-switcher { display: flex; justify-content: flex-end; gap: 6px; margin-bottom: 30px; }
-        .lang-btn { 
-            background: transparent; border: 1px solid var(--border); padding: 6px 14px; 
-            border-radius: 30px; cursor: pointer; font-weight: 600; font-size: 11px; letter-spacing: 1px;
-            color: var(--text-light); transition: all 0.3s ease;
-        }
-        .lang-btn:hover { border-color: var(--primary-color); color: var(--primary-color); }
-        .lang-btn.active { background: var(--primary-color); color: white; border-color: var(--primary-color); box-shadow: 0 4px 10px rgba(92, 122, 77, 0.2); }
 
-        h1 { 
-            text-align: center; margin-top: 0; margin-bottom: 10px; 
-            color: var(--text-dark); font-family: 'Playfair Display', serif; 
-            font-size: 36px; font-weight: 600; letter-spacing: -0.5px;
+        .lang-switcher {
+            display: flex;
+            justify-content: flex-end;
+            gap: 6px;
+            margin-bottom: 30px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 11px;
+            letter-spacing: 1px;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .lang-btn:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .lang-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 10px rgba(92, 122, 77, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
         }
 
         .subtitle {
-            text-align: center; color: var(--text-light); font-size: 14px; margin-bottom: 35px;
+            text-align: center;
+            color: var(--text-light);
+            font-size: 14px;
+            margin-bottom: 35px;
         }
 
-        .notice { 
-            background-color: rgba(212, 163, 115, 0.1); color: #a67c52; padding: 12px 20px; 
-            border-radius: 12px; font-size: 0.85em; font-weight: 600; margin-bottom: 30px; text-align: center; 
-            border: 1px solid rgba(212, 163, 115, 0.2); letter-spacing: 0.5px;
+        .notice {
+            background-color: rgba(212, 163, 115, 0.1);
+            color: #a67c52;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-bottom: 30px;
+            text-align: center;
+            border: 1px solid rgba(212, 163, 115, 0.2);
+            letter-spacing: 0.5px;
+            line-height: 1.5;
         }
-        
-        .row { display: flex; gap: 20px; }
-        .row .form-floating { flex: 1; }
-        
-        /* Lebegő címkék (Floating Labels) */
+
+        .row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .row .form-floating {
+            flex: 1;
+        }
+
         .form-floating {
             position: relative;
             margin-bottom: 25px;
         }
 
-        .form-floating input, .form-floating select, .form-floating textarea {
+        .form-floating input,
+        .form-floating select,
+        .form-floating textarea {
             width: 100%;
             padding: 18px 16px 10px;
             font-size: 15px;
@@ -89,15 +142,23 @@
             background-color: rgba(255, 255, 255, 0.6);
             border: 1px solid var(--border);
             border-radius: 12px;
-            box-sizing: border-box;
             transition: all 0.3s ease;
             outline: none;
         }
 
-        .form-floating input:focus, .form-floating select:focus, .form-floating textarea:focus {
+        .form-floating input:focus,
+        .form-floating select:focus,
+        .form-floating textarea:focus {
             border-color: var(--primary-color);
             background-color: #ffffff;
             box-shadow: 0 0 0 4px rgba(92, 122, 77, 0.1);
+        }
+
+        .form-floating input[readonly],
+        .form-floating select:disabled {
+            background-color: rgba(227, 224, 216, 0.45);
+            color: var(--text-light);
+            cursor: not-allowed;
         }
 
         .form-floating label {
@@ -116,7 +177,6 @@
             top: 24px;
         }
 
-        /* Amikor fókuszban van, vagy van benne adat */
         .form-floating input:focus ~ label,
         .form-floating input:not(:placeholder-shown) ~ label,
         .form-floating select:focus ~ label,
@@ -130,83 +190,159 @@
             font-weight: 600;
         }
 
-        /* Select nyilacska igazítás */
-        select { appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%235c7a4d%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E"); background-repeat: no-repeat; background-position: right 16px top 50%; background-size: 10px auto; }
-        select:disabled { background-color: rgba(227, 224, 216, 0.5); cursor: not-allowed; color: var(--text-light); }
+        select {
+            appearance: none;
+            -webkit-appearance: none;
+            background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%235c7a4d%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+            background-repeat: no-repeat;
+            background-position: right 16px top 50%;
+            background-size: 10px auto;
+        }
 
-        /* Gomb stílus */
-        button[type="submit"] { 
-            width: 100%; padding: 18px; 
+        button[type="submit"] {
+            width: 100%;
+            padding: 18px;
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
-            color: white; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; 
-            cursor: pointer; margin-top: 15px; letter-spacing: 1px;
-            transition: all 0.3s ease; font-family: 'Montserrat', sans-serif;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 15px;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
             box-shadow: 0 10px 20px rgba(92, 122, 77, 0.25);
         }
-        button[type="submit"]:hover { transform: translateY(-2px); box-shadow: 0 15px 25px rgba(92, 122, 77, 0.35); }
-        button[type="submit"]:active { transform: translateY(1px); box-shadow: 0 5px 10px rgba(92, 122, 77, 0.2); }
-        button[type="submit"]:disabled { background: #b2b9bf; box-shadow: none; cursor: not-allowed; transform: none; }
-        
-        #message { margin-top: 25px; font-weight: 600; text-align: center; font-size: 14px; }
 
-        /* Flatpickr Prémium Színek */
-        .flatpickr-calendar { font-family: 'Montserrat', sans-serif !important; border-radius: 16px !important; box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important; border: none !important; }
-        .flatpickr-day.selected, .flatpickr-day.selected:focus, .flatpickr-day.selected:hover {
-            background: var(--primary-color) !important; border-color: var(--primary-color) !important; color: white !important;
+        button[type="submit"]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px rgba(92, 122, 77, 0.35);
         }
-        .flatpickr-months .flatpickr-month { background: var(--primary-color); border-radius: 16px 16px 0 0; }
-        .flatpickr-current-month .flatpickr-monthDropdown-months, .flatpickr-current-month input.cur-year { color: white !important; }
-        .flatpickr-weekday { color: var(--primary-color) !important; font-weight: 600; }
-        span.flatpickr-weekday { background: transparent; }
-        .flatpickr-months .flatpickr-prev-month, .flatpickr-months .flatpickr-next-month { color: white !important; fill: white !important; }
+
+        button[type="submit"]:disabled {
+            background: #b2b9bf;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #message {
+            margin-top: 25px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .flatpickr-calendar {
+            font-family: 'Montserrat', sans-serif !important;
+            border-radius: 16px !important;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1) !important;
+            border: none !important;
+        }
+
+        .flatpickr-day.selected,
+        .flatpickr-day.selected:focus,
+        .flatpickr-day.selected:hover {
+            background: var(--primary-color) !important;
+            border-color: var(--primary-color) !important;
+            color: white !important;
+        }
+
+        .flatpickr-months .flatpickr-month {
+            background: var(--primary-color);
+            border-radius: 16px 16px 0 0;
+        }
+
+        .flatpickr-current-month .flatpickr-monthDropdown-months,
+        .flatpickr-current-month input.cur-year {
+            color: white !important;
+        }
+
+        .flatpickr-weekday {
+            color: var(--primary-color) !important;
+            font-weight: 600;
+        }
+
+        span.flatpickr-weekday {
+            background: transparent;
+        }
+
+        .flatpickr-months .flatpickr-prev-month,
+        .flatpickr-months .flatpickr-next-month {
+            color: white !important;
+            fill: white !important;
+        }
+
+        @media (max-width: 620px) {
+            .container {
+                padding: 36px 24px;
+            }
+
+            .row {
+                flex-direction: column;
+                gap: 0;
+            }
+
+            h1 {
+                font-size: 31px;
+            }
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="lang-switcher">
-            <button class="lang-btn active" data-lang="hu">HU</button>
-            <button class="lang-btn" data-lang="en">EN</button>
-            <button class="lang-btn" data-lang="de">DE</button>
+            <button class="lang-btn active" type="button" data-lang="hu">HU</button>
+            <button class="lang-btn" type="button" data-lang="en">EN</button>
+            <button class="lang-btn" type="button" data-lang="de">DE</button>
         </div>
-        
-        <h1 data-i18n="h1">Reggeli Rendelés</h1>
+
+        <h1 data-i18n="h1">Reggeli rendelés</h1>
         <div class="subtitle" data-i18n="subtitle">Balaton Essence Luxury Apartments</div>
         <div class="notice" data-i18n="notice">Másnapi kiszállításhoz a rendelést ma 16:00-ig adhatja le.</div>
-        
+
         <form id="breakfastForm">
             <div class="form-floating">
                 <input type="text" id="name" placeholder=" " required>
-                <label for="name" data-i18n="nameLabel">Név (foglaláson szereplő)</label>
+                <label for="name" data-i18n="nameLabel">Név</label>
             </div>
-            
+
             <div class="form-floating">
                 <input type="email" id="email" placeholder=" " required>
                 <label for="email" data-i18n="emailLabel">E-mail cím</label>
             </div>
-            
+
+            <div class="form-floating">
+                <input type="tel" id="phone" placeholder=" ">
+                <label for="phone" data-i18n="phoneLabel">Telefonszám</label>
+            </div>
+
             <div class="row">
                 <div class="form-floating">
                     <select id="apartment" required>
                         <option value="" disabled selected></option>
-                        <option value="FONYÓD SUN">Fonyód SUN</option>
-                        <option value="FONYÓD SUP">Fonyód SUP</option>
                     </select>
                     <label for="apartment" data-i18n="aptLabel">Apartman</label>
                 </div>
+
                 <div class="form-floating">
                     <input type="number" id="guests" min="1" max="10" value="2" placeholder=" " required>
-                    <label for="guests" data-i18n="guestsLabel">Fő</label>
+                    <label for="guests" data-i18n="guestsLabel">Személyek</label>
                 </div>
             </div>
 
             <div class="form-floating">
                 <input type="text" id="date" placeholder=" " required>
-                <label for="date" data-i18n="dateLabel">Napok kiválasztása (egyesével)</label>
+                <label for="date" data-i18n="dateLabel">Napok kiválasztása</label>
             </div>
 
             <div class="form-floating">
                 <textarea id="orderDetails" rows="3" placeholder=" " required></textarea>
-                <label for="orderDetails" data-i18n="detailsLabel">Milyen reggelit kértek? (Kívánságok)</label>
+                <label for="orderDetails" data-i18n="detailsLabel">Milyen reggelit kértek? Kívánságok</label>
             </div>
 
             <div class="form-floating">
@@ -217,8 +353,9 @@
                 <label for="paymentMethod" data-i18n="paymentLabel">Fizetési mód</label>
             </div>
 
-            <button type="submit" id="submitBtn" data-i18n="submitBtn">Rendelés Véglegesítése</button>
+            <button type="submit" id="submitBtn" data-i18n="submitBtn">Rendelés véglegesítése</button>
         </form>
+
         <div id="message"></div>
     </div>
 
@@ -227,146 +364,305 @@
     <script src="https://npmcdn.com/flatpickr/dist/l10n/de.js"></script>
 
     <script>
-        const STRIPE_PUBLIC_KEY = 'pk_test_Vezesd_Be_A_Sajatod'; 
-        const PRICE_PER_PERSON_PER_DAY = 4500; 
+        const STRIPE_PUBLIC_KEY = 'pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0';
+        const PRICE_PER_PERSON_PER_DAY = 4500;
 
         const translations = {
-            hu: { 
-                title: "Reggeli Rendelés | Balaton Essence", h1: "Reggeli Rendelés", subtitle: "Balaton Essence Luxury Apartments", notice: "Másnapi kiszállításhoz a rendelést ma 16:00-ig adhatja le.", 
-                nameLabel: "Név (foglaláson szereplő)", emailLabel: "E-mail cím", 
-                aptLabel: "Apartman", guestsLabel: "Személyek",
-                dateLabel: "Napok kiválasztása (egyesével)", detailsLabel: "Milyen reggelit kértek? (Kívánságok)", 
-                paymentLabel: "Fizetési mód", payCash: "Helyszíni készpénz", payCard: "Online bankkártya",
-                submitBtn: "Rendelés Véglegesítése", sending: "Feldolgozás...", redirecting: "Biztonságos fizetés indítása...",
-                success: "Sikeres rendelés! A visszaigazolást elküldtük." 
+            hu: {
+                title: "Reggeli rendelés | Balaton Essence",
+                h1: "Reggeli rendelés",
+                subtitle: "Balaton Essence Luxury Apartments",
+                notice: "Másnapi kiszállításhoz a rendelést ma 16:00-ig adhatja le.",
+                nameLabel: "Név",
+                emailLabel: "E-mail cím",
+                phoneLabel: "Telefonszám",
+                aptLabel: "Apartman",
+                guestsLabel: "Személyek",
+                dateLabel: "Napok kiválasztása",
+                detailsLabel: "Milyen reggelit kértek? Kívánságok",
+                paymentLabel: "Fizetési mód",
+                payCash: "Helyszíni készpénz",
+                payCard: "Online bankkártya",
+                submitBtn: "Rendelés véglegesítése",
+                sending: "Feldolgozás...",
+                redirecting: "Biztonságos fizetés indítása...",
+                success: "Sikeres rendelés! A visszaigazolást elküldtük.",
+                selectDate: "Kérjük, válasszon legalább egy napot.",
+                missingBooking: "A reggeli rendeléshez érvényes foglalási link szükséges.",
+                invalidBooking: "A foglalás nem található vagy nem érvényes.",
+                verifyError: "Nem sikerült ellenőrizni a foglalást.",
+                genericError: "Hiba történt a feldolgozás során.",
+                networkError: "Hálózati hiba. Kérjük, próbálja újra."
             },
-            en: { 
-                title: "Breakfast Order | Balaton Essence", h1: "Breakfast Order", subtitle: "Balaton Essence Luxury Apartments", notice: "For next-day delivery, please order by 16:00 today.", 
-                nameLabel: "Name (used for booking)", emailLabel: "Email address", 
-                aptLabel: "Apartment", guestsLabel: "Guests",
-                dateLabel: "Select days (one by one)", detailsLabel: "Breakfast preferences / requests", 
-                paymentLabel: "Payment method", payCash: "Cash on site", payCard: "Credit Card online",
-                submitBtn: "Complete Order", sending: "Processing...", redirecting: "Starting secure checkout...",
-                success: "Success! Confirmation email sent." 
+            en: {
+                title: "Breakfast order | Balaton Essence",
+                h1: "Breakfast order",
+                subtitle: "Balaton Essence Luxury Apartments",
+                notice: "For next-day delivery, please order by 16:00 today.",
+                nameLabel: "Name",
+                emailLabel: "Email address",
+                phoneLabel: "Phone number",
+                aptLabel: "Apartment",
+                guestsLabel: "Guests",
+                dateLabel: "Select days",
+                detailsLabel: "Breakfast preferences / requests",
+                paymentLabel: "Payment method",
+                payCash: "Cash on site",
+                payCard: "Online card payment",
+                submitBtn: "Complete order",
+                sending: "Processing...",
+                redirecting: "Starting secure checkout...",
+                success: "Success! Confirmation email sent.",
+                selectDate: "Please select at least one day.",
+                missingBooking: "A valid booking link is required to order breakfast.",
+                invalidBooking: "The booking was not found or is not valid.",
+                verifyError: "Could not verify the booking.",
+                genericError: "An error occurred during processing.",
+                networkError: "Network error. Please try again."
             },
-            de: { 
-                title: "Frühstück | Balaton Essence", h1: "Frühstück", subtitle: "Balaton Essence Luxury Apartments", notice: "Für eine Lieferung am nächsten Tag bestellen Sie bitte bis 16:00 Uhr.", 
-                nameLabel: "Name (wie gebucht)", emailLabel: "E-Mail-Adresse", 
-                aptLabel: "Apartment", guestsLabel: "Personen",
-                dateLabel: "Tage auswählen (einzeln)", detailsLabel: "Frühstückswünsche / Bemerkungen", 
-                paymentLabel: "Zahlungsart", payCash: "Barzahlung vor Ort", payCard: "Kreditkarte online",
-                submitBtn: "Bestellung Abschließen", sending: "Verarbeitung...", redirecting: "Sichere Zahlung starten...",
-                success: "Erfolgreich! Bestätigung gesendet." 
+            de: {
+                title: "Frühstücksbestellung | Balaton Essence",
+                h1: "Frühstücksbestellung",
+                subtitle: "Balaton Essence Luxury Apartments",
+                notice: "Für eine Lieferung am nächsten Tag bestellen Sie bitte bis 16:00 Uhr.",
+                nameLabel: "Name",
+                emailLabel: "E-Mail-Adresse",
+                phoneLabel: "Telefonnummer",
+                aptLabel: "Apartment",
+                guestsLabel: "Personen",
+                dateLabel: "Tage auswählen",
+                detailsLabel: "Frühstückswünsche / Bemerkungen",
+                paymentLabel: "Zahlungsart",
+                payCash: "Barzahlung vor Ort",
+                payCard: "Online-Kartenzahlung",
+                submitBtn: "Bestellung abschließen",
+                sending: "Verarbeitung...",
+                redirecting: "Sichere Zahlung wird gestartet...",
+                success: "Erfolgreich! Bestätigung wurde gesendet.",
+                selectDate: "Bitte wählen Sie mindestens einen Tag aus.",
+                missingBooking: "Für die Frühstücksbestellung ist ein gültiger Buchungslink erforderlich.",
+                invalidBooking: "Die Buchung wurde nicht gefunden oder ist ungültig.",
+                verifyError: "Die Buchung konnte nicht überprüft werden.",
+                genericError: "Bei der Verarbeitung ist ein Fehler aufgetreten.",
+                networkError: "Netzwerkfehler. Bitte versuchen Sie es erneut."
             }
         };
 
         let currentLang = 'hu';
-        const apartmentSelect = document.getElementById('apartment');
-        let fpInstance;
+        let fpInstance = null;
 
-        const getMinDate = () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookingId = urlParams.get('id');
+        const initialLang = urlParams.get('lang');
+
+        if (['hu', 'en', 'de'].includes(initialLang)) {
+            currentLang = initialLang;
+        }
+
+        const form = document.getElementById('breakfastForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const messageEl = document.getElementById('message');
+        const apartmentSelect = document.getElementById('apartment');
+
+        function getMinDate() {
             const now = new Date();
             const minDate = new Date();
-            now.getHours() >= 16 ? minDate.setDate(now.getDate() + 2) : minDate.setDate(now.getDate() + 1);
+
+            if (now.getHours() >= 16) {
+                minDate.setDate(now.getDate() + 2);
+            } else {
+                minDate.setDate(now.getDate() + 1);
+            }
+
             return minDate;
-        };
+        }
 
         function updateLang(lang) {
             currentLang = lang;
-            document.querySelectorAll('.lang-btn').forEach(b => b.classList.toggle('active', b.dataset.lang === lang));
-            document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = translations[lang][el.dataset.i18n]);
-            if(fpInstance) { fpInstance.set('locale', lang === 'en' ? 'default' : lang); }
-        }
+            document.documentElement.lang = lang;
+            document.title = translations[lang].title;
 
-        document.querySelectorAll('.lang-btn').forEach(b => b.addEventListener('click', () => updateLang(b.dataset.lang)));
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const apt = urlParams.get('apt');
-        if (apt) {
-            const searchVal = "FONYÓD " + apt.toUpperCase();
-            for (let opt of apartmentSelect.options) {
-                if (opt.value === searchVal) { apartmentSelect.value = searchVal; apartmentSelect.disabled = true; break; }
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.dataset.i18n;
+
+                if (translations[lang][key]) {
+                    el.textContent = translations[lang][key];
+                }
+            });
+
+            if (fpInstance) {
+                fpInstance.set('locale', lang === 'en' ? 'default' : lang);
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            fpInstance = flatpickr("#date", {
-                mode: "multiple", 
-                minDate: getMinDate(),
-                dateFormat: "Y-m-d",
-                locale: "hu",
-                conjunction: ", "
-            });
-            updateLang(currentLang);
-        });
+        function showMessage(text, type = 'error') {
+            messageEl.textContent = text;
+            messageEl.style.color = type === 'success' ? 'var(--primary-color)' : 'var(--danger)';
+        }
 
-        document.getElementById('breakfastForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submitBtn');
-            const msg = document.getElementById('message');
-            
-            const selectedDates = fpInstance.selectedDates.sort((a, b) => a - b);
-            if (selectedDates.length === 0) {
-                msg.textContent = currentLang === 'hu' ? "Kérjük, válasszon legalább egy napot!" : "Please select at least one day!";
-                msg.style.color = "#dc3545";
+        function clearMessage() {
+            messageEl.textContent = '';
+        }
+
+        async function loadBookingData() {
+            if (!bookingId) {
+                showMessage(translations[currentLang].missingBooking);
+                submitBtn.disabled = true;
                 return;
             }
 
-            btn.disabled = true;
-            btn.textContent = translations[currentLang].sending;
-            
-            const daysCount = selectedDates.length;
-            const guestsCount = parseInt(document.getElementById('guests').value, 10);
-            const totalAmount = daysCount * guestsCount * PRICE_PER_PERSON_PER_DAY;
-            const paymentMethod = document.getElementById('paymentMethod').value;
+            try {
+                const response = await fetch(`/api/verify-booking/${encodeURIComponent(bookingId)}`);
+                const booking = await response.json().catch(() => null);
 
-            const dateList = selectedDates.map(d => d.toISOString().split('T')[0]).join(', ');
+                if (!response.ok || !booking || booking.valid !== true) {
+                    showMessage(translations[currentLang].invalidBooking);
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                document.getElementById('name').value = booking.guestName || '';
+                document.getElementById('email').value = booking.email || '';
+
+                document.getElementById('name').readOnly = true;
+                document.getElementById('email').readOnly = true;
+
+                apartmentSelect.innerHTML = '';
+                const option = document.createElement('option');
+                option.value = booking.aptName || '';
+                option.textContent = booking.aptName || '';
+                option.selected = true;
+                apartmentSelect.appendChild(option);
+                apartmentSelect.disabled = true;
+
+                if (booking.lang && ['hu', 'en', 'de'].includes(booking.lang) && !initialLang) {
+                    updateLang(booking.lang);
+                }
+
+                clearMessage();
+            } catch (err) {
+                console.error('Booking verification error:', err);
+                showMessage(translations[currentLang].verifyError);
+                submitBtn.disabled = true;
+            }
+        }
+
+        function escapeOrderText(value) {
+            return String(value ?? '').trim().replace(/\s+/g, ' ');
+        }
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                updateLang(btn.dataset.lang);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fpInstance = flatpickr("#date", {
+                mode: "multiple",
+                minDate: getMinDate(),
+                dateFormat: "Y-m-d",
+                locale: currentLang === 'en' ? 'default' : currentLang,
+                conjunction: ", "
+            });
+
+            updateLang(currentLang);
+            loadBookingData();
+        });
+
+        form.addEventListener('submit', async event => {
+            event.preventDefault();
+            clearMessage();
+
+            if (!fpInstance) return;
+
+            const selectedDates = [...fpInstance.selectedDates].sort((a, b) => a - b);
+
+            if (selectedDates.length === 0) {
+                showMessage(translations[currentLang].selectDate);
+                return;
+            }
+
+            const guestsCount = Number(document.getElementById('guests').value || 0);
+
+            if (!Number.isFinite(guestsCount) || guestsCount < 1) {
+                showMessage(translations[currentLang].genericError);
+                return;
+            }
+
+            const paymentMethod = document.getElementById('paymentMethod').value;
+            const daysCount = selectedDates.length;
+            const totalAmount = daysCount * guestsCount * PRICE_PER_PERSON_PER_DAY;
+
+            const formatDate = date => fpInstance.formatDate(date, 'Y-m-d');
+            const dateList = selectedDates.map(formatDate).join(', ');
+
+            const orderDetails = escapeOrderText(document.getElementById('orderDetails').value);
+            const phone = escapeOrderText(document.getElementById('phone').value);
 
             const payload = {
                 type: 'BREAKFAST',
                 lang: currentLang,
-                guestName: document.getElementById('name').value,
-                email: document.getElementById('email').value,
+                guestName: document.getElementById('name').value.trim(),
+                email: document.getElementById('email').value.trim(),
+                phone,
                 apartment: apartmentSelect.value,
-                start: selectedDates[0].toISOString().split('T')[0], 
-                end: selectedDates[selectedDates.length - 1].toISOString().split('T')[0],
+                start: formatDate(selectedDates[0]),
+                end: formatDate(selectedDates[selectedDates.length - 1]),
                 days: daysCount,
-                items: document.getElementById('orderDetails').value + ` | NAPOK: ${dateList} | FŐ: ${guestsCount}`,
+                items: `${orderDetails} | Napok: ${dateList} | Személyek: ${guestsCount}`,
                 method: paymentMethod,
                 amount: totalAmount
             };
 
+            submitBtn.disabled = true;
+            submitBtn.textContent = translations[currentLang].sending;
+
             try {
-                const res = await fetch('/api/order', {
+                const response = await fetch('/api/order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
 
-                const result = await res.json();
+                const result = await response.json().catch(() => null);
 
-                if (res.ok && result.success) {
-                    if (paymentMethod === 'card' && result.stripeSessionId) {
-                        btn.textContent = translations[currentLang].redirecting;
-                        const stripe = Stripe(STRIPE_PUBLIC_KEY);
-                        await stripe.redirectToCheckout({ sessionId: result.stripeSessionId });
-                    } else {
-                        msg.textContent = translations[currentLang].success;
-                        msg.style.color = "var(--primary-color)";
-                        e.target.reset();
-                        fpInstance.clear();
-                        if (apt) apartmentSelect.value = "FONYÓD " + apt.toUpperCase();
-                    }
-                } else {
-                    msg.textContent = result.error || "Hiba történt a feldolgozás során.";
-                    msg.style.color = "#dc3545";
+                if (!response.ok || !result || result.success !== true) {
+                    showMessage(result?.error || translations[currentLang].genericError);
+                    return;
                 }
+
+                if (paymentMethod === 'card' && result.stripeSessionId) {
+                    submitBtn.textContent = translations[currentLang].redirecting;
+
+                    const stripe = Stripe(STRIPE_PUBLIC_KEY);
+                    const redirectResult = await stripe.redirectToCheckout({
+                        sessionId: result.stripeSessionId
+                    });
+
+                    if (redirectResult.error) {
+                        showMessage(redirectResult.error.message || translations[currentLang].genericError);
+                    }
+
+                    return;
+                }
+
+                showMessage(translations[currentLang].success, 'success');
+
+                form.reset();
+                fpInstance.clear();
+
+                await loadBookingData();
             } catch (err) {
-                msg.textContent = "Hálózati hiba. Kérjük, próbálja újra.";
-                msg.style.color = "#dc3545";
+                console.error('Breakfast order error:', err);
+                showMessage(translations[currentLang].networkError);
             } finally {
-                btn.disabled = false;
-                btn.textContent = translations[currentLang].submitBtn;
+                submitBtn.disabled = false;
+                submitBtn.textContent = translations[currentLang].submitBtn;
             }
         });
     </script>
