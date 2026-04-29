@@ -3,117 +3,234 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balaton Essence</title>
-    <style>
-        :root { --primary: #5c7a4d; --dark: #2C3325; --success: #28a745; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f2; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; color: var(--dark); }
-        .container { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; max-width: 500px; width: 90%; border-top: 5px solid var(--primary); }
-        
-        .check-icon { width: 80px; height: 80px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; color: white; font-size: 40px; }
-        h1, h2 { color: var(--primary); margin-bottom: 10px; }
-        p { line-height: 1.6; color: #555; }
-        
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid var(--primary); border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 20px auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    <title>Foglalás visszaigazolása | Balaton Essence</title>
 
-        .btn-home { display: inline-block; margin-top: 25px; padding: 12px 25px; background: var(--primary); color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: opacity 0.2s; }
-        .btn-home:hover { opacity: 0.9; }
-        
-        .hidden { display: none; }
-        .error-text { color: #8b0000 !important; font-weight: bold; }
+    <style>
+        :root {
+            --primary: #5c7a4d;
+            --dark: #2C3325;
+            --danger: #8b0000;
+            --bg: #f4f7f2;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+            color: var(--dark);
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            text-align: center;
+            max-width: 520px;
+            width: 100%;
+            border-top: 5px solid var(--primary);
+        }
+
+        .check-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            color: white;
+            font-size: 40px;
+        }
+
+        h1, h2 {
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+
+        p {
+            line-height: 1.6;
+            color: #555;
+        }
+
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .btn-home {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 25px;
+            background: var(--primary);
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        .btn-home:hover {
+            opacity: 0.9;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .error-text {
+            color: var(--danger) !important;
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
 
-    <div class="container">
-        <div id="processing-ui">
-            <div class="loader"></div>
-            <h2 id="status-title"></h2>
-            <p id="status-desc"></p>
-        </div>
-
-        <div id="success-ui" class="hidden">
-            <div class="check-icon">✓</div>
-            <h1 id="res-title"></h1>
-            <p id="res-desc"></p>
-            <a href="/" class="btn-home" id="btn-text"></a>
-        </div>
-
-        <div id="error-ui" class="hidden">
-            <h2 class="error-text" id="err-title"></h2>
-            <p id="err-desc"></p>
-            <a href="/" class="btn-home" id="err-btn"></a>
-        </div>
+<div class="container">
+    <div id="processing-ui">
+        <div class="loader"></div>
+        <h2 id="status-title"></h2>
+        <p id="status-desc"></p>
     </div>
 
-    <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const sessionId = urlParams.get('session_id');
-        const lang = urlParams.get('lang') || 'hu';
+    <div id="success-ui" class="hidden">
+        <div class="check-icon">✓</div>
+        <h1 id="res-title"></h1>
+        <p id="res-desc"></p>
+        <a href="/" class="btn-home" id="btn-text"></a>
+    </div>
 
-        // Teljes szótár minden eshetőségre
-        const translations = {
-            hu: { 
-                procTitle: "Foglalás véglegesítése...", procDesc: "Kérjük, ne zárja be az ablakot, amíg rögzítjük az adatait.",
-                succTitle: "Sikeres foglalás!", succDesc: "Köszönjük! A befizetett előleget (50%) sikeresen igazoltuk. A foglalási adatokat és a visszaigazolást elküldtük az e-mail címére.",
-                errTitle: "Hoppá! Valami hiba történt.", errDesc: "A fizetés állapota ismeretlen. Kérjük, vegye fel velünk a kapcsolatot az info@balatonessence.com címen!",
-                btnHome: "Vissza a főoldalra"
-            },
-            en: { 
-                procTitle: "Finalizing booking...", procDesc: "Please do not close this window while we secure your reservation.",
-                succTitle: "Booking Successful!", succDesc: "Thank you! Your 50% deposit has been verified. The booking details and confirmation have been sent to your email.",
-                errTitle: "Oops! Something went wrong.", errDesc: "Payment status is unknown. Please contact us at info@balatonessence.com!",
-                btnHome: "Back to Home"
-            },
-            de: { 
-                procTitle: "Buchung wird abgeschlossen...", procDesc: "Bitte schließen Sie dieses Fenster nicht, während wir Ihre Daten speichern.",
-                succTitle: "Buchung erfolgreich!", succDesc: "Vielen Dank! Ihre Anzahlung (50%) wurde bestätigt. Die Buchungsdetails und die Bestätigung wurden an Ihre E-Mail gesendet.",
-                errTitle: "Hoppla! Etwas ist schiefgelaufen.", errDesc: "Der Zahlungsstatus ist unbekannt. Bitte kontaktieren Sie uns unter info@balatonessence.com!",
-                btnHome: "Zurück zur Startseite"
-            }
-        };
+    <div id="error-ui" class="hidden">
+        <h2 class="error-text" id="err-title"></h2>
+        <p id="err-desc"></p>
+        <a href="/" class="btn-home" id="err-btn"></a>
+    </div>
+</div>
 
-        const t = translations[lang] || translations.hu;
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const sessionId = urlParams.get('session_id');
+    const lang = urlParams.get('lang') || 'hu';
 
-        // Azonnali felirat-betöltés a "Töltés" fázishoz
-        document.getElementById('status-title').innerText = t.procTitle;
-        document.getElementById('status-desc').innerText = t.procDesc;
-        document.getElementById('btn-text').innerText = t.btnHome;
-        document.getElementById('err-btn').innerText = t.btnHome;
+    const translations = {
+        hu: {
+            htmlLang: 'hu',
+            pageTitle: 'Foglalás visszaigazolása | Balaton Essence',
+            procTitle: 'Foglalás véglegesítése...',
+            procDesc: 'Kérjük, ne zárja be az ablakot, amíg rögzítjük az adatait.',
+            succTitle: 'Sikeres foglalás!',
+            succDesc: 'Köszönjük! A befizetett előleget sikeresen igazoltuk. A foglalási adatokat és a visszaigazolást elküldtük az e-mail címére.',
+            errTitle: 'Hoppá! Valami hiba történt.',
+            errDesc: 'A fizetés állapota ismeretlen. Kérjük, vegye fel velünk a kapcsolatot az info@balatonessence.com címen!',
+            btnHome: 'Vissza a főoldalra',
+            homeUrl: '/'
+        },
+        en: {
+            htmlLang: 'en',
+            pageTitle: 'Booking Confirmation | Balaton Essence',
+            procTitle: 'Finalizing booking...',
+            procDesc: 'Please do not close this window while we secure your reservation.',
+            succTitle: 'Booking successful!',
+            succDesc: 'Thank you! Your deposit has been verified. The booking details and confirmation have been sent to your email.',
+            errTitle: 'Oops! Something went wrong.',
+            errDesc: 'Payment status is unknown. Please contact us at info@balatonessence.com.',
+            btnHome: 'Back to home',
+            homeUrl: '/en/'
+        },
+        de: {
+            htmlLang: 'de',
+            pageTitle: 'Buchungsbestätigung | Balaton Essence',
+            procTitle: 'Buchung wird abgeschlossen...',
+            procDesc: 'Bitte schließen Sie dieses Fenster nicht, während wir Ihre Daten speichern.',
+            succTitle: 'Buchung erfolgreich!',
+            succDesc: 'Vielen Dank! Ihre Anzahlung wurde bestätigt. Die Buchungsdetails und die Bestätigung wurden an Ihre E-Mail gesendet.',
+            errTitle: 'Hoppla! Etwas ist schiefgelaufen.',
+            errDesc: 'Der Zahlungsstatus ist unbekannt. Bitte kontaktieren Sie uns unter info@balatonessence.com.',
+            btnHome: 'Zurück zur Startseite',
+            homeUrl: '/de/'
+        }
+    };
 
-        async function finalize() {
-            if (!sessionId) {
+    const t = translations[lang] || translations.hu;
+
+    document.documentElement.lang = t.htmlLang;
+    document.title = t.pageTitle;
+
+    document.getElementById('status-title').innerText = t.procTitle;
+    document.getElementById('status-desc').innerText = t.procDesc;
+
+    document.getElementById('btn-text').innerText = t.btnHome;
+    document.getElementById('btn-text').href = t.homeUrl;
+
+    document.getElementById('err-btn').innerText = t.btnHome;
+    document.getElementById('err-btn').href = t.homeUrl;
+
+    async function finalize() {
+        if (!sessionId) {
+            showError();
+            return;
+        }
+
+        try {
+            const response = await fetch(
+                `/api/finalize-booking?session_id=${encodeURIComponent(sessionId)}`
+            );
+
+            if (!response.ok) {
                 showError();
                 return;
             }
 
-            try {
-                const response = await fetch(`/api/finalize-booking?session_id=${sessionId}`);
-                if (response.ok) {
-                    showSuccess();
-                } else {
-                    showError();
-                }
-            } catch (err) {
+            const result = await response.json().catch(() => null);
+
+            if (result && result.success === true) {
+                showSuccess();
+            } else {
                 showError();
             }
+        } catch (err) {
+            console.error('Finalize booking error:', err);
+            showError();
         }
+    }
 
-        function showSuccess() {
-            document.getElementById('processing-ui').classList.add('hidden');
-            document.getElementById('success-ui').classList.remove('hidden');
-            document.getElementById('res-title').innerText = t.succTitle;
-            document.getElementById('res-desc').innerText = t.succDesc;
-        }
+    function showSuccess() {
+        document.getElementById('processing-ui').classList.add('hidden');
+        document.getElementById('error-ui').classList.add('hidden');
+        document.getElementById('success-ui').classList.remove('hidden');
 
-        function showError() {
-            document.getElementById('processing-ui').classList.add('hidden');
-            document.getElementById('error-ui').classList.remove('hidden');
-            document.getElementById('err-title').innerText = t.errTitle;
-            document.getElementById('err-desc').innerText = t.errDesc;
-        }
+        document.getElementById('res-title').innerText = t.succTitle;
+        document.getElementById('res-desc').innerText = t.succDesc;
+    }
 
-        finalize();
-    </script>
+    function showError() {
+        document.getElementById('processing-ui').classList.add('hidden');
+        document.getElementById('success-ui').classList.add('hidden');
+        document.getElementById('error-ui').classList.remove('hidden');
+
+        document.getElementById('err-title').innerText = t.errTitle;
+        document.getElementById('err-desc').innerText = t.errDesc;
+    }
+
+    finalize();
+</script>
+
 </body>
 </html>

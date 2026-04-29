@@ -784,21 +784,40 @@ app.post('/api/order', async (req, res) => {
             return res.status(400).json({ error: 'Hiányos rendelési adatok.' });
         }
 
+        if (!['BREAKFAST', 'EXTRA'].includes(data.type)) {
+            return res.status(400).json({ error: 'Ismeretlen rendelési típus.' });
+        }
+
+        if (!['cash', 'card'].includes(data.method)) {
+            return res.status(400).json({ error: 'Ismeretlen fizetési mód.' });
+        }
+
+        const amount = Number(data.amount || data.totalPrice || 0);
+
+        if (!Number.isFinite(amount) || amount <= 0) {
+            return res.status(400).json({ error: 'Hibás rendelési összeg.' });
+        }
+
         const db = await getDbContent();
 
-        if (data.type === 'BREAKFAST') {
-            const isFonyod = data.apartment && data.apartment.toUpperCase().includes('FONYÓD');
+        if (!db.bookings) db.bookings = [];
 
-            if (!isFonyod || data.apartment === 'KÜLSŐS' || data.apartment === 'EXTERNAL') {
+        if (data.type === 'BREAKFAST') {
+            const apartmentName = String(data.apartment || '');
+            const isFonyod = apartmentName.toUpperCase().includes('FONYÓD');
+
+            if (!isFonyod || apartmentName === 'KÜLSŐS' || apartmentName === 'EXTERNAL') {
                 return res.status(400).json({
                     error: lang === 'hu'
                         ? 'Reggeli csak fonyódi apartmanokba rendelhető!'
-                        : 'Breakfast is only available for apartments in Fonyód!'
+                        : lang === 'de'
+                            ? 'Frühstück ist nur für Apartments in Fonyód verfügbar!'
+                            : 'Breakfast is only available for apartments in Fonyód!'
                 });
             }
 
             const hasBooking = db.bookings.find(b =>
-                b.aptName === data.apartment &&
+                String(b.aptName || '') === apartmentName &&
                 String(b.email || '').toLowerCase() === String(data.email || '').toLowerCase() &&
                 new Date(data.start) >= new Date(b.checkIn) &&
                 new Date(data.start) <= new Date(b.checkOut)
@@ -808,7 +827,9 @@ app.post('/api/order', async (req, res) => {
                 return res.status(403).json({
                     error: lang === 'hu'
                         ? 'Sajnos nem találtunk érvényes szállásfoglalást erre az időszakra ezzel az e-mail címmel.'
-                        : "Sorry, we couldn't find a valid accommodation booking for this period with this email address."
+                        : lang === 'de'
+                            ? 'Leider konnten wir für diesen Zeitraum mit dieser E-Mail-Adresse keine gültige Unterkunftsbuchung finden.'
+                            : "Sorry, we couldn't find a valid accommodation booking for this period with this email address."
                 });
             }
         }
@@ -816,13 +837,17 @@ app.post('/api/order', async (req, res) => {
         const order = {
             id,
             ...data,
+            amount,
             lang,
             paymentStatus: data.method === 'card' ? 'pending' : 'cash',
             createdAt: new Date().toISOString()
         };
 
         await updateDbContent(async currentDb => {
-            if (data.type === 'BREAKFAST') {
+            if (!currentDb.breakfasts) currentDb.breakfasts = [];
+            if (!currentDb.extras) currentDb.extras = [];
+
+            if (order.type === 'BREAKFAST') {
                 currentDb.breakfasts.push(order);
             } else {
                 currentDb.extras.push(order);
@@ -832,63 +857,65 @@ app.post('/api/order', async (req, res) => {
         });
 
         try {
+            const paymentLabel = order.method === 'cash'
+                ? 'KP'
+                : 'KÁRTYA - FIZETÉSRE VÁR';
+
             await resend.emails.send({
                 from: 'Rendszer <info@balatonessence.com>',
                 to: 'balatonessence@gmail.com',
-                subject: `${data.type === 'BREAKFAST' ? '🍳' : '☀️'} ÚJ RENDELÉS (${data.method === 'cash' ? 'KP' : 'KÁRTYA'}): ${escapeHtml(data.guestName)}`,
+                subject: `${order.type === 'BREAKFAST' ? '🍳' : '☀️'} ÚJ RENDELÉS (${paymentLabel}): ${escapeHtml(order.guestName)}`,
                 html: `
-                    <h2>Új ${data.type === 'BREAKFAST' ? 'reggeli' : 'felszerelés'} rendelés</h2>
-                    <p><strong>Vendég:</strong> ${escapeHtml(data.guestName)} (${escapeHtml(data.email)})</p>
-                    <p><strong>Apartman:</strong> ${escapeHtml(data.apartment)}</p>
-                    <p><strong>Tételek:</strong> ${escapeHtml(data.items)}</p>
-                    <p><strong>Idő:</strong> ${escapeHtml(data.start)} — ${escapeHtml(data.end)} (${escapeHtml(data.days)} nap)</p>
-                    <p><strong>Fizetés:</strong> ${data.method === 'cash' ? 'Helyszíni KP' : 'Online kártya'}</p>`
+                    <h2>Új ${order.type === 'BREAKFAST' ? 'reggeli' : 'felszerelés'} rendelés</h2>
+                    <p><strong>Státusz:</strong> ${order.method === 'cash' ? 'Helyszíni fizetés' : 'Online fizetésre vár'}</p>
+                    <p><strong>Vendég:</strong> ${escapeHtml(order.guestName)} (${escapeHtml(order.email)})</p>
+                    <p><strong>Apartman:</strong> ${escapeHtml(order.apartment)}</p>
+                    <p><strong>Tételek:</strong> ${escapeHtml(order.items)}</p>
+                    <p><strong>Idő:</strong> ${escapeHtml(order.start)} — ${escapeHtml(order.end)} (${escapeHtml(order.days)} nap)</p>
+                    <p><strong>Összeg:</strong> ${formatMoney(amount)} Ft</p>
+                    <p><strong>Fizetés:</strong> ${order.method === 'cash' ? 'Helyszíni KP' : 'Online kártya'}</p>`
             });
         } catch (err) {
             console.error('Admin rendelési email hiba:', err);
         }
 
-        if (data.method === 'cash') {
-            await sendGuestOrderEmail(data, lang, 'cash');
+        if (order.method === 'cash') {
+            await sendGuestOrderEmail(order, lang, 'cash');
             return res.json({ success: true, id, method: 'cash' });
         }
 
-        if (data.method === 'card') {
-            const t = getOrderTranslations(data, lang);
+        const t = getOrderTranslations(order, lang);
 
-            const session = await stripe.checkout.sessions.create({
-                payment_method_types: ['card'],
-                line_items: [{
-                    price_data: {
-                        currency: 'huf',
-                        product_data: {
-                            name: t.subj,
-                            description: `${data.items} | ${data.apartment}`
-                        },
-                        unit_amount: Math.round(Number(data.amount || 0)) * 100
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [{
+                price_data: {
+                    currency: 'huf',
+                    product_data: {
+                        name: t.subj,
+                        description: `${order.items} | ${order.apartment}`
                     },
-                    quantity: 1
-                }],
-                mode: 'payment',
-                success_url: `https://${req.get('host')}/success-extra.html?session_id={CHECKOUT_SESSION_ID}&lang=${lang}`,
-                cancel_url: `https://${req.get('host')}/${data.type === 'BREAKFAST' ? 'morning.html' : 'sun.html'}?lang=${lang}`,
-                customer_email: data.email,
-                metadata: {
-                    orderId: id,
-                    type: data.type,
-                    lang
-                }
-            });
+                    unit_amount: Math.round(amount) * 100
+                },
+                quantity: 1
+            }],
+            mode: 'payment',
+            success_url: `https://${req.get('host')}/success-extra.html?session_id={CHECKOUT_SESSION_ID}&lang=${lang}`,
+            cancel_url: `https://${req.get('host')}/${order.type === 'BREAKFAST' ? 'morning.html' : 'sun.html'}?lang=${lang}`,
+            customer_email: order.email,
+            metadata: {
+                orderId: id,
+                type: order.type,
+                lang
+            }
+        });
 
-            return res.json({
-                success: true,
-                id,
-                method: 'card',
-                stripeSessionId: session.id
-            });
-        }
-
-        return res.status(400).json({ error: 'Ismeretlen fizetési mód.' });
+        return res.json({
+            success: true,
+            id,
+            method: 'card',
+            stripeSessionId: session.id
+        });
     } catch (e) {
         console.error('Rendelési hiba:', e);
         res.status(500).json({ error: e.message });
@@ -898,24 +925,35 @@ app.post('/api/order', async (req, res) => {
 app.get('/api/finalize-extra', async (req, res) => {
     try {
         const { session_id } = req.query;
-        if (!session_id) return res.status(400).json({ error: 'Hiányzó session_id.' });
+
+        if (!session_id) {
+            return res.status(400).json({ error: 'Hiányzó session_id.' });
+        }
 
         const session = await stripe.checkout.sessions.retrieve(session_id);
 
-        if (session.payment_status !== 'paid') {
+        if (!session || session.payment_status !== 'paid') {
             return res.status(400).json({ error: 'A fizetés még nem sikeres.' });
         }
 
         const orderId = session.metadata?.orderId;
         const type = session.metadata?.type;
+        const lang = normalizeLang(session.metadata?.lang || 'hu');
 
         if (!orderId || !type) {
             return res.status(400).json({ error: 'Hiányzó rendelési metadata.' });
         }
 
+        if (!['BREAKFAST', 'EXTRA'].includes(type)) {
+            return res.status(400).json({ error: 'Ismeretlen rendelési típus.' });
+        }
+
         let order = null;
 
         await updateDbContent(async db => {
+            if (!db.breakfasts) db.breakfasts = [];
+            if (!db.extras) db.extras = [];
+
             const list = type === 'BREAKFAST' ? db.breakfasts : db.extras;
             const idx = list.findIndex(item => String(item.id) === String(orderId));
 
@@ -925,30 +963,57 @@ app.get('/api/finalize-extra', async (req, res) => {
                 throw err;
             }
 
-            list[idx].paymentStatus = 'paid';
-            list[idx].stripeId = session_id;
-            list[idx].paidAmount = Number(session.amount_total || 0) / 100;
-            list[idx].paidAt = new Date().toISOString();
+            if (list[idx].paymentStatus === 'paid' && list[idx].stripeId === session_id) {
+                order = list[idx];
+                return db;
+            }
+
+            list[idx] = {
+                ...list[idx],
+                paymentStatus: 'paid',
+                stripeId: session_id,
+                paidAmount: Number(session.amount_total || 0) / 100,
+                paidAt: new Date().toISOString(),
+                lang
+            };
 
             order = list[idx];
             return db;
         });
 
         if (order && !order.guestEmailSentAfterCardPayment) {
-            await sendGuestOrderEmail(order, normalizeLang(order.lang || 'hu'), 'card');
+            try {
+                if (typeof sendGuestOrderEmail === 'function') {
+                    await sendGuestOrderEmail(order, normalizeLang(order.lang || lang), 'card');
+                }
 
-            await updateDbContent(async db => {
-                const list = order.type === 'BREAKFAST' ? db.breakfasts : db.extras;
-                const idx = list.findIndex(item => String(item.id) === String(order.id));
-                if (idx !== -1) list[idx].guestEmailSentAfterCardPayment = true;
-                return db;
-            });
+                await updateDbContent(async db => {
+                    if (!db.breakfasts) db.breakfasts = [];
+                    if (!db.extras) db.extras = [];
+
+                    const list = order.type === 'BREAKFAST' ? db.breakfasts : db.extras;
+                    const idx = list.findIndex(item => String(item.id) === String(order.id));
+
+                    if (idx !== -1) {
+                        list[idx].guestEmailSentAfterCardPayment = true;
+                    }
+
+                    return db;
+                });
+            } catch (mailErr) {
+                console.error('Kártyás extra vendég email hiba:', mailErr);
+            }
         }
 
-        res.json({ success: true, order });
+        res.json({
+            success: true,
+            type: type === 'BREAKFAST' ? 'Reggeli rendelés' : 'Extra szolgáltatás',
+            orderId,
+            order
+        });
     } catch (e) {
         console.error('Extra véglegesítési hiba:', e);
-        res.status(e.statusCode || 500).json({ error: e.message });
+        res.status(e.statusCode || 500).json({ error: e.message || 'Szerverhiba.' });
     }
 });
 
@@ -1133,7 +1198,6 @@ app.post('/api/sync', requireAdmin, async (req, res) => {
                         }
 
                         const incomingIds = new Set(incomingEvents.map(ev => ev.icalId));
-
                         const beforeCount = db.bookings.length;
 
                         db.bookings = db.bookings.filter(b => {
@@ -1227,9 +1291,7 @@ app.get('/api/balaton-water-temp', async (req, res) => {
                         if (!match) continue;
 
                         const num = Number(String(match[1]).replace(',', '.'));
-                        if (!Number.isNaN(num) && num > 0 && num < 40) {
-                            return num;
-                        }
+                        if (!Number.isNaN(num) && num > 0 && num < 40) return num;
                     }
 
                     return null;
@@ -1243,17 +1305,13 @@ app.get('/api/balaton-water-temp', async (req, res) => {
                         .replace(/\s+/g, ' ')
                         .replace(/&nbsp;/g, ' ');
 
-                    // Fonyód vízmérce sor: dátum + vízállás + vízhozam + felszíni vízhő
-                    // Ha a vízhő mező "-", nem fog találatot adni.
                     const rowPattern = /(\d{4}\.\d{2}\.\d{2}\.\s+\d{2}:\d{2})\s+(-?\d+)\s+[-–]\s+(\d{1,2}(?:[,.]\d)?)/i;
                     const match = clean.match(rowPattern);
 
                     if (!match) return null;
 
                     const num = Number(String(match[3]).replace(',', '.'));
-                    if (!Number.isNaN(num) && num > 0 && num < 40) {
-                        return num;
-                    }
+                    if (!Number.isNaN(num) && num > 0 && num < 40) return num;
 
                     return null;
                 }
@@ -1266,7 +1324,6 @@ app.get('/api/balaton-water-temp', async (req, res) => {
                         .replace(/\s+/g, ' ')
                         .replace(/&nbsp;/g, ' ');
 
-                    // Fonyód nincs mindig külön, ezért Siófok / Gyenesdiás / Révfülöp fallback lehet.
                     const patterns = [
                         /Balaton \(Siófok\):\s*(\d{1,2}(?:[,.]\d)?)\s*°C/i,
                         /Balaton \(Gyenesdiás\):\s*(\d{1,2}(?:[,.]\d)?)\s*°C/i,
@@ -1278,9 +1335,7 @@ app.get('/api/balaton-water-temp', async (req, res) => {
                         if (!match) continue;
 
                         const num = Number(String(match[1]).replace(',', '.'));
-                        if (!Number.isNaN(num) && num > 0 && num < 40) {
-                            return num;
-                        }
+                        if (!Number.isNaN(num) && num > 0 && num < 40) return num;
                     }
 
                     return null;
@@ -1322,7 +1377,6 @@ app.get('/api/balaton-water-temp', async (req, res) => {
             source: null,
             error: 'Fonyódi vízhőfok adat jelenleg nem elérhető.'
         });
-
     } catch (e) {
         console.error('Vízhőfok hiba:', e.message);
 
@@ -1504,7 +1558,6 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Express 4/5 kompatibilisebb fallback, app.get('*') helyett.
 app.use((req, res) => {
     if (req.path.startsWith('/api/')) {
         return res.status(404).json({ error: 'API endpoint nem található.' });
