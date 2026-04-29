@@ -323,9 +323,7 @@
 
             <div class="row">
                 <div class="form-floating">
-                    <select id="apartment" required>
-                        <option value="" disabled selected></option>
-                    </select>
+                    <input type="text" id="apartment" placeholder=" " required readonly>
                     <label for="apartment" data-i18n="aptLabel">Apartman</label>
                 </div>
 
@@ -531,13 +529,7 @@
                 document.getElementById('name').readOnly = true;
                 document.getElementById('email').readOnly = true;
 
-                apartmentSelect.innerHTML = '';
-                const option = document.createElement('option');
-                option.value = booking.aptName || '';
-                option.textContent = booking.aptName || '';
-                option.selected = true;
-                apartmentSelect.appendChild(option);
-                apartmentSelect.disabled = true;
+                apartmentSelect.value = booking.aptName || '';
 
                 if (booking.lang && ['hu', 'en', 'de'].includes(booking.lang) && !initialLang) {
                     updateLang(booking.lang);
