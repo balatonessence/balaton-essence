@@ -160,52 +160,61 @@
     const sessionId = params.get('session_id');
 
     const translations = {
-        hu: {
-            pageTitle: 'Rendelés visszaigazolása | Balaton Essence',
-            processingTitle: 'Rendelés véglegesítése...',
-            processingMsg: 'Kérjük, ne zárd be az ablakot, amíg ellenőrizzük a fizetést.',
-            successTitle: 'Köszönjük!',
-            successMsg: 'A fizetés sikeres volt, a rendelésedet rögzítettük a rendszerünkben.',
-            errorTitle: 'Hiba történt',
-            errorMsg: 'A fizetés állapota nem ellenőrizhető. Kérjük, vedd fel velünk a kapcsolatot az info@balatonessence.com címen.',
-            btn: 'Vissza a főoldalra',
-            redir: 'Automatikus átirányítás',
-            sec: 'másodperc múlva...',
-            serviceProcessing: 'Szolgáltatás ellenőrzése',
-            serviceSuccess: 'Szolgáltatás rögzítve',
-            homeUrl: '/'
-        },
-        en: {
-            pageTitle: 'Order Confirmation | Balaton Essence',
-            processingTitle: 'Finalizing order...',
-            processingMsg: 'Please do not close this window while we verify your payment.',
-            successTitle: 'Thank you!',
-            successMsg: 'Payment successful, your order has been recorded in our system.',
-            errorTitle: 'Something went wrong',
-            errorMsg: 'Payment status could not be verified. Please contact us at info@balatonessence.com.',
-            btn: 'Back to home',
-            redir: 'Redirecting automatically in',
-            sec: 'seconds...',
-            serviceProcessing: 'Verifying service',
-            serviceSuccess: 'Service confirmed',
-            homeUrl: '/en/'
-        },
-        de: {
-            pageTitle: 'Bestellbestätigung | Balaton Essence',
-            processingTitle: 'Bestellung wird abgeschlossen...',
-            processingMsg: 'Bitte schließen Sie dieses Fenster nicht, während wir Ihre Zahlung überprüfen.',
-            successTitle: 'Vielen Dank!',
-            successMsg: 'Die Zahlung war erfolgreich, Ihre Bestellung wurde in unserem System registriert.',
-            errorTitle: 'Etwas ist schiefgelaufen',
-            errorMsg: 'Der Zahlungsstatus konnte nicht überprüft werden. Bitte kontaktieren Sie uns unter info@balatonessence.com.',
-            btn: 'Zurück zur Startseite',
-            redir: 'Automatische Weiterleitung in',
-            sec: 'Sekunden...',
-            serviceProcessing: 'Service wird überprüft',
-            serviceSuccess: 'Service bestätigt',
-            homeUrl: '/de/'
-        }
-    };
+    hu: {
+        pageTitle: 'Rendelés visszaigazolása | Balaton Essence',
+        processingTitle: 'Rendelés véglegesítése...',
+        processingMsg: 'Kérjük, ne zárd be az ablakot, amíg ellenőrizzük a fizetést.',
+        successTitle: 'Köszönjük!',
+        successMsg: 'A fizetés sikeres volt, a rendelésedet rögzítettük a rendszerünkben.',
+        errorTitle: 'Hiba történt',
+        errorMsg: 'A fizetés állapota nem ellenőrizhető. Kérjük, vedd fel velünk a kapcsolatot az info@balatonessence.com címen.',
+        btn: 'Vissza a főoldalra',
+        redir: 'Automatikus átirányítás',
+        sec: 'másodperc múlva...',
+        serviceProcessing: 'Szolgáltatás ellenőrzése',
+        serviceSuccess: 'Szolgáltatás rögzítve',
+        serviceError: 'Sikertelen ellenőrzés',
+        homeUrl: '/',
+        breakfastType: 'Reggeli rendelés',
+        extraType: 'Extra szolgáltatás'
+    },
+    en: {
+        pageTitle: 'Order Confirmation | Balaton Essence',
+        processingTitle: 'Finalizing order...',
+        processingMsg: 'Please do not close this window while we verify your payment.',
+        successTitle: 'Thank you!',
+        successMsg: 'Payment successful, your order has been recorded in our system.',
+        errorTitle: 'Something went wrong',
+        errorMsg: 'Payment status could not be verified. Please contact us at info@balatonessence.com.',
+        btn: 'Back to home',
+        redir: 'Redirecting automatically in',
+        sec: 'seconds...',
+        serviceProcessing: 'Verifying service',
+        serviceSuccess: 'Service confirmed',
+        serviceError: 'Verification failed',
+        homeUrl: '/en/',
+        breakfastType: 'Breakfast order',
+        extraType: 'Extra service'
+    },
+    de: {
+        pageTitle: 'Bestellbestätigung | Balaton Essence',
+        processingTitle: 'Bestellung wird abgeschlossen...',
+        processingMsg: 'Bitte schließen Sie dieses Fenster nicht, während wir Ihre Zahlung überprüfen.',
+        successTitle: 'Vielen Dank!',
+        successMsg: 'Die Zahlung war erfolgreich, Ihre Bestellung wurde in unserem System registriert.',
+        errorTitle: 'Etwas ist schiefgelaufen',
+        errorMsg: 'Der Zahlungsstatus konnte nicht überprüft werden. Bitte kontaktieren Sie uns unter info@balatonessence.com.',
+        btn: 'Zurück zur Startseite',
+        redir: 'Automatische Weiterleitung in',
+        sec: 'Sekunden...',
+        serviceProcessing: 'Service wird überprüft',
+        serviceSuccess: 'Service bestätigt',
+        serviceError: 'Überprüfung fehlgeschlagen',
+        homeUrl: '/de/',
+        breakfastType: 'Frühstücksbestellung',
+        extraType: 'Extra-Service'
+    }
+};
 
     const t = translations[lang] || translations.hu;
 
@@ -232,38 +241,43 @@
 
     if (sessionId) {
         orderId.innerText = 'ID: ' + sessionId.substring(0, 15) + '...';
+    } else {
+        orderId.innerText = 'ID: -';
     }
 
     async function finalizeExtraOrder() {
-        if (!sessionId) {
-            showError();
+    if (!sessionId) {
+        showError();
+        return;
+    }
+
+    try {
+        const response = await fetch(
+            `/api/finalize-extra?session_id=${encodeURIComponent(sessionId)}`
+        );
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result || result.success !== true) {
+            console.error('Finalize extra failed:', result);
+            showError(result?.error);
             return;
         }
 
-        try {
-            const response = await fetch(
-                `/api/finalize-extra?session_id=${encodeURIComponent(sessionId)}`
-            );
-
-            const result = await response.json().catch(() => null);
-
-            if (!response.ok || !result || result.success !== true) {
-                showError();
-                return;
-            }
-
-            if (result.type) {
-                serviceType.innerText = result.type;
-            } else {
-                serviceType.innerText = t.serviceSuccess;
-            }
-
-            showSuccess();
-        } catch (err) {
-            console.error('Finalize extra error:', err);
-            showError();
+        if (result.order && result.order.type === 'BREAKFAST') {
+            serviceType.innerText = t.breakfastType;
+        } else if (result.order && result.order.type === 'EXTRA') {
+            serviceType.innerText = t.extraType;
+        } else {
+            serviceType.innerText = t.serviceSuccess;
         }
+
+        showSuccess();
+    } catch (err) {
+        console.error('Finalize extra error:', err);
+        showError();
     }
+}
 
     function showSuccess() {
         loader.style.display = 'none';
@@ -278,15 +292,15 @@
         startCountdown();
     }
 
-    function showError() {
+    function showError(errorText = null) {
         loader.style.display = 'none';
         icon.style.display = 'flex';
         icon.classList.add('error');
         icon.innerText = '✕';
 
         title.innerText = t.errorTitle;
-        msg.innerText = t.errorMsg;
-        serviceType.innerText = t.serviceProcessing;
+        msg.innerText = errorText ? `${t.errorMsg} (${errorText})` : t.errorMsg;
+        serviceType.innerText = t.serviceError;
     }
 
     function startCountdown() {
