@@ -1258,6 +1258,86 @@ app.delete('/api/bookings/:id', requireAdmin, async (req, res) => {
 // API - ICAL SYNC
 // -----------------------------------------------------------------------------
 
+function escapeIcalText(value) {
+    return String(value ?? '')
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\r?\n/g, '\\n');
+}
+
+function formatIcalDate(dateString) {
+    const date = normalizeIcalDate(dateString);
+    if (!date) return null;
+    return date.replace(/-/g, '');
+}
+
+app.get('/api/ical/:aptId.ics', async (req, res) => {
+    try {
+        const { aptId } = req.params;
+        const db = await getDbContent();
+
+        const apartment = db.apartments.find(apt => String(apt.id) === String(aptId));
+
+        if (!apartment) {
+            return res.status(404).send('Apartment not found');
+        }
+
+        const ownBookings = (db.bookings || []).filter(booking => {
+            const isSameApartment = String(booking.aptId) === String(aptId);
+            const isOwnWebsiteBooking = !booking.icalId && !booking.source && !booking.importedFrom;
+            const isConfirmed = booking.status !== 'cancelled';
+
+            return isSameApartment && isOwnWebsiteBooking && isConfirmed;
+        });
+
+        const nowStamp = new Date()
+            .toISOString()
+            .replace(/[-:]/g, '')
+            .replace(/\.\d{3}Z$/, 'Z');
+
+        const lines = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//Balaton Essence//Booking Calendar//HU',
+            'CALSCALE:GREGORIAN',
+            'METHOD:PUBLISH',
+            `X-WR-CALNAME:${escapeIcalText(`Balaton Essence - ${apartment.name}`)}`
+        ];
+
+        ownBookings.forEach(booking => {
+            const start = formatIcalDate(booking.checkIn);
+            const end = formatIcalDate(booking.checkOut || booking.end);
+
+            if (!start || !end) return;
+
+            const uid = `${booking.id || booking.stripeId || start}-${aptId}@balatonessence.com`;
+
+            lines.push(
+                'BEGIN:VEVENT',
+                `UID:${escapeIcalText(uid)}`,
+                `DTSTAMP:${nowStamp}`,
+                `DTSTART;VALUE=DATE:${start}`,
+                `DTEND;VALUE=DATE:${end}`,
+                `SUMMARY:${escapeIcalText('Reserved')}`,
+                `DESCRIPTION:${escapeIcalText('Reserved via Balaton Essence website')}`,
+                'TRANSP:OPAQUE',
+                'STATUS:CONFIRMED',
+                'END:VEVENT'
+            );
+        });
+
+        lines.push('END:VCALENDAR');
+
+        res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+        res.setHeader('Content-Disposition', `inline; filename="balaton-essence-${aptId}.ics"`);
+        res.send(lines.join('\r\n'));
+    } catch (e) {
+        console.error('iCal export hiba:', e);
+        res.status(500).send('iCal export error');
+    }
+});
+
 app.post('/api/sync', requireAdmin, async (req, res) => {
     try {
         let hasChange = false;
