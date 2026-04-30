@@ -625,9 +625,14 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Helyszín</label>
+                    <label>Helyszín / város</label>
                     <input type="text" id="a-loc" placeholder="Pl.: Fonyód">
                 </div>
+            </div>
+
+            <div class="form-group">
+                <label>Pontos cím az érkezési emailhez</label>
+                <input type="text" id="a-address" placeholder="Pl.: 8640 Fonyód, Fürdő utca 40.">
             </div>
 
             <div class="form-group">
@@ -993,6 +998,7 @@
             id: activeId || Date.now().toString(),
             name: document.getElementById('a-name').value.trim(),
             location: document.getElementById('a-loc').value.trim(),
+            address: document.getElementById('a-address').value.trim(),
             ownerId: document.getElementById('a-owner-select').value,
 
             seasons: seasonsData,
@@ -1047,7 +1053,7 @@
 
                 if (calendarWrapper) calendarWrapper.style.display = 'none';
 
-                ['a-name', 'a-loc', 'a-desc', 'a-desc-en', 'a-desc-de', 'a-ical-b', 'a-ical-sz'].forEach(fieldId => {
+                ['a-name', 'a-loc', 'a-address', 'a-desc', 'a-desc-en', 'a-desc-de', 'a-ical-b', 'a-ical-sz'].forEach(fieldId => {
                     const el = document.getElementById(fieldId);
                     if (el) el.value = '';
                 });
@@ -1082,6 +1088,7 @@
 
             setVal('a-name', a.name);
             setVal('a-loc', a.location);
+            setVal('a-address', a.address);
             setVal('a-owner-select', a.ownerId);
             setVal('a-desc', a.description);
             setVal('a-desc-en', a.description_en || a.descriptionEn || '');
@@ -1385,6 +1392,7 @@
                         <div>
                             <div style="font-weight: 700;">${escapeHtml(a.name)}</div>
                             <div style="font-size: 0.8rem; color: #777;">${escapeHtml(a.location)} • ${escapeHtml(owner ? owner.name : 'Nincs tulaj')}</div>
+                            ${a.address ? `<div style="font-size:0.72rem; color:#999; margin-top:3px;">${escapeHtml(a.address)}</div>` : ''}    
                             ${langBadges}
                         </div>
                     </div>

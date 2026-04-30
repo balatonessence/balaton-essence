@@ -102,6 +102,17 @@ function diffDays(fromDate, toDate) {
     return Math.round((toDate - fromDate) / msPerDay);
 }
 
+function getBookingApartmentAddress(db, booking) {
+    const apt = (db.apartments || []).find(a => String(a.id) === String(booking.aptId));
+
+    return (
+        booking.address ||
+        booking.aptAddress ||
+        apt?.address ||
+        ''
+    );
+}
+
 function getBookingLang(booking) {
     const lang = booking.lang || booking.language || 'hu';
     return ['hu', 'en', 'de'].includes(lang) ? lang : 'hu';
