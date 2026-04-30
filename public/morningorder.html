@@ -365,6 +365,17 @@
         const STRIPE_PUBLIC_KEY = 'pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0';
         const PRICE_PER_PERSON_PER_DAY = 4500;
 
+        function normalizeText(value) {
+            return String(value || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '');
+        }
+
+        function isFonyodApartmentName(value) {
+            return normalizeText(value).includes('fonyod');
+        }
+
         const translations = {
             hu: {
                 title: "Reggeli rendelés | Balaton Essence",
@@ -533,6 +544,23 @@
 
                 if (booking.lang && ['hu', 'en', 'de'].includes(booking.lang) && !initialLang) {
                     updateLang(booking.lang);
+                }
+
+                if (!isFonyodApartmentName(booking.aptName || booking.apartment || '')) {
+                    const btn = document.getElementById('submitBtn');
+                    const msg = document.getElementById('message');
+
+                    if (btn) btn.disabled = true;
+
+                    if (msg) {
+                        msg.textContent = currentLang === 'hu'
+                            ? 'Reggeli rendelés jelenleg csak fonyódi apartmanokhoz kérhető.'
+                            : currentLang === 'de'
+                                ? 'Frühstücksbestellungen sind derzeit nur für Apartments in Fonyód verfügbar.'
+                                : 'Breakfast orders are currently available only for apartments in Fonyód.';
+
+                        msg.style.color = '#dc3545';
+                    }
                 }
 
                 clearMessage();

@@ -35,6 +35,105 @@ function escapeHtml(value) {
         .replace(/'/g, '&#039;');
 }
 
+function normalizeText(value) {
+    return String(value || '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+}
+
+function isFonyodApartment(apt) {
+    if (!apt) return false;
+
+    const haystack = normalizeText([
+        apt.name,
+        apt.aptName,
+        apt.location,
+        apt.city,
+        apt.address
+    ].filter(Boolean).join(' '));
+
+    return haystack.includes('fonyod');
+}
+
+function findApartmentForOrder(db, data) {
+    const aptId = data.aptId || data.bookingAptId || data.apartmentId;
+    const aptName = data.apartment || data.aptName || data.apartmentName;
+
+    if (aptId) {
+        const byId = (db.apartments || []).find(apt => String(apt.id) === String(aptId));
+        if (byId) return byId;
+    }
+
+    if (aptName) {
+        const normalizedAptName = normalizeText(aptName);
+
+        return (db.apartments || []).find(apt => {
+            return normalizeText(apt.name) === normalizedAptName;
+        });
+    }
+
+    return null;
+}
+
+function getPublicBaseUrl() {
+    return process.env.PUBLIC_BASE_URL || 'https://balatonessence.com';
+}
+
+function parseDateOnly(value) {
+    if (!value) return null;
+
+    const parts = String(value).slice(0, 10).split('-').map(Number);
+
+    if (parts.length !== 3 || parts.some(Number.isNaN)) {
+        return null;
+    }
+
+    return new Date(parts[0], parts[1] - 1, parts[2]);
+}
+
+function todayDateOnly() {
+    const now = new Date();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+}
+
+function diffDays(fromDate, toDate) {
+    const msPerDay = 24 * 60 * 60 * 1000;
+    return Math.round((toDate - fromDate) / msPerDay);
+}
+
+function getBookingLang(booking) {
+    const lang = booking.lang || booking.language || 'hu';
+    return ['hu', 'en', 'de'].includes(lang) ? lang : 'hu';
+}
+
+function getBookingApartmentName(db, booking) {
+    if (booking.aptName) return booking.aptName;
+    if (booking.apartment) return booking.apartment;
+
+    const apt = (db.apartments || []).find(a => String(a.id) === String(booking.aptId));
+    return apt?.name || 'Balaton Essence apartman';
+}
+
+async function sendEmailHtml({ to, subject, html }) {
+    if (!to) return;
+
+    if (typeof sendMail === 'function') {
+        return sendMail({ to, subject, html });
+    }
+
+    if (typeof resend !== 'undefined') {
+        return resend.emails.send({
+            from: process.env.EMAIL_FROM || 'Balaton Essence <info@balatonessence.com>',
+            to,
+            subject,
+            html
+        });
+    }
+
+    throw new Error('Nincs elérhető email küldő függvény.');
+}
+
 function formatMoney(value) {
     return Number(value || 0).toLocaleString('hu-HU');
 }
@@ -1135,11 +1234,11 @@ app.get('/api/verify-booking/:id', async (req, res) => {
 
 app.post('/api/order', async (req, res) => {
     try {
-        const data = req.body;
+        const data = req.body || {};
         const id = generateId('ord');
         const lang = normalizeLang(data.lang || 'hu');
 
-        if (!data || !data.email || !data.guestName || !data.type || !data.method) {
+        if (!data.email || !data.guestName || !data.type || !data.method) {
             return res.status(400).json({ error: 'Hiányos rendelési adatok.' });
         }
 
@@ -1158,14 +1257,12 @@ app.post('/api/order', async (req, res) => {
         }
 
         const db = await getDbContent();
-
         if (!db.bookings) db.bookings = [];
 
         if (data.type === 'BREAKFAST') {
-            const apartmentName = String(data.apartment || '');
-            const isFonyod = apartmentName.toUpperCase().includes('FONYÓD');
+            const apt = findApartmentForOrder(db, data);
 
-            if (!isFonyod || apartmentName === 'KÜLSŐS' || apartmentName === 'EXTERNAL') {
+            if (!isFonyodApartment(apt)) {
                 return res.status(400).json({
                     error: lang === 'hu'
                         ? 'Reggeli csak fonyódi apartmanokba rendelhető!'
@@ -1175,12 +1272,22 @@ app.post('/api/order', async (req, res) => {
                 });
             }
 
-            const hasBooking = db.bookings.find(b =>
-                String(b.aptName || '') === apartmentName &&
-                String(b.email || '').toLowerCase() === String(data.email || '').toLowerCase() &&
-                new Date(data.start) >= new Date(b.checkIn) &&
-                new Date(data.start) < new Date(b.checkOut)
-            );
+            const apartmentName = String(data.apartment || data.aptName || apt.name || '');
+            const orderDate = new Date(data.start);
+
+            const hasBooking = db.bookings.find(b => {
+                const sameApt =
+                    String(b.aptId || '') === String(apt.id || '') ||
+                    String(b.aptName || b.apartment || '') === apartmentName;
+
+                const sameEmail =
+                    String(b.email || '').toLowerCase() === String(data.email || '').toLowerCase();
+
+                const checkIn = new Date(b.checkIn || b.start);
+                const checkOut = new Date(b.checkOut || b.end);
+
+                return sameApt && sameEmail && orderDate >= checkIn && orderDate < checkOut;
+            });
 
             if (!hasBooking) {
                 return res.status(403).json({
@@ -1229,11 +1336,12 @@ app.post('/api/order', async (req, res) => {
                     <p><strong>Státusz:</strong> ${order.method === 'cash' ? 'Helyszíni fizetés' : 'Online fizetésre vár'}</p>
                     <p><strong>Vendég:</strong> ${escapeHtml(data.guestName)} (${escapeHtml(data.email)})</p>
                     <p><strong>Telefon:</strong> ${escapeHtml(data.phone || data.tel || data.telefon || '-')}</p>
-                    <p><strong>Apartman:</strong> ${escapeHtml(data.apartment)}</p>
-                    <p><strong>Tételek:</strong> ${escapeHtml(data.items)}</p>
-                    <p><strong>Idő:</strong> ${escapeHtml(order.start)} — ${escapeHtml(order.end)} (${escapeHtml(order.days)} nap)</p>
+                    <p><strong>Apartman:</strong> ${escapeHtml(data.apartment || data.aptName || '')}</p>
+                    <p><strong>Tételek:</strong> ${escapeHtml(data.items || data.details || '')}</p>
+                    <p><strong>Idő:</strong> ${escapeHtml(order.start || '')} — ${escapeHtml(order.end || '')} (${escapeHtml(order.days || '')} nap)</p>
                     <p><strong>Összeg:</strong> ${formatMoney(amount)} Ft</p>
-                    <p><strong>Fizetés:</strong> ${order.method === 'cash' ? 'Helyszíni KP' : 'Online kártya'}</p>`
+                    <p><strong>Fizetés:</strong> ${order.method === 'cash' ? 'Helyszíni KP' : 'Online kártya'}</p>
+                `
             });
         } catch (err) {
             console.error('Admin rendelési email hiba:', err);
@@ -1253,7 +1361,7 @@ app.post('/api/order', async (req, res) => {
                     currency: 'huf',
                     product_data: {
                         name: t.subj,
-                        description: `${order.items} | ${order.apartment}`
+                        description: `${order.items || order.details || ''} | ${order.apartment || order.aptName || ''}`
                     },
                     unit_amount: Math.round(amount) * 100
                 },
