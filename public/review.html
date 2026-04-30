@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Értékelés | Balaton Essence</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #FCFBF9;
+            --text: #2C3325;
+            --text-light: #6A7063;
+            --accent: #5C7A4D;
+            --border: #E3E0D8;
+            --danger: #B0413E;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .card {
+            width: 100%;
+            max-width: 620px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            padding: 44px;
+            box-shadow: 0 20px 60px rgba(44, 51, 37, 0.08);
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .logo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+        }
+
+        .logo-sub {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            color: var(--accent);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            text-align: center;
+            margin: 0 0 12px;
+        }
+
+        .intro {
+            text-align: center;
+            color: var(--text-light);
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 22px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 700;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            font-family: inherit;
+            font-size: 1rem;
+            outline: none;
+            background: #fff;
+        }
+
+        input:focus,
+        textarea:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(92,122,77,0.08);
+        }
+
+        textarea {
+            min-height: 140px;
+            resize: vertical;
+            line-height: 1.6;
+        }
+
+        .stars {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .star {
+            border: none;
+            background: transparent;
+            font-size: 2.2rem;
+            cursor: pointer;
+            color: #d8d4ca;
+            transition: 0.2s;
+            padding: 0;
+        }
+
+        .star.active {
+            color: #c99a3e;
+            transform: translateY(-1px);
+        }
+
+        .btn {
+            width: 100%;
+            border: none;
+            border-radius: 999px;
+            padding: 16px 24px;
+            background: var(--accent);
+            color: white;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        #message {
+            margin-top: 22px;
+            text-align: center;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .lang-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 24px;
+        }
+
+        .lang-btn {
+            border: 1px solid var(--border);
+            background: transparent;
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .lang-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        @media (max-width: 600px) {
+            .card { padding: 32px 22px; }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="card">
+        <div class="logo">
+            <div class="logo-title">BALATON</div>
+            <div class="logo-sub">Essence</div>
+        </div>
+
+        <div class="lang-switcher">
+            <button type="button" class="lang-btn active" data-lang="hu">HU</button>
+            <button type="button" class="lang-btn" data-lang="en">EN</button>
+            <button type="button" class="lang-btn" data-lang="de">DE</button>
+        </div>
+
+        <h1 id="title">Értékelés írása</h1>
+        <p class="intro" id="intro">Köszönjük, hogy nálunk pihent. Nagyon sokat jelentene, ha megosztaná velünk a tapasztalatait.</p>
+
+        <form id="review-form">
+            <div class="form-group">
+                <label for="name" id="name-label">Név</label>
+                <input type="text" id="name" required>
+            </div>
+
+            <div class="form-group">
+                <label id="rating-label">Értékelés</label>
+                <div class="stars" id="stars">
+                    <button type="button" class="star active" data-value="1">★</button>
+                    <button type="button" class="star active" data-value="2">★</button>
+                    <button type="button" class="star active" data-value="3">★</button>
+                    <button type="button" class="star active" data-value="4">★</button>
+                    <button type="button" class="star active" data-value="5">★</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="text" id="text-label">Értékelés szövege</label>
+                <textarea id="text" required></textarea>
+            </div>
+
+            <button type="submit" class="btn" id="submit-btn">Értékelés elküldése</button>
+        </form>
+
+        <div id="message"></div>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const bookingId = params.get('bookingId') || params.get('id') || '';
+        const initialLang = params.get('lang') || 'hu';
+
+        let currentLang = ['hu', 'en', 'de'].includes(initialLang) ? initialLang : 'hu';
+        let rating = 5;
+
+        const t = {
+            hu: {
+                title: 'Értékelés írása',
+                intro: 'Köszönjük, hogy nálunk pihent. Nagyon sokat jelentene, ha megosztaná velünk a tapasztalatait.',
+                name: 'Név',
+                rating: 'Értékelés',
+                text: 'Értékelés szövege',
+                submit: 'Értékelés elküldése',
+                sending: 'Küldés...',
+                success: 'Köszönjük az értékelést! Az admin jóváhagyása után megjelenhet az oldalon.',
+                error: 'Nem sikerült elküldeni az értékelést. Kérjük, próbálja újra.'
+            },
+            en: {
+                title: 'Leave a review',
+                intro: 'Thank you for staying with us. It would mean a lot if you shared your experience.',
+                name: 'Name',
+                rating: 'Rating',
+                text: 'Review text',
+                submit: 'Submit review',
+                sending: 'Sending...',
+                success: 'Thank you for your review! It may appear on the website after admin approval.',
+                error: 'Could not submit the review. Please try again.'
+            },
+            de: {
+                title: 'Bewertung schreiben',
+                intro: 'Vielen Dank für Ihren Aufenthalt. Es würde uns sehr freuen, wenn Sie Ihre Erfahrung teilen.',
+                name: 'Name',
+                rating: 'Bewertung',
+                text: 'Bewertungstext',
+                submit: 'Bewertung senden',
+                sending: 'Senden...',
+                success: 'Vielen Dank für Ihre Bewertung! Sie kann nach Freigabe durch den Admin auf der Website erscheinen.',
+                error: 'Die Bewertung konnte nicht gesendet werden. Bitte versuchen Sie es erneut.'
+            }
+        };
+
+        function applyLang(lang) {
+            currentLang = lang;
+            document.documentElement.lang = lang;
+
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.lang === lang);
+            });
+
+            document.getElementById('title').innerText = t[lang].title;
+            document.getElementById('intro').innerText = t[lang].intro;
+            document.getElementById('name-label').innerText = t[lang].name;
+            document.getElementById('rating-label').innerText = t[lang].rating;
+            document.getElementById('text-label').innerText = t[lang].text;
+            document.getElementById('submit-btn').innerText = t[lang].submit;
+            document.title = `${t[lang].title} | Balaton Essence`;
+        }
+
+        function renderStars() {
+            document.querySelectorAll('.star').forEach(star => {
+                const value = Number(star.dataset.value);
+                star.classList.toggle('active', value <= rating);
+            });
+        }
+
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => applyLang(btn.dataset.lang));
+        });
+
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', () => {
+                rating = Number(star.dataset.value);
+                renderStars();
+            });
+        });
+
+        document.getElementById('review-form').addEventListener('submit', async event => {
+            event.preventDefault();
+
+            const btn = document.getElementById('submit-btn');
+            const msg = document.getElementById('message');
+
+            const payload = {
+                bookingId,
+                lang: currentLang,
+                name: document.getElementById('name').value.trim(),
+                rating,
+                text: document.getElementById('text').value.trim()
+            };
+
+            if (!payload.name || !payload.text) return;
+
+            btn.disabled = true;
+            btn.innerText = t[currentLang].sending;
+            msg.innerText = '';
+            msg.style.color = '';
+
+            try {
+                const res = await fetch('/api/public-review', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await res.json().catch(() => null);
+
+                if (!res.ok || !result || result.success !== true) {
+                    throw new Error(result?.error || 'Submit failed');
+                }
+
+                document.getElementById('review-form').reset();
+                rating = 5;
+                renderStars();
+
+                msg.innerText = t[currentLang].success;
+                msg.style.color = 'var(--accent)';
+            } catch (err) {
+                console.error(err);
+                msg.innerText = t[currentLang].error;
+                msg.style.color = 'var(--danger)';
+            } finally {
+                btn.disabled = false;
+                btn.innerText = t[currentLang].submit;
+            }
+        });
+
+        applyLang(currentLang);
+        renderStars();
+    </script>
+</body>
+</html>

@@ -177,6 +177,262 @@ function normalizeLang(lang) {
     return ['hu', 'en', 'de'].includes(lang) ? lang : 'hu';
 }
 
+function buildPreArrivalEmailHtml(db, booking) {
+    const lang = getBookingLang(booking);
+    const aptName = getBookingApartmentName(db, booking);
+    const aptAddress = getBookingApartmentAddress(db, booking);
+    const baseUrl = getPublicBaseUrl();
+
+    const morningUrl = `${baseUrl}/morningorder.html?id=${encodeURIComponent(booking.id)}&lang=${lang}`;
+
+    const sunPath = lang === 'en'
+        ? '/en/sun.html'
+        : lang === 'de'
+            ? '/de/sun.html'
+            : '/sun.html';
+
+    const sunUrl = `${baseUrl}${sunPath}?id=${encodeURIComponent(booking.id)}&lang=${lang}`;
+
+    const t = {
+        hu: {
+            title: 'Hasznos információk érkezés előtt',
+            hello: `Kedves ${booking.guestName || 'Vendégünk'}!`,
+            intro: 'Már csak 7 nap van hátra az érkezésig. Összegyűjtöttünk néhány hasznos információt a foglalásához.',
+            apt: 'Apartman',
+            address: 'Cím',
+            dates: 'Időszak',
+            breakfast: 'Reggeli rendelés',
+            breakfastText: 'Ha szeretne reggelit rendelni a tartózkodás idejére, itt tudja leadni.',
+            breakfastBtn: 'Reggeli rendelése',
+            sun: 'SUP és strandfelszerelés',
+            sunText: 'SUP, napozószék és napernyő foglalása a balatoni napokhoz.',
+            sunBtn: 'Strandfelszerelés foglalása',
+            footer: 'Várjuk szeretettel!'
+        },
+        en: {
+            title: 'Useful information before your arrival',
+            hello: `Dear ${booking.guestName || 'Guest'},`,
+            intro: 'There are only 7 days left until your arrival. Here are a few useful details for your stay.',
+            apt: 'Apartment',
+            address: 'Address',
+            dates: 'Period',
+            breakfast: 'Breakfast order',
+            breakfastText: 'If you would like to order breakfast for your stay, you can do it here.',
+            breakfastBtn: 'Order breakfast',
+            sun: 'SUP and beach equipment',
+            sunText: 'Book SUP, sunbeds and parasols for your days at Lake Balaton.',
+            sunBtn: 'Book beach equipment',
+            footer: 'We look forward to welcoming you!'
+        },
+        de: {
+            title: 'Nützliche Informationen vor Ihrer Anreise',
+            hello: `Liebe/r ${booking.guestName || 'Gast'},`,
+            intro: 'Es sind nur noch 7 Tage bis zu Ihrer Anreise. Hier finden Sie einige nützliche Informationen zu Ihrem Aufenthalt.',
+            apt: 'Apartment',
+            address: 'Adresse',
+            dates: 'Zeitraum',
+            breakfast: 'Frühstücksbestellung',
+            breakfastText: 'Wenn Sie Frühstück für Ihren Aufenthalt bestellen möchten, können Sie dies hier tun.',
+            breakfastBtn: 'Frühstück bestellen',
+            sun: 'SUP und Strandausrüstung',
+            sunText: 'Buchen Sie SUP, Sonnenliegen und Sonnenschirme für Ihre Tage am Plattensee.',
+            sunBtn: 'Strandausrüstung buchen',
+            footer: 'Wir freuen uns auf Sie!'
+        }
+    }[lang];
+
+    return `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #2C3325; line-height: 1.6;">
+            <h1 style="color:#5c7a4d;">${escapeHtml(t.title)}</h1>
+
+            <p>${escapeHtml(t.hello)}</p>
+            <p>${escapeHtml(t.intro)}</p>
+
+            <div style="background:#f9fbf8; border:1px solid #e2e8df; border-radius:10px; padding:20px; margin:25px 0;">
+                <p><strong>${escapeHtml(t.apt)}:</strong> ${escapeHtml(aptName)}</p>
+                ${aptAddress ? `<p><strong>${escapeHtml(t.address)}:</strong> ${escapeHtml(aptAddress)}</p>` : ''}
+                <p><strong>${escapeHtml(t.dates)}:</strong> ${escapeHtml(booking.checkIn || booking.start || '')} – ${escapeHtml(booking.checkOut || booking.end || '')}</p>
+            </div>
+
+            <div style="background:#ffffff; border:1px solid #e2e8df; border-radius:10px; padding:20px; margin-bottom:18px;">
+                <h3 style="margin-top:0; color:#5c7a4d;">${escapeHtml(t.breakfast)}</h3>
+                <p>${escapeHtml(t.breakfastText)}</p>
+                <a href="${morningUrl}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:12px 22px; border-radius:24px; font-weight:bold;">
+                    ${escapeHtml(t.breakfastBtn)}
+                </a>
+            </div>
+
+            <div style="background:#ffffff; border:1px solid #e2e8df; border-radius:10px; padding:20px; margin-bottom:25px;">
+                <h3 style="margin-top:0; color:#5c7a4d;">${escapeHtml(t.sun)}</h3>
+                <p>${escapeHtml(t.sunText)}</p>
+                <a href="${sunUrl}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:12px 22px; border-radius:24px; font-weight:bold;">
+                    ${escapeHtml(t.sunBtn)}
+                </a>
+            </div>
+
+            <p>${escapeHtml(t.footer)}</p>
+            <p style="font-size:12px; color:#999;">Balaton Essence</p>
+        </div>
+    `;
+}
+
+function buildReviewEmailHtml(db, booking) {
+    const lang = getBookingLang(booking);
+    const aptName = getBookingApartmentName(db, booking);
+    const reviewUrl = process.env.REVIEW_URL
+    || `${getPublicBaseUrl()}/review.html?bookingId=${encodeURIComponent(booking.id)}&lang=${lang}`;
+
+    const t = {
+        hu: {
+            title: 'Köszönjük, hogy nálunk pihent!',
+            hello: `Kedves ${booking.guestName || 'Vendégünk'}!`,
+            intro: `Reméljük, kellemesen telt a pihenés a(z) ${aptName} apartmanban.`,
+            text: 'Nagyon sokat jelentene számunkra, ha megosztaná velünk a tapasztalatait egy rövid értékelés formájában.',
+            btn: 'Értékelés írása',
+            footer: 'Köszönjük, hogy a Balaton Essence-t választotta!'
+        },
+        en: {
+            title: 'Thank you for staying with us!',
+            hello: `Dear ${booking.guestName || 'Guest'},`,
+            intro: `We hope you had a pleasant stay at ${aptName}.`,
+            text: 'It would mean a lot to us if you shared your experience in a short review.',
+            btn: 'Leave a review',
+            footer: 'Thank you for choosing Balaton Essence!'
+        },
+        de: {
+            title: 'Vielen Dank für Ihren Aufenthalt!',
+            hello: `Liebe/r ${booking.guestName || 'Gast'},`,
+            intro: `Wir hoffen, Sie hatten einen angenehmen Aufenthalt im Apartment ${aptName}.`,
+            text: 'Es würde uns sehr freuen, wenn Sie Ihre Erfahrung in einer kurzen Bewertung teilen würden.',
+            btn: 'Bewertung schreiben',
+            footer: 'Vielen Dank, dass Sie Balaton Essence gewählt haben!'
+        }
+    }[lang];
+
+    return `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #2C3325; line-height: 1.6;">
+            <h1 style="color:#5c7a4d;">${escapeHtml(t.title)}</h1>
+
+            <p>${escapeHtml(t.hello)}</p>
+            <p>${escapeHtml(t.intro)}</p>
+            <p>${escapeHtml(t.text)}</p>
+
+            <div style="margin:30px 0;">
+                <a href="${reviewUrl}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:12px 24px; border-radius:24px; font-weight:bold;">
+                    ${escapeHtml(t.btn)}
+                </a>
+            </div>
+
+            <p>${escapeHtml(t.footer)}</p>
+            <p style="font-size:12px; color:#999;">Balaton Essence</p>
+        </div>
+    `;
+}
+
+async function processScheduledGuestEmails() {
+    try {
+        const today = todayDateOnly();
+        const db = await getDbContent();
+
+        const bookings = db.bookings || [];
+        const sentUpdates = [];
+
+        for (const booking of bookings) {
+            if (!booking || !booking.email) continue;
+            if (booking.status === 'cancelled') continue;
+
+            const checkIn = parseDateOnly(booking.checkIn || booking.start);
+            const checkOut = parseDateOnly(booking.checkOut || booking.end);
+
+            if (!checkIn) continue;
+
+            const daysUntilArrival = diffDays(today, checkIn);
+
+            if (daysUntilArrival === 7 && !booking.preArrivalEmailSentAt) {
+                const lang = getBookingLang(booking);
+
+                const subject = {
+                    hu: 'Hasznos információk az érkezés előtt | Balaton Essence',
+                    en: 'Useful information before your arrival | Balaton Essence',
+                    de: 'Nützliche Informationen vor Ihrer Anreise | Balaton Essence'
+                }[lang];
+
+                try {
+                    await sendEmailHtml({
+                        to: booking.email,
+                        subject,
+                        html: buildPreArrivalEmailHtml(db, booking)
+                    });
+
+                    sentUpdates.push({
+                        bookingId: booking.id,
+                        field: 'preArrivalEmailSentAt'
+                    });
+
+                    console.log(`7 napos érkezési email elküldve: ${booking.id}`);
+                } catch (err) {
+                    console.error(`7 napos érkezési email hiba: ${booking.id}`, err);
+                }
+            }
+
+            if (checkOut) {
+                const daysAfterCheckout = diffDays(checkOut, today);
+
+                if (daysAfterCheckout === 1 && !booking.reviewEmailSentAt) {
+                    const lang = getBookingLang(booking);
+
+                    const subject = {
+                        hu: 'Köszönjük, hogy nálunk pihent | Balaton Essence',
+                        en: 'Thank you for staying with us | Balaton Essence',
+                        de: 'Vielen Dank für Ihren Aufenthalt | Balaton Essence'
+                    }[lang];
+
+                    try {
+                        await sendEmailHtml({
+                            to: booking.email,
+                            subject,
+                            html: buildReviewEmailHtml(db, booking)
+                        });
+
+                        sentUpdates.push({
+                            bookingId: booking.id,
+                            field: 'reviewEmailSentAt'
+                        });
+
+                        console.log(`Értékelő email elküldve: ${booking.id}`);
+                    } catch (err) {
+                        console.error(`Értékelő email hiba: ${booking.id}`, err);
+                    }
+                }
+            }
+        }
+
+        if (sentUpdates.length > 0) {
+            await updateDbContent(async freshDb => {
+                freshDb.bookings = (freshDb.bookings || []).map(booking => {
+                    const updatesForBooking = sentUpdates.filter(
+                        update => String(update.bookingId) === String(booking.id)
+                    );
+
+                    if (updatesForBooking.length === 0) return booking;
+
+                    const updatedBooking = { ...booking };
+
+                    updatesForBooking.forEach(update => {
+                        updatedBooking[update.field] = new Date().toISOString();
+                    });
+
+                    return updatedBooking;
+                });
+
+                return freshDb;
+            });
+        }
+    } catch (err) {
+        console.error('Automata vendég email feldolgozási hiba:', err);
+    }
+}
+
 function isBookingOverlapping(bookings, newBooking, ignoreStripeId = null, ignoreBookingId = null) {
     return (bookings || []).some(oldB => {
         if (String(oldB.aptId) !== String(newBooking.aptId)) return false;
@@ -2087,6 +2343,50 @@ app.delete('/api/reviews/:id', requireAdmin, async (req, res) => {
     }
 });
 
+app.post('/api/public-review', async (req, res) => {
+    try {
+        const data = req.body || {};
+
+        const lang = normalizeLang(data.lang || 'hu');
+        const name = String(data.name || '').trim();
+        const text = String(data.text || '').trim();
+        const rating = Math.min(5, Math.max(1, Number(data.rating || 5)));
+        const bookingId = String(data.bookingId || '').trim();
+
+        if (!name || !text) {
+            return res.status(400).json({ error: 'Hiányzó értékelési adatok.' });
+        }
+
+        const review = {
+            id: generateId('rev'),
+            name,
+            rating,
+            text_hu: lang === 'hu' ? text : '',
+            text_en: lang === 'en' ? text : '',
+            text_de: lang === 'de' ? text : '',
+            isVisible: false,
+            status: 'pending',
+            source: 'guest',
+            bookingId,
+            createdAt: new Date().toISOString()
+        };
+
+        await updateDbContent(async db => {
+            if (!Array.isArray(db.reviews)) db.reviews = [];
+            db.reviews.unshift(review);
+            return db;
+        });
+
+        res.json({
+            success: true,
+            review
+        });
+    } catch (err) {
+        console.error('Publikus értékelés mentési hiba:', err);
+        res.status(500).json({ error: 'Nem sikerült menteni az értékelést.' });
+    }
+});
+
 // -----------------------------------------------------------------------------
 // STATIC ROUTES
 // -----------------------------------------------------------------------------
@@ -2132,6 +2432,19 @@ app.use((req, res) => {
 
     return res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
+
+function startScheduledGuestEmails() {
+    const run = () => {
+        processScheduledGuestEmails().catch(err => {
+            console.error('Scheduled guest email fatal error:', err);
+        });
+    };
+
+    setTimeout(run, 30 * 1000);
+    setInterval(run, 6 * 60 * 60 * 1000);
+}
+
+startScheduledGuestEmails();
 
 // -----------------------------------------------------------------------------
 // START

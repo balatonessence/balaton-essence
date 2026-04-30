@@ -1467,7 +1467,9 @@
                         ${escapeHtml(preview.slice(0, 160))}${preview.length > 160 ? '...' : ''}
                         <div style="font-size:0.7rem; margin-top:4px; color:#999;">
                             HU ${r.text_hu ? '✅' : '—'} EN ${r.text_en ? '✅' : '—'} DE ${r.text_de ? '✅' : '—'}
-                            ${r.isVisible === false ? ' • rejtett' : ''}
+                            ${r.source === 'guest' ? ' • vendég által beküldve' : ''}
+                            ${r.status === 'pending' ? ' • jóváhagyásra vár' : ''}
+                            ${r.isVisible === false ? ' • rejtett' : ' • publikus'}
                         </div>
                     </div>
                     <div style="display:flex; gap:8px; justify-content:flex-end;">
@@ -1763,14 +1765,22 @@
     }
 
     async function saveReview() {
+        const existingId = document.getElementById('review-id').value || null;
+        const existingReview = existingId
+            ? (db.reviews || []).find(r => String(r.id) === String(existingId))
+            : null;
+
         const review = {
-            id: document.getElementById('review-id').value || null,
+            ...(existingReview || {}),
+            id: existingId,
             name: document.getElementById('review-name').value.trim(),
             rating: Number(document.getElementById('review-rating').value),
             text_hu: document.getElementById('review-text-hu').value.trim(),
             text_en: document.getElementById('review-text-en').value.trim(),
             text_de: document.getElementById('review-text-de').value.trim(),
-            isVisible: document.getElementById('review-visible').checked
+            isVisible: document.getElementById('review-visible').checked,
+            status: document.getElementById('review-visible').checked ? 'approved' : 'pending',
+            updatedAt: new Date().toISOString()
         };
 
         if (!review.name || (!review.text_hu && !review.text_en && !review.text_de)) {
