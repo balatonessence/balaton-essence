@@ -4,41 +4,80 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Über uns | Balaton Essence</title>
-    <meta name="description" content="Lernen Sie Balaton Essence kennen: Premium-Apartments, persönliche Gastfreundschaft und sorgfältig ausgewählte Aufenthalte am Plattensee.">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --bg: #FCFBF9;
-            --bg-alt: #F4F2EC;
-            --text: #2C3325;
-            --text-light: #6A7063;
-            --accent: #5C7A4D;
-            --accent-hover: #48613A;
-            --border: #E3E0D8;
-            --shadow: rgba(44, 51, 37, 0.05);
+        :root {
+            --bg: #F9F9F7;
+            --text: #1A1A1A;
+            --muted: #666;
+            --soft: #F1EFEA;
+            --accent: #E76F51;
+            --essence: #5C7A4D;
+            --border: #E9E5DD;
+            --white: #FFFFFF;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        body { 
-            font-family: 'Montserrat', sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
             overflow-x: hidden;
         }
 
-        /* HEADER */
-        header { 
-            position: fixed; 
-            top: 0; left: 0; width: 100%; 
-            padding: 1.5rem 5vw; 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            z-index: 1000; 
-            background: rgba(255,255,255,0.95); 
-            backdrop-filter: blur(10px); 
-            border-bottom: 1px solid var(--border); 
+        a {
+            color: inherit;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.5rem 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo-container {
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .logo-main {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text);
+            letter-spacing: 2px;
+        }
+
+        .logo-sub {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.65rem;
+            font-weight: 400;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 6px;
+            margin-top: 4px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
         }
 
         .nav-links a {
@@ -48,132 +87,267 @@
             font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-left: 2rem;
+            transition: color 0.3s ease;
         }
 
-        /* HERO SEKTION */
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--essence);
+        }
+
         .about-hero {
-            height: 65vh;
+            min-height: 72vh;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1586106856257-e23581588d7a?q=80&w=1074&auto=format&fit=crop');
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.34), rgba(0, 0, 0, 0.34)),
+                url('https://images.unsplash.com/photo-1586106856257-e23581588d7a?q=80&w=1600&auto=format&fit=crop');
             background-size: cover;
             background-position: center;
             color: white;
-            padding: 0 5vw;
+            padding: 9rem 5vw 5rem;
         }
 
-        .about-hero h1 {
-            font-family: 'Playfair Display';
-            font-size: clamp(2.5rem, 6vw, 4.5rem);
-            margin-bottom: 1rem;
-            text-shadow: 0 4px 20px rgba(0,0,0,0.2);
-        }
-
-        .about-hero p {
-            font-size: 0.8rem;
+        .about-hero .eyebrow {
+            font-size: 0.78rem;
             text-transform: uppercase;
             letter-spacing: 5px;
             font-weight: 600;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1.25rem;
         }
 
-        /* INHALT */
+        .about-hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.8rem, 7vw, 5.5rem);
+            line-height: 1.05;
+            max-width: 900px;
+            text-shadow: 0 4px 24px rgba(0, 0, 0, 0.22);
+        }
+
+        .about-hero .lead {
+            max-width: 760px;
+            margin-top: 1.75rem;
+            font-size: clamp(1rem, 2vw, 1.25rem);
+            line-height: 1.8;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
         .content-section {
-            max-width: 1400px;
-            margin: -5rem auto 5rem;
+            max-width: 1360px;
+            margin: -5.5rem auto 0;
             padding: 0 5vw;
             position: relative;
             z-index: 10;
         }
 
         .about-card {
-            background: white;
-            padding: 4rem;
-            border-radius: 2px;
-            box-shadow: 0 30px 60px rgba(0,0,0,0.05);
+            background: var(--white);
+            padding: clamp(2.5rem, 5vw, 5rem);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.07);
             display: grid;
-            grid-template-columns: 1.2fr 1fr;
-            gap: 4rem;
-            align-items: center;
+            grid-template-columns: 0.95fr 1.35fr;
+            gap: clamp(2.5rem, 5vw, 5rem);
+            align-items: start;
         }
 
-        .about-text h2 {
-            font-family: 'Playfair Display';
-            font-size: 2.5rem;
-            margin-bottom: 2rem;
-            line-height: 1.2;
+        .story-intro {
+            position: sticky;
+            top: 8rem;
         }
 
-        .about-text p {
-            margin-bottom: 1.5rem;
-            color: #555;
-            font-size: 1rem;
+        .story-intro .small-title {
+            color: var(--essence);
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 1.25rem;
+        }
+
+        .story-intro h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.1rem, 4vw, 3.3rem);
+            line-height: 1.12;
+            margin-bottom: 1.75rem;
+        }
+
+        .story-intro .quote {
+            border-left: 3px solid var(--accent);
+            padding-left: 1.25rem;
+            color: var(--muted);
             line-height: 1.8;
+            font-size: 1rem;
         }
 
-        /* TEAM SEKTION */
+        .story-text p {
+            color: #505050;
+            font-size: 1rem;
+            line-height: 1.9;
+            margin-bottom: 1.35rem;
+        }
+
+        .story-text p:first-child {
+            font-size: 1.15rem;
+            color: var(--text);
+        }
+
+        .highlight-box {
+            margin: 2.5rem 0;
+            padding: 2rem;
+            background: var(--soft);
+            border-left: 4px solid var(--essence);
+        }
+
+        .highlight-box p {
+            margin: 0;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        .values-section {
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 5rem 5vw 1rem;
+        }
+
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+        }
+
+        .value-card {
+            background: white;
+            padding: 2.25rem;
+            border: 1px solid var(--border);
+            min-height: 230px;
+        }
+
+        .value-card span {
+            display: inline-block;
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.75rem;
+            letter-spacing: 2px;
+            margin-bottom: 1.2rem;
+        }
+
+        .value-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem;
+            margin-bottom: 1rem;
+        }
+
+        .value-card p {
+            color: var(--muted);
+            line-height: 1.75;
+            font-size: 0.95rem;
+        }
+
         .team-section {
-            padding: 5rem 5vw;
-            max-width: 1400px;
+            padding: 5rem 5vw 6rem;
+            max-width: 1360px;
             margin: 0 auto;
         }
 
         .team-title {
             text-align: center;
-            margin-bottom: 5rem;
+            margin-bottom: 4rem;
         }
 
-        .team-title h2 {
-            font-family: 'Playfair Display';
-            font-size: 2.5rem;
+        .team-title .eyebrow {
+            color: var(--essence);
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-size: 0.72rem;
+            font-weight: 700;
             margin-bottom: 1rem;
         }
 
+        .team-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 4vw, 3.3rem);
+            margin-bottom: 1rem;
+        }
+
+        .team-title p {
+            color: #777;
+            line-height: 1.8;
+            max-width: 720px;
+            margin: 0 auto;
+        }
+
         .team-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2.5rem;
+            display: flex;
+            justify-content: center;
+            max-width: 820px;
+            margin: 0 auto;
         }
 
         .team-member {
+            width: 100%;
+            max-width: 440px;
             background: white;
             padding: 3rem 2rem;
             text-align: center;
             border: 1px solid var(--border);
-            transition: 0.3s;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
         }
 
         .team-member:hover {
-            box-shadow: 0 15px 40px rgba(0,0,0,0.05);
-            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 18px 45px rgba(0, 0, 0, 0.06);
+            border-color: rgba(231, 111, 81, 0.45);
         }
 
         .member-img {
-            width: 160px;
-            height: 160px;
+            width: 165px;
+            height: 165px;
             border-radius: 50%;
             object-fit: cover;
             margin-bottom: 2rem;
-            border: 3px solid var(--bg);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+            border: 4px solid var(--bg);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.09);
         }
 
         .team-member h3 {
-            font-family: 'Playfair Display';
-            font-size: 1.6rem;
-            margin-bottom: 0.5rem;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+            line-height: 1.3;
+            margin-bottom: 0.75rem;
         }
 
-        .team-member span {
-            color: var(--accent);
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 2px;
+        .team-member p {
+            color: var(--muted);
+            line-height: 1.7;
+            font-size: 0.92rem;
+            max-width: 310px;
+            margin: 0 auto;
+        }
+
+        .closing-section {
+            background: var(--essence);
+            color: white;
+            padding: 5rem 5vw;
+            text-align: center;
+        }
+
+        .closing-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            margin-bottom: 1rem;
+        }
+
+        .closing-section p {
+            max-width: 760px;
+            margin: 0 auto;
+            line-height: 1.85;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         footer {
@@ -187,24 +361,75 @@
             background: white;
         }
 
-        .member-placeholder {
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            background: var(--bg-alt);
-            border: 3px solid var(--bg);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-            margin: 0 auto 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: 'Playfair Display', serif;
-            font-size: 2.2rem;
-            color: var(--accent);
+        @media (max-width: 968px) {
+            header {
+                padding: 1.2rem 5vw;
+            }
+
+            .nav-links {
+                gap: 1.2rem;
+            }
+
+            .nav-links a {
+                font-size: 0.65rem;
+            }
+
+            .about-hero {
+                min-height: 68vh;
+                padding-top: 8rem;
+            }
+
+            .about-card {
+                grid-template-columns: 1fr;
+            }
+
+            .story-intro {
+                position: static;
+            }
+
+            .values-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
-        @media (max-width: 968px) {
-            .about-card { grid-template-columns: 1fr; padding: 2.5rem; }
+        @media (max-width: 640px) {
+            .logo-main {
+                font-size: 1.25rem;
+            }
+
+            .logo-sub {
+                font-size: 0.55rem;
+                letter-spacing: 4px;
+            }
+
+            .nav-links {
+                gap: 0.8rem;
+            }
+
+            .nav-links a {
+                letter-spacing: 1px;
+            }
+
+            .about-hero .eyebrow {
+                letter-spacing: 3px;
+                font-size: 0.68rem;
+            }
+
+            .content-section {
+                margin-top: -3rem;
+            }
+
+            .about-card {
+                padding: 2rem 1.4rem;
+            }
+
+            .highlight-box {
+                padding: 1.5rem;
+            }
+
+            .team-member {
+                max-width: 100%;
+            }
         }
     </style>
     <link rel="stylesheet" href="../mobile.css">
@@ -212,48 +437,94 @@
 <body>
 
     <header>
-        <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1;">
-            <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
-            <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+        <a href="index.html" class="logo-container">
+            <span class="logo-main">BALATON</span>
+            <span class="logo-sub">Essence</span>
         </a>
 
         <nav class="nav-links">
             <a href="index.html#apartments">Apartments</a>
-            <a href="rolunk.html" style="color: var(--accent);">Über uns</a>
+            <a href="rolunk.html" class="active">Über uns</a>
         </nav>
     </header>
 
     <section class="about-hero">
-        <p>Willkommen in der Welt von Essence</p>
+        <p class="eyebrow">Willkommen in der Welt von Balaton Essence</p>
         <h1>Unsere Geschichte</h1>
+        <p class="lead">Alles begann mit einem kleinen Haus mit Panoramablick auf den Balaton — und wurde zu einer Welt von Gästeorten, an denen Ankommen wirklich guttut.</p>
     </section>
 
     <main class="content-section">
         <div class="about-card">
-            <div class="about-text">
-                <h2>Leidenschaft für den Plattensee.</h2>
-                <p>Unser Ziel ist es, den Urlaub am Plattensee auf ein neues Niveau zu heben.</p>
-                <p>Jedes unserer Apartments wird nach strengen Qualitätskriterien ausgewählt, um unseren Gästen das Maximum an Komfort zu bieten.</p>
-                <p>Das Team von Balaton Essence arbeitet täglich daran, Gastfreundschaft zu einem echten Erlebnis zu machen, bei dem Sie sich vom ersten Moment an wie zu Hause fühlen.</p>
-            </div>
+            <aside class="story-intro">
+                <p class="small-title">Über uns</p>
+                <h2>Der Balaton wurde für uns mehr als ein Reiseziel. Er wurde Zuhause.</h2>
+                <p class="quote">Was wir zuerst für uns selbst gesucht haben — Ruhe, Entschleunigung und einen Ort zum Auftanken — möchten wir heute mit unseren Gästen teilen.</p>
+            </aside>
+
+            <article class="story-text">
+                <p>Alles begann mit einem kleinen Haus mit Panoramablick auf den Balaton.</p>
+
+                <p>Unser gemeinsamer Traum wurde 2020 Wirklichkeit, als wir im Balaton-Oberland diesen besonderen Ort fanden: ein Haus mit Holzbalken, umgeben von Stille, mit Weinkeller und einer Atmosphäre, die uns sofort berührt hat.</p>
+
+                <p>Ursprünglich war es nur für uns gedacht. Ein Ort, an den wir uns aus der Großen Ungarischen Tiefebene zurückziehen, langsamer werden und neue Kraft schöpfen konnten. Doch im Oktober 2021 entstand daraus das Bor Mámor Ederics Gästehaus.<br>Was bis dahin nur uns gehörte, öffnete sich auch für andere — damit wir dieses Erlebnis weitergeben konnten.</p>
+
+                <div class="highlight-box">
+                    <p>Die Geschichte endete dort nicht. Was als Rückzugsort begann, wurde mit der Zeit zu einer Lebensform.</p>
+                </div>
+
+                <p>Der Balaton wurde schließlich unser Zuhause. Jahr für Jahr sind wir gewachsen: zuerst mit zwei Apartments, später mit weiteren. Heute empfangen wir unsere Gäste in mehreren direkt am Wasser gelegenen Apartments am Südufer.</p>
+
+                <p>Seitdem gestalten wir diese Welt Schritt für Schritt weiter. Wir schaffen nicht nur Räume, sondern auch Erlebnisse und Verbindungen — mit wiederkehrenden Gästen, die sich immer wieder für uns entscheiden. Für uns ist das eine der schönsten Bestätigungen.</p>
+
+                <p>Wir lieben es, zu gestalten, zu planen, Ideen zu entwickeln und uns laufend weiterzuentwickeln. Unser Ziel ist es, Orte zu schaffen, an denen Gäste schon im ersten Moment spüren: Hier bin ich richtig angekommen.</p>
+
+                <p>Das Bor Mámor Ederics Gästehaus wird derzeit erneuert, damit es unsere Gäste bald in einer noch schöneren und komfortableren Form empfangen kann.</p>
+            </article>
         </div>
     </main>
 
+    <section class="values-section">
+        <div class="values-grid">
+            <div class="value-card">
+                <span>01</span>
+                <h3>Persönliche Aufmerksamkeit</h3>
+                <p>Für uns ist Gastfreundschaft mehr als eine Schlüsselübergabe. Sie bedeutet Fürsorge, Präsenz und das Gefühl, gut aufgehoben zu sein.</p>
+            </div>
+
+            <div class="value-card">
+                <span>02</span>
+                <h3>Balaton-Lebensgefühl</h3>
+                <p>Die Nähe zum Wasser, die Ruhe, die Weinregion und der langsamere Rhythmus ergeben gemeinsam das Erlebnis, das wir weitergeben möchten.</p>
+            </div>
+
+            <div class="value-card">
+                <span>03</span>
+                <h3>Ständige Weiterentwicklung</h3>
+                <p>Wir gestalten jedes unserer Apartments so, dass es komfortabel, liebevoll und zeitlos ist — ein Ort, an den man gerne zurückkehrt.</p>
+            </div>
+        </div>
+    </section>
+
     <section class="team-section">
         <div class="team-title">
-            <h2>WER WIR SIND</h2>
-            <p style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 0.7rem;">Persönliche Betreuung bei jeder Buchung</p>
+            <p class="eyebrow">Wer wir sind</p>
+            <h2>Die Menschen hinter Balaton Essence</h2>
+            <p>Hinter Balaton Essence stehen eine persönliche Geschichte, viel Arbeit und ständige Präsenz. Unser Ziel ist einfach: Die Zeit unserer Gäste am Balaton soll leicht, komfortabel und unvergesslich sein.</p>
         </div>
+
         <div class="team-grid">
             <div class="team-member">
-                <div class="member-placeholder">ZS</div>
-                <h3>Zsuzsa Szabó</h3>
-            </div>
-            <div class="team-member">
-                <div class="member-placeholder">TS</div>
-                <h3>Tamás Szabó</h3>
+                <img src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=900&auto=format&fit=crop" alt="Zsuzsa Szabó und Tamás Szabó" class="member-img">
+                <h3>Zsuzsa Szabó<br>&amp;<br>Tamás Szabó</h3>
+                <p>Gemeinsam gestalten wir die Details, die Atmosphäre und das Gästeerlebnis hinter Balaton Essence.</p>
             </div>
         </div>
+    </section>
+
+    <section class="closing-section">
+        <h2>Gut ankommen. Gerne zurückkehren.</h2>
+        <p>Genau das möchten wir jedem Gast schenken: ruhige Tage am Balaton, ein anspruchsvolles Umfeld und das Gefühl, dass Entschleunigung hier wirklich möglich wird.</p>
     </section>
 
     <footer>
