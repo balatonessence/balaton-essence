@@ -107,31 +107,7 @@
 </div>
 
 <main>
-    <div class="breakfast-grid">
-        <div class="pillar-card" id="card-breakfast_plate" onclick="openMorningModal('breakfast_plate')">
-            <div class="pillar-header">
-                <h3 id="card-title-breakfast_plate">MORNING MOMENT - Reggeli tál</h3>
-                <span class="price-tag" id="card-price-breakfast_plate">4 200 FT / FŐ</span>
-            </div>
-            <div class="pillar-img" id="card-img-breakfast_plate" style="background-image: url('img/Reggeli\ tál.png');"></div>
-        </div>
-
-        <div class="pillar-card" id="card-cheese_plate" onclick="openMorningModal('cheese_plate')">
-            <div class="pillar-header">
-                <h3 id="card-title-cheese_plate">WINE & CHEESE MOMENT - Sajttál</h3>
-                <span class="price-tag" id="card-price-cheese_plate">4 800 FT / FŐ</span>
-            </div>
-            <div class="pillar-img" id="card-img-cheese_plate" style="background-image: url('img/Sajttál.png');"></div>
-        </div>
-
-        <div class="pillar-card" id="card-celebration_plate" onclick="openMorningModal('celebration_plate')">
-            <div class="pillar-header">
-                <h3 id="card-title-celebration_plate">CELEBRATION MOMENT - Születésnap/Évforduló</h3>
-                <span class="price-tag" id="card-price-celebration_plate">4 800 FT / FŐ</span>
-            </div>
-            <div class="pillar-img" id="card-img-celebration_plate" style="background-image: url('img/Születésnap\,\ évforduló.png');"></div>
-        </div>
-    </div>
+    <div id="moments-grid" class="breakfast-grid"></div>
 </main>
 
 <div id="morning-modal" class="modal-overlay" onclick="closeMorningModal()">
