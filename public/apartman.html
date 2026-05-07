@@ -691,11 +691,42 @@
         return 'hu';
     }
 
+    function getNextBookableInfo(apt) {
+    const today = new Date();
+
+    for (let i = 0; i < 370; i++) {
+        const testDate = new Date(today);
+        testDate.setDate(today.getDate() + i);
+
+        const dateStr = getLocalDateString(testDate);
+
+        const isBlockedByAdmin = Array.isArray(apt.disabledDates)
+            && apt.disabledDates.includes(dateStr);
+
+        if (isBlockedByAdmin) {
+            continue;
+        }
+
+        const info = getAptStatusAndPrice(apt, testDate);
+
+        if (info.status === 'OPEN') {
+            return info;
+        }
+    }
+
+    return {
+        status: 'CLOSED',
+        price: 0,
+        label: '',
+        minNights: 1,
+        maxGuests: 2
+    };
+}
+
     function renderDetails() {
         if (!currentApt) return;
 
-        const today = new Date();
-        const info = getAptStatusAndPrice(currentApt, today);
+        const info = getNextBookableInfo(currentApt);
 
         const setSafeText = (id, text) => {
             const el = document.getElementById(id);
@@ -872,8 +903,7 @@
         document.getElementById('display-end').innerText = '-';
 
         const guestSelect = document.getElementById('book-guests');
-        const today = new Date();
-        const info = getAptStatusAndPrice(currentApt, today);
+        const info = getNextBookableInfo(currentApt);
         const maxAllowed = Number(info.maxGuests || 2);
 
         guestSelect.innerHTML = '';
