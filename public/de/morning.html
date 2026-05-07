@@ -106,20 +106,7 @@
 </div>
 
 <main>
-    <div class="breakfast-grid">
-        <div class="pillar-card" onclick="openMorningModal('Frühstücksplatte')">
-            <div class="pillar-header"><h3>MORNING MOMENT - Frühstücksplatte</h3><span class="price-tag">4 200 HUF / PERSON</span></div>
-            <div class="pillar-img" style="background-image: url('../img/Reggeli\ tál.png');"></div>
-        </div>
-        <div class="pillar-card" onclick="openMorningModal('Käseplatte')">
-            <div class="pillar-header"><h3>WINE & CHEESE MOMENT - Käseplatte</h3><span class="price-tag">4 800 HUF / PERSON</span></div>
-            <div class="pillar-img" style="background-image: url('../img/Sajttál.png');"></div>
-        </div>
-        <div class="pillar-card" onclick="openMorningModal('Festliche Platte')">
-            <div class="pillar-header"><h3>CELEBRATION MOMENT- Geburtstag/Jubiläum</h3><span class="price-tag">4 800 HUF / PERSON</span></div>
-            <div class="pillar-img" style="background-image: url('../img/Születésnap\,\ évforduló.png');"></div>
-        </div>
-    </div>
+    <div id="moments-grid" class="breakfast-grid"></div>
 </main>
 
 <div id="morning-modal" class="modal-overlay" onclick="closeMorningModal()">
@@ -211,8 +198,38 @@
 <script>
     let currentQty = 1;
     let calendar;
+    let momentServices = [];
+    let selectedMomentService = null;
 
     const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0');
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function safeImageUrl(value) {
+        const url = String(value || '').trim();
+
+        if (!url) return '';
+        if (url.startsWith('../img/')) return url;
+        if (url.startsWith('/img/')) return url;
+        if (url.startsWith('https://')) return url;
+
+        if (url.startsWith('img/')) {
+            return `../${url}`;
+        }
+
+        return '';
+    }
+
+    function formatPrice(value) {
+        return Number(value || 0).toLocaleString('de-DE');
+    }
 
     const momentDescriptions = {
         "Frühstücksplatte": `
@@ -229,7 +246,65 @@
         `
     };
 
+    async function loadMomentServices() {
+    try {
+        const res = await fetch('/api/services?t=' + Date.now());
+
+        if (!res.ok) {
+            throw new Error('Services konnten nicht geladen werden.');
+        }
+
+        const data = await res.json();
+
+        momentServices = (data.services?.moments || [])
+            .filter(item => item.active !== false);
+
+        renderMomentCards();
+    } catch (error) {
+        console.error('Moments Ladefehler:', error);
+
+        document.getElementById('moments-grid').innerHTML = `
+            <div style="grid-column: 1 / -1; text-align:center; color:#b0413e;">
+                Moments sind derzeit nicht verfügbar.
+            </div>
+        `;
+    }
+}
+
+function renderMomentCards() {
+    const grid = document.getElementById('moments-grid');
+    if (!grid) return;
+
+    if (momentServices.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align:center; color:#777;">
+                Keine verfügbaren Moments-Leistungen.
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = momentServices.map(service => {
+        const name = service.name_de || service.name_hu || service.id || 'Moment';
+        const description = service.description_de || '';
+        const image = safeImageUrl(service.image);
+        const price = Number(service.price || 0);
+
+        return `
+            <div class="pillar-card" onclick="openMorningModalById('${escapeHtml(service.id)}')">
+                <div class="pillar-header">
+                    <h3>${escapeHtml(name)}</h3>
+                    ${description ? `<p class="moment-desc">${escapeHtml(description)}</p>` : ''}
+                    <span class="price-tag">${formatPrice(price)} HUF / Person</span>
+                </div>
+                <div class="pillar-img" style="background-image: url('${escapeHtml(image)}');"></div>
+            </div>
+        `;
+    }).join('');
+}
+
     document.addEventListener('DOMContentLoaded', async function() {
+        await loadMomentServices();
         const urlParams = new URLSearchParams(window.location.search);
         const bookingId = urlParams.get('id');
         const bookingToken = urlParams.get('token') || '';
@@ -299,18 +374,32 @@
             .replace(/'/g, '&#039;');
     }
 
-    function openMorningModal(itemName) {
-        currentQty = 1;
+    function openMorningModalById(serviceId) {
+    const service = momentServices.find(item => String(item.id) === String(serviceId));
 
-        document.getElementById('qty-num').innerText = currentQty;
-        document.getElementById('m-item-type').value = itemName;
-        document.getElementById('m-title').innerText = itemName;
-        document.getElementById('m-desc').innerText = momentDescriptions[itemName] || "";
-
-        const modal = document.getElementById('morning-modal');
-        modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('active'), 10);
+    if (!service) {
+        showSuccess("Fehler!", "Die ausgewählte Leistung ist nicht verfügbar.", "error");
+        return;
     }
+
+    selectedMomentService = service;
+    currentQty = 1;
+
+    const name = service.name_de || service.name_hu || service.id || 'Moment';
+    const description = service.description_de || '';
+
+    document.getElementById('qty-num').innerText = currentQty;
+    document.getElementById('m-item-type').value = service.id;
+    document.getElementById('m-title').innerText = name;
+    document.getElementById('m-desc').innerText = description;
+
+    const modal = document.getElementById('morning-modal');
+    modal.style.display = 'flex';
+
+    setTimeout(() => {
+        modal.classList.add('active');
+    }, 10);
+}
 
     function closeMorningModal() {
         const modal = document.getElementById('morning-modal');
@@ -338,8 +427,17 @@
             return showSuccess("Fehler!", "Bitte füllen Sie alle Felder aus!", "error");
         }
 
-        const pricePerUnit = itemType === 'Frühstücksplatte' ? 4200 : 4800;
+        if (!selectedMomentService) {
+            return showSuccess("Fehler!", "Bitte wählen Sie zuerst eine Leistung aus.", "error");
+        }
+
+        const itemName = selectedMomentService.name_de || selectedMomentService.name_hu || selectedMomentService.id || itemType;
+        const pricePerUnit = Number(selectedMomentService.price || 0);
         const totalAmount = currentQty * pricePerUnit;
+
+        if (totalAmount <= 0) {
+            return showSuccess("Fehler!", "Ungültiger Preis. Bitte kontaktieren Sie uns.", "error");
+        }
 
         const payload = {
             type: 'BREAKFAST',
@@ -355,7 +453,7 @@
             totalPrice: totalAmount,
             method: method,
             lang: 'de',
-            items: `${itemType} × ${currentQty} Person${currentQty > 1 ? 'en' : ''}`
+            items: `${itemName} × ${currentQty} Person${currentQty > 1 ? 'en' : ''}`
         };
 
         const submitBtn = document.querySelector('.btn-submit');

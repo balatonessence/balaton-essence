@@ -107,29 +107,7 @@
     </div>
 
     <section class="sun-cards-section">
-        <div class="sun-cards-grid">
-            <div class="sun-item-card" onclick="openRentModal('sup')">
-                <div class="sun-card-img" style="background-image: url('../img/sup.png');"></div>
-                <div class="sun-card-content">
-                    <h3 class="sun-card-title">SUP</h3>
-                    <p class="sun-card-price">5 900 HUF <small>/ Tag</small></p>
-                </div>
-            </div>
-            <div class="sun-item-card" onclick="openRentModal('sunbed')">
-                <div class="sun-card-img" style="background-image: url('../img/napozoszek.png');"></div>
-                <div class="sun-card-content">
-                    <h3 class="sun-card-title">Sonnenliege</h3>
-                    <p class="sun-card-price">1 500 HUF <small>/ Tag</small></p>
-                </div>
-            </div>
-            <div class="sun-item-card" onclick="openRentModal('umbrella')">
-                <div class="sun-card-img" style="background-image: url('../img/napernyo.png');"></div>
-                <div class="sun-card-content">
-                    <h3 class="sun-card-title">Sonnenschirm</h3>
-                    <p class="sun-card-price">1 000 HUF <small>/ Tag</small></p>
-                </div>
-            </div>
-        </div>
+        <div id="sun-cards-grid" class="sun-cards-grid"></div>
     </section>
 </main>
 
@@ -143,47 +121,7 @@
         </p>
         
         <form id="rent-form" onsubmit="submitRentForm(event)">
-            <div style="margin-bottom: 1.5rem; text-align: left; background: #fbfbfb; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
-                
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <label class="extras-item-label">
-                        <input type="checkbox" id="item-sup" onchange="updateLiveTotal()"> 
-                        <span class="custom-checkmark"></span>
-                        <span class="item-text-main">SUP <small style="color: #777;">(5.900 HUF/Tag)</small></span>
-                    </label>
-                    <div class="qty-selector">
-                        <button type="button" class="qty-btn" onclick="changeQty('qty-sup', -1)">−</button>
-                        <span id="qty-sup" class="qty-val">1</span>
-                        <button type="button" class="qty-btn" onclick="changeQty('qty-sup', 1)">+</button>
-                    </div>
-                </div>
-
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                    <label class="extras-item-label">
-                        <input type="checkbox" id="item-sunbed" onchange="updateLiveTotal()"> 
-                        <span class="custom-checkmark"></span>
-                        <span class="item-text-main">Sonnenliege <small style="color: #777;">(1.500 HUF/Tag)</small></span>
-                    </label>
-                    <div class="qty-selector">
-                        <button type="button" class="qty-btn" onclick="changeQty('qty-sunbed', -1)">−</button>
-                        <span id="qty-sunbed" class="qty-val">1</span>
-                        <button type="button" class="qty-btn" onclick="changeQty('qty-sunbed', 1)">+</button>
-                    </div>
-                </div>
-
-                <div style="display: flex; align-items: center; justify-content: space-between;">
-                    <label class="extras-item-label">
-                        <input type="checkbox" id="item-umbrella" onchange="updateLiveTotal()"> 
-                        <span class="custom-checkmark"></span>
-                        <span class="item-text-main">Sonnenschirm <small style="color: #777;">(1.000 HUF/Tag)</small></span>
-                    </label>
-                    <div class="qty-selector">
-                        <button type="button" class="qty-btn" onclick="changeQty('qty-umbrella', -1)">−</button>
-                        <span id="qty-umbrella" class="qty-val">1</span>
-                        <button type="button" class="qty-btn" onclick="changeQty('qty-umbrella', 1)">+</button>
-                    </div>
-                </div>
-            </div>
+            <div id="sun-modal-items" style="margin-bottom: 1.5rem; text-align: left; background: #fbfbfb; padding: 15px; border-radius: 8px; border: 1px solid #eee;"></div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
                 <div>
@@ -239,32 +177,138 @@
 <script>
     const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0');
 
-    const itemMap = {
-        sup: {
-            checkboxId: 'item-sup',
-            qtyId: 'qty-sup',
-            label: 'SUP',
-            price: 5900
-        },
-        sunbed: {
-            checkboxId: 'item-sunbed',
-            qtyId: 'qty-sunbed',
-            label: 'Sonnenliege',
-            price: 1500
-        },
-        umbrella: {
-            checkboxId: 'item-umbrella',
-            qtyId: 'qty-umbrella',
-            label: 'Sonnenschirm',
-            price: 1000
-        }
-    };
+    let sunServices = [];
+
+    const itemMap = {};
 
     document.addEventListener('DOMContentLoaded', async function() {
+        await loadSunServices();
         await loadApartments();
         initDatePickers();
         updateLiveTotal();
     });
+
+    async function loadSunServices() {
+    try {
+        const res = await fetch('/api/services?t=' + Date.now());
+
+        if (!res.ok) {
+            throw new Error('Services konnten nicht geladen werden.');
+        }
+
+        const data = await res.json();
+
+        sunServices = (data.services?.sun || [])
+            .filter(item => item.active !== false);
+
+        sunServices.forEach(service => {
+            const id = String(service.id || '').trim();
+
+            if (!id) return;
+
+            itemMap[id] = {
+                checkboxId: `item-${id}`,
+                qtyId: `qty-${id}`,
+                label: service.name_de || service.name_hu || id,
+                price: Number(service.price || 0),
+                image: service.image || '',
+                unit: service.unit_de || 'Tag'
+            };
+        });
+
+        renderSunCards();
+        renderSunModalItems();
+    } catch (err) {
+        console.error('Sun services loading error:', err);
+
+        const grid = document.getElementById('sun-cards-grid');
+        if (grid) {
+            grid.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align:center; color:#b0413e;">
+                    Strandausrüstung ist derzeit nicht verfügbar.
+                </div>
+            `;
+        }
+    }
+}
+
+function safeImageUrl(value) {
+    const url = String(value || '').trim();
+
+    if (!url) return '';
+    if (url.startsWith('../img/')) return url;
+    if (url.startsWith('/img/')) return url;
+    if (url.startsWith('https://')) return url;
+
+    if (url.startsWith('img/')) {
+        return `../${url}`;
+    }
+
+    return '';
+}
+
+function formatPrice(value) {
+    return Number(value || 0).toLocaleString('de-DE');
+}
+
+function renderSunCards() {
+    const grid = document.getElementById('sun-cards-grid');
+    if (!grid) return;
+
+    if (sunServices.length === 0) {
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align:center; color:#777;">
+                Keine Strandausrüstung verfügbar.
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = sunServices.map(service => {
+        const id = String(service.id || '').trim();
+        const name = service.name_de || service.name_hu || id;
+        const price = Number(service.price || 0);
+        const unit = service.unit_de || 'Tag';
+        const image = safeImageUrl(service.image);
+
+        return `
+            <div class="sun-item-card" onclick="openRentModal('${escapeHtml(id)}')">
+                <div class="sun-card-img" style="background-image: url('${escapeHtml(image)}');"></div>
+                <div class="sun-card-content">
+                    <h3 class="sun-card-title">${escapeHtml(name)}</h3>
+                    <p class="sun-card-price">${formatPrice(price)} HUF <small>/ ${escapeHtml(unit)}</small></p>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function renderSunModalItems() {
+    const modalItemsContainer = document.getElementById('sun-modal-items');
+    if (!modalItemsContainer) return;
+
+    modalItemsContainer.innerHTML = sunServices.map(service => {
+        const id = String(service.id || '').trim();
+        const name = service.name_de || service.name_hu || id;
+        const price = Number(service.price || 0);
+        const unit = service.unit_de || 'Tag';
+
+        return `
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <label class="extras-item-label">
+                    <input type="checkbox" id="item-${escapeHtml(id)}" onchange="updateLiveTotal()"> 
+                    <span class="custom-checkmark"></span>
+                    <span class="item-text-main">${escapeHtml(name)} <small style="color: #777;">(${formatPrice(price)} HUF/${escapeHtml(unit)})</small></span>
+                </label>
+                <div class="qty-selector">
+                    <button type="button" class="qty-btn" onclick="changeQty('qty-${escapeHtml(id)}', -1)">−</button>
+                    <span id="qty-${escapeHtml(id)}" class="qty-val">1</span>
+                    <button type="button" class="qty-btn" onclick="changeQty('qty-${escapeHtml(id)}', 1)">+</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
 
     async function loadApartments() {
         const aptSelect = document.getElementById('r-apt');
