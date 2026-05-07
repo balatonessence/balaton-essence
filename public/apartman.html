@@ -642,7 +642,7 @@
     <span class="lightbox-nav nav-next" onclick="event.stopPropagation(); changeImage(1)">›</span>
 </div>
 
-<script src="database.js?v=16.3"></script>
+<script src="database.js?v=16.4"></script>
 <script src="https://js.stripe.com/v3/"></script>
 <script src="figyelmeztetes.js"></script>
 
@@ -762,13 +762,29 @@
     }
 
     function getDiscountConfig(apt) {
-    const discount = apt?.discount;
+    const discount = apt?.discount || apt?.nightlyDiscount || null;
 
-    if (!discount || discount.active !== true) {
+    if (!discount) {
         return null;
     }
 
-    const amount = Number(discount.amountPerNight || 0);
+    const isActive =
+        discount.active === true ||
+        discount.active === 'true' ||
+        discount.enabled === true ||
+        discount.enabled === 'true';
+
+    if (!isActive) {
+        return null;
+    }
+
+    const amount = Number(
+        discount.amountPerNight ||
+        discount.amount ||
+        discount.value ||
+        apt.discountAmount ||
+        0
+    );
 
     if (amount <= 0) {
         return null;
@@ -776,10 +792,31 @@
 
     return {
         amount,
-        bookingStart: discount.bookingStart || discount.start || '',
-        bookingEnd: discount.bookingEnd || discount.end || '',
-        stayStart: discount.stayStart || '',
-        stayEnd: discount.stayEnd || ''
+        bookingStart:
+            discount.bookingStart ||
+            discount.booking_start ||
+            discount.start ||
+            discount.startDate ||
+            '',
+
+        bookingEnd:
+            discount.bookingEnd ||
+            discount.booking_end ||
+            discount.end ||
+            discount.endDate ||
+            '',
+
+        stayStart:
+            discount.stayStart ||
+            discount.stay_start ||
+            discount.validFrom ||
+            '',
+
+        stayEnd:
+            discount.stayEnd ||
+            discount.stay_end ||
+            discount.validTo ||
+            ''
     };
 }
 
@@ -862,7 +899,16 @@ function renderDiscountBox() {
 
     const discount = getDiscountConfig(currentApt);
 
-    if (!discount || !isDiscountBookingPeriodActive(currentApt)) {
+    if (!discount) {
+        box.style.display = 'none';
+        return;
+    }
+
+    const todayStr = getLocalDateString(new Date());
+    const bookingHasStarted = !discount.bookingStart || todayStr >= discount.bookingStart;
+    const bookingHasEnded = discount.bookingEnd && todayStr > discount.bookingEnd;
+
+    if (!bookingHasStarted || bookingHasEnded) {
         box.style.display = 'none';
         return;
     }
@@ -875,13 +921,19 @@ function renderDiscountBox() {
         ? formatDiscountDate(discount.bookingEnd)
         : 'visszavonásig';
 
-    const stayRangeText = discount.stayStart || discount.stayEnd
-        ? `${formatDiscountDate(discount.stayStart)} – ${formatDiscountDate(discount.stayEnd)}`
-        : 'minden foglalható időszakra';
+    let stayRangeText = 'minden foglalható időszakra';
+
+    if (discount.stayStart && discount.stayEnd) {
+        stayRangeText = `${formatDiscountDate(discount.stayStart)} – ${formatDiscountDate(discount.stayEnd)}`;
+    } else if (discount.stayStart) {
+        stayRangeText = `${formatDiscountDate(discount.stayStart)} napjától`;
+    } else if (discount.stayEnd) {
+        stayRangeText = `${formatDiscountDate(discount.stayEnd)} napjáig`;
+    }
 
     main.innerText = `A kedvezmény akkor érvényes, ha legkésőbb ${bookingEndText} napjáig foglalsz.`;
 
-    small.innerText = `Érvényes tartózkodási időszak: ${stayRangeText}. A kedvezmény éjszakánként kerül levonásra.`;
+    small.innerText = `Érvényes tartózkodási időszak: ${stayRangeText}. A kedvezmény csak ezekre az éjszakákra kerül levonásra.`;
 
     box.style.display = 'block';
 }
