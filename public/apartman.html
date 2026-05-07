@@ -197,16 +197,19 @@
             display: block;
             color: #999;
             text-decoration: line-through;
-            font-size: 1rem;
+            font-size: 1.05rem;
             font-weight: 500;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.35rem;
+            white-space: nowrap;
         }
 
         .price-sale {
             display: block;
             color: var(--warning);
-            font-size: 1.6rem;
+            font-size: 1.55rem;
             font-weight: 700;
+            line-height: 1.2;
+            white-space: nowrap;
         }
 
         .sale-badge {
@@ -537,12 +540,6 @@
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; font-style: italic;">Foglalás</h3>
                 <p id="apt-price" class="price-tag"></p>
 
-                <div id="apt-discount-box" class="apt-discount-box">
-                    <div id="apt-discount-label" class="apt-discount-label"></div>
-                    <div id="apt-discount-main" class="apt-discount-main"></div>
-                    <div id="apt-discount-small" class="apt-discount-small"></div>
-                </div>
-
                 <div class="dev-status">
                     <span></span>
                     <span></span>
@@ -645,7 +642,7 @@
     <span class="lightbox-nav nav-next" onclick="event.stopPropagation(); changeImage(1)">›</span>
 </div>
 
-<script src="database.js?v=16.2"></script>
+<script src="database.js?v=16.3"></script>
 <script src="https://js.stripe.com/v3/"></script>
 <script src="figyelmeztetes.js"></script>
 
@@ -908,9 +905,12 @@ function getNextBookableInfo(apt) {
         const info = getAptStatusAndPrice(apt, testDate);
 
         if (info.status === 'OPEN') {
-            return info;
-        }
+        return {
+            ...info,
+            dateStr
+        };
     }
+}
 
     return {
         status: 'CLOSED',
@@ -961,9 +961,8 @@ function getNextBookableInfo(apt) {
 
                 if (discountAmount > 0) {
                     priceTag.innerHTML = `
-                        <div class="apt-price-old">${originalPrice.toLocaleString('hu-HU')} Ft / éjszaka</div>
-                        <div class="apt-price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft</div>
-                        <div>/ éjszaka</div>
+                        <div class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft / éjszaka</div>
+                        <div class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft / éjszaka</div>
                     `;
                 } else {
                     priceTag.innerHTML = `<span class="price-num">${originalPrice.toLocaleString('hu-HU')} Ft</span> / éjszaka`;
