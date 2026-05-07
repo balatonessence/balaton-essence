@@ -303,6 +303,19 @@
             pointer-events: none;
         }
 
+        .cal-day.end-allowed {
+            pointer-events: auto !important;
+            cursor: pointer !important;
+            opacity: 1;
+            text-decoration: none !important;
+            border: 1px dashed var(--accent);
+        }
+
+        .cal-day.end-allowed:hover {
+            background: #f0f5ec !important;
+            color: var(--accent) !important;
+        }
+
         .selected-start,
         .selected-end {
             background: var(--accent) !important;
@@ -966,65 +979,86 @@
     }
 
     function renderCalendar() {
-        const daysContainer = document.getElementById('calendar-days');
-        const monthYearLabel = document.getElementById('calendar-month-year');
+    const daysContainer = document.getElementById('calendar-days');
+    const monthYearLabel = document.getElementById('calendar-month-year');
 
-        if (!daysContainer || !monthYearLabel) return;
+    if (!daysContainer || !monthYearLabel) return;
 
-        const year = calDate.getFullYear();
-        const month = calDate.getMonth();
+    const year = calDate.getFullYear();
+    const month = calDate.getMonth();
 
-        const monthName = new Intl.DateTimeFormat('en-US', {
-            month: 'long'
-        }).format(calDate);
+    const monthName = new Intl.DateTimeFormat('en-US', {
+        month: 'long'
+    }).format(calDate);
 
-        monthYearLabel.innerText = `${monthName} ${year}`;
+    monthYearLabel.innerText = `${monthName} ${year}`;
 
-        const firstDay = new Date(year, month, 1).getDay();
-        const daysInMonth = new Date(year, month + 1, 0).getDate();
-        const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const startOffset = firstDay === 0 ? 6 : firstDay - 1;
 
-        const blockedDates = getBlockedDatesSet();
+    const blockedDates = getBlockedDatesSet();
 
-        let htmlContent = '';
+    let htmlContent = '';
 
-        for (let i = 0; i < startOffset; i++) {
-            htmlContent += `<div class="cal-day empty"></div>`;
-        }
-
-        for (let d = 1; d <= daysInMonth; d++) {
-            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-
-            let className = 'cal-day';
-            let onClickAttr = `onclick="selectDate('${dateStr}')"`;
-
-            if (!isCheckInAllowedByLeadTime(dateStr)) {
-                className += ' past';
-                onClickAttr = '';
-            }
-
-            if (blockedDates.has(dateStr)) {
-                className += ' booked';
-                onClickAttr = '';
-            }
-
-            if (selectedStart && dateStr === selectedStart) {
-                className += ' selected-start';
-            }
-
-            if (selectedEnd && dateStr === selectedEnd) {
-                className += ' selected-end';
-            }
-
-            if (selectedStart && selectedEnd && dateStr > selectedStart && dateStr < selectedEnd) {
-                className += ' selected-range';
-            }
-
-            htmlContent += `<div class="${className}" ${onClickAttr}>${d}</div>`;
-        }
-
-        daysContainer.innerHTML = htmlContent;
+    for (let i = 0; i < startOffset; i++) {
+        htmlContent += `<div class="cal-day empty"></div>`;
     }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+        let className = 'cal-day';
+        let onClickAttr = `onclick="selectDate('${dateStr}')"`;
+
+        const isTooSoon = !isCheckInAllowedByLeadTime(dateStr);
+        const isBlocked = blockedDates.has(dateStr);
+
+        let canBeCheckoutDay = false;
+
+        if (
+            selectedStart &&
+            !selectedEnd &&
+            dateStr > selectedStart &&
+            isCheckInAllowedByLeadTime(selectedStart) &&
+            !hasBlockedDateInRange(selectedStart, dateStr)
+        ) {
+            canBeCheckoutDay = true;
+        }
+
+        if (isTooSoon) {
+            className += ' past';
+            onClickAttr = '';
+        }
+
+        if (isBlocked) {
+            className += ' booked';
+
+            if (canBeCheckoutDay) {
+                className += ' end-allowed';
+                onClickAttr = `onclick="selectDate('${dateStr}')"`;
+            } else {
+                onClickAttr = '';
+            }
+        }
+
+        if (selectedStart && dateStr === selectedStart) {
+            className += ' selected-start';
+        }
+
+        if (selectedEnd && dateStr === selectedEnd) {
+            className += ' selected-end';
+        }
+
+        if (selectedStart && selectedEnd && dateStr > selectedStart && dateStr < selectedEnd) {
+            className += ' selected-range';
+        }
+
+        htmlContent += `<div class="${className}" ${onClickAttr}>${d}</div>`;
+    }
+
+    daysContainer.innerHTML = htmlContent;
+}
 
     function selectDate(dateStr) {
         if (!isCheckInAllowedByLeadTime(dateStr)) {

@@ -485,6 +485,33 @@ function isBookingOverlapping(bookings, newBooking, ignoreStripeId = null, ignor
     });
 }
 
+function hasDisabledDateInBookingRange(apartment, booking) {
+    const disabledDates = new Set(
+        Array.isArray(apartment?.disabledDates) ? apartment.disabledDates : []
+    );
+
+    if (disabledDates.size === 0) return false;
+
+    const start = parseDateOnly(booking.checkIn || booking.start);
+    const end = parseDateOnly(booking.checkOut || booking.end);
+
+    if (!start || !end) return true;
+
+    const curr = new Date(start);
+
+    while (curr < end) {
+        const dateStr = `${curr.getFullYear()}-${pad2(curr.getMonth() + 1)}-${pad2(curr.getDate())}`;
+
+        if (disabledDates.has(dateStr)) {
+            return true;
+        }
+
+        curr.setDate(curr.getDate() + 1);
+    }
+
+    return false;
+}
+
 function pad2(num) {
     return String(num).padStart(2, '0');
 }
@@ -1162,6 +1189,20 @@ app.post('/api/create-checkout-session', async (req, res) => {
         }
 
         const db = await getDbContent();
+
+        const apartment = (db.apartments || []).find(apt =>
+            String(apt.id) === String(newB.aptId)
+        );
+
+        if (!apartment) {
+            return res.status(400).json({ error: 'Az apartman nem található.' });
+        }
+
+        if (hasDisabledDateInBookingRange(apartment, newB)) {
+            return res.status(400).json({
+                error: 'A kiválasztott időszak letiltott napot tartalmaz.'
+            });
+        }
 
         if (isBookingOverlapping(db.bookings, newB)) {
             return res.status(400).json({ error: 'Sajnos ez az időpont már foglalt!' });
