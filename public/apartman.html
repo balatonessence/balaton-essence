@@ -961,10 +961,9 @@ function getNextBookableInfo(apt) {
 
                 if (discountAmount > 0) {
                     priceTag.innerHTML = `
-                        <span class="sale-badge">Akció: -${discountAmount.toLocaleString('hu-HU')} Ft / éjszaka</span>
-                        <span class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft / éjszaka</span>
-                        <span class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft</span>
-                        <span style="font-size:1rem; color:var(--text-light);"> / éjszaka</span>
+                        <div class="apt-price-old">${originalPrice.toLocaleString('hu-HU')} Ft / éjszaka</div>
+                        <div class="apt-price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft</div>
+                        <div>/ éjszaka</div>
                     `;
                 } else {
                     priceTag.innerHTML = `<span class="price-num">${originalPrice.toLocaleString('hu-HU')} Ft</span> / éjszaka`;
