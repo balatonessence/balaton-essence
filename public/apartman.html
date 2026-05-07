@@ -691,6 +691,34 @@
         return 'hu';
     }
 
+    function isDiscountActiveForNight(apt, dateStr) {
+        const discount = apt?.discount;
+
+        if (!discount || discount.active !== true) {
+            return false;
+        }
+
+        if (!discount.start || !discount.end) {
+            return false;
+        }
+
+        const amount = Number(discount.amountPerNight || 0);
+
+        if (amount <= 0) {
+            return false;
+        }
+
+        return dateStr >= discount.start && dateStr <= discount.end;
+    }
+
+    function getDiscountAmountForNight(apt, dateStr) {
+        if (!isDiscountActiveForNight(apt, dateStr)) {
+            return 0;
+        }
+
+        return Number(apt.discount.amountPerNight || 0);
+    }
+
     function getNextBookableInfo(apt) {
     const today = new Date();
 
@@ -1187,32 +1215,63 @@
 
         const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
 
-        let total = 0;
-        let minNightsRequired = 1;
+let total = 0;
+let originalTotal = 0;
+let discountTotal = 0;
+let discountedNightCount = 0;
+let minNightsRequired = 1;
 
-        for (let i = 0; i < nights; i++) {
-            const currentDay = new Date(start);
-            currentDay.setDate(currentDay.getDate() + i);
+for (let i = 0; i < nights; i++) {
+    const currentDay = new Date(start);
+    currentDay.setDate(currentDay.getDate() + i);
 
-            const info = getAptStatusAndPrice(currentApt, currentDay, guests);
+    const currentDateStr = getLocalDateString(currentDay);
+    const info = getAptStatusAndPrice(currentApt, currentDay, guests);
 
-            if (info.status === 'OPEN') {
-                total += Number(info.price || 0);
+    if (info.status === 'OPEN') {
+        const nightlyPrice = Number(info.price || 0);
+        const nightlyDiscount = getDiscountAmountForNight(currentApt, currentDateStr);
+        const finalNightlyPrice = Math.max(0, nightlyPrice - nightlyDiscount);
 
-                if (Number(info.minNights || 1) > minNightsRequired) {
-                    minNightsRequired = Number(info.minNights || 1);
-                }
-            } else {
-                infoText.innerHTML = `<span style="color:var(--warning)">Zárva tartás a választott napokon!</span>`;
-                totalBox.innerText = 'Zárva';
-                btn.innerText = 'Nem foglalható';
-                btn.style.background = 'var(--warning)';
-                btn.style.color = 'white';
-                return;
-            }
+        originalTotal += nightlyPrice;
+        discountTotal += nightlyPrice - finalNightlyPrice;
+        total += finalNightlyPrice;
+
+        if (nightlyDiscount > 0) {
+            discountedNightCount++;
         }
 
-        totalBox.innerText = `${total.toLocaleString('hu-HU')} Ft`;
+        if (Number(info.minNights || 1) > minNightsRequired) {
+            minNightsRequired = Number(info.minNights || 1);
+        }
+    } else {
+        infoText.innerHTML = `<span style="color:var(--warning)">Zárva tartás a választott napokon!</span>`;
+        totalBox.innerText = 'Zárva';
+        btn.innerText = 'Nem foglalható';
+        btn.style.background = 'var(--warning)';
+        btn.style.color = 'white';
+        return;
+    }
+}
+
+totalBox.dataset.finalTotal = String(total);
+
+if (discountTotal > 0) {
+    totalBox.innerHTML = `
+        <div style="font-size:0.9rem; color:#999; text-decoration:line-through; margin-bottom:4px;">
+            ${originalTotal.toLocaleString('hu-HU')} Ft
+        </div>
+        <div>
+            ${total.toLocaleString('hu-HU')} Ft
+        </div>
+        <div style="font-size:0.75rem; color:var(--accent); font-family:'Montserrat'; font-weight:700; margin-top:4px;">
+            Akciós kedvezmény: -${discountTotal.toLocaleString('hu-HU')} Ft
+        </div>
+    `;
+} else {
+    totalBox.dataset.finalTotal = String(total);
+    totalBox.innerText = `${total.toLocaleString('hu-HU')} Ft`;
+}
 
         if (nights < minNightsRequired) {
             infoText.innerHTML = `<span style="color:var(--warning)">Minimum ${minNightsRequired} éjszaka szükséges ebben az időszakban!</span>`;
@@ -1240,12 +1299,7 @@
         const submitBtn = document.getElementById('submit-booking-btn');
         const totalElement = document.getElementById('grand-total');
 
-        let cleanNumber = 0;
-
-        if (totalElement) {
-            const rawValue = totalElement.innerText;
-            cleanNumber = parseInt(rawValue.replace(/[^0-9]/g, ''), 10) || 0;
-        }
+        let cleanNumber = Number(totalElement?.dataset.finalTotal || 0);
 
         const currentLang = getCurrentLang();
 

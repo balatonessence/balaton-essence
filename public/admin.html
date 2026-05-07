@@ -648,6 +648,38 @@
                 <button type="button" class="btn-outline" style="font-size:0.8rem; padding:0.5rem 1rem; margin-top:10px;" onclick="addSeasonRow()">+ Új szezon hozzáadása</button>
             </div>
 
+            <div class="form-group" style="background:#fff7e8; padding:1.5rem; border-radius:8px; border:1px solid #ead7b7; margin-top:1rem;">
+                <label style="color:#9a6a22; font-weight:bold; margin-bottom:10px; display:block;">
+                    Akció / éjszakánkénti fix kedvezmény
+                </label>
+
+                <label style="display:flex; align-items:center; gap:10px; margin-bottom:15px; font-size:0.85rem; font-weight:700; color:#666;">
+                    <input type="checkbox" id="a-discount-active" style="width:auto;">
+                    Akció aktív ennél az apartmannál
+                </label>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px;">
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Kezdete</label>
+                        <input type="date" id="a-discount-start">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Vége</label>
+                        <input type="date" id="a-discount-end">
+                    </div>
+
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label>Kedvezmény / éj</label>
+                        <input type="number" id="a-discount-amount" placeholder="Pl. 15000">
+                    </div>
+                </div>
+
+                <p style="font-size:0.75rem; color:#8a6a3d; margin-top:12px; line-height:1.5;">
+                    A kedvezmény csak azokra az éjszakákra vonódik le, amelyek beleesnek az akció időszakába.
+                </p>
+            </div>
+
             <div class="form-group" style="margin-top:1.5rem;">
                 <label>Leírás - Magyar</label>
                 <textarea id="a-desc" rows="4" placeholder="Magyar leírás..."></textarea>
@@ -1003,6 +1035,13 @@
 
             seasons: seasonsData,
 
+            discount: {
+                active: document.getElementById('a-discount-active')?.checked === true,
+                start: document.getElementById('a-discount-start')?.value || '',
+                end: document.getElementById('a-discount-end')?.value || '',
+                amountPerNight: Number(document.getElementById('a-discount-amount')?.value || 0)
+            },
+
             description: document.getElementById('a-desc').value.trim(),
             description_en: document.getElementById('a-desc-en').value.trim(),
             description_de: document.getElementById('a-desc-de').value.trim(),
@@ -1053,10 +1092,13 @@
 
                 if (calendarWrapper) calendarWrapper.style.display = 'none';
 
-                ['a-name', 'a-loc', 'a-address', 'a-desc', 'a-desc-en', 'a-desc-de', 'a-ical-b', 'a-ical-sz'].forEach(fieldId => {
+                ['a-name', 'a-loc', 'a-address', 'a-desc', 'a-desc-en', 'a-desc-de', 'a-ical-b', 'a-ical-sz', 'a-discount-start', 'a-discount-end', 'a-discount-amount'].forEach(fieldId => {
                     const el = document.getElementById(fieldId);
                     if (el) el.value = '';
                 });
+
+                const discountActive = document.getElementById('a-discount-active');
+                if (discountActive) discountActive.checked = false;
 
                 currentCoverImage = null;
                 currentGalleryImages = [];
@@ -1095,6 +1137,17 @@
             setVal('a-desc-de', a.description_de || a.descriptionDe || '');
             setVal('a-ical-b', a.icalBooking);
             setVal('a-ical-sz', a.icalSzallas);
+
+            const discount = a.discount || {};
+
+            const discountActive = document.getElementById('a-discount-active');
+            if (discountActive) {
+                discountActive.checked = discount.active === true;
+            }
+
+            setVal('a-discount-start', discount.start || '');
+            setVal('a-discount-end', discount.end || '');
+            setVal('a-discount-amount', discount.amountPerNight || '');
 
             currentCoverImage = a.coverImage || null;
             currentGalleryImages = Array.isArray(a.galleryImages) ? [...a.galleryImages] : [];
