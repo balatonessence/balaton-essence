@@ -883,27 +883,27 @@
     }
 
     function getActiveNightlyDiscount(apt, date = new Date()) {
-    const discount = apt.nightlyDiscount || apt.discount || null;
+    const discount = apt?.discount || null;
 
-    if (!discount || discount.active === false) {
+    if (!discount || discount.active !== true) {
         return null;
     }
 
-    const amount = Number(discount.amount || discount.value || apt.discountAmount || 0);
+    const amount = Number(discount.amountPerNight || 0);
 
     if (amount <= 0) {
         return null;
     }
 
     const todayStr = getLocalDateStringForIndex(date);
-    const start = discount.start || discount.startDate || '';
-    const end = discount.end || discount.endDate || '';
+    const start = discount.start || '';
+    const end = discount.end || '';
 
-    if (start && todayStr < start) {
+    if (!start || !end) {
         return null;
     }
 
-    if (end && todayStr > end) {
+    if (todayStr < start || todayStr > end) {
         return null;
     }
 
@@ -963,53 +963,6 @@ function renderIndexPriceHtml(apt) {
         <div class="apt-price-old">${minDisplayPrice.toLocaleString('hu-HU')} Ft-tól</div>
         <p class="apt-price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft-tól</p>
     `;
-}
-
-    function renderIndexApartments() {
-    const grid = document.getElementById('apartment-grid');
-
-    if (!grid) return;
-
-    if (!window.db || !Array.isArray(db.apartments) || db.apartments.length === 0) {
-        grid.innerHTML = `
-            <div class="loader-wrap">
-                <div>Jelenleg nincs elérhető apartman.</div>
-            </div>
-        `;
-        return;
-    }
-
-    grid.innerHTML = "";
-
-    db.apartments.forEach(apt => {
-        const priceHtml = renderIndexPriceHtml(apt);
-
-        const card = document.createElement('a');
-        card.href = `apartman.html?id=${encodeURIComponent(apt.id)}`;
-        card.className = 'pillar-card';
-
-        card.innerHTML = `
-            <div class="pillar-header">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">
-                    ${escapeHtml(apt.name || 'Apartman')}
-                </h3>
-
-                <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">
-                    ${escapeHtml(apt.location || '')}
-                </p>
-
-                ${priceHtml}
-
-                <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem; display: inline-block;">
-                    Felfedezés
-                </span>
-            </div>
-
-            <div class="pillar-img" style="background-image: url('${safeUrl(apt.coverImage || '')}');"></div>
-        `;
-
-        grid.appendChild(card);
-    });
 }
 
     function showApartmentError(message) {
