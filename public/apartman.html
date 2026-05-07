@@ -366,6 +366,43 @@
             color: var(--accent) !important;
         }
 
+        .apt-discount-box {
+            display: none;
+            background: rgba(176, 65, 62, 0.08);
+            border: 1px solid rgba(176, 65, 62, 0.22);
+            border-left: 4px solid var(--warning);
+            border-radius: 10px;
+            padding: 1rem 1.1rem;
+            margin: 1rem 0 1.4rem;
+        }
+
+        .apt-discount-label {
+            display: inline-flex;
+            background: var(--warning);
+            color: white;
+            border-radius: 999px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.62rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 0.75rem;
+        }
+
+        .apt-discount-main {
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.55;
+            font-weight: 600;
+        }
+
+        .apt-discount-small {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            line-height: 1.55;
+            margin-top: 0.5rem;
+        }
+
         .selected-start,
         .selected-end {
             background: var(--accent) !important;
@@ -499,6 +536,12 @@
             <div class="booking-card">
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; font-style: italic;">Foglalás</h3>
                 <p id="apt-price" class="price-tag"></p>
+
+                <div id="apt-discount-box" class="apt-discount-box">
+                    <div id="apt-discount-label" class="apt-discount-label"></div>
+                    <div id="apt-discount-main" class="apt-discount-main"></div>
+                    <div id="apt-discount-small" class="apt-discount-small"></div>
+                </div>
 
                 <div class="dev-status">
                     <span></span>
@@ -721,88 +764,129 @@
         return 'hu';
     }
 
-    function isDiscountActiveForNight(apt, nightDateStr) {
+    function getDiscountConfig(apt) {
     const discount = apt?.discount;
 
     if (!discount || discount.active !== true) {
-        return false;
+        return null;
     }
 
     const amount = Number(discount.amountPerNight || 0);
 
     if (amount <= 0) {
+        return null;
+    }
+
+    return {
+        amount,
+        bookingStart: discount.bookingStart || discount.start || '',
+        bookingEnd: discount.bookingEnd || discount.end || '',
+        stayStart: discount.stayStart || '',
+        stayEnd: discount.stayEnd || ''
+    };
+}
+
+function isDiscountBookingPeriodActive(apt) {
+    const discount = getDiscountConfig(apt);
+
+    if (!discount) {
         return false;
     }
 
     const todayStr = getLocalDateString(new Date());
 
-    const bookingStart = discount.bookingStart || discount.start || '';
-    const bookingEnd = discount.bookingEnd || discount.end || '';
-
-    if (bookingStart && todayStr < bookingStart) {
+    if (discount.bookingStart && todayStr < discount.bookingStart) {
         return false;
     }
 
-    if (bookingEnd && todayStr > bookingEnd) {
-        return false;
-    }
-
-    const stayStart = discount.stayStart || discount.start || '';
-    const stayEnd = discount.stayEnd || discount.end || '';
-
-    if (stayStart && nightDateStr < stayStart) {
-        return false;
-    }
-
-    if (stayEnd && nightDateStr > stayEnd) {
+    if (discount.bookingEnd && todayStr > discount.bookingEnd) {
         return false;
     }
 
     return true;
 }
 
-function getDiscountAmountForNight(apt, nightDateStr) {
-    if (!isDiscountActiveForNight(apt, nightDateStr)) {
+function isDiscountValidForStayNight(apt, dateStr) {
+    const discount = getDiscountConfig(apt);
+
+    if (!discount) {
+        return false;
+    }
+
+    if (!isDiscountBookingPeriodActive(apt)) {
+        return false;
+    }
+
+    if (discount.stayStart && dateStr < discount.stayStart) {
+        return false;
+    }
+
+    if (discount.stayEnd && dateStr > discount.stayEnd) {
+        return false;
+    }
+
+    return true;
+}
+
+function getDiscountAmountForNight(apt, dateStr) {
+    if (!isDiscountValidForStayNight(apt, dateStr)) {
         return 0;
     }
 
-    return Number(apt.discount.amountPerNight || 0);
+    const discount = getDiscountConfig(apt);
+    return Number(discount.amount || 0);
 }
 
-    function getNextBookableInfo(apt) {
-    const today = new Date();
+function formatDiscountDate(dateStr) {
+    if (!dateStr) return '-';
 
-    for (let i = 0; i < 370; i++) {
-        const testDate = new Date(today);
-        testDate.setDate(today.getDate() + i);
+    const d = parseLocalDate(dateStr);
 
-        const dateStr = getLocalDateString(testDate);
-
-        const isBlockedByAdmin = Array.isArray(apt.disabledDates)
-            && apt.disabledDates.includes(dateStr);
-
-        if (isBlockedByAdmin) {
-            continue;
-        }
-
-        const info = getAptStatusAndPrice(apt, testDate);
-
-        if (info.status === 'OPEN') {
-            return {
-                ...info,
-                dateStr
-            };
-        }
+    if (!d || isNaN(d.getTime())) {
+        return dateStr;
     }
 
-    return {
-        status: 'CLOSED',
-        price: 0,
-        label: '',
-        minNights: 1,
-        maxGuests: 2,
-        dateStr: ''
-    };
+    return new Intl.DateTimeFormat('hu-HU', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    }).format(d);
+}
+
+function renderDiscountBox() {
+    const box = document.getElementById('apt-discount-box');
+    const label = document.getElementById('apt-discount-label');
+    const main = document.getElementById('apt-discount-main');
+    const small = document.getElementById('apt-discount-small');
+
+    if (!box || !label || !main || !small || !currentApt) {
+        return;
+    }
+
+    const discount = getDiscountConfig(currentApt);
+
+    if (!discount || !isDiscountBookingPeriodActive(currentApt)) {
+        box.style.display = 'none';
+        return;
+    }
+
+    const amountText = discount.amount.toLocaleString('hu-HU');
+
+    label.innerText = `Akció: -${amountText} Ft / éj`;
+
+    const bookingEndText = discount.bookingEnd
+        ? formatDiscountDate(discount.bookingEnd)
+        : 'visszavonásig';
+
+    const stayRangeText = discount.stayStart || discount.stayEnd
+        ? `${formatDiscountDate(discount.stayStart)} – ${formatDiscountDate(discount.stayEnd)}`
+        : 'minden foglalható időszakra';
+
+    main.innerText = `A kedvezmény akkor érvényes, ha legkésőbb ${bookingEndText} napjáig foglalsz.`;
+
+    small.innerText = `Érvényes tartózkodási időszak: ${stayRangeText}. A kedvezmény éjszakánként kerül levonásra.`;
+
+    box.style.display = 'block';
 }
 
     function renderDetails() {
@@ -918,6 +1002,7 @@ function getDiscountAmountForNight(apt, nightDateStr) {
                 gal.appendChild(wrapper);
             });
         }
+        renderDiscountBox();
     }
 
     function openLightbox(index) {
