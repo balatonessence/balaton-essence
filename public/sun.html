@@ -335,27 +335,27 @@ img {
     <section class="sun-cards-section">
         <div class="sun-cards-grid">
             
-            <div class="sun-item-card" onclick="openRentModal('sup')">
-                <div class="sun-card-img" style="background-image: url('img/sup.png');"></div>
+            <div class="sun-item-card" id="card-sup" onclick="openRentModal('sup')">
+                <div class="sun-card-img" id="card-img-sup" style="background-image: url('img/sup.png');"></div>
                 <div class="sun-card-content">
                     <h3 class="sun-card-title">SUP</h3>
-                    <p class="sun-card-price">5 900 Ft <small>/ nap</small></p>
+                    <p class="sun-card-price" id="card-price-sup">5 900 Ft <small>/ nap</small></p>
                 </div>
             </div>
             
-            <div class="sun-item-card" onclick="openRentModal('sunbed')">
-                <div class="sun-card-img" style="background-image: url('img/napozoszek.png');"></div>
+            <div class="sun-item-card" id="card-sunbed" onclick="openRentModal('sunbed')">
+                <div class="sun-card-img" id="card-img-sunbed" style="background-image: url('img/napozoszek.png');"></div>
                 <div class="sun-card-content">
                     <h3 class="sun-card-title">Napozószék</h3>
-                    <p class="sun-card-price">1 500 Ft <small>/ nap</small></p>
+                    <p class="sun-card-price" id="card-price-sunbed">1 500 Ft <small>/ nap</small></p>
                 </div>
             </div>
 
-            <div class="sun-item-card" onclick="openRentModal('umbrella')">
-                <div class="sun-card-img" style="background-image: url('img/napernyo.png');"></div>
+            <div class="sun-item-card" id="card-umbrella" onclick="openRentModal('umbrella')">
+                <div class="sun-card-img" id="card-img-umbrella" style="background-image: url('img/napernyo.png');"></div>
                 <div class="sun-card-content">
                     <h3 class="sun-card-title">Napernyő</h3>
-                    <p class="sun-card-price">1 000 Ft <small>/ nap</small></p>
+                    <p class="sun-card-price" id="card-price-umbrella">1 000 Ft <small>/ nap</small></p>
                 </div>
             </div>
 
@@ -379,7 +379,7 @@ img {
                     <label class="extras-item-label">
                         <input type="checkbox" id="item-sup" onchange="updateLiveTotal()"> 
                         <span class="custom-checkmark"></span>
-                        <span class="item-text-main">SUP <small style="color: #777;">(5.900 Ft/nap)</small></span>
+                        <span class="item-text-main">SUP <small id="modal-price-sup" style="color: #777;">(5.900 Ft/nap)</small></span>
                     </label>
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" onclick="changeQty('qty-sup', -1)">−</button>
@@ -392,7 +392,7 @@ img {
                     <label class="extras-item-label">
                         <input type="checkbox" id="item-sunbed" onchange="updateLiveTotal()"> 
                         <span class="custom-checkmark"></span>
-                        <span class="item-text-main">Napozószék <small style="color: #777;">(1.500 Ft/nap)</small></span>
+                        <span class="item-text-main">Napozószék <small id="modal-price-sunbed" style="color: #777;">(1.500 Ft/nap)</small></span>
                     </label>
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" onclick="changeQty('qty-sunbed', -1)">−</button>
@@ -405,7 +405,7 @@ img {
                     <label class="extras-item-label">
                         <input type="checkbox" id="item-umbrella" onchange="updateLiveTotal()"> 
                         <span class="custom-checkmark"></span>
-                        <span class="item-text-main">Napernyő <small style="color: #777;">(1.000 Ft/nap)</small></span>
+                        <span class="item-text-main">Napernyő <small id="modal-price-umbrella" style="color: #777;">(1.000 Ft/nap)</small></span>
                     </label>
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" onclick="changeQty('qty-umbrella', -1)">−</button>
@@ -471,7 +471,7 @@ img {
 <script>
     const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0');
 
-    const itemMap = {
+    let itemMap = {
         sup: {
             checkboxId: 'item-sup',
             qtyId: 'qty-sup',
@@ -492,7 +492,67 @@ img {
         }
     };
 
+    async function loadSunServices() {
+    try {
+        const res = await fetch('/api/services?t=' + Date.now());
+
+        if (!res.ok) {
+            throw new Error('Nem sikerült betölteni a szolgáltatás árakat.');
+        }
+
+        const data = await res.json();
+        const services = data.services?.sun || [];
+
+        services.forEach(service => {
+            if (!service.id || !itemMap[service.id]) return;
+
+            itemMap[service.id] = {
+                ...itemMap[service.id],
+                label: service.name_hu || itemMap[service.id].label,
+                price: Number(service.price || itemMap[service.id].price),
+                unit: service.unit_hu || 'nap',
+                image: service.image || '',
+                active: service.active !== false
+            };
+        });
+
+        renderSunServiceTexts();
+    } catch (err) {
+        console.error('SUP & SUN árbetöltési hiba:', err);
+        renderSunServiceTexts();
+    }
+}
+
+function renderSunServiceTexts() {
+    Object.entries(itemMap).forEach(([key, item]) => {
+        const priceText = `${Number(item.price || 0).toLocaleString('hu-HU')} Ft`;
+        const unitText = item.unit || 'nap';
+
+        const card = document.getElementById(`card-${key}`);
+        const cardPrice = document.getElementById(`card-price-${key}`);
+        const modalPrice = document.getElementById(`modal-price-${key}`);
+        const cardImg = document.getElementById(`card-img-${key}`);
+
+        if (card) {
+            card.style.display = item.active === false ? 'none' : 'flex';
+        }
+
+        if (cardPrice) {
+            cardPrice.innerHTML = `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
+        }
+
+        if (modalPrice) {
+            modalPrice.innerText = `(${priceText}/${unitText})`;
+        }
+
+        if (cardImg && item.image) {
+            cardImg.style.backgroundImage = `url('${escapeHtml(item.image)}')`;
+        }
+    });
+}
+
     document.addEventListener('DOMContentLoaded', async function() {
+        await loadSunServices();
         await loadApartments();
         initDatePickers();
         updateLiveTotal();

@@ -108,28 +108,28 @@
 
 <main>
     <div class="breakfast-grid">
-        <div class="pillar-card" onclick="openMorningModal('Reggeli tál')">
+        <div class="pillar-card" id="card-breakfast_plate" onclick="openMorningModal('breakfast_plate')">
             <div class="pillar-header">
-                <h3>MORNING MOMENT - Reggeli tál</h3>
-                <span class="price-tag">4 200 FT / FŐ</span>
+                <h3 id="card-title-breakfast_plate">MORNING MOMENT - Reggeli tál</h3>
+                <span class="price-tag" id="card-price-breakfast_plate">4 200 FT / FŐ</span>
             </div>
-            <div class="pillar-img" style="background-image: url('img/Reggeli\ tál.png');"></div>
+            <div class="pillar-img" id="card-img-breakfast_plate" style="background-image: url('img/Reggeli\ tál.png');"></div>
         </div>
 
-        <div class="pillar-card" onclick="openMorningModal('Sajttál')">
+        <div class="pillar-card" id="card-cheese_plate" onclick="openMorningModal('cheese_plate')">
             <div class="pillar-header">
-                <h3>WINE & CHEESE MOMENT - Sajttál</h3>
-                <span class="price-tag">4 800 FT / FŐ</span>
+                <h3 id="card-title-cheese_plate">WINE & CHEESE MOMENT - Sajttál</h3>
+                <span class="price-tag" id="card-price-cheese_plate">4 800 FT / FŐ</span>
             </div>
-            <div class="pillar-img" style="background-image: url('img/Sajttál.png');"></div>
+            <div class="pillar-img" id="card-img-cheese_plate" style="background-image: url('img/Sajttál.png');"></div>
         </div>
 
-        <div class="pillar-card" onclick="openMorningModal('Ünnepi tál')">
+        <div class="pillar-card" id="card-celebration_plate" onclick="openMorningModal('celebration_plate')">
             <div class="pillar-header">
-                <h3>CELEBRATION MOMENT - Születésnap/Évforduló</h3>
-                <span class="price-tag">4 800 FT / FŐ</span>
+                <h3 id="card-title-celebration_plate">CELEBRATION MOMENT - Születésnap/Évforduló</h3>
+                <span class="price-tag" id="card-price-celebration_plate">4 800 FT / FŐ</span>
             </div>
-            <div class="pillar-img" style="background-image: url('img/Születésnap\,\ évforduló.png');"></div>
+            <div class="pillar-img" id="card-img-celebration_plate" style="background-image: url('img/Születésnap\,\ évforduló.png');"></div>
         </div>
     </div>
 </main>
@@ -224,6 +224,7 @@
     let currentQty = 1;
     let calendar;
     const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0');
+
     const momentDescriptions = {
         "Reggeli tál": `
             Friss péksütemények, válogatott felvágottak és sajtok, szezonális zöldségek, gyümölcsök és apró finomságok. Kényelmes, bőséges reggeli, amely tökéletes indítása a napnak. 
@@ -239,7 +240,90 @@
         `
     };
 
+    let momentsMap = {
+        breakfast_plate: {
+            id: 'breakfast_plate',
+            name_hu: 'Reggeli tál',
+            price: 4200,
+            description_hu: momentDescriptions?.["Reggeli tál"] || '',
+            image: 'img/Reggeli tál.png',
+            active: true
+        },
+        cheese_plate: {
+            id: 'cheese_plate',
+            name_hu: 'Sajttál',
+            price: 4800,
+            description_hu: momentDescriptions?.["Sajttál"] || '',
+            image: 'img/Sajttál.png',
+            active: true
+        },
+        celebration_plate: {
+            id: 'celebration_plate',
+            name_hu: 'Ünnepi tál',
+            price: 4800,
+            description_hu: momentDescriptions?.["Ünnepi tál"] || '',
+            image: 'img/Születésnap, évforduló.png',
+            active: true
+        }
+    };
+
+    async function loadMomentServices() {
+        try {
+            const res = await fetch('/api/services?t=' + Date.now());
+
+            if (!res.ok) {
+                throw new Error('Nem sikerült betölteni a moments árakat.');
+            }
+
+            const data = await res.json();
+            const services = data.services?.moments || [];
+
+            services.forEach(service => {
+                if (!service.id || !momentsMap[service.id]) return;
+
+                momentsMap[service.id] = {
+                    ...momentsMap[service.id],
+                    ...service,
+                    price: Number(service.price || momentsMap[service.id].price),
+                    active: service.active !== false
+                };
+            });
+
+            renderMomentCards();
+        } catch (err) {
+            console.error('Moments árbetöltési hiba:', err);
+            renderMomentCards();
+        }
+    }
+
+    function renderMomentCards() {
+        Object.entries(momentsMap).forEach(([key, item]) => {
+            const card = document.getElementById(`card-${key}`);
+            const title = document.getElementById(`card-title-${key}`);
+            const price = document.getElementById(`card-price-${key}`);
+            const img = document.getElementById(`card-img-${key}`);
+
+            if (card) {
+                card.style.display = item.active === false ? 'none' : 'block';
+            }
+
+            if (title) {
+                title.innerText = item.name_hu || key;
+            }
+
+            if (price) {
+                price.innerText = `${Number(item.price || 0).toLocaleString('hu-HU')} FT / FŐ`;
+            }
+
+            if (img && item.image) {
+                img.style.backgroundImage = `url('${escapeHtml(item.image)}')`;
+            }
+        });
+    }
+
     document.addEventListener('DOMContentLoaded', async function() {
+        await loadMomentServices();
+
         const urlParams = new URLSearchParams(window.location.search);
         const bookingId = urlParams.get('id');
         const bookingToken = urlParams.get('token') || '';
@@ -290,30 +374,26 @@
         });
     });
 
-    function openMorningModal(itemName) {
-        currentQty = 1;
-        document.getElementById('qty-num').innerText = currentQty;
-        document.getElementById('m-item-type').value = itemName;
-        document.getElementById('m-title').innerText = itemName;
+    function openMorningModal(itemId) {
+    const item = momentsMap[itemId];
 
-        document.getElementById('m-desc').innerText =
-            momentDescriptions[itemName] || "";
-
-        const modal = document.getElementById('morning-modal');
-        modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('active'), 10);
+    if (!item || item.active === false) {
+        showSuccess("Hiba!", "Ez a szolgáltatás jelenleg nem elérhető.", "error");
+        return;
     }
 
-    function closeMorningModal() {
-        const modal = document.getElementById('morning-modal');
-        modal.classList.remove('active');
-        setTimeout(() => modal.style.display = 'none', 400);
-    }
+    currentQty = 1;
+    document.getElementById('qty-num').innerText = currentQty;
+    document.getElementById('m-item-type').value = itemId;
+    document.getElementById('m-title').innerText = item.name_hu || 'Rendelés';
 
-    function updateQty(val) {
-        currentQty = Math.max(1, currentQty + val);
-        document.getElementById('qty-num').innerText = currentQty;
-    }
+    document.getElementById('m-desc').innerText =
+        item.description_hu || "";
+
+    const modal = document.getElementById('morning-modal');
+    modal.style.display = 'flex';
+    setTimeout(() => modal.classList.add('active'), 10);
+}
 
     async function submitMorning() {
         const apt = document.getElementById('m-apt-select').value;
@@ -328,8 +408,19 @@
             return showSuccess("Hiba!", "Minden mező kitöltése kötelező!", "error");
         }
 
-        const pricePerUnit = type === 'Reggeli tál' ? 4200 : 4800;
+        const selectedService = momentsMap[type];
+
+        if (!selectedService) {
+            return showSuccess("Hiba!", "A kiválasztott tétel nem található.", "error");
+        }
+
+        const itemName = selectedService.name_hu || 'Tétel';
+        const pricePerUnit = Number(selectedService.price || 0);
         const totalAmount = currentQty * pricePerUnit;
+
+        if (totalAmount <= 0) {
+            return showSuccess("Hiba!", "Hibás ár. Ellenőrizd az admin felületen.", "error");
+        }
 
         const payload = {
             type: 'BREAKFAST',
@@ -345,7 +436,7 @@
             totalPrice: totalAmount,
             method: method,
             lang: 'hu',
-            items: `${type} × ${currentQty} fő`
+            items: `${itemName} × ${currentQty} fő`
         };
 
         try {

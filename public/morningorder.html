@@ -363,7 +363,32 @@
 
     <script>
         const STRIPE_PUBLIC_KEY = 'pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0';
-        const PRICE_PER_PERSON_PER_DAY = 4500;
+
+        let PRICE_PER_PERSON_PER_DAY = 4500;
+
+        async function loadBreakfastPrice() {
+            try {
+                const response = await fetch('/api/services?t=' + Date.now());
+
+                if (!response.ok) {
+                    throw new Error('Nem sikerült betölteni a szolgáltatás árát.');
+                }
+
+                const data = await response.json();
+                const moments = data.services?.moments || [];
+
+                const breakfastService = moments.find(item =>
+                    item.id === 'breakfast_plate' ||
+                    item.name_hu === 'Reggeli tál'
+                );
+
+                if (breakfastService && Number(breakfastService.price) > 0) {
+                    PRICE_PER_PERSON_PER_DAY = Number(breakfastService.price);
+                }
+            } catch (err) {
+                console.error('Reggeli ár betöltési hiba:', err);
+            }
+        }
 
         function normalizeText(value) {
             return String(value || '')
@@ -581,8 +606,10 @@
             });
         });
 
-        document.addEventListener('DOMContentLoaded', () => {
-            fpInstance = flatpickr("#date", {
+        document.addEventListener('DOMContentLoaded', async () => {
+        await loadBreakfastPrice();
+
+        fpInstance = flatpickr("#date", {
                 mode: "multiple",
                 minDate: getMinDate(),
                 dateFormat: "Y-m-d",
