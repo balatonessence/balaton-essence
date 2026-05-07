@@ -172,6 +172,36 @@
             color: var(--text);
         }
 
+        .price-old {
+            display: block;
+            color: #999;
+            text-decoration: line-through;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .price-sale {
+            display: block;
+            color: var(--warning);
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .sale-badge {
+            display: inline-block;
+            background: rgba(176, 65, 62, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(176, 65, 62, 0.25);
+            border-radius: 999px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.62rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.8rem;
+        }
+
         .btn-booking {
             width: 100%;
             background: #EAE8E2;
@@ -709,7 +739,10 @@ function getDiscountAmountForNight(apt, dateStr) {
         const info = getAptStatusAndPrice(apt, testDate);
 
         if (info.status === 'OPEN') {
-            return info;
+            return {
+                ...info,
+                dateStr
+            };
         }
     }
 
@@ -718,7 +751,8 @@ function getDiscountAmountForNight(apt, dateStr) {
         price: 0,
         label: '',
         minNights: 1,
-        maxGuests: 2
+        maxGuests: 2,
+        dateStr: ''
     };
 }
 
@@ -777,7 +811,20 @@ function getDiscountAmountForNight(apt, dateStr) {
 
         if (info.status === 'OPEN') {
             if (priceTag) {
-                priceTag.innerHTML = `<span class="price-num">${Number(info.price || 0).toLocaleString('hu-HU')} Ft</span> / night`;
+                const originalPrice = Number(info.price || 0);
+                const discountAmount = getDiscountAmountForNight(currentApt, info.dateStr);
+                const discountedPrice = Math.max(0, originalPrice - discountAmount);
+
+                if (discountAmount > 0) {
+                    priceTag.innerHTML = `
+                        <span class="sale-badge">Sale: -${discountAmount.toLocaleString('hu-HU')} Ft / night</span>
+                        <span class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft / night</span>
+                        <span class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft</span>
+                        <span style="font-size:1rem; color:var(--text-light);"> / night</span>
+                    `;
+                } else {
+                    priceTag.innerHTML = `<span class="price-num">${originalPrice.toLocaleString('hu-HU')} Ft</span> / night`;
+                }
             }
 
             if (bookingBtn) {
@@ -1181,6 +1228,7 @@ function getDiscountAmountForNight(apt, dateStr) {
 
         if (!startVal || !endVal) {
             infoText.innerText = 'Select arrival and departure dates.';
+            totalBox.dataset.finalTotal = '0';
             totalBox.innerText = '0 Ft';
             btn.innerText = 'Select dates!';
             return;
@@ -1191,6 +1239,7 @@ function getDiscountAmountForNight(apt, dateStr) {
 
         if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
             infoText.innerText = 'Invalid date selection.';
+            totalBox.dataset.finalTotal = '0';
             totalBox.innerText = '0 Ft';
             btn.innerText = 'Invalid dates';
             return;
@@ -1198,6 +1247,7 @@ function getDiscountAmountForNight(apt, dateStr) {
 
         if (hasBlockedDateInRange(startVal, endVal)) {
             infoText.innerHTML = `<span style="color:var(--warning)">The selected period contains a booked or blocked date.</span>`;
+            totalBox.dataset.finalTotal = '0';
             totalBox.innerText = '0 Ft';
             btn.innerText = 'Unavailable';
             btn.style.background = 'var(--warning)';

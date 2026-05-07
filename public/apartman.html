@@ -193,6 +193,36 @@
             color: var(--text);
         }
 
+        .price-old {
+            display: block;
+            color: #999;
+            text-decoration: line-through;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.25rem;
+        }
+
+        .price-sale {
+            display: block;
+            color: var(--warning);
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .sale-badge {
+            display: inline-block;
+            background: rgba(176, 65, 62, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(176, 65, 62, 0.25);
+            border-radius: 999px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.62rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.8rem;
+        }
+
         .btn-booking {
             width: 100%;
             background: #EAE8E2;
@@ -738,7 +768,10 @@
         const info = getAptStatusAndPrice(apt, testDate);
 
         if (info.status === 'OPEN') {
-            return info;
+            return {
+                ...info,
+                dateStr
+            };
         }
     }
 
@@ -747,7 +780,8 @@
         price: 0,
         label: '',
         minNights: 1,
-        maxGuests: 2
+        maxGuests: 2,
+        dateStr: ''
     };
 }
 
@@ -785,7 +819,20 @@
 
         if (info.status === 'OPEN') {
             if (priceTag) {
-                priceTag.innerHTML = `<span class="price-num">${Number(info.price || 0).toLocaleString('hu-HU')} Ft</span> / éjszaka`;
+                const originalPrice = Number(info.price || 0);
+                const discountAmount = getDiscountAmountForNight(currentApt, info.dateStr);
+                const discountedPrice = Math.max(0, originalPrice - discountAmount);
+
+                if (discountAmount > 0) {
+                    priceTag.innerHTML = `
+                        <span class="sale-badge">Akció: -${discountAmount.toLocaleString('hu-HU')} Ft / éjszaka</span>
+                        <span class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft / éjszaka</span>
+                        <span class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft</span>
+                        <span style="font-size:1rem; color:var(--text-light);"> / éjszaka</span>
+                    `;
+                } else {
+                    priceTag.innerHTML = `<span class="price-num">${originalPrice.toLocaleString('hu-HU')} Ft</span> / éjszaka`;
+                }
             }
 
             if (bookingBtn) {
@@ -1190,6 +1237,7 @@
         if (!startVal || !endVal) {
             infoText.innerText = 'Válassz érkezési és távozási dátumot!';
             totalBox.innerText = '0 Ft';
+            totalBox.dataset.finalTotal = '0';
             btn.innerText = 'Válassz dátumot!';
             return;
         }
@@ -1200,6 +1248,7 @@
         if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
             infoText.innerText = 'Hibás dátumválasztás!';
             totalBox.innerText = '0 Ft';
+            totalBox.dataset.finalTotal = '0';
             btn.innerText = 'Hibás dátum';
             return;
         }
@@ -1207,6 +1256,7 @@
         if (hasBlockedDateInRange(startVal, endVal)) {
             infoText.innerHTML = `<span style="color:var(--warning)">A kiválasztott időszak foglalt vagy letiltott napot tartalmaz!</span>`;
             totalBox.innerText = '0 Ft';
+            totalBox.dataset.finalTotal = '0';
             btn.innerText = 'Nem foglalható';
             btn.style.background = 'var(--warning)';
             btn.style.color = 'white';

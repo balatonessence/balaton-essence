@@ -128,6 +128,44 @@
         .pillar-header { padding: 4rem 2rem; flex-grow: 1; }
         .pillar-img { width: 100%; height: 350px; background-size: cover; background-position: center; }
 
+        .apt-sale-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(176, 65, 62, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(176, 65, 62, 0.25);
+            border-radius: 999px;
+            padding: 0.45rem 0.85rem;
+            font-size: 0.62rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 1rem;
+        }
+
+        .apt-price-old {
+            color: var(--text-light);
+            text-decoration: line-through;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .apt-price-sale {
+            color: var(--warning);
+            font-weight: 800;
+            letter-spacing: 1px;
+            margin-bottom: 2rem;
+        }
+
+        .apt-price-normal {
+            color: var(--accent);
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 2rem;
+        }
+
         .apt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 4rem; margin-top: 2rem; }
 
         /* Language selector container */
@@ -594,68 +632,137 @@
         }
     }
 
-    function renderIndexApartments() {
-        const grid = document.getElementById('apartment-grid');
+    function getActiveNightlyDiscount(apt, date = new Date()) {
+    const discount = apt.nightlyDiscount || apt.discount || null;
 
-        if (!grid) return;
-
-        if (!window.db || !Array.isArray(db.apartments) || db.apartments.length === 0) {
-            grid.innerHTML = `
-                <div class="loader-wrap">
-                    <div>There are currently no available apartments.</div>
-                </div>
-            `;
-            return;
-        }
-
-        grid.innerHTML = "";
-
-        db.apartments.forEach(apt => {
-            const info = typeof getAptStatusAndPrice === "function"
-                ? getAptStatusAndPrice(apt, new Date())
-                : { status: 'CLOSED', price: apt.price || 0 };
-
-            let priceDisplay = "";
-
-            const seasonPrices = Array.isArray(apt.seasons)
-                ? apt.seasons.flatMap(s => [
-                    Number(s.price || 0),
-                    Number(s.price3 || 0),
-                    Number(s.price4 || 0)
-                ]).filter(p => p > 0)
-                : [];
-
-            const basePrice = Number(apt.price || 0);
-
-            const minDisplayPrice = seasonPrices.length > 0
-                ? Math.min(...seasonPrices)
-                : basePrice;
-
-            if (minDisplayPrice > 0) {
-                priceDisplay = `From ${minDisplayPrice.toLocaleString('en-US')} HUF`;
-            } else {
-                priceDisplay = `Available soon`;
-            }
-
-            const card = document.createElement('a');
-            card.href = `apartman.html?id=${encodeURIComponent(apt.id)}`;
-            card.className = 'pillar-card';
-            card.style.textDecoration = 'none';
-            card.style.color = 'inherit';
-
-            card.innerHTML = `
-                <div class="pillar-header">
-                    <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">${escapeHtml(apt.name || 'Apartment')}</h3>
-                    <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">${escapeHtml(apt.location || '')}</p>
-                    <p style="font-weight: 700; color: var(--accent); letter-spacing: 1px; margin-bottom: 2rem;">${escapeHtml(priceDisplay)}</p>
-                    <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem; display: inline-block;">Explore</span>
-                </div>
-                <div class="pillar-img" style="background-image: url('${safeUrl(apt.coverImage || '')}');"></div>
-            `;
-
-            grid.appendChild(card);
-        });
+    if (!discount || discount.active === false) {
+        return null;
     }
+
+    const amount = Number(discount.amount || discount.value || apt.discountAmount || 0);
+
+    if (amount <= 0) {
+        return null;
+    }
+
+    const todayStr = getLocalDateStringForIndex(date);
+    const start = discount.start || discount.startDate || '';
+    const end = discount.end || discount.endDate || '';
+
+    if (start && todayStr < start) {
+        return null;
+    }
+
+    if (end && todayStr > end) {
+        return null;
+    }
+
+    return {
+        amount,
+        start,
+        end
+    };
+}
+
+function getLocalDateStringForIndex(date) {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+
+    return `${year}-${month}-${day}`;
+}
+
+function getApartmentMinDisplayPrice(apt) {
+    const seasonPrices = Array.isArray(apt.seasons)
+        ? apt.seasons.flatMap(s => [
+            Number(s.price || 0),
+            Number(s.price3 || 0),
+            Number(s.price4 || 0)
+        ]).filter(p => p > 0)
+        : [];
+
+    const basePrice = Number(apt.price || 0);
+
+    return seasonPrices.length > 0
+        ? Math.min(...seasonPrices)
+        : basePrice;
+}
+
+function renderIndexPriceHtml(apt) {
+    const minDisplayPrice = getApartmentMinDisplayPrice(apt);
+
+    if (minDisplayPrice <= 0) {
+        return `
+            <p class="apt-price-normal">Available soon</p>
+        `;
+    }
+
+    const discount = getActiveNightlyDiscount(apt);
+
+    if (!discount) {
+        return `
+            <p class="apt-price-normal">From ${minDisplayPrice.toLocaleString('en-US')} HUF</p>
+        `;
+    }
+
+    const discountedPrice = Math.max(0, minDisplayPrice - discount.amount);
+
+    return `
+        <div class="apt-sale-badge">Offer: -${discount.amount.toLocaleString('en-US')} HUF / night</div>
+        <div class="apt-price-old">From ${minDisplayPrice.toLocaleString('en-US')} HUF</div>
+        <p class="apt-price-sale">From ${discountedPrice.toLocaleString('en-US')} HUF</p>
+    `;
+}
+
+    function renderIndexApartments() {
+    const grid = document.getElementById('apartment-grid');
+
+    if (!grid) return;
+
+    if (!window.db || !Array.isArray(db.apartments) || db.apartments.length === 0) {
+        grid.innerHTML = `
+            <div class="loader-wrap">
+                <div>There are currently no available apartments.</div>
+            </div>
+        `;
+        return;
+    }
+
+    grid.innerHTML = "";
+
+    db.apartments.forEach(apt => {
+        const priceHtml = renderIndexPriceHtml(apt);
+
+        const card = document.createElement('a');
+        card.href = `apartman.html?id=${encodeURIComponent(apt.id)}`;
+        card.className = 'pillar-card';
+        card.style.textDecoration = 'none';
+        card.style.color = 'inherit';
+
+        card.innerHTML = `
+            <div class="pillar-header">
+                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">
+                    ${escapeHtml(apt.name_en || apt.nameEn || apt.name || 'Apartment')}
+                </h3>
+
+                <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">
+                    ${escapeHtml(apt.location_en || apt.locationEn || apt.location || '')}
+                </p>
+
+                ${priceHtml}
+
+                <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem; display: inline-block;">
+                    Explore
+                </span>
+            </div>
+
+            <div class="pillar-img" style="background-image: url('${safeUrl(apt.coverImage || '')}');"></div>
+        `;
+
+        grid.appendChild(card);
+    });
+}
 
     function showApartmentError(message) {
         const grid = document.getElementById('apartment-grid');
