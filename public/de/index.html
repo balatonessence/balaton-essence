@@ -525,7 +525,7 @@
 </footer>
 
 
-<script src="../database.js?v=2.0"></script>
+<script src="../database.js?v=2.1"></script>
 <script src="../figyelmeztetes.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -635,35 +635,63 @@
         }
     }
 
-    function getActiveNightlyDiscount(apt, date = new Date()) {
-    const discount = apt.nightlyDiscount || apt.discount || null;
+    function getDiscountConfigForIndex(apt) {
+    const discount = apt?.discount || apt?.nightlyDiscount || null;
 
-    if (!discount || discount.active === false) {
+    if (!discount) {
         return null;
     }
 
-    const amount = Number(discount.amount || discount.value || apt.discountAmount || 0);
+    const isActive =
+        discount.active === true ||
+        discount.active === 'true' ||
+        discount.enabled === true ||
+        discount.enabled === 'true';
+
+    if (!isActive) {
+        return null;
+    }
+
+    const amount = Number(
+        discount.amountPerNight ||
+        discount.amount ||
+        discount.value ||
+        apt.discountAmount ||
+        0
+    );
 
     if (amount <= 0) {
         return null;
     }
 
-    const todayStr = getLocalDateStringForIndex(date);
-    const start = discount.start || discount.startDate || '';
-    const end = discount.end || discount.endDate || '';
-
-    if (start && todayStr < start) {
-        return null;
-    }
-
-    if (end && todayStr > end) {
-        return null;
-    }
-
     return {
         amount,
-        start,
-        end
+
+        bookingStart:
+            discount.bookingStart ||
+            discount.booking_start ||
+            discount.start ||
+            discount.startDate ||
+            '',
+
+        bookingEnd:
+            discount.bookingEnd ||
+            discount.booking_end ||
+            discount.end ||
+            discount.endDate ||
+            '',
+
+        stayStart:
+            discount.stayStart ||
+            discount.stay_start ||
+            discount.validFrom ||
+            '',
+
+        stayEnd:
+            discount.stayEnd ||
+            discount.stay_end ||
+            discount.validTo ||
+            ''
     };
 }
 
@@ -674,6 +702,44 @@ function getLocalDateStringForIndex(date) {
     const day = String(d.getDate()).padStart(2, '0');
 
     return `${year}-${month}-${day}`;
+}
+
+function isDiscountBookingActiveForIndex(apt) {
+    const discount = getDiscountConfigForIndex(apt);
+
+    if (!discount) {
+        return false;
+    }
+
+    const todayStr = getLocalDateStringForIndex(new Date());
+
+    if (discount.bookingStart && todayStr < discount.bookingStart) {
+        return false;
+    }
+
+    if (discount.bookingEnd && todayStr > discount.bookingEnd) {
+        return false;
+    }
+
+    return true;
+}
+
+function formatIndexDateDe(dateStr) {
+    if (!dateStr) return '';
+
+    const parts = String(dateStr).split('-').map(Number);
+
+    if (parts.length !== 3 || parts.some(Number.isNaN)) {
+        return dateStr;
+    }
+
+    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+
+    return new Intl.DateTimeFormat('de-DE', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    }).format(d);
 }
 
 function getApartmentMinDisplayPrice(apt) {
@@ -701,9 +767,9 @@ function renderIndexPriceHtml(apt) {
         `;
     }
 
-    const discount = getActiveNightlyDiscount(apt);
+    const discount = getDiscountConfigForIndex(apt);
 
-    if (!discount) {
+    if (!discount || !isDiscountBookingActiveForIndex(apt)) {
         return `
             <p class="apt-price-normal">Ab ${minDisplayPrice.toLocaleString('de-DE')} HUF</p>
         `;
@@ -711,10 +777,30 @@ function renderIndexPriceHtml(apt) {
 
     const discountedPrice = Math.max(0, minDisplayPrice - discount.amount);
 
+    const bookingEndText = discount.bookingEnd
+        ? `Buchbar bis ${formatIndexDateDe(discount.bookingEnd)}`
+        : 'Buchbar bis auf Widerruf';
+
+    let stayRangeText = '';
+
+    if (discount.stayStart && discount.stayEnd) {
+        stayRangeText = `Gültig für Aufenthalte: ${formatIndexDateDe(discount.stayStart)} – ${formatIndexDateDe(discount.stayEnd)}`;
+    } else if (discount.stayStart) {
+        stayRangeText = `Gültig für Aufenthalte ab ${formatIndexDateDe(discount.stayStart)}`;
+    } else if (discount.stayEnd) {
+        stayRangeText = `Gültig für Aufenthalte bis ${formatIndexDateDe(discount.stayEnd)}`;
+    } else {
+        stayRangeText = 'Gültig für alle buchbaren Aufenthalte';
+    }
+
     return `
         <div class="apt-sale-badge">Angebot: -${discount.amount.toLocaleString('de-DE')} HUF / Nacht</div>
         <div class="apt-price-old">Ab ${minDisplayPrice.toLocaleString('de-DE')} HUF</div>
         <p class="apt-price-sale">Ab ${discountedPrice.toLocaleString('de-DE')} HUF</p>
+        <div style="font-size:0.72rem; color:var(--text-light); line-height:1.5; margin-top:-1.2rem; margin-bottom:2rem;">
+            ${bookingEndText}<br>
+            ${stayRangeText}
+        </div>
     `;
 }
 

@@ -522,7 +522,7 @@
 </footer>
 
 
-<script src="../database.js?v=2.0"></script>
+<script src="../database.js?v=2.1"></script>
 <script src="../figyelmeztetes.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
@@ -633,34 +633,72 @@
     }
 
     function getActiveNightlyDiscount(apt, date = new Date()) {
-    const discount = apt.nightlyDiscount || apt.discount || null;
+    const discount = apt?.discount || apt?.nightlyDiscount || null;
 
-    if (!discount || discount.active === false) {
+    if (!discount) {
         return null;
     }
 
-    const amount = Number(discount.amount || discount.value || apt.discountAmount || 0);
+    const isActive =
+        discount.active === true ||
+        discount.active === 'true' ||
+        discount.enabled === true ||
+        discount.enabled === 'true';
+
+    if (!isActive) {
+        return null;
+    }
+
+    const amount = Number(
+        discount.amountPerNight ||
+        discount.amount ||
+        discount.value ||
+        apt.discountAmount ||
+        0
+    );
 
     if (amount <= 0) {
         return null;
     }
 
     const todayStr = getLocalDateStringForIndex(date);
-    const start = discount.start || discount.startDate || '';
-    const end = discount.end || discount.endDate || '';
 
-    if (start && todayStr < start) {
+    const bookingStart =
+        discount.bookingStart ||
+        discount.booking_start ||
+        discount.start ||
+        discount.startDate ||
+        '';
+
+    const bookingEnd =
+        discount.bookingEnd ||
+        discount.booking_end ||
+        discount.end ||
+        discount.endDate ||
+        '';
+
+    if (bookingStart && todayStr < bookingStart) {
         return null;
     }
 
-    if (end && todayStr > end) {
+    if (bookingEnd && todayStr > bookingEnd) {
         return null;
     }
 
     return {
         amount,
-        start,
-        end
+        bookingStart,
+        bookingEnd,
+        stayStart:
+            discount.stayStart ||
+            discount.stay_start ||
+            discount.validFrom ||
+            '',
+        stayEnd:
+            discount.stayEnd ||
+            discount.stay_end ||
+            discount.validTo ||
+            ''
     };
 }
 
@@ -689,6 +727,23 @@ function getApartmentMinDisplayPrice(apt) {
         : basePrice;
 }
 
+function formatIndexDiscountDate(dateStr) {
+    if (!dateStr) return '';
+
+    const parts = String(dateStr).split('-').map(Number);
+
+    if (parts.length !== 3 || parts.some(Number.isNaN)) {
+        return dateStr;
+    }
+
+    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+
+    return new Intl.DateTimeFormat('en-US', {
+        month: 'short',
+        day: 'numeric'
+    }).format(d);
+}
+
 function renderIndexPriceHtml(apt) {
     const minDisplayPrice = getApartmentMinDisplayPrice(apt);
 
@@ -708,10 +763,27 @@ function renderIndexPriceHtml(apt) {
 
     const discountedPrice = Math.max(0, minDisplayPrice - discount.amount);
 
+    const bookingEndText = discount.bookingEnd
+        ? `Book by ${formatIndexDiscountDate(discount.bookingEnd)}`
+        : 'Limited offer';
+
+    let stayText = '';
+
+    if (discount.stayStart && discount.stayEnd) {
+        stayText = `Valid for stays: ${formatIndexDiscountDate(discount.stayStart)} – ${formatIndexDiscountDate(discount.stayEnd)}`;
+    } else if (discount.stayStart) {
+        stayText = `Valid for stays from ${formatIndexDiscountDate(discount.stayStart)}`;
+    } else if (discount.stayEnd) {
+        stayText = `Valid for stays until ${formatIndexDiscountDate(discount.stayEnd)}`;
+    }
+
     return `
         <div class="apt-sale-badge">Offer: -${discount.amount.toLocaleString('en-US')} HUF / night</div>
         <div class="apt-price-old">From ${minDisplayPrice.toLocaleString('en-US')} HUF</div>
         <p class="apt-price-sale">From ${discountedPrice.toLocaleString('en-US')} HUF</p>
+        <div style="font-size:0.68rem; color:var(--text-light); font-weight:700; line-height:1.5; margin-top:-1.4rem; margin-bottom:1.8rem;">
+            ${bookingEndText}${stayText ? `<br>${stayText}` : ''}
+        </div>
     `;
 }
 

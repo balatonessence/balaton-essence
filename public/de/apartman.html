@@ -202,6 +202,43 @@
             margin-bottom: 0.8rem;
         }
 
+        .apt-discount-box {
+            display: none;
+            background: rgba(176, 65, 62, 0.08);
+            border: 1px solid rgba(176, 65, 62, 0.22);
+            border-left: 4px solid var(--warning);
+            border-radius: 10px;
+            padding: 1rem 1.1rem;
+            margin: 1rem 0 1.4rem;
+        }
+
+        .apt-discount-label {
+            display: inline-flex;
+            background: var(--warning);
+            color: white;
+            border-radius: 999px;
+            padding: 0.35rem 0.75rem;
+            font-size: 0.62rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 0.75rem;
+        }
+
+        .apt-discount-main {
+            font-size: 0.9rem;
+            color: var(--text);
+            line-height: 1.55;
+            font-weight: 600;
+        }
+
+        .apt-discount-small {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            line-height: 1.55;
+            margin-top: 0.5rem;
+        }
+
         .btn-booking {
             width: 100%;
             background: #EAE8E2;
@@ -480,6 +517,12 @@
                 <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; font-style: italic;">Buchung</h3>
                 <p id="apt-price" class="price-tag"></p>
 
+                <div id="apt-discount-box" class="apt-discount-box">
+                    <div id="apt-discount-label" class="apt-discount-label"></div>
+                    <div id="apt-discount-main" class="apt-discount-main"></div>
+                    <div id="apt-discount-small" class="apt-discount-small"></div>
+                </div>
+
                 <div class="dev-status">
                     <span></span>
                     <span></span>
@@ -582,7 +625,7 @@
     <span class="lightbox-nav nav-next" onclick="event.stopPropagation(); changeImage(1)">›</span>
 </div>
 
-<script src="../database.js?v=16.1"></script>
+<script src="../database.js?v=16.5"></script>
 <script src="https://js.stripe.com/v3/"></script>
 <script src="../figyelmeztetes.js"></script>
 
@@ -692,40 +735,102 @@
         }).format(d);
     }
 
-   function isDiscountActiveForNight(apt, nightDateStr) {
-    const discount = apt?.discount;
+   function getDiscountConfig(apt) {
+    const discount = apt?.discount || apt?.nightlyDiscount || null;
 
-    if (!discount || discount.active !== true) {
-        return false;
+    if (!discount) {
+        return null;
     }
 
-    const amount = Number(discount.amountPerNight || 0);
+    const isActive =
+        discount.active === true ||
+        discount.active === 'true' ||
+        discount.enabled === true ||
+        discount.enabled === 'true';
+
+    if (!isActive) {
+        return null;
+    }
+
+    const amount = Number(
+        discount.amountPerNight ||
+        discount.amount ||
+        discount.value ||
+        apt.discountAmount ||
+        0
+    );
 
     if (amount <= 0) {
+        return null;
+    }
+
+    return {
+        amount,
+
+        bookingStart:
+            discount.bookingStart ||
+            discount.booking_start ||
+            discount.start ||
+            discount.startDate ||
+            '',
+
+        bookingEnd:
+            discount.bookingEnd ||
+            discount.booking_end ||
+            discount.end ||
+            discount.endDate ||
+            '',
+
+        stayStart:
+            discount.stayStart ||
+            discount.stay_start ||
+            discount.validFrom ||
+            '',
+
+        stayEnd:
+            discount.stayEnd ||
+            discount.stay_end ||
+            discount.validTo ||
+            ''
+    };
+}
+
+function isDiscountBookingPeriodActive(apt) {
+    const discount = getDiscountConfig(apt);
+
+    if (!discount) {
         return false;
     }
 
     const todayStr = getLocalDateString(new Date());
 
-    const bookingStart = discount.bookingStart || discount.start || '';
-    const bookingEnd = discount.bookingEnd || discount.end || '';
-
-    if (bookingStart && todayStr < bookingStart) {
+    if (discount.bookingStart && todayStr < discount.bookingStart) {
         return false;
     }
 
-    if (bookingEnd && todayStr > bookingEnd) {
+    if (discount.bookingEnd && todayStr > discount.bookingEnd) {
         return false;
     }
 
-    const stayStart = discount.stayStart || discount.start || '';
-    const stayEnd = discount.stayEnd || discount.end || '';
+    return true;
+}
 
-    if (stayStart && nightDateStr < stayStart) {
+function isDiscountActiveForNight(apt, nightDateStr) {
+    const discount = getDiscountConfig(apt);
+
+    if (!discount) {
         return false;
     }
 
-    if (stayEnd && nightDateStr > stayEnd) {
+    if (!isDiscountBookingPeriodActive(apt)) {
+        return false;
+    }
+
+    if (discount.stayStart && nightDateStr < discount.stayStart) {
+        return false;
+    }
+
+    if (discount.stayEnd && nightDateStr > discount.stayEnd) {
         return false;
     }
 
@@ -737,7 +842,66 @@ function getDiscountAmountForNight(apt, nightDateStr) {
         return 0;
     }
 
-    return Number(apt.discount.amountPerNight || 0);
+    const discount = getDiscountConfig(apt);
+    return Number(discount.amount || 0);
+}
+
+function formatDiscountDate(dateStr) {
+    if (!dateStr) return '-';
+
+    const d = parseLocalDate(dateStr);
+
+    if (!d || isNaN(d.getTime())) {
+        return dateStr;
+    }
+
+    return new Intl.DateTimeFormat('de-DE', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric'
+    }).format(d);
+}
+
+function renderDiscountBox() {
+    const box = document.getElementById('apt-discount-box');
+    const label = document.getElementById('apt-discount-label');
+    const main = document.getElementById('apt-discount-main');
+    const small = document.getElementById('apt-discount-small');
+
+    if (!box || !label || !main || !small || !currentApt) {
+        return;
+    }
+
+    const discount = getDiscountConfig(currentApt);
+
+    if (!discount || !isDiscountBookingPeriodActive(currentApt)) {
+        box.style.display = 'none';
+        return;
+    }
+
+    const amountText = discount.amount.toLocaleString('hu-HU');
+
+    label.innerText = `Rabatt: -${amountText} Ft / Nacht`;
+
+    const bookingEndText = discount.bookingEnd
+        ? formatDiscountDate(discount.bookingEnd)
+        : 'bis auf Widerruf';
+
+    let stayRangeText = 'für alle buchbaren Zeiträume';
+
+    if (discount.stayStart && discount.stayEnd) {
+        stayRangeText = `${formatDiscountDate(discount.stayStart)} – ${formatDiscountDate(discount.stayEnd)}`;
+    } else if (discount.stayStart) {
+        stayRangeText = `ab ${formatDiscountDate(discount.stayStart)}`;
+    } else if (discount.stayEnd) {
+        stayRangeText = `bis ${formatDiscountDate(discount.stayEnd)}`;
+    }
+
+    main.innerText = `Der Rabatt gilt, wenn Sie spätestens bis zum ${bookingEndText} buchen.`;
+
+    small.innerText = `Gültiger Aufenthaltszeitraum: ${stayRangeText}. Der Rabatt wird pro Nacht nur für diese Nächte abgezogen.`;
+
+    box.style.display = 'block';
 }
 
     function getNextBookableInfo(apt) {
@@ -836,12 +1000,11 @@ function getDiscountAmountForNight(apt, nightDateStr) {
                 const discountedPrice = Math.max(0, originalPrice - discountAmount);
 
                 if (discountAmount > 0) {
-                    priceTag.innerHTML = `
-                        <span class="sale-badge">Rabatt: -${discountAmount.toLocaleString('hu-HU')} Ft / Nacht</span>
-                        <span class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft / Nacht</span>
-                        <span class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft</span>
-                        <span style="font-size:1rem; color:var(--text-light);"> / Nacht</span>
-                    `;
+                priceTag.innerHTML = `
+                    <span class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft / Nacht</span>
+                    <span class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft / Nacht</span>
+                `;
+
                 } else {
                     priceTag.innerHTML = `<span class="price-num">${originalPrice.toLocaleString('hu-HU')} Ft</span> / Nacht`;
                 }
@@ -910,6 +1073,7 @@ function getDiscountAmountForNight(apt, nightDateStr) {
                 gal.appendChild(wrapper);
             });
         }
+        renderDiscountBox();
     }
 
     function openLightbox(index) {
