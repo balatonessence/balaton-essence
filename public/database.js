@@ -12,41 +12,82 @@ async function initDatabase(callback) {
     } catch (e) { console.error("Hiba az adatok betöltésekor:", e); }
 }
 
-function getAptStatusAndPrice(apt, targetDate = new Date(), guestCount = 2) {
-    const dateStr = targetDate.toISOString().split('T')[0];
-    
-    // --- ÚJ: Manuálisan letiltott napok ellenőrzése ---
-    if (apt.disabledDates && apt.disabledDates.includes(dateStr)) {
-        return { status: 'DISABLED', price: null, label: 'Karbantartás', maxGuests: 0 };
+function getAptStatusAndPrice(apt, date = new Date(), guests = 2) {
+    if (!apt) {
+        return {
+            status: 'CLOSED',
+            price: 0,
+            label: '',
+            minNights: 1,
+            maxGuests: 2
+        };
     }
 
-    const month = targetDate.getMonth() + 1;
-    const day = targetDate.getDate();
+    const seasons = Array.isArray(apt.seasons) ? apt.seasons : [];
 
-    const isInsideGlobalWindow = (month > 4 || (month === 4 && day >= 1)) && 
-                                 (month < 9 || (month === 9 && day <= 30));
-
-    if (!isInsideGlobalWindow) {
-        return { status: 'CLOSED', price: null, label: 'Zárva', maxGuests: 4 };
+    if (seasons.length === 0) {
+        return {
+            status: 'CLOSED',
+            price: 0,
+            label: '',
+            minNights: 1,
+            maxGuests: Number(apt.maxGuests || 2)
+        };
     }
 
-    if (apt.seasons && apt.seasons.length > 0) {
-        for (let s of apt.seasons) {
-            if (dateStr >= s.start && dateStr <= s.end) {
-                let finalPrice = s.price; 
-                if (guestCount == 3 && s.price3) finalPrice = s.price3;
-                if (guestCount >= 4 && s.price4) finalPrice = s.price4;
+    const selectedDate = new Date(date);
+    const selectedMonthDay = String(selectedDate.getMonth() + 1).padStart(2, '0') + '-' + String(selectedDate.getDate()).padStart(2, '0');
 
-                return { 
-                    status: 'OPEN', 
-                    price: finalPrice, 
-                    label: s.name, 
-                    minNights: s.minNights || 2, 
-                    maxGuests: s.maxGuests || 4 
-                };
-            }
+    const getMonthDay = (dateStr) => {
+        if (!dateStr) return '';
+
+        const parts = String(dateStr).split('-');
+
+        if (parts.length !== 3) return '';
+
+        return `${parts[1]}-${parts[2]}`;
+    };
+
+    const isDateInSeason = (season) => {
+        const startMonthDay = getMonthDay(season.start);
+        const endMonthDay = getMonthDay(season.end);
+
+        if (!startMonthDay || !endMonthDay) return false;
+
+        if (startMonthDay <= endMonthDay) {
+            return selectedMonthDay >= startMonthDay && selectedMonthDay <= endMonthDay;
         }
+
+        return selectedMonthDay >= startMonthDay || selectedMonthDay <= endMonthDay;
+    };
+
+    const activeSeason = seasons.find(isDateInSeason);
+
+    if (!activeSeason) {
+        return {
+            status: 'CLOSED',
+            price: 0,
+            label: '',
+            minNights: 1,
+            maxGuests: Number(apt.maxGuests || 2)
+        };
     }
 
-    return { status: 'OPEN', price: apt.price || 0, label: 'Alapár', minNights: 2, maxGuests: 2 };
+    let price = Number(activeSeason.price || 0);
+
+    if (Number(guests) === 3 && Number(activeSeason.price3 || 0) > 0) {
+        price = Number(activeSeason.price3);
+    }
+
+    if (Number(guests) >= 4 && Number(activeSeason.price4 || 0) > 0) {
+        price = Number(activeSeason.price4);
+    }
+
+    return {
+        status: 'OPEN',
+        price,
+        label: activeSeason.name || '',
+        minNights: Number(activeSeason.minNights || 1),
+        maxGuests: Number(activeSeason.maxGuests || apt.maxGuests || 2)
+    };
 }
