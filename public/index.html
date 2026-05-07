@@ -867,20 +867,24 @@
 
             let priceDisplay = "";
 
-            if (info.status === 'OPEN') {
-                priceDisplay = `${Number(info.price || 0).toLocaleString('hu-HU')} Ft / éj`;
+            const seasonPrices = Array.isArray(apt.seasons)
+                ? apt.seasons.flatMap(s => [
+                    Number(s.price || 0),
+                    Number(s.price3 || 0),
+                    Number(s.price4 || 0)
+                ]).filter(p => p > 0)
+                : [];
+
+            const basePrice = Number(apt.price || 0);
+
+            const minDisplayPrice = seasonPrices.length > 0
+                ? Math.min(...seasonPrices)
+                : basePrice;
+
+            if (minDisplayPrice > 0) {
+                priceDisplay = `${minDisplayPrice.toLocaleString('hu-HU')} Ft-tól`;
             } else {
-                const seasonPrices = Array.isArray(apt.seasons)
-                    ? apt.seasons.map(s => Number(s.price || 0)).filter(p => p > 0)
-                    : [];
-
-                const minSeasonPrice = seasonPrices.length > 0
-                    ? Math.min(...seasonPrices)
-                    : Number(apt.price || 0);
-
-                priceDisplay = minSeasonPrice > 0
-                    ? `Nyitás áprilisban: ${minSeasonPrice.toLocaleString('hu-HU')} Ft-tól`
-                    : `Hamarosan foglalható`;
+                priceDisplay = `Hamarosan foglalható`;
             }
 
             const card = document.createElement('a');
