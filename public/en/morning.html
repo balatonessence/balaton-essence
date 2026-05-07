@@ -293,7 +293,6 @@ function renderMomentCards() {
             <div class="pillar-card" onclick="openMorningModalById('${escapeHtml(service.id)}')">
                 <div class="pillar-header">
                     <h3>${escapeHtml(name)}</h3>
-                    ${description ? `<p class="moment-desc">${escapeHtml(description)}</p>` : ''}
                     <span class="price-tag">${formatPrice(price)} HUF / person</span>
                 </div>
                 <div class="pillar-img" style="background-image: url('${escapeHtml(image)}');"></div>

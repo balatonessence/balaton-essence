@@ -285,16 +285,15 @@ function renderMomentCards() {
     }
 
     grid.innerHTML = momentServices.map(service => {
-        const name = service.name_de || service.name_hu || service.id || 'Moment';
-        const description = service.description_de || '';
-        const image = safeImageUrl(service.image);
+        const id = String(service.id || '').trim();
+        const name = service.name_de || service.name_hu || id;
         const price = Number(service.price || 0);
+        const image = safeImageUrl(service.image);
 
         return `
-            <div class="pillar-card" onclick="openMorningModalById('${escapeHtml(service.id)}')">
+            <div class="pillar-card" onclick="openMorningModal('${escapeHtml(id)}')">
                 <div class="pillar-header">
                     <h3>${escapeHtml(name)}</h3>
-                    ${description ? `<p class="moment-desc">${escapeHtml(description)}</p>` : ''}
                     <span class="price-tag">${formatPrice(price)} HUF / Person</span>
                 </div>
                 <div class="pillar-img" style="background-image: url('${escapeHtml(image)}');"></div>
