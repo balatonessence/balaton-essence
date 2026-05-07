@@ -645,7 +645,7 @@
     <span class="lightbox-nav nav-next" onclick="event.stopPropagation(); changeImage(1)">›</span>
 </div>
 
-<script src="database.js?v=16.1"></script>
+<script src="database.js?v=16.2"></script>
 <script src="https://js.stripe.com/v3/"></script>
 <script src="figyelmeztetes.js"></script>
 
@@ -887,6 +887,38 @@ function renderDiscountBox() {
     small.innerText = `Érvényes tartózkodási időszak: ${stayRangeText}. A kedvezmény éjszakánként kerül levonásra.`;
 
     box.style.display = 'block';
+}
+
+function getNextBookableInfo(apt) {
+    const today = new Date();
+
+    for (let i = 0; i < 370; i++) {
+        const testDate = new Date(today);
+        testDate.setDate(today.getDate() + i);
+
+        const dateStr = getLocalDateString(testDate);
+
+        const isBlockedByAdmin = Array.isArray(apt.disabledDates)
+            && apt.disabledDates.includes(dateStr);
+
+        if (isBlockedByAdmin) {
+            continue;
+        }
+
+        const info = getAptStatusAndPrice(apt, testDate);
+
+        if (info.status === 'OPEN') {
+            return info;
+        }
+    }
+
+    return {
+        status: 'CLOSED',
+        price: 0,
+        label: '',
+        minNights: 1,
+        maxGuests: 2
+    };
 }
 
     function renderDetails() {
