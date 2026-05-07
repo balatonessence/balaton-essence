@@ -373,6 +373,18 @@ function renderMomentCards() {
             .replace(/'/g, '&#039;');
     }
 
+        function openMorningModal(value) {
+            const nameToIdMap = {
+                'Frühstücksplatte': 'breakfast_plate',
+                'Käseplatte': 'cheese_plate',
+                'Festliche Platte': 'celebration_plate'
+            };
+
+            const serviceId = nameToIdMap[value] || value;
+
+            openMorningModalById(serviceId);
+        }
+
     function openMorningModalById(serviceId) {
     const service = momentServices.find(item => String(item.id) === String(serviceId));
 

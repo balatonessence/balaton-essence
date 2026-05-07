@@ -383,26 +383,57 @@
         });
     });
 
-    function openMorningModal(itemId) {
-    const item = momentsMap[itemId];
+        function openMorningModal(itemId) {
+        const item = momentsMap[itemId];
 
-    if (!item || item.active === false) {
-        showSuccess("Hiba!", "Ez a szolgáltatás jelenleg nem elérhető.", "error");
-        return;
+        if (!item || item.active === false) {
+            showSuccess("Hiba!", "Ez a szolgáltatás jelenleg nem elérhető.", "error");
+            return;
+        }
+
+        currentQty = 1;
+
+        const qtyEl = document.getElementById('qty-num');
+        const typeEl = document.getElementById('m-item-type');
+        const titleEl = document.getElementById('m-title');
+        const descEl = document.getElementById('m-desc');
+        const modal = document.getElementById('morning-modal');
+
+        if (qtyEl) qtyEl.innerText = currentQty;
+        if (typeEl) typeEl.value = itemId;
+        if (titleEl) titleEl.innerText = item.name_hu || 'Rendelés';
+        if (descEl) descEl.innerText = item.description_hu || '';
+
+        if (modal) {
+            modal.style.display = 'flex';
+
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
     }
 
-    currentQty = 1;
-    document.getElementById('qty-num').innerText = currentQty;
-    document.getElementById('m-item-type').value = itemId;
-    document.getElementById('m-title').innerText = item.name_hu || 'Rendelés';
+    function closeMorningModal() {
+        const modal = document.getElementById('morning-modal');
 
-    document.getElementById('m-desc').innerText =
-        item.description_hu || "";
+        if (!modal) return;
 
-    const modal = document.getElementById('morning-modal');
-    modal.style.display = 'flex';
-    setTimeout(() => modal.classList.add('active'), 10);
-}
+        modal.classList.remove('active');
+
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 400);
+    }
+
+    function updateQty(change) {
+        currentQty = Math.max(1, currentQty + change);
+
+        const qtyEl = document.getElementById('qty-num');
+
+        if (qtyEl) {
+            qtyEl.innerText = currentQty;
+        }
+    }
 
     async function submitMorning() {
         const apt = document.getElementById('m-apt-select').value;
