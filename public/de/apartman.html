@@ -554,6 +554,16 @@
 
     const STRIPE_PUBLISHABLE_KEY = 'pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0';
 
+    const MIN_BOOKING_DAYS_AHEAD = 2;
+
+    function getMinimumBookableDateString() {
+        const minDate = new Date();
+        minDate.setHours(0, 0, 0, 0);
+        minDate.setDate(minDate.getDate() + MIN_BOOKING_DAYS_AHEAD);
+
+        return getLocalDateString(minDate);
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
@@ -955,9 +965,8 @@
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const startOffset = firstDay === 0 ? 6 : firstDay - 1;
 
-        const todayStr = getLocalDateString(new Date());
+        const minBookableDateStr = getMinimumBookableDateString();
         const blockedDates = getBlockedDatesSet();
-
         let htmlContent = '';
 
         for (let i = 0; i < startOffset; i++) {
@@ -970,7 +979,7 @@
             let className = 'cal-day';
             let onClickAttr = `onclick="selectDate('${dateStr}')"`;
 
-            if (dateStr < todayStr) {
+            if (dateStr < minBookableDateStr) {
                 className += ' past';
                 onClickAttr = '';
             }
@@ -999,9 +1008,14 @@
     }
 
     function selectDate(dateStr) {
-        const todayStr = getLocalDateString(new Date());
+        const minBookableDateStr = getMinimumBookableDateString();
 
-        if (dateStr < todayStr) {
+        if (dateStr < minBookableDateStr) {
+            showSuccess(
+                'Anreise zu kurzfristig',
+                'Buchungen sind frühestens 2 Tage vor der Anreise möglich.',
+                'error'
+            );
             return;
         }
 
@@ -1181,6 +1195,17 @@
             showSuccess(
                 'Fehlende Daten',
                 'Bitte wählen Sie Anreise- und Abreisedatum.',
+                'error'
+            );
+            return;
+        }
+
+        const minBookableDateStr = getMinimumBookableDateString();
+
+        if (data.checkIn < minBookableDateStr) {
+            showSuccess(
+                'Anreise zu kurzfristig',
+                'Buchungen sind frühestens 2 Tage vor der Anreise möglich.',
                 'error'
             );
             return;

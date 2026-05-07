@@ -102,6 +102,31 @@ function diffDays(fromDate, toDate) {
     return Math.round((toDate - fromDate) / msPerDay);
 }
 
+function validateMinimumBookingLeadTime(checkInValue) {
+    const checkIn = parseDateOnly(checkInValue);
+    const today = todayDateOnly();
+
+    if (!checkIn) {
+        return {
+            valid: false,
+            error: 'Hibás érkezési dátum.'
+        };
+    }
+
+    const daysUntilArrival = diffDays(today, checkIn);
+
+    if (daysUntilArrival < 2) {
+        return {
+            valid: false,
+            error: 'Foglalást legkorábban 2 nappal az érkezés előtt lehet leadni.'
+        };
+    }
+
+    return {
+        valid: true
+    };
+}
+
 function getBookingApartmentAddress(db, booking) {
     const apt = (db.apartments || []).find(a => String(a.id) === String(booking.aptId));
 
@@ -1188,6 +1213,12 @@ app.post('/api/create-checkout-session', async (req, res) => {
 
         if (!newB || !newB.aptId || !newB.checkIn || !newB.checkOut || !newB.email || !newB.totalPrice) {
             return res.status(400).json({ error: 'Hiányos foglalási adatok.' });
+        }
+
+        const leadTimeValidation = validateMinimumBookingLeadTime(newB.checkIn);
+
+        if (!leadTimeValidation.valid) {
+            return res.status(400).json({ error: leadTimeValidation.error });
         }
 
         const db = await getDbContent();
