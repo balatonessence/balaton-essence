@@ -103,22 +103,32 @@ function diffDays(fromDate, toDate) {
 }
 
 function validateMinimumBookingLeadTime(checkInValue) {
-    const checkIn = parseDateOnly(checkInValue);
-    const today = todayDateOnly();
+    const checkInDate = parseDateOnly(checkInValue);
 
-    if (!checkIn) {
+    if (!checkInDate) {
         return {
             valid: false,
             error: 'Hibás érkezési dátum.'
         };
     }
 
-    const daysUntilArrival = diffDays(today, checkIn);
+    const checkInDateTime = new Date(
+        checkInDate.getFullYear(),
+        checkInDate.getMonth(),
+        checkInDate.getDate(),
+        14,
+        0,
+        0,
+        0
+    );
 
-    if (daysUntilArrival < 2) {
+    const minimumAllowedDateTime = new Date();
+    minimumAllowedDateTime.setHours(minimumAllowedDateTime.getHours() + 48);
+
+    if (checkInDateTime < minimumAllowedDateTime) {
         return {
             valid: false,
-            error: 'Foglalást legkorábban 2 nappal az érkezés előtt lehet leadni.'
+            error: 'Foglalást legalább 48 órával az érkezés, azaz 14:00 előtt lehet leadni.'
         };
     }
 

@@ -554,14 +554,33 @@
 
     const STRIPE_PUBLISHABLE_KEY = 'pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0';
 
-    const MIN_BOOKING_DAYS_AHEAD = 2;
+    const MIN_BOOKING_HOURS_AHEAD = 48;
+    const CHECK_IN_HOUR = 14;
 
-    function getMinimumBookableDateString() {
-        const minDate = new Date();
-        minDate.setHours(0, 0, 0, 0);
-        minDate.setDate(minDate.getDate() + MIN_BOOKING_DAYS_AHEAD);
+    function getCheckInDateTime(dateStr) {
+        const date = parseLocalDate(dateStr);
 
-        return getLocalDateString(minDate);
+        if (!date || isNaN(date.getTime())) {
+            return null;
+        }
+
+        date.setHours(CHECK_IN_HOUR, 0, 0, 0);
+        return date;
+    }
+
+    function isCheckInAllowedByLeadTime(dateStr) {
+        const checkInDateTime = getCheckInDateTime(dateStr);
+
+        if (!checkInDateTime) {
+            return false;
+        }
+
+        const minimumAllowedDateTime = new Date();
+        minimumAllowedDateTime.setHours(
+            minimumAllowedDateTime.getHours() + MIN_BOOKING_HOURS_AHEAD
+        );
+
+        return checkInDateTime >= minimumAllowedDateTime;
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
@@ -965,7 +984,6 @@
         const daysInMonth = new Date(year, month + 1, 0).getDate();
         const startOffset = firstDay === 0 ? 6 : firstDay - 1;
 
-        const minBookableDateStr = getMinimumBookableDateString();
         const blockedDates = getBlockedDatesSet();
         let htmlContent = '';
 
@@ -979,7 +997,7 @@
             let className = 'cal-day';
             let onClickAttr = `onclick="selectDate('${dateStr}')"`;
 
-            if (dateStr < minBookableDateStr) {
+            if (!isCheckInAllowedByLeadTime(dateStr)) {
                 className += ' past';
                 onClickAttr = '';
             }
@@ -1008,12 +1026,10 @@
     }
 
     function selectDate(dateStr) {
-        const minBookableDateStr = getMinimumBookableDateString();
-
-        if (dateStr < minBookableDateStr) {
+        if (!isCheckInAllowedByLeadTime(dateStr)) {
             showSuccess(
                 'Anreise zu kurzfristig',
-                'Buchungen sind frühestens 2 Tage vor der Anreise möglich.',
+                'Buchungen müssen mindestens 48 Stunden vor der Anreise um 14:00 Uhr erfolgen.',
                 'error'
             );
             return;
@@ -1200,12 +1216,11 @@
             return;
         }
 
-        const minBookableDateStr = getMinimumBookableDateString();
 
-        if (data.checkIn < minBookableDateStr) {
+        if (!isCheckInAllowedByLeadTime(data.checkIn)) {
             showSuccess(
                 'Anreise zu kurzfristig',
-                'Buchungen sind frühestens 2 Tage vor der Anreise möglich.',
+                'Buchungen müssen mindestens 48 Stunden vor der Anreise um 14:00 Uhr erfolgen.',
                 'error'
             );
             return;
