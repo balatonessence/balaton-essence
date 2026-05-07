@@ -692,14 +692,10 @@
         }).format(d);
     }
 
-    function isDiscountActiveForNight(apt, dateStr) {
+    function isDiscountActiveForNight(apt, nightDateStr) {
     const discount = apt?.discount;
 
     if (!discount || discount.active !== true) {
-        return false;
-    }
-
-    if (!discount.start || !discount.end) {
         return false;
     }
 
@@ -709,11 +705,35 @@
         return false;
     }
 
-    return dateStr >= discount.start && dateStr <= discount.end;
+    const todayStr = getLocalDateString(new Date());
+
+    const bookingStart = discount.bookingStart || discount.start || '';
+    const bookingEnd = discount.bookingEnd || discount.end || '';
+
+    if (bookingStart && todayStr < bookingStart) {
+        return false;
+    }
+
+    if (bookingEnd && todayStr > bookingEnd) {
+        return false;
+    }
+
+    const stayStart = discount.stayStart || discount.start || '';
+    const stayEnd = discount.stayEnd || discount.end || '';
+
+    if (stayStart && nightDateStr < stayStart) {
+        return false;
+    }
+
+    if (stayEnd && nightDateStr > stayEnd) {
+        return false;
+    }
+
+    return true;
 }
 
-function getDiscountAmountForNight(apt, dateStr) {
-    if (!isDiscountActiveForNight(apt, dateStr)) {
+function getDiscountAmountForNight(apt, nightDateStr) {
+    if (!isDiscountActiveForNight(apt, nightDateStr)) {
         return 0;
     }
 

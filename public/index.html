@@ -898,21 +898,24 @@
     }
 
     const todayStr = getLocalDateStringForIndex(date);
-    const start = discount.start || '';
-    const end = discount.end || '';
 
-    if (!start || !end) {
+    const bookingStart = discount.bookingStart || discount.start || '';
+    const bookingEnd = discount.bookingEnd || discount.end || '';
+
+    if (bookingStart && todayStr < bookingStart) {
         return null;
     }
 
-    if (todayStr < start || todayStr > end) {
+    if (bookingEnd && todayStr > bookingEnd) {
         return null;
     }
 
     return {
         amount,
-        start,
-        end
+        bookingStart,
+        bookingEnd,
+        stayStart: discount.stayStart || discount.start || '',
+        stayEnd: discount.stayEnd || discount.end || ''
     };
 }
 

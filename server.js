@@ -1170,6 +1170,205 @@ app.post('/api/save', requireAdmin, async (req, res) => {
     }
 });
 
+function getDateStringHu(date = new Date()) {
+    return new Intl.DateTimeFormat('sv-SE', {
+        timeZone: 'Europe/Budapest',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).format(date);
+}
+
+function getDateStringFromDate(date) {
+    return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+function getApartmentNightInfo(apt, date, guests = 2) {
+    const dateStr = getDateStringFromDate(date);
+    const guestCount = Number(guests || 2);
+
+    const season = Array.isArray(apt.seasons)
+        ? apt.seasons.find(s => dateStr >= s.start && dateStr <= s.end)
+        : null;
+
+    if (!season) {
+        return {
+            status: 'CLOSED',
+            price: 0,
+            minNights: 1,
+            maxGuests: Number(apt.maxGuests || 2)
+        };
+    }
+
+    let price = Number(season.price || apt.price || 0);
+
+    if (guestCount === 3 && Number(season.price3 || 0) > 0) {
+        price = Number(season.price3);
+    }
+
+    if (guestCount >= 4 && Number(season.price4 || 0) > 0) {
+        price = Number(season.price4);
+    }
+
+    return {
+        status: 'OPEN',
+        price,
+        minNights: Number(season.minNights || 1),
+        maxGuests: Number(season.maxGuests || apt.maxGuests || 2)
+    };
+}
+
+function getDiscountConfig(apt) {
+    const discount = apt?.discount;
+
+    if (!discount || discount.active !== true) {
+        return null;
+    }
+
+    const amountPerNight = Number(discount.amountPerNight || 0);
+
+    if (amountPerNight <= 0) {
+        return null;
+    }
+
+    return {
+        amountPerNight,
+
+        bookingStart: discount.bookingStart || discount.start || '',
+        bookingEnd: discount.bookingEnd || discount.end || '',
+
+        stayStart: discount.stayStart || '',
+        stayEnd: discount.stayEnd || ''
+    };
+}
+
+function isDiscountActiveOnBookingDate(apt, bookingDateStr = getDateStringHu()) {
+    const discount = getDiscountConfig(apt);
+
+    if (!discount) {
+        return false;
+    }
+
+    if (discount.bookingStart && bookingDateStr < discount.bookingStart) {
+        return false;
+    }
+
+    if (discount.bookingEnd && bookingDateStr > discount.bookingEnd) {
+        return false;
+    }
+
+    return true;
+}
+
+function isDiscountValidForStayNight(apt, nightDateStr) {
+    const discount = getDiscountConfig(apt);
+
+    if (!discount) {
+        return false;
+    }
+
+    if (discount.stayStart && nightDateStr < discount.stayStart) {
+        return false;
+    }
+
+    if (discount.stayEnd && nightDateStr > discount.stayEnd) {
+        return false;
+    }
+
+    return true;
+}
+
+function calculateBookingTotalOnServer(apt, booking) {
+    const start = parseDateOnly(booking.checkIn || booking.start);
+    const end = parseDateOnly(booking.checkOut || booking.end);
+    const guests = Number(booking.guests || 2);
+
+    if (!start || !end || end <= start) {
+        return {
+            valid: false,
+            error: 'Hibás dátumválasztás.'
+        };
+    }
+
+    let total = 0;
+    let originalTotal = 0;
+    let discountTotal = 0;
+    let nights = 0;
+    let minNightsRequired = 1;
+
+    const bookingDateStr = getDateStringHu();
+    const discountIsActiveNow = isDiscountActiveOnBookingDate(apt, bookingDateStr);
+    const discount = getDiscountConfig(apt);
+
+    const current = new Date(start);
+
+    while (current < end) {
+        const nightDateStr = getDateStringFromDate(current);
+        const info = getApartmentNightInfo(apt, current, guests);
+
+        if (info.status !== 'OPEN') {
+            return {
+                valid: false,
+                error: 'Az apartman zárva van a kiválasztott időszakban.'
+            };
+        }
+
+        if (guests > Number(info.maxGuests || 2)) {
+            return {
+                valid: false,
+                error: 'A vendégek száma meghaladja az apartman kapacitását.'
+            };
+        }
+
+        const nightlyPrice = Number(info.price || 0);
+
+        if (nightlyPrice <= 0) {
+            return {
+                valid: false,
+                error: 'Az ár nem számolható a kiválasztott időszakra.'
+            };
+        }
+
+        let nightlyDiscount = 0;
+
+        if (
+            discountIsActiveNow &&
+            discount &&
+            isDiscountValidForStayNight(apt, nightDateStr)
+        ) {
+            nightlyDiscount = discount.amountPerNight;
+        }
+
+        const finalNightPrice = Math.max(0, nightlyPrice - nightlyDiscount);
+
+        originalTotal += nightlyPrice;
+        discountTotal += nightlyPrice - finalNightPrice;
+        total += finalNightPrice;
+
+        minNightsRequired = Math.max(minNightsRequired, Number(info.minNights || 1));
+
+        nights++;
+        current.setDate(current.getDate() + 1);
+    }
+
+    if (nights < minNightsRequired) {
+        return {
+            valid: false,
+            error: `Minimum ${minNightsRequired} éjszaka szükséges ebben az időszakban.`
+        };
+    }
+
+    return {
+        valid: true,
+        total,
+        originalTotal,
+        discountTotal,
+        nights,
+        minNightsRequired,
+        bookingDateStr
+    };
+}
+
 // -----------------------------------------------------------------------------
 // API - STRIPE BOOKING CHECKOUT
 // -----------------------------------------------------------------------------
@@ -1178,7 +1377,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
     try {
         const newB = req.body.booking || req.body;
 
-        if (!newB || !newB.aptId || !newB.checkIn || !newB.checkOut || !newB.email || !newB.totalPrice) {
+        if (!newB || !newB.aptId || !newB.checkIn || !newB.checkOut || !newB.email) {
             return res.status(400).json({ error: 'Hiányos foglalási adatok.' });
         }
 
@@ -1208,8 +1407,34 @@ app.post('/api/create-checkout-session', async (req, res) => {
             return res.status(400).json({ error: 'Sajnos ez az időpont már foglalt!' });
         }
 
-        const depositAmount = Math.round(Number(newB.totalPrice) / 2);
+        const priceCalculation = calculateBookingTotalOnServer(apartment, newB);
+
+        if (!priceCalculation.valid) {
+            return res.status(400).json({ error: priceCalculation.error });
+        }
+
+        const finalTotalPrice = Number(priceCalculation.total || 0);
+
+        if (!Number.isFinite(finalTotalPrice) || finalTotalPrice <= 0) {
+            return res.status(400).json({
+                error: 'A foglalás összege nem számolható.'
+            });
+        }
+
+        const depositAmount = Math.round(finalTotalPrice / 2);
         const lang = normalizeLang(newB.lang || 'hu');
+
+        const safeBookingData = {
+            ...newB,
+
+            aptName: apartment.name || newB.aptName || 'Balaton Essence',
+            totalPrice: finalTotalPrice,
+            originalTotalPrice: priceCalculation.originalTotal,
+            discountTotal: priceCalculation.discountTotal,
+            nights: priceCalculation.nights,
+            calculatedByServer: true,
+            serverBookingDate: priceCalculation.bookingDateStr
+        };
 
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ['card'],
@@ -1217,8 +1442,8 @@ app.post('/api/create-checkout-session', async (req, res) => {
                 price_data: {
                     currency: 'huf',
                     product_data: {
-                        name: `Előleg (50%): ${newB.aptName || 'Balaton Essence'}`,
-                        description: `${newB.checkIn} — ${newB.checkOut} (${newB.guests || '-'} fő)`
+                        name: `Előleg (50%): ${safeBookingData.aptName || 'Balaton Essence'}`,
+                        description: `${safeBookingData.checkIn} — ${safeBookingData.checkOut} (${safeBookingData.guests || '-'} fő)`
                     },
                     unit_amount: depositAmount * 100
                 },
@@ -1226,11 +1451,11 @@ app.post('/api/create-checkout-session', async (req, res) => {
             }],
             mode: 'payment',
             metadata: {
-                bookingData: JSON.stringify(newB)
+                bookingData: JSON.stringify(safeBookingData)
             },
             success_url: `https://${req.get('host')}/success.html?session_id={CHECKOUT_SESSION_ID}&lang=${lang}`,
             cancel_url: `https://${req.get('host')}/${lang === 'hu' ? '' : `${lang}/`}apartman.html`,
-            customer_email: newB.email
+            customer_email: safeBookingData.email
         });
 
         res.json({ id: session.id });
