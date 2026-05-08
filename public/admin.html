@@ -2400,7 +2400,24 @@
         const grid = document.getElementById('stats-grid');
         if (!grid) return;
 
-        const bookings = db.bookings || [];
+        const allBookings = db.bookings || [];
+
+        const realBookings = allBookings.filter(b => {
+            const guest = String(b.guestName || '').toLowerCase();
+            const type = String(b.type || '').toLowerCase();
+            const status = String(b.status || '').toLowerCase();
+
+            return (
+                guest !== 'zárolt időszak' &&
+                guest !== 'zarolt idoszak' &&
+                type !== 'blocked' &&
+                type !== 'manual-block' &&
+                status !== 'blocked'
+            );
+        });
+
+        const blockedBookings = allBookings.length - realBookings.length;
+
         const breakfasts = db.breakfasts || [];
         const extras = db.extras || [];
         const apartments = db.apartments || [];
@@ -2408,9 +2425,9 @@
         const pendingReviews = (db.reviews || []).filter(r => r.status === 'pending').length;
 
         grid.innerHTML = `
-            ${statCard('Foglalások', bookings.length, 'Apartman foglalás összesen')}
+            ${statCard('Foglalások', realBookings.length, 'Valódi apartman foglalások')}
+            ${statCard('Zárolások', blockedBookings, 'Manuális / külső blokkolások')}
             ${statCard('Reggelik', breakfasts.length, 'Leadott reggeli rendelések')}
-            ${statCard('Eszköz bérlések', extras.length, 'SUP & SUN rendelések')}
             ${statCard('Ingatlanok', apartments.length, `${owners.length} partnerhez rendelve`)}
             ${statCard('Vélemények', (db.reviews || []).length, pendingReviews ? `${pendingReviews} jóváhagyásra vár` : 'Nincs függő vélemény')}
         `;
