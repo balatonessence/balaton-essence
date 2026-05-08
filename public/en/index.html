@@ -4,39 +4,71 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Balaton Essence | Luxury Apartments & SUP Rental</title>
-    <meta name="description" content="Browse the exclusive apartments of Balaton Essence! Multiple premium accommodations and SUP rental options in the most popular towns of Lake Balaton. Book now!">
-    <meta name="keywords" content="apartment rental Balaton, accommodation and SUP rental Balaton, water sports equipment, luxury accommodation Balaton">
+    <title>Balaton Essence | Luxury Apartments & Experiences</title>
+    <meta name="description" content="Premium apartments, breakfast delivery, SUP rental and unforgettable experiences on the shores of Lake Balaton. Book your stay with Balaton Essence.">
+    <meta name="keywords" content="Balaton apartment rental, Lake Balaton accommodation, SUP rental Balaton, premium apartment Balaton, luxury accommodation Hungary">
     <link rel="canonical" href="https://balatonessence.com/en/">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://balatonessence.com/en/">
-    <meta property="og:title" content="Balaton Essence | Luxury Apartments & SUP Rental">
-    <meta property="og:description" content="Premium accommodation and SUP experiences at Lake Balaton. Book your stay now!">
-    <meta property="og:image" content="https://balatonessence.com/img/hatter.jpg"> 
-    
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
-    
+    <meta property="og:title" content="Balaton Essence | Luxury Apartments & Experiences">
+    <meta property="og:description" content="Premium apartments, breakfast delivery, SUP rental and unforgettable experiences on the shores of Lake Balaton.">
+    <meta property="og:image" content="https://balatonessence.com/img/hatter.jpg">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+
     <style>
-        :root { 
-            --bg: #FCFBF9; --bg-alt: #F4F2EC; --text: #2C3325; --text-light: #6A7063;  
-            --accent: #5C7A4D; --accent-hover: #48613A; --border: #E3E0D8; --shadow: rgba(44, 51, 37, 0.05);
+        :root {
+            --bg: #FCFBF9;
+            --bg-alt: #F4F2EC;
+            --text: #2C3325;
+            --text-light: #6A7063;
+            --accent: #5C7A4D;
+            --accent-hover: #48613A;
+            --gold: #D7B889;
+            --gold-dark: #B9935F;
+            --border: #E3E0D8;
             --warning: #B0413E;
-        }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-
-        /* DEVELOPMENT BANNER */
-        .dev-banner {
-            background: var(--warning); color: white; text-align: center; padding: 12px 5vw;
-            font-size: 0.75rem; font-weight: 600; letter-spacing: 1px; position: fixed;
-            top: 0; left: 0; width: 100%; z-index: 2000; line-height: 1.4;
+            --shadow: rgba(44, 51, 37, 0.08);
+            --dark: #111A13;
         }
 
-        /* HEADER */
-        header { position: fixed; top: 40px; left: 0; width: 100%; padding: 1.5rem 5vw; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(252, 251, 249, 0.95); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); transition: 0.3s; }
-        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 1.6rem 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(8, 13, 10, 0.62), rgba(8, 13, 10, 0));
+            transition: 0.3s ease;
+        }
+
         .logo-container {
             display: flex;
             flex-direction: column;
@@ -46,87 +78,418 @@
 
         .logo-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.6rem;
+            font-size: 1.7rem;
             font-weight: 700;
-            color: var(--text);
-            letter-spacing: 2px;
+            color: #fff;
+            letter-spacing: 4px;
         }
 
-        .logo-sub {
+        .logo-subtitle {
             font-family: 'Montserrat', sans-serif;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
             font-weight: 400;
-            color: var(--accent);
+            color: rgba(255,255,255,0.8);
             text-transform: uppercase;
             letter-spacing: 6px;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
-        nav { display: flex; gap: 2rem; align-items: center; }
-        .nav-link { font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; color: var(--text); text-decoration: none; transition: 0.3s; }
-        .nav-link:hover { color: var(--accent); }
-        
-        .btn-primary { background: var(--accent); color: white; border: 1px solid var(--accent); padding: 0.8rem 2rem; border-radius: 50px; font-weight: 600; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 1.5px; cursor: pointer; transition: 0.4s; text-decoration: none; display: inline-block; }
-        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(92, 122, 77, 0.2); }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.2rem;
+        }
 
-        /* HERO */
-.hero {
-    height: 100vh;
-    display: flex;
-    align-items: center;
-    padding: 0 5vw;
-    position: relative;
-    overflow: hidden;
-    background: none;
-}
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255,255,255,0.9);
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            transition: 0.25s;
+        }
 
-.hero::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: url('../img/hatter.jpg') center/cover no-repeat;
-    filter: contrast(1.2) brightness(1.08) saturate(1.8);
-    z-index: 0;
-}
+        .nav-links a:hover {
+            color: var(--gold);
+        }
 
-.hero::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-        to right,
-        rgba(252,251,249, 1) 0%,
-        rgba(252,251,249, 0.85) 45%,
-        rgba(252,251,249, 0) 100%
-    );
-    z-index: 1;
-}
+        .nav-booking {
+            border: 1px solid rgba(215, 184, 137, 0.8);
+            padding: 0.9rem 1.7rem;
+            color: white !important;
+        }
 
-.hero-content {
-    max-width: 650px;
-    margin-top: 5rem;
-    position: relative;
-    z-index: 2;
-}
+        .nav-booking:hover {
+            background: rgba(215, 184, 137, 0.16);
+        }
 
-.hero-title {
-    font-family: 'Playfair Display', serif;
-    font-size: clamp(3rem, 5vw, 4.5rem);
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
-    color: var(--text);
-}
+        .menu-lines {
+            width: 28px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
 
-        /* PILLARS */
-        .pillars-section { padding: 8rem 5vw; background: var(--bg); max-width: 1600px; margin: 0 auto; }
-        .section-header { text-align: center; margin-bottom: 5rem; }
-        .section-header h2 { font-family: 'Playfair Display'; font-size: 3rem; color: var(--text); font-style: italic; }
+        .menu-lines span {
+            display: block;
+            height: 2px;
+            background: rgba(255,255,255,0.9);
+        }
 
-        .pillars-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 4rem; }
-        .pillar-card { background: white; border: 1px solid var(--border); box-shadow: 0 15px 40px var(--shadow); transition: 0.4s; text-align: center; overflow: hidden; display: flex; flex-direction: column; }
-        .pillar-card:hover { transform: translateY(-10px); }
-        .pillar-header { padding: 4rem 2rem; flex-grow: 1; }
-        .pillar-img { width: 100%; height: 350px; background-size: cover; background-position: center; }
+        .lang-dropdown {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.2rem;
+            padding: 10px 0;
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.9);
+            cursor: pointer;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+        }
+
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid rgba(255,255,255,0.85);
+            transition: 0.25s;
+        }
+
+        .lang-content {
+            display: none;
+            position: absolute;
+            top: calc(100% - 2px);
+            right: 0;
+            min-width: 130px;
+            background: rgba(20, 27, 18, 0.94);
+            border: 1px solid rgba(255,255,255,0.22);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+            backdrop-filter: blur(12px);
+            z-index: 9999;
+            border-radius: 6px;
+            overflow: hidden;
+            padding: 6px 0;
+        }
+
+        .lang-content a {
+            display: block;
+            padding: 12px 16px;
+            color: rgba(255,255,255,0.92) !important;
+            text-decoration: none;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: 0;
+            background: transparent !important;
+            text-shadow: none !important;
+        }
+
+        .lang-content a:hover {
+            background: rgba(255,255,255,0.12) !important;
+            color: var(--gold) !important;
+        }
+
+        .lang-dropdown:hover .lang-content,
+        .lang-dropdown:focus-within .lang-content {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .lang-dropdown:hover .arrow,
+        .lang-dropdown:focus-within .arrow {
+            transform: rotate(180deg);
+        }
+
+        .hero {
+            min-height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 8rem 7vw 6rem;
+            overflow: hidden;
+            color: white;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: url('../img/hatter.jpg') center/cover no-repeat;
+            z-index: 0;
+            filter: brightness(0.78) contrast(1.08) saturate(1.1);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(to right, rgba(8, 13, 10, 0.74) 0%, rgba(8, 13, 10, 0.38) 44%, rgba(8, 13, 10, 0.1) 100%),
+                linear-gradient(to bottom, rgba(8, 13, 10, 0.1) 0%, rgba(8, 13, 10, 0.18) 64%, rgba(8, 13, 10, 0.58) 100%);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 690px;
+            margin-top: 4rem;
+        }
+
+        .hero-kicker {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 2.8px;
+            color: rgba(255,255,255,0.88);
+            font-weight: 600;
+            margin-bottom: 1.7rem;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3.1rem, 5.7vw, 5.7rem);
+            line-height: 1.05;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            text-shadow: 0 18px 50px rgba(0,0,0,0.35);
+        }
+
+        .hero-line {
+            width: 86px;
+            height: 3px;
+            background: var(--gold);
+            margin: 2rem 0;
+        }
+
+        .hero-text {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.92);
+            max-width: 480px;
+            margin-bottom: 2.2rem;
+        }
+
+        .btn-outline-hero {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            color: white;
+            border: 1px solid rgba(215, 184, 137, 0.85);
+            padding: 1.1rem 2.3rem;
+            text-transform: uppercase;
+            letter-spacing: 1.8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            transition: 0.3s;
+        }
+
+        .btn-outline-hero:hover {
+            background: rgba(215, 184, 137, 0.16);
+            transform: translateY(-2px);
+        }
+
+        .hero-features {
+            position: absolute;
+            left: 50%;
+            bottom: 0;
+            transform: translateX(-50%);
+            width: min(1180px, 88vw);
+            z-index: 3;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            background: rgba(12, 18, 14, 0.62);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .feature-item {
+            min-height: 94px;
+            padding: 1.2rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            color: rgba(255,255,255,0.88);
+            border-right: 1px solid rgba(255,255,255,0.14);
+        }
+
+        .feature-item:last-child {
+            border-right: none;
+        }
+
+        .feature-icon {
+            width: 42px;
+            height: 42px;
+            color: rgba(255,255,255,0.9);
+            flex: 0 0 auto;
+        }
+
+        .feature-icon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .feature-icon path,
+        .feature-icon circle,
+        .feature-icon line,
+        .feature-icon polyline {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .feature-text {
+            font-size: 0.76rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            line-height: 1.55;
+            font-weight: 700;
+        }
+
+        .scroll-indicator {
+            position: absolute;
+            left: 50%;
+            bottom: 18px;
+            z-index: 4;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 2.2rem;
+            opacity: 0.85;
+        }
+
+        .section {
+            padding: 7rem 5vw;
+        }
+
+        .section-inner {
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3.5rem;
+        }
+
+        .section-kicker {
+            font-size: 0.75rem;
+            color: var(--gold-dark);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 4vw, 3.4rem);
+            font-weight: 400;
+            color: var(--text);
+        }
+
+        .apt-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+        }
+
+        .apartment-card {
+            background: white;
+            border: 1px solid var(--border);
+            box-shadow: 0 18px 50px rgba(44, 51, 37, 0.08);
+            overflow: hidden;
+            text-decoration: none;
+            color: inherit;
+            transition: 0.32s ease;
+        }
+
+        .apartment-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 28px 70px rgba(44, 51, 37, 0.14);
+        }
+
+        .apt-image {
+            position: relative;
+            height: 245px;
+            background-size: cover;
+            background-position: center;
+            background-color: var(--bg-alt);
+        }
+
+        .guest-badge {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            background: var(--accent);
+            color: white;
+            border-radius: 4px;
+            padding: 0.42rem 0.68rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+        }
+
+        .apt-body {
+            padding: 1.7rem 1.7rem 1.9rem;
+        }
+
+        .apt-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem;
+            font-weight: 700;
+            margin-bottom: 0.65rem;
+            color: var(--text);
+        }
+
+        .apt-location {
+            color: var(--text-light);
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+        }
+
+        .apt-desc {
+            font-size: 0.86rem;
+            color: var(--text);
+            line-height: 1.65;
+            min-height: 4.2rem;
+            margin-bottom: 1.7rem;
+        }
+
+        .apt-card-bottom {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .apt-price-normal {
+            color: var(--gold-dark);
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            font-size: 1rem;
+        }
 
         .apt-sale-badge {
             display: inline-flex;
@@ -136,183 +499,178 @@
             color: var(--warning);
             border: 1px solid rgba(176, 65, 62, 0.25);
             border-radius: 999px;
-            padding: 0.45rem 0.85rem;
-            font-size: 0.62rem;
+            padding: 0.35rem 0.65rem;
+            font-size: 0.58rem;
             font-weight: 800;
             text-transform: uppercase;
-            letter-spacing: 1.2px;
-            margin-bottom: 1rem;
+            letter-spacing: 1px;
+            margin-bottom: 0.4rem;
         }
 
         .apt-price-old {
             color: var(--text-light);
             text-decoration: line-through;
-            font-size: 0.85rem;
+            font-size: 0.78rem;
             font-weight: 600;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
         }
 
         .apt-price-sale {
             color: var(--warning);
-            font-weight: 800;
-            letter-spacing: 1px;
-            margin-bottom: 2rem;
+            font-weight: 900;
+            letter-spacing: 0.4px;
+            font-size: 1rem;
         }
 
-        .apt-price-normal {
-            color: var(--accent);
+        .apt-discount-small {
+            font-size: 0.62rem;
+            color: var(--text-light);
             font-weight: 700;
-            letter-spacing: 1px;
-            margin-bottom: 2rem;
+            line-height: 1.45;
+            margin-top: 0.35rem;
         }
 
-        .apt-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 4rem; margin-top: 2rem; }
-
-        /* Language selector container */
-        .lang-dropdown {
-            position: relative;
-            display: inline-block;
-            margin-left: 1.5rem;
-        }
-
-        /* Main button */
-        .lang-btn {
-            background: none;
-            border: none;
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.75rem;
-            font-weight: 500;
-            letter-spacing: 1px;
-            color: var(--text);
-            cursor: pointer;
-            padding: 5px 0;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            text-transform: uppercase;
-        }
-
-        .arrow {
-            width: 0; 
-            height: 0; 
-            border-left: 4px solid transparent;
-            border-right: 4px solid transparent;
-            border-top: 4px solid var(--text);
-            transition: 0.3s;
-        }
-
-        /* Dropdown content */
-        .lang-content {
-            display: none;
-            position: absolute;
-            right: 0;
-            background-color: var(--bg);
-            min-width: 120px;
-            box-shadow: 0 8px 16px var(--shadow);
-            border: 1px solid var(--border);
-            z-index: 1;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .lang-content a {
-            color: var(--text);
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            font-size: 0.7rem;
-            transition: 0.3s;
-            text-align: left;
-        }
-
-        .lang-content a:hover {
-            background-color: var(--bg-alt);
+        .btn-small {
+            border: 1px solid rgba(92, 122, 77, 0.55);
             color: var(--accent);
+            padding: 0.75rem 1.45rem;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            font-size: 0.66rem;
+            font-weight: 800;
+            white-space: nowrap;
+            transition: 0.3s;
         }
 
-        /* Hover event */
-        .lang-dropdown:hover .lang-content {
-            display: block;
-            animation: fadeIn 0.2s ease-out;
+        .apartment-card:hover .btn-small {
+            background: var(--accent);
+            color: white;
         }
 
-        .lang-dropdown:hover .arrow {
-            transform: rotate(180deg);
+        .all-apartments-wrap {
+            text-align: center;
+            margin-top: 2.4rem;
         }
 
-        /* Vékony Kapszula Stílusok */
-
-        #weather-widget {
-            display: none;
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: 1px solid var(--accent);
+            padding: 0.9rem 2rem;
+            border-radius: 4px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 1.3px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .nav-weather-pill {
-            background-color: rgba(255, 255, 255, 0.6); /* Enyhén átlátszó, hogy szép legyen */
-            border: 1px solid #e2e8df;
-            border-radius: 50px; /* Eztől lesz kapszula formájú */
-            padding: 6px 16px;
-            display: inline-flex;
-            align-items: center;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            font-size: 15px;
-            margin: 0 15px;
-            height: fit-content;
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
         }
 
-        .weather-loader {
-            font-size: 13px;
-            color: #888;
+        .btn-secondary {
+            border: 1px solid rgba(92, 122, 77, 0.55);
+            color: var(--accent);
+            padding: 0.9rem 2rem;
+            border-radius: 4px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 1.3px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .weather-pill-content {
+        .btn-secondary:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        .promo-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 4rem;
+        }
+
+        .promo-card {
+            min-height: 250px;
+            padding: 2.4rem;
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            overflow: hidden;
             display: flex;
             align-items: center;
-            gap: 8px; /* Távolság az elemek között */
+            border: 1px solid var(--border);
         }
 
-        .weather-pill-content.hidden {
-            display: none !important;
+        .promo-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to right, rgba(252,251,249,0.93) 0%, rgba(252,251,249,0.78) 48%, rgba(252,251,249,0.2) 100%);
+            z-index: 0;
         }
 
-        .air-temp {
-            font-weight: bold;
-            color: #5c7a4d; /* Essence zöld */
+        .promo-content {
+            position: relative;
+            z-index: 1;
+            max-width: 420px;
         }
 
-        .weather-divider {
-            color: #ccc;
-            margin: 0 2px;
+        .promo-content h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.9rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
         }
 
-        .water-temp {
-            font-weight: bold;
-            color: #0077b6; /* Szép Balaton-kék */
-            display: flex;
-            align-items: center;
-            gap: 4px;
+        .promo-kicker {
+            color: var(--gold-dark);
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .promo-content p {
+            font-size: 0.9rem;
+            line-height: 1.65;
+            color: var(--text);
+            margin-bottom: 1.4rem;
         }
 
         .plain-amp {
-            font-family: 'Cormorant Garamond', serif;
+            font-family: Arial, sans-serif;
             font-style: normal;
-            font-weight: 600;
-            font-size: 0.9em;
-            margin: 0 4px;
-            vertical-align: 0.02em;
+            font-weight: 500;
+        }
+
+        .reviews-section {
+            background: var(--bg);
+            padding-top: 4rem;
         }
 
         .reviews-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 2.5rem;
+            gap: 2rem;
         }
 
         .review-card {
-            background: rgba(255, 255, 255, 0.92);
+            background: white;
             border: 1px solid var(--border);
-            padding: 2.8rem 2.4rem;
+            padding: 2.4rem;
             box-shadow: 0 20px 60px rgba(44, 51, 37, 0.06);
-            transition: transform 0.35s ease, box-shadow 0.35s ease, border-color 0.35s ease;
             position: relative;
             overflow: hidden;
         }
@@ -320,34 +678,26 @@
         .review-card::before {
             content: "“";
             position: absolute;
-            top: -20px;
-            right: 24px;
+            top: -24px;
+            right: 22px;
             font-family: 'Playfair Display', serif;
             font-size: 7rem;
             color: rgba(92, 122, 77, 0.08);
             line-height: 1;
         }
 
-        .review-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 30px 80px rgba(44, 51, 37, 0.12);
-            border-color: rgba(92, 122, 77, 0.35);
-        }
-
         .review-stars {
             color: #c99a3e;
             letter-spacing: 3px;
-            margin-bottom: 1.3rem;
-            font-size: 0.95rem;
+            margin-bottom: 1.2rem;
         }
 
         .review-text {
             font-family: 'Playfair Display', serif;
-            font-size: 1.25rem;
+            font-size: 1.16rem;
             line-height: 1.65;
             font-style: italic;
-            color: var(--text);
-            margin-bottom: 1.8rem;
+            margin-bottom: 1.5rem;
             position: relative;
             z-index: 1;
         }
@@ -357,55 +707,260 @@
             text-transform: uppercase;
             letter-spacing: 2px;
             color: var(--text-light);
-            font-weight: 700;
+            font-weight: 800;
         }
 
-        .page-spacer {
-            height: 92px;
+        .nav-weather-pill {
+            background-color: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 50px;
+            padding: 6px 14px;
+            display: none;
+            align-items: center;
+            font-size: 0.8rem;
+            color: white;
         }
 
-        @media (max-width: 900px) {
+        .weather-pill-content {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .weather-pill-content.hidden {
+            display: none !important;
+        }
+
+        .air-temp {
+            font-weight: 800;
+            color: white;
+        }
+
+        .weather-divider {
+            color: rgba(255,255,255,0.35);
+        }
+
+        .water-temp {
+            font-weight: 800;
+            color: #b9e3ff;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .contact-section {
+            background: #172418;
+            color: rgba(255,255,255,0.82);
+            padding: 4rem 5vw 2rem;
+        }
+
+        .contact-grid {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr 1fr;
+            gap: 3rem;
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            padding-bottom: 3rem;
+        }
+
+        .footer-logo .logo-title,
+        .footer-logo .logo-subtitle {
+            color: white;
+        }
+
+        .contact-section h4 {
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .contact-section p,
+        .contact-section li,
+        .contact-section a {
+            color: rgba(255,255,255,0.72);
+            font-size: 0.85rem;
+            line-height: 1.9;
+            text-decoration: none;
+        }
+
+        .contact-section a:hover {
+            color: var(--gold);
+        }
+
+        .footer-bottom {
+            max-width: 1320px;
+            margin: 0 auto;
+            padding-top: 1.7rem;
+            text-align: center;
+            font-size: 0.72rem;
+            color: rgba(255,255,255,0.48);
+        }
+
+        .loader-wrap {
+            text-align: center;
+            padding: 5rem 5vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            grid-column: 1 / -1;
+        }
+
+        .loader-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #eee;
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 1100px) {
+            .nav-links {
+                gap: 1rem;
+            }
+
+            .nav-links a:not(.nav-booking) {
+                display: none;
+            }
+
+            .hero-features {
+                grid-template-columns: repeat(2, 1fr);
+                position: relative;
+                bottom: auto;
+                left: auto;
+                transform: none;
+                width: 100%;
+                margin-top: -1px;
+            }
+
+            .scroll-indicator {
+                display: none;
+            }
+
+            .apt-grid,
             .reviews-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .promo-grid,
+            .contact-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
+        @media (max-width: 720px) {
+            .site-header {
+                padding: 1.1rem 5vw;
+            }
+
+            .logo-title {
+                font-size: 1.35rem;
+            }
+
+            .logo-subtitle {
+                font-size: 0.5rem;
+                letter-spacing: 4px;
+            }
+
+            .nav-booking,
+            .menu-lines,
+            .nav-weather-pill {
+                display: none !important;
+            }
+
+            .hero {
+                min-height: 92vh;
+                padding: 7rem 5vw 4rem;
+            }
+
+            .hero-title {
+                font-size: clamp(2.8rem, 12vw, 4rem);
+            }
+
+            .hero-features {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-item {
+                justify-content: flex-start;
+                padding-left: 2rem;
+            }
+
+            .apt-grid,
+            .reviews-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 5rem 5vw;
+            }
+
+            .apt-image {
+                height: 220px;
+            }
+
+            .apt-card-bottom {
+                align-items: flex-start;
+                flex-direction: column;
+            }
         }
 
-        footer { background: var(--accent); padding: 6rem 5vw; color: white; text-align: center; }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
-    <link rel="stylesheet" href="../mobile.css">
+
+    <link rel="stylesheet" href="../mobile.css?v=3">
 </head>
+
 <body>
 
-<header>    
-    <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1;">
-        <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
-        <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+<header class="site-header">
+    <a href="index.html" class="logo-container" aria-label="Balaton Essence home">
+        <span class="logo-title">BALATON</span>
+        <span class="logo-subtitle">Essence</span>
     </a>
 
-    <nav class="nav-links" style="display: flex; gap: 2rem;">
-        <a href="#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Apartments</a>
-        <a href="rolunk.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">About Us</a>
-        <div class="nav-weather-pill" id="weather-widget" style="display: none;">
-            <span id="weather-loader" class="weather-loader" style="display: none;"></span>
+    <nav class="nav-links" aria-label="Main navigation">
+        <a href="#apartments">Apartments</a>
+        <a href="#services">Services</a>
+        <a href="#reviews-section">Experiences</a>
+        <a href="#contact">Contact</a>
+
+        <div class="nav-weather-pill" id="weather-widget">
             <div id="weather-content" class="weather-pill-content hidden">
-                <span id="weather-icon" title="Air Temperature">☀️</span>
+                <span title="Air temperature">☀️</span>
                 <span id="weather-temp" class="air-temp"></span>
                 <span class="weather-divider">|</span>
-                <span title="Lake Balaton Water" class="water-temp">🌊 <span id="water-temp-val"></span></span>
+                <span title="Lake Balaton water" class="water-temp">🌊 <span id="water-temp-val"></span></span>
             </div>
         </div>
+
         <div class="lang-dropdown">
-            <button class="lang-btn">EN <span class="arrow"></span></button>
+            <button class="lang-btn" type="button">EN <span class="arrow"></span></button>
             <div class="lang-content">
                 <a href="../index.html">Magyar</a>
                 <a href="index.html">English</a>
@@ -415,115 +970,207 @@
     </nav>
 </header>
 
-<div class="page-spacer"></div>
-
 <section class="hero">
     <div class="hero-content">
-        <h1 class="hero-title" aria-label="Balaton Essence - Premium apartment management and booking around Lake Balaton">
-            The Essence of Balaton — <br>
-            <i>an experience you feel</i>.
+        <div class="hero-kicker">The essence of Balaton</div>
+        <h1 class="hero-title">
+            Where experiences<br>
+            become memories.
         </h1>
-        <a href="#pillars" class="btn-primary">Explore</a>
+        <div class="hero-line"></div>
+        <p class="hero-text">
+            Premium stays, special moments and unforgettable experiences on the shores of Lake Balaton.
+        </p>
+        <a href="#apartments" class="btn-outline-hero">Explore</a>
     </div>
-</section>
 
-<section id="pillars" class="pillars-section">
-    <div class="section-header">
-        <h2>The Essence Lifestyle</h2>
-    </div>
-    <div class="pillars-grid">
-        <div class="pillar-card">
-            <div class="pillar-header">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">
-                    SUP <span class="plain-amp">&amp;</span> SUN
-                </h3>                <a href="sun.html" class="btn-primary">CHECK</a>
+    <div class="hero-features">
+        <div class="feature-item">
+            <div class="feature-icon">
+                <svg viewBox="0 0 64 64">
+                    <path d="M12 50h40"></path>
+                    <path d="M18 50V22h28v28"></path>
+                    <path d="M24 50V34h16v16"></path>
+                    <path d="M24 28h4"></path>
+                    <path d="M36 28h4"></path>
+                    <path d="M24 16h16"></path>
+                    <path d="M28 16v-5h8v5"></path>
+                </svg>
             </div>
-            <div class="pillar-img" style="background-image: url('../img/sunkartya.png');"></div>
+            <div class="feature-text">Premium<br>apartments</div>
         </div>
-        <div class="pillar-card">
-            <div class="pillar-header">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">MOMENTS</h3>
-                <a href="morning.html" class="btn-primary">CHECK</a>
+
+        <div class="feature-item">
+            <div class="feature-icon">
+                <svg viewBox="0 0 64 64">
+                    <path d="M32 10v38"></path>
+                    <path d="M16 30c4-12 12-18 16-18s12 6 16 18"></path>
+                    <path d="M16 30c5-4 11-4 16 0"></path>
+                    <path d="M32 30c5-4 11-4 16 0"></path>
+                    <path d="M22 52h20"></path>
+                </svg>
             </div>
-            <div class="pillar-img" style="background-image: url('../img/moments.png');"></div>
+            <div class="feature-text">Sunbeds and<br>parasols</div>
+        </div>
+
+        <div class="feature-item">
+            <div class="feature-icon">
+                <svg viewBox="0 0 64 64">
+                    <path d="M18 45c8 4 20 4 28 0"></path>
+                    <path d="M22 42l10-26"></path>
+                    <path d="M32 16l10 26"></path>
+                    <path d="M26 28h12"></path>
+                    <path d="M12 51c5 3 10 3 15 0s10-3 15 0 10 3 15 0"></path>
+                </svg>
+            </div>
+            <div class="feature-text">SUP and water<br>experiences</div>
+        </div>
+
+        <div class="feature-item">
+            <div class="feature-icon">
+                <svg viewBox="0 0 64 64">
+                    <path d="M18 40h28"></path>
+                    <path d="M22 40c1-10 8-16 10-16s9 6 10 16"></path>
+                    <path d="M15 46h34"></path>
+                    <path d="M32 18v-5"></path>
+                    <path d="M28 13h8"></path>
+                    <path d="M24 52h16"></path>
+                </svg>
+            </div>
+            <div class="feature-text">Breakfast and<br>surprises</div>
+        </div>
+
+        <div class="feature-item">
+            <div class="feature-icon">
+                <svg viewBox="0 0 64 64">
+                    <circle cx="32" cy="19" r="8"></circle>
+                    <path d="M18 50c2-11 8-17 14-17s12 6 14 17"></path>
+                    <path d="M43 24c3-4 10-2 10 4c0 6-10 12-10 12s-10-6-10-12c0-6 7-8 10-4z"></path>
+                </svg>
+            </div>
+            <div class="feature-text">Personal<br>guest experience</div>
+        </div>
+    </div>
+
+</section>
+
+<section id="apartments" class="section" style="background: var(--bg);">
+    <div class="section-inner">
+        <div class="section-header">
+            <div class="section-kicker">Selected apartments</div>
+            <h2>Featured stays</h2>
+        </div>
+
+        <div id="apartment-grid" class="apt-grid">
+            <div class="loader-wrap">
+                <div class="loader-spinner"></div>
+                <div>Apartments loading...</div>
+            </div>
+        </div>
+
+        <div id="services" class="promo-grid">
+            <div class="promo-card" style="background-image: url('../img/moments.png');">
+                <div class="promo-content">
+                    <h3>Breakfast order</h3>
+                    <div class="promo-kicker">Comfort from the morning</div>
+                    <p>
+                        Start the day with fresh breakfast delivered to your apartment. Order in advance and enjoy a calm, effortless morning.
+                    </p>
+                    <a href="morning.html" class="btn-primary">Order breakfast</a>
+                </div>
+            </div>
+
+            <div class="promo-card" style="background-image: url('../img/sunkartya.png');">
+                <div class="promo-content">
+                    <h3>SUP <span class="plain-amp">/</span> water experiences</h3>
+                    <div class="promo-kicker">The call of the water</div>
+                    <p>
+                        Discover Lake Balaton with SUP rental, sunbeds and beach equipment for easy summer moments by the water.
+                    </p>
+                    <a href="sun.html" class="btn-primary">Explore experiences</a>
+                </div>
+            </div>
         </div>
     </div>
 </section>
 
-<section id="apartments" class="pillars-section" style="padding-top: 0; background: var(--bg-alt);">
-    <div class="section-header" style="padding-top: 8rem;">
-        <h2>Premium Apartments</h2>
-    </div>
-    <div id="apartment-grid" class="apt-grid">
-        <div class="loader-wrap">
-            <div class="loader-spinner"></div>
-            <div>Apartments loading...</div>
+<section id="reviews-section" class="section reviews-section">
+    <div class="section-inner">
+        <div class="section-header">
+            <div class="section-kicker">Our guests said</div>
+            <h2>Real experiences from real guests.</h2>
         </div>
+
+        <div id="reviews-grid" class="reviews-grid"></div>
     </div>
 </section>
 
-
-<section id="reviews-section" class="pillars-section" style="background: var(--bg);">
-    <div class="section-header">
-        <h2>What our guests say</h2>
-    </div>
-    <div id="reviews-grid" class="reviews-grid"></div>
-</section>
-
-<section id="contact" style="background: white; padding: 5rem 5vw; border-top: 1px solid var(--border); margin-top: 5rem;">
-    <div style="max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 4rem;">
-        
+<section id="contact" class="contact-section">
+    <div class="contact-grid">
         <div>
-            <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1; margin-bottom: 1.5rem;">
-                <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
-                <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+            <a href="index.html" class="logo-container footer-logo" style="margin-bottom: 1.4rem;">
+                <span class="logo-title">BALATON</span>
+                <span class="logo-subtitle">Essence</span>
             </a>
-            <p style="font-size: 0.85rem; color: #666; line-height: 1.8; margin-top: 1rem;">
-                Premium apartments and unforgettable experiences on the north and south shores of Lake Balaton. We take care of your comfort so you can focus solely on relaxation.
+
+            <p style="margin-top: 1.2rem;">
+                Premium stays and memorable experiences on the shores of Lake Balaton.
             </p>
         </div>
 
         <div>
-            <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Contact</h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 2;">
-                <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <span style="color: var(--accent);">📍</span> 8640 Fonyód, Hungary
-                </li>
-                <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <span style="color: var(--accent);">📞</span> +36 20 499 5484
-                </li>
-                <li style="margin-bottom: 10px; display: flex; align-items: center; gap: 10px;">
-                    <span style="color: var(--accent);">✉️</span> info@balatonessence.com
-                </li>
-            </ul>
+            <h4>Quick links</h4>
+            <p><a href="#apartments">Apartments</a></p>
+            <p><a href="#services">Services</a></p>
+            <p><a href="#reviews-section">Experiences</a></p>
+            <p><a href="#contact">Contact</a></p>
         </div>
 
         <div>
-            <h4 style="font-family: 'Playfair Display'; font-size: 1.2rem; margin-bottom: 1.5rem;">Navigation</h4>
-            <ul style="list-style: none; padding: 0; font-size: 0.85rem; line-height: 2;">
-                <li><a href="index.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Apartments</a></li>
-                <li><a href="rolunk.html" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">About Us</a></li>
-                <li><a href="#contact" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Contact</a></li>
-                <li><a href="#" style="text-decoration: none; color: #666; transition: 0.3s;" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='#666'">Terms & Conditions</a></li>
-            </ul>
+            <h4>Contact</h4>
+            <p>📍 8640 Fonyód, Hungary</p>
+            <p>📞 <a href="tel:+36204995484">+36 20 499 5484</a></p>
+            <p>✉️ <a href="mailto:info@balatonessence.com">info@balatonessence.com</a></p>
         </div>
 
+        <div>
+            <h4>Useful information</h4>
+            <p><a href="#">FAQ</a></p>
+            <p><a href="#">Booking terms</a></p>
+            <p><a href="#">Privacy policy</a></p>
+            <p><a href="#">Terms & Conditions</a></p>
+        </div>
     </div>
 
+    <div class="footer-bottom">
+        © 2026 Balaton Essence. All rights reserved.
+    </div>
 </section>
 
-<footer>
-    <div class="logo-container" onclick="openAdminLogin()" style="cursor: pointer; display: flex; flex-direction: column; line-height: 1.1;">
-    <span class="logo-title" style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #ffffff; letter-spacing: 2px;">BALATON ESSENCE</span>
-    <span class="logo-sub" style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: var(--accent); text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
-    </div>
-    <p style="font-size: 0.8rem; opacity: 0.7; letter-spacing: 2px; text-transform: uppercase;">An experience you feel.</p>
-    <p style="margin-top: 4rem; font-size: 0.7rem; opacity: 0.5;">&copy; 2026 Essence Balaton. All rights reserved.</p>
-</footer>
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "LodgingBusiness",
+    "name": "Balaton Essence",
+    "description": "Premium apartments, breakfast delivery, SUP rental and experiences at Lake Balaton.",
+    "url": "https://balatonessence.com/en/",
+    "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Fonyód",
+        "addressCountry": "HU"
+    },
+    "areaServed": [
+        "Fonyód",
+        "Balatonszemes",
+        "Balatonederics",
+        "Lake Balaton"
+    ]
+}
+</script>
 
-
-<script src="../database.js?v=2.1"></script>
+<script src="../database.js?v=2.2"></script>
 <script src="../figyelmeztetes.js"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         initApartments();
@@ -633,208 +1280,253 @@
     }
 
     function getActiveNightlyDiscount(apt, date = new Date()) {
-    const discount = apt?.discount || apt?.nightlyDiscount || null;
+        const discount = apt?.discount || apt?.nightlyDiscount || null;
 
-    if (!discount) {
-        return null;
+        if (!discount) {
+            return null;
+        }
+
+        const isActive =
+            discount.active === true ||
+            discount.active === 'true' ||
+            discount.enabled === true ||
+            discount.enabled === 'true';
+
+        if (!isActive) {
+            return null;
+        }
+
+        const amount = Number(
+            discount.amountPerNight ||
+            discount.amount ||
+            discount.value ||
+            apt.discountAmount ||
+            0
+        );
+
+        if (amount <= 0) {
+            return null;
+        }
+
+        const todayStr = getLocalDateStringForIndex(date);
+
+        const bookingStart =
+            discount.bookingStart ||
+            discount.booking_start ||
+            discount.start ||
+            discount.startDate ||
+            '';
+
+        const bookingEnd =
+            discount.bookingEnd ||
+            discount.booking_end ||
+            discount.end ||
+            discount.endDate ||
+            '';
+
+        if (bookingStart && todayStr < bookingStart) {
+            return null;
+        }
+
+        if (bookingEnd && todayStr > bookingEnd) {
+            return null;
+        }
+
+        return {
+            amount,
+            bookingStart,
+            bookingEnd,
+            stayStart:
+                discount.stayStart ||
+                discount.stay_start ||
+                discount.validFrom ||
+                '',
+            stayEnd:
+                discount.stayEnd ||
+                discount.stay_end ||
+                discount.validTo ||
+                ''
+        };
     }
 
-    const isActive =
-        discount.active === true ||
-        discount.active === 'true' ||
-        discount.enabled === true ||
-        discount.enabled === 'true';
+    function getLocalDateStringForIndex(date) {
+        const d = new Date(date);
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
 
-    if (!isActive) {
-        return null;
+        return `${year}-${month}-${day}`;
     }
 
-    const amount = Number(
-        discount.amountPerNight ||
-        discount.amount ||
-        discount.value ||
-        apt.discountAmount ||
-        0
-    );
+    function getApartmentMinDisplayPrice(apt) {
+        const seasonPrices = Array.isArray(apt.seasons)
+            ? apt.seasons.flatMap(s => [
+                Number(s.price || 0),
+                Number(s.price3 || 0),
+                Number(s.price4 || 0)
+            ]).filter(p => p > 0)
+            : [];
 
-    if (amount <= 0) {
-        return null;
+        const basePrice = Number(apt.price || 0);
+
+        return seasonPrices.length > 0
+            ? Math.min(...seasonPrices)
+            : basePrice;
     }
 
-    const todayStr = getLocalDateStringForIndex(date);
+    function formatIndexDiscountDate(dateStr) {
+        if (!dateStr) return '';
 
-    const bookingStart =
-        discount.bookingStart ||
-        discount.booking_start ||
-        discount.start ||
-        discount.startDate ||
-        '';
+        const parts = String(dateStr).split('-').map(Number);
 
-    const bookingEnd =
-        discount.bookingEnd ||
-        discount.booking_end ||
-        discount.end ||
-        discount.endDate ||
-        '';
+        if (parts.length !== 3 || parts.some(Number.isNaN)) {
+            return dateStr;
+        }
 
-    if (bookingStart && todayStr < bookingStart) {
-        return null;
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+
+        return new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: 'numeric'
+        }).format(d);
     }
 
-    if (bookingEnd && todayStr > bookingEnd) {
-        return null;
+    function renderIndexPriceHtml(apt) {
+        const minDisplayPrice = getApartmentMinDisplayPrice(apt);
+
+        if (minDisplayPrice <= 0) {
+            return `
+                <div>
+                    <div class="apt-price-normal">Available soon</div>
+                </div>
+            `;
+        }
+
+        const discount = getActiveNightlyDiscount(apt);
+
+        if (!discount) {
+            return `
+                <div>
+                    <div class="apt-price-normal">${minDisplayPrice.toLocaleString('en-US')} HUF / night</div>
+                </div>
+            `;
+        }
+
+        const discountedPrice = Math.max(0, minDisplayPrice - discount.amount);
+
+        const bookingEndText = discount.bookingEnd
+            ? `Book by ${formatIndexDiscountDate(discount.bookingEnd)}`
+            : 'Limited offer';
+
+        let stayText = '';
+
+        if (discount.stayStart && discount.stayEnd) {
+            stayText = `Valid for stays: ${formatIndexDiscountDate(discount.stayStart)} – ${formatIndexDiscountDate(discount.stayEnd)}`;
+        } else if (discount.stayStart) {
+            stayText = `Valid from ${formatIndexDiscountDate(discount.stayStart)}`;
+        } else if (discount.stayEnd) {
+            stayText = `Valid until ${formatIndexDiscountDate(discount.stayEnd)}`;
+        }
+
+        return `
+            <div>
+                <div class="apt-sale-badge">Offer: -${discount.amount.toLocaleString('en-US')} HUF / night</div>
+                <div class="apt-price-old">${minDisplayPrice.toLocaleString('en-US')} HUF / night</div>
+                <div class="apt-price-sale">${discountedPrice.toLocaleString('en-US')} HUF / night</div>
+                <div class="apt-discount-small">
+                    ${bookingEndText}${stayText ? `<br>${stayText}` : ''}
+                </div>
+            </div>
+        `;
     }
 
-    return {
-        amount,
-        bookingStart,
-        bookingEnd,
-        stayStart:
-            discount.stayStart ||
-            discount.stay_start ||
-            discount.validFrom ||
-            '',
-        stayEnd:
-            discount.stayEnd ||
-            discount.stay_end ||
-            discount.validTo ||
+    function getApartmentDescription(apt) {
+        return (
+            apt.description_en ||
+            apt.descriptionEn ||
+            apt.desc_en ||
+            apt.descEn ||
+            apt.description ||
             ''
-    };
-}
-
-function getLocalDateStringForIndex(date) {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
-}
-
-function getApartmentMinDisplayPrice(apt) {
-    const seasonPrices = Array.isArray(apt.seasons)
-        ? apt.seasons.flatMap(s => [
-            Number(s.price || 0),
-            Number(s.price3 || 0),
-            Number(s.price4 || 0)
-        ]).filter(p => p > 0)
-        : [];
-
-    const basePrice = Number(apt.price || 0);
-
-    return seasonPrices.length > 0
-        ? Math.min(...seasonPrices)
-        : basePrice;
-}
-
-function formatIndexDiscountDate(dateStr) {
-    if (!dateStr) return '';
-
-    const parts = String(dateStr).split('-').map(Number);
-
-    if (parts.length !== 3 || parts.some(Number.isNaN)) {
-        return dateStr;
+        );
     }
 
-    const d = new Date(parts[0], parts[1] - 1, parts[2]);
+    function shortenText(text, maxLength = 118) {
+        const clean = String(text || '').trim();
 
-    return new Intl.DateTimeFormat('en-US', {
-        month: 'short',
-        day: 'numeric'
-    }).format(d);
-}
+        if (clean.length <= maxLength) {
+            return clean;
+        }
 
-function renderIndexPriceHtml(apt) {
-    const minDisplayPrice = getApartmentMinDisplayPrice(apt);
-
-    if (minDisplayPrice <= 0) {
-        return `
-            <p class="apt-price-normal">Available soon</p>
-        `;
+        return clean.slice(0, maxLength).trim() + '...';
     }
 
-    const discount = getActiveNightlyDiscount(apt);
+    function getMaxGuests(apt) {
+        const seasonMaxGuests = Array.isArray(apt.seasons)
+            ? apt.seasons.map(s => Number(s.maxGuests || 0)).filter(n => n > 0)
+            : [];
 
-    if (!discount) {
-        return `
-            <p class="apt-price-normal">From ${minDisplayPrice.toLocaleString('en-US')} HUF</p>
-        `;
+        const maxGuests = seasonMaxGuests.length > 0
+            ? Math.max(...seasonMaxGuests)
+            : Number(apt.maxGuests || 2);
+
+        return maxGuests || 2;
     }
-
-    const discountedPrice = Math.max(0, minDisplayPrice - discount.amount);
-
-    const bookingEndText = discount.bookingEnd
-        ? `Book by ${formatIndexDiscountDate(discount.bookingEnd)}`
-        : 'Limited offer';
-
-    let stayText = '';
-
-    if (discount.stayStart && discount.stayEnd) {
-        stayText = `Valid for stays: ${formatIndexDiscountDate(discount.stayStart)} – ${formatIndexDiscountDate(discount.stayEnd)}`;
-    } else if (discount.stayStart) {
-        stayText = `Valid for stays from ${formatIndexDiscountDate(discount.stayStart)}`;
-    } else if (discount.stayEnd) {
-        stayText = `Valid for stays until ${formatIndexDiscountDate(discount.stayEnd)}`;
-    }
-
-    return `
-        <div class="apt-sale-badge">Offer: -${discount.amount.toLocaleString('en-US')} HUF / night</div>
-        <div class="apt-price-old">From ${minDisplayPrice.toLocaleString('en-US')} HUF</div>
-        <p class="apt-price-sale">From ${discountedPrice.toLocaleString('en-US')} HUF</p>
-        <div style="font-size:0.68rem; color:var(--text-light); font-weight:700; line-height:1.5; margin-top:-1.4rem; margin-bottom:1.8rem;">
-            ${bookingEndText}${stayText ? `<br>${stayText}` : ''}
-        </div>
-    `;
-}
 
     function renderIndexApartments() {
-    const grid = document.getElementById('apartment-grid');
+        const grid = document.getElementById('apartment-grid');
 
-    if (!grid) return;
+        if (!grid) return;
 
-    if (!window.db || !Array.isArray(db.apartments) || db.apartments.length === 0) {
-        grid.innerHTML = `
-            <div class="loader-wrap">
-                <div>There are currently no available apartments.</div>
-            </div>
-        `;
-        return;
+        if (!window.db || !Array.isArray(db.apartments) || db.apartments.length === 0) {
+            grid.innerHTML = `
+                <div class="loader-wrap">
+                    <div>There are currently no available apartments.</div>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = "";
+
+        db.apartments.forEach(apt => {
+            const priceHtml = renderIndexPriceHtml(apt);
+            const maxGuests = getMaxGuests(apt);
+            const desc = shortenText(getApartmentDescription(apt));
+
+            const card = document.createElement('a');
+            card.href = `apartman.html?id=${encodeURIComponent(apt.id)}`;
+            card.className = 'apartment-card';
+
+            card.innerHTML = `
+                <div class="apt-image" style="background-image: url('${safeUrl(apt.coverImage || '')}');">
+                    <div class="guest-badge">${maxGuests} guests</div>
+                </div>
+
+                <div class="apt-body">
+                    <h3 class="apt-title">
+                        ${escapeHtml(apt.name_en || apt.nameEn || apt.name || 'Apartment')}
+                    </h3>
+
+                    <div class="apt-location">
+                        <span>📍</span>
+                        <span>${escapeHtml(apt.location_en || apt.locationEn || apt.location || '')}</span>
+                    </div>
+
+                    <div class="apt-desc">
+                        ${escapeHtml(desc || 'Premium Balaton apartment for a comfortable stay.')}
+                    </div>
+
+                    <div class="apt-card-bottom">
+                        ${priceHtml}
+                        <span class="btn-small">View</span>
+                    </div>
+                </div>
+            `;
+
+            grid.appendChild(card);
+        });
     }
-
-    grid.innerHTML = "";
-
-    db.apartments.forEach(apt => {
-        const priceHtml = renderIndexPriceHtml(apt);
-
-        const card = document.createElement('a');
-        card.href = `apartman.html?id=${encodeURIComponent(apt.id)}`;
-        card.className = 'pillar-card';
-        card.style.textDecoration = 'none';
-        card.style.color = 'inherit';
-
-        card.innerHTML = `
-            <div class="pillar-header">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; color: var(--text);">
-                    ${escapeHtml(apt.name_en || apt.nameEn || apt.name || 'Apartment')}
-                </h3>
-
-                <p style="font-style: italic; color: var(--text-light); margin-bottom: 1rem;">
-                    ${escapeHtml(apt.location_en || apt.locationEn || apt.location || '')}
-                </p>
-
-                ${priceHtml}
-
-                <span class="btn-primary" style="font-size: 0.6rem; padding: 0.6rem 1.5rem; display: inline-block;">
-                    Explore
-                </span>
-            </div>
-
-            <div class="pillar-img" style="background-image: url('${safeUrl(apt.coverImage || '')}');"></div>
-        `;
-
-        grid.appendChild(card);
-    });
-}
 
     function showApartmentError(message) {
         const grid = document.getElementById('apartment-grid');
@@ -872,5 +1564,6 @@ function renderIndexPriceHtml(apt) {
         return '';
     }
 </script>
+
 </body>
 </html>
