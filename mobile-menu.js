@@ -1,40 +1,40 @@
-function toggleMobileMenu() {
-    const header = document.getElementById('site-header') || document.querySelector('.site-header');
-    if (!header) return;
+(function () {
+    function initMobileMenu() {
+        const header = document.getElementById('site-header');
+        const button = document.querySelector('.mobile-menu-toggle');
 
-    header.classList.toggle('mobile-open');
-}
+        if (!header || !button) return;
 
-document.addEventListener('DOMContentLoaded', function () {
-    const header = document.getElementById('site-header') || document.querySelector('.site-header');
-    const toggle = document.querySelector('.mobile-menu-toggle');
+        button.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            header.classList.toggle('mobile-open');
+        });
 
-    if (!header || !toggle) {
-        console.warn('Mobile menu: header vagy gomb nem található.');
-        return;
+        const menuLinks = header.querySelectorAll('.nav-links a');
+
+        menuLinks.forEach(link => {
+            link.addEventListener('click', function () {
+                header.classList.remove('mobile-open');
+            });
+        });
+
+        document.addEventListener('click', function (event) {
+            if (!header.contains(event.target)) {
+                header.classList.remove('mobile-open');
+            }
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape') {
+                header.classList.remove('mobile-open');
+            }
+        });
     }
 
-    toggle.addEventListener('click', function (event) {
-        event.preventDefault();
-        event.stopPropagation();
-        toggleMobileMenu();
-    });
-
-    header.querySelectorAll('.nav-links a').forEach(link => {
-        link.addEventListener('click', function () {
-            header.classList.remove('mobile-open');
-        });
-    });
-
-    document.addEventListener('click', function (event) {
-        if (!header.contains(event.target)) {
-            header.classList.remove('mobile-open');
-        }
-    });
-
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape') {
-            header.classList.remove('mobile-open');
-        }
-    });
-});
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMobileMenu);
+    } else {
+        initMobileMenu();
+    }
+})();
