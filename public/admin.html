@@ -1096,6 +1096,37 @@
         box-shadow: 0 8px 20px rgba(176,65,62,0.28);
     }
 
+    .gallery-sort-item {
+        cursor: grab;
+    }
+
+    .gallery-sort-item:active {
+        cursor: grabbing;
+    }
+
+    .gallery-drag-handle {
+        position: absolute;
+        left: -8px;
+        top: -8px;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: var(--text);
+        color: white;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.75rem;
+        font-weight: 900;
+        cursor: grab;
+        z-index: 3;
+        box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+    }
+
+    .gallery-sort-item:active .gallery-drag-handle {
+        cursor: grabbing;
+    }
+
     .simple-modal-card {
         background: white;
         padding: 1.8rem;
@@ -1702,6 +1733,7 @@
     let currentGalleryImages = [];
     let adminCalDate = new Date();
     let currentEditingAptId = null;
+    let gallerySortable = null;
 
     function getAdminToken() {
         let token = sessionStorage.getItem('ADMIN_TOKEN');
@@ -1877,40 +1909,70 @@
     }
 
     function renderImagePreviews() {
-        const coverContainer = document.getElementById('a-cover-preview');
+    const coverContainer = document.getElementById('a-cover-preview');
 
-        if (coverContainer) {
-            coverContainer.innerHTML = currentCoverImage ? `
-                <div class="image-preview-item">
-                    <img src="${currentCoverImage}" style="width:130px; height:88px; border-color:var(--essence);">
-                    <div onclick="removeCoverImage()" class="remove-image-btn">X</div>
-                </div>
-            ` : '';
-        }
+    if (coverContainer) {
+        coverContainer.innerHTML = currentCoverImage ? `
+            <div class="image-preview-item">
+                <img src="${currentCoverImage}" style="width:130px; height:88px; border-color:var(--essence);">
+                <div onclick="removeCoverImage()" class="remove-image-btn">X</div>
+            </div>
+        ` : '';
+    }
 
-        const galleryContainer = document.getElementById('a-gallery-preview');
+    const galleryContainer = document.getElementById('a-gallery-preview');
 
-        if (galleryContainer) {
-            galleryContainer.innerHTML = currentGalleryImages.map((img, idx) => `
-                <div class="image-preview-item">
-                    <img src="${img}">
-                    <div onclick="removeGalleryImage(${idx})" class="remove-image-btn">X</div>
-                </div>
-            `).join('');
-        }
+    if (galleryContainer) {
+        galleryContainer.innerHTML = currentGalleryImages.map((img, idx) => `
+            <div class="image-preview-item gallery-sort-item" data-index="${idx}">
+                <span class="gallery-drag-handle">↕</span>
+                <img src="${img}">
+                <div onclick="removeGalleryImage(${idx})" class="remove-image-btn">X</div>
+            </div>
+        `).join('');
 
-        const visual = document.getElementById('apt-visual');
+        initGallerySorting();
+    }
 
-        if (visual) {
-            if (currentCoverImage) {
-                visual.style.backgroundImage = `url(${currentCoverImage})`;
-            } else if (currentGalleryImages.length > 0) {
-                visual.style.backgroundImage = `url(${currentGalleryImages[0]})`;
-            } else {
-                visual.style.backgroundImage = 'none';
-            }
+    const visual = document.getElementById('apt-visual');
+
+    if (visual) {
+        if (currentCoverImage) {
+            visual.style.backgroundImage = `url(${currentCoverImage})`;
+        } else if (currentGalleryImages.length > 0) {
+            visual.style.backgroundImage = `url(${currentGalleryImages[0]})`;
+        } else {
+            visual.style.backgroundImage = 'none';
         }
     }
+}
+
+function initGallerySorting() {
+    const galleryContainer = document.getElementById('a-gallery-preview');
+
+    if (!galleryContainer || typeof Sortable === 'undefined') return;
+
+    if (gallerySortable) {
+        gallerySortable.destroy();
+        gallerySortable = null;
+    }
+
+    gallerySortable = new Sortable(galleryContainer, {
+        animation: 160,
+        handle: '.gallery-drag-handle',
+        ghostClass: 'sortable-ghost',
+        onEnd: function () {
+            const newOrder = Array.from(galleryContainer.querySelectorAll('.gallery-sort-item'))
+                .map(item => Number(item.dataset.index))
+                .filter(index => !Number.isNaN(index))
+                .map(index => currentGalleryImages[index])
+                .filter(Boolean);
+
+            currentGalleryImages = newOrder;
+            renderImagePreviews();
+        }
+    });
+}
 
     function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2', maxGuests = '4', price3 = '', price4 = '') {
     const container = document.getElementById('seasons-container');
