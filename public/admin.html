@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Központi Vezérlőpult | Balaton Essence</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
     <script>
@@ -20,28 +20,40 @@
                 }
 
                 db = await res.json();
-                console.log("Adatok betöltve! ✅");
+                console.log('Adatok betöltve! ✅');
 
                 if (callback) callback();
             } catch (e) {
-                console.error("Beolvasási hiba:", e);
-                alert("Nem sikerült betölteni az adatokat.");
+                console.error('Beolvasási hiba:', e);
+                alert('Nem sikerült betölteni az adatokat.');
             }
         }
     </script>
 
     <style>
         :root {
-            --bg: #F9F9F7;
-            --text: #1A1A1A;
-            --accent: #E76F51;
-            --border: #eee;
+            --bg: #F4F2EC;
+            --surface: #FFFFFF;
+            --surface-soft: #FCFBF9;
+            --text: #172318;
+            --text-muted: #6A7063;
+            --accent: #5C7A4D;
+            --accent-2: #C8A46B;
+            --accent-warm: #E76F51;
+            --border: #E3E0D8;
+            --border-strong: #D2CEC3;
             --booking: #003580;
-            --szallas: #e62e2e;
+            --szallas: #E62E2E;
             --essence: #5C7A4D;
-            --breakfast: #E9C46A;
+            --breakfast: #E9A93F;
             --rent: #264653;
             --danger: #B0413E;
+            --warning: #F39C12;
+            --shadow-sm: 0 8px 24px rgba(23, 35, 24, 0.06);
+            --shadow-md: 0 18px 50px rgba(23, 35, 24, 0.09);
+            --radius-lg: 22px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
         }
 
         * {
@@ -50,145 +62,414 @@
             padding: 0;
         }
 
-        body {
-            font-family: 'Montserrat', sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            padding-bottom: 5rem;
+        html {
+            scroll-behavior: smooth;
         }
 
-        header {
-            position: fixed;
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background:
+                radial-gradient(circle at 10% 0%, rgba(200,164,107,0.16), transparent 28%),
+                linear-gradient(180deg, #FCFBF9 0%, var(--bg) 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 5rem;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .admin-shell {
+            min-height: 100vh;
+        }
+
+        .topbar {
+            position: sticky;
             top: 0;
             left: 0;
             width: 100%;
-            padding: 1.5rem 5vw;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
             z-index: 1000;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
+            padding: 1rem 4vw;
+            background: rgba(252, 251, 249, 0.88);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(227,224,216,0.85);
         }
 
-        .btn-cta {
+        .topbar-inner {
+            max-width: 1480px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.5rem;
+        }
+
+        .brand {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.05;
+            text-decoration: none;
+        }
+
+        .brand-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+        }
+
+        .brand-subtitle {
+            margin-top: 0.3rem;
+            font-size: 0.58rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .topbar-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            border: 1px solid transparent;
+            border-radius: 999px;
+            padding: 0.74rem 1.2rem;
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: 0.22s ease;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
             background: var(--text);
             color: white;
-            border: none;
-            padding: 0.8rem 1.8rem;
-            border-radius: 50px;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.7rem;
-            letter-spacing: 1.5px;
-            cursor: pointer;
-            transition: 0.3s;
+            box-shadow: 0 12px 28px rgba(23,35,24,0.16);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 34px rgba(23,35,24,0.2);
+        }
+
+        .btn-accent {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 10px 24px rgba(92,122,77,0.22);
+        }
+
+        .btn-accent:hover {
+            background: #48613A;
+            transform: translateY(-1px);
         }
 
         .btn-outline {
-            background: transparent;
-            border: 1px solid #ddd;
-            padding: 0.6rem 1.2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            transition: 0.3s;
+            background: rgba(255,255,255,0.68);
+            color: var(--text);
+            border-color: var(--border-strong);
         }
 
         .btn-outline:hover {
-            background: #eee;
+            background: white;
+            border-color: var(--text-muted);
+            transform: translateY(-1px);
         }
 
-        .btn-del {
+        .btn-danger {
+            background: transparent;
             color: var(--danger);
+            border-color: rgba(176,65,62,0.35);
+        }
+
+        .btn-danger:hover {
+            background: var(--danger);
+            color: white;
             border-color: var(--danger);
         }
 
-        .btn-del:hover {
-            background: var(--danger);
+        .btn-mini {
+            padding: 0.52rem 0.82rem;
+            font-size: 0.62rem;
+            letter-spacing: 0.9px;
+        }
+
+        .main {
+            max-width: 1480px;
+            margin: 0 auto;
+            padding: 2.2rem 4vw 0;
+        }
+
+        .hero-admin {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
+            gap: 1.2rem;
+            align-items: stretch;
+            margin-bottom: 1.4rem;
+        }
+
+        .hero-panel,
+        .quick-panel {
+            background: rgba(255,255,255,0.8);
+            border: 1px solid rgba(227,224,216,0.95);
+            box-shadow: var(--shadow-sm);
+            border-radius: var(--radius-lg);
+            padding: clamp(1.4rem, 2vw, 2.1rem);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .hero-panel::after {
+            content: '';
+            position: absolute;
+            right: -80px;
+            top: -90px;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(92,122,77,0.16), transparent 65%);
+            pointer-events: none;
+        }
+
+        .kicker {
+            color: var(--accent-2);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.1rem, 4vw, 3.5rem);
+            line-height: 1.05;
+            margin-bottom: 0.8rem;
+        }
+
+        .hero-lead {
+            color: var(--text-muted);
+            line-height: 1.75;
+            max-width: 760px;
+            font-size: 0.96rem;
+        }
+
+        .quick-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 1rem;
+            background:
+                radial-gradient(circle at 90% 10%, rgba(200,164,107,0.18), transparent 30%),
+                linear-gradient(135deg, #172318, #253421);
             color: white;
         }
 
-        main {
-            max-width: 1400px;
-            margin: 10rem auto 0;
-            padding: 0 5vw;
+        .quick-panel p {
+            color: rgba(255,255,255,0.74);
+            line-height: 1.65;
+            font-size: 0.86rem;
+        }
+
+        .quick-panel .btn-outline {
+            background: rgba(255,255,255,0.08);
+            color: white;
+            border-color: rgba(255,255,255,0.24);
+        }
+
+        .quick-panel .btn-outline:hover {
+            background: rgba(255,255,255,0.14);
+            border-color: rgba(255,255,255,0.4);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.82);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.15rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-label {
+            font-size: 0.66rem;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            font-weight: 800;
+            margin-bottom: 0.45rem;
+        }
+
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .stat-note {
+            margin-top: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.74rem;
+            line-height: 1.4;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 1.4rem;
         }
 
         .section {
-            background: white;
-            border-radius: 12px;
-            padding: 2.5rem;
-            margin-bottom: 3rem;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.03);
-            position: relative;
+            background: rgba(255,255,255,0.88);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
             overflow: hidden;
-        }
-
-        .section::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 6px;
-            height: 100%;
-            background: var(--border);
-        }
-
-        .section.s-booking::before {
-            background: var(--booking);
-        }
-
-        .section.s-breakfast::before {
-            background: var(--breakfast);
-        }
-
-        .section.s-rent::before {
-            background: var(--rent);
         }
 
         .section-header {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 2rem;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1.35rem 1.55rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(252,251,249,0.85));
         }
 
-        .section-header h2 {
-            font-family: 'Playfair Display';
-            font-size: 1.8rem;
+        .section-title-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.9rem;
+        }
+
+        .section-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(92,122,77,0.11);
+            color: var(--accent);
+            font-size: 1.2rem;
+            flex: 0 0 auto;
+        }
+
+        .section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.65rem;
+            line-height: 1.1;
+        }
+
+        .section-subtitle {
+            margin-top: 0.3rem;
+            font-size: 0.76rem;
+            color: var(--text-muted);
+        }
+
+        .section-body {
+            padding: 1.35rem 1.55rem 1.55rem;
+        }
+
+        .section-booking .section-icon { background: rgba(0,53,128,0.1); color: var(--booking); }
+        .section-breakfast .section-icon { background: rgba(233,169,63,0.16); color: #C47F14; }
+        .section-rent .section-icon { background: rgba(38,70,83,0.12); color: var(--rent); }
+        .section-services .section-icon { background: rgba(92,122,77,0.12); color: var(--essence); }
+        .section-apartments .section-icon { background: rgba(200,164,107,0.17); color: #9A753B; }
+        .section-reviews .section-icon { background: rgba(231,111,81,0.13); color: var(--accent-warm); }
+        .section-owners .section-icon { background: rgba(23,35,24,0.09); color: var(--text); }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: white;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
+            min-width: 760px;
         }
 
         th {
             text-align: left;
-            padding: 1rem;
-            font-size: 0.7rem;
-            color: #999;
+            padding: 0.95rem 1rem;
+            font-size: 0.66rem;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 2px solid var(--border);
+            letter-spacing: 1.2px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-soft);
+            white-space: nowrap;
         }
 
         td {
-            padding: 1.2rem 1rem;
+            padding: 1rem;
             border-bottom: 1px solid var(--border);
-            font-size: 0.85rem;
+            font-size: 0.84rem;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tbody tr {
+            transition: 0.18s ease;
+        }
+
+        tbody tr:hover {
+            background: rgba(244,242,236,0.55);
+        }
+
+        .empty-state {
+            padding: 2rem;
+            text-align: center;
+            color: var(--text-muted);
+            background: white;
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius-md);
+            line-height: 1.6;
         }
 
         .badge {
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 0.65rem;
-            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.35rem 0.62rem;
+            border-radius: 999px;
+            font-size: 0.62rem;
+            font-weight: 900;
             text-transform: uppercase;
+            letter-spacing: 0.8px;
+            white-space: nowrap;
         }
 
         .badge-booking,
@@ -210,111 +491,489 @@
             color: var(--essence);
         }
 
-        .modal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
+        .badge-muted {
+            background: rgba(106,112,99,0.12);
+            color: var(--text-muted);
         }
 
-        .custom-modal {
-            background: white;
-            width: 95%;
-            height: 90vh;
+        .muted {
+            color: var(--text-muted);
+        }
+
+        .price-text {
+            color: var(--accent-warm);
+            font-weight: 800;
+            font-size: 0.8rem;
+            margin-top: 0.25rem;
+        }
+
+        .services-layout {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.4rem;
+        }
+
+        .service-group-heading {
             display: flex;
-            border-radius: 12px;
-            overflow: hidden;
-            position: relative;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            margin: 0.4rem 0 1rem;
         }
 
-        .modal-visual {
-            flex: 0.8;
-            background-size: cover;
-            background-position: center;
-            background-color: #06111C;
+        .service-group-heading h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.45rem;
         }
 
-        .modal-body {
-            flex: 1.2;
-            padding: 4rem;
-            overflow-y: auto;
+        .service-count {
+            font-size: 0.66rem;
+            font-weight: 900;
+            color: var(--text-muted);
+            background: rgba(106,112,99,0.1);
+            padding: 0.4rem 0.65rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .service-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            box-shadow: 0 8px 24px rgba(23,35,24,0.04);
+        }
+
+        .service-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .service-card-title {
+            font-size: 0.72rem;
+            font-weight: 900;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            margin-bottom: 0.25rem;
+        }
+
+        .service-card-name {
+            font-weight: 800;
+            font-size: 1rem;
+        }
+
+        .service-active-row {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.45rem 0.6rem;
+            border-radius: 999px;
+            background: rgba(92,122,77,0.1);
+            color: var(--accent);
+            font-size: 0.66rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+
+        .service-active-row input {
+            width: auto;
+            accent-color: var(--accent);
+        }
+
+        .service-fields {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.8rem;
+        }
+
+        .service-fields.two {
+            grid-template-columns: 1fr 1fr;
         }
 
         .form-group {
-            margin-bottom: 1.2rem;
+            margin-bottom: 1rem;
         }
 
-        .form-group label {
+        .form-group label,
+        .field-label {
             display: block;
-            margin-bottom: 0.4rem;
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #666;
+            margin-bottom: 0.38rem;
+            font-size: 0.66rem;
+            color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-weight: 900;
+            letter-spacing: 0.9px;
         }
 
         input,
         select,
         textarea {
             width: 100%;
-            border: none;
-            border-bottom: 2px solid #eee;
-            padding: 0.8rem 0;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.82rem 0.88rem;
             outline: none;
-            font-family: 'Montserrat';
-            background: transparent;
+            background: var(--surface-soft);
+            color: var(--text);
+            transition: 0.18s ease;
+            font-size: 0.86rem;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: rgba(92,122,77,0.65);
+            box-shadow: 0 0 0 4px rgba(92,122,77,0.08);
+            background: white;
         }
 
         textarea {
+            min-height: 90px;
             resize: vertical;
+            line-height: 1.55;
         }
 
-        .gallery-preview {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
+        .unit-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.45rem;
         }
 
-        .owner-tag {
-            color: var(--essence);
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 0.65rem;
-            background: rgba(92, 122, 77, 0.1);
-            padding: 2px 6px;
-            border-radius: 4px;
-            margin-left: 5px;
-        }
-
-        .sortable-ghost {
-            opacity: 0.4;
-            background-color: #f9f9f9;
+        .apt-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.9rem;
         }
 
         .apt-row {
             cursor: grab;
+            display: grid;
+            grid-template-columns: minmax(260px, 2.2fr) minmax(260px, 2fr) minmax(180px, auto);
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: white;
+            box-shadow: 0 6px 18px rgba(23,35,24,0.035);
         }
 
         .apt-row:active {
             cursor: grabbing;
         }
 
-        .admin-cal-day {
-            padding: 10px 0;
-            border: 1px solid #ddd;
+        .apt-main {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .apt-thumb,
+        .apt-thumb-placeholder {
+            width: 64px;
+            height: 64px;
+            border-radius: 18px;
+            object-fit: cover;
+            flex: 0 0 auto;
+            border: 1px solid var(--border);
+        }
+
+        .apt-thumb-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--surface-soft);
+            color: var(--text-muted);
+            font-weight: 900;
+        }
+
+        .apt-title {
+            font-weight: 900;
+            font-size: 0.98rem;
+        }
+
+        .apt-meta {
+            color: var(--text-muted);
+            font-size: 0.76rem;
+            line-height: 1.55;
+            margin-top: 0.24rem;
+        }
+
+        .lang-status {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-top: 0.5rem;
+        }
+
+        .lang-pill {
+            font-size: 0.62rem;
+            font-weight: 900;
+            color: var(--text-muted);
+            background: rgba(106,112,99,0.1);
+            padding: 0.25rem 0.45rem;
+            border-radius: 999px;
+        }
+
+        .lang-pill.ok {
+            color: var(--accent);
+            background: rgba(92,122,77,0.12);
+        }
+
+        .discount-badge {
+            display: inline-flex;
+            margin-top: 0.5rem;
+            padding: 0.35rem 0.55rem;
+            border-radius: 999px;
+            background: rgba(176,65,62,0.1);
+            color: var(--danger);
+            font-size: 0.64rem;
+            font-weight: 900;
+            line-height: 1.35;
+        }
+
+        .chart-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .chart-box {
+            min-width: 70px;
+            text-align: center;
+            background: var(--surface-soft);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 0.5rem;
+        }
+
+        .chart-percent {
+            font-size: 0.6rem;
+            font-weight: 900;
+        }
+
+        .chart-label {
+            font-size: 0.52rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+
+        .row-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .review-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.85rem;
+        }
+
+        .review-row {
+            display: grid;
+            grid-template-columns: 1.1fr 0.75fr 3fr auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: white;
+        }
+
+        .star-text {
+            color: #D49A23;
+            letter-spacing: 1px;
+            white-space: nowrap;
+        }
+
+        .modal-overlay,
+        .modal {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 15, 12, 0.62);
+            backdrop-filter: blur(10px);
+            z-index: 3000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .custom-modal {
+            background: white;
+            width: min(1180px, 96vw);
+            height: min(90vh, 980px);
+            display: grid;
+            grid-template-columns: 0.82fr 1.18fr;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 36px 100px rgba(0,0,0,0.28);
+            border: 1px solid rgba(255,255,255,0.18);
+        }
+
+        .modal-visual {
+            background-size: cover;
+            background-position: center;
+            background-color: #172318;
+            position: relative;
+        }
+
+        .modal-visual::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(180deg, rgba(0,0,0,0.08), rgba(0,0,0,0.35)),
+                radial-gradient(circle at 70% 20%, rgba(200,164,107,0.25), transparent 35%);
+        }
+
+        .modal-body {
+            padding: 2.2rem;
+            overflow-y: auto;
+            background: linear-gradient(180deg, #fff, #FCFBF9);
+        }
+
+        .modal-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .modal-title-row h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+        }
+
+        .modal-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .modal-card-title {
+            font-weight: 900;
+            color: var(--text);
+            text-transform: uppercase;
+            letter-spacing: 1.1px;
+            font-size: 0.72rem;
+            margin-bottom: 1rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .season-row {
+            display: grid;
+            grid-template-columns: 1.4fr 1fr 1fr 1fr 0.75fr 0.75fr 1fr 1fr auto;
+            gap: 0.55rem;
+            align-items: end;
+            margin-bottom: 0.75rem;
+            background: var(--surface-soft);
+            padding: 0.85rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .admin-calendar-wrapper {
+            background: white;
+            padding: 1.2rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+
+        .calendar-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.72rem;
+            font-weight: 800;
+            color: var(--text-muted);
+        }
+
+        .legend-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
             border-radius: 4px;
+            margin-right: 5px;
+            vertical-align: middle;
+            border: 1px solid var(--border-strong);
+        }
+
+        .admin-calendar-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            background: var(--surface-soft);
+            padding: 0.75rem;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+        }
+
+        .weekday-grid,
+        #admin-calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+        }
+
+        .weekday-grid {
+            font-size: 0.62rem;
+            font-weight: 900;
+            color: var(--text-muted);
+            margin-bottom: 0.45rem;
+            letter-spacing: 1px;
+        }
+
+        #admin-calendar-days {
+            gap: 4px;
+        }
+
+        .admin-cal-day {
+            padding: 0.7rem 0;
+            border: 1px solid var(--border);
+            border-radius: 10px;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: 0.2s;
+            font-size: 0.82rem;
+            transition: 0.18s ease;
         }
 
         .admin-cal-day.empty {
@@ -324,245 +983,392 @@
         }
 
         .admin-cal-day.status-free {
-            background: #f9f9f9;
-            color: #333;
+            background: var(--surface-soft);
+            color: var(--text);
         }
 
         .admin-cal-day.status-free:hover {
-            background: #e2e2e2;
+            background: #ECE8DE;
         }
 
         .admin-cal-day.status-booked {
-            background: #f39c12;
+            background: var(--warning);
             color: white;
             cursor: not-allowed;
-            border-color: #e67e22;
+            border-color: #E67E22;
         }
 
         .admin-cal-day.status-blocked {
-            background: #b0413e;
+            background: var(--danger);
             color: white;
-            font-weight: bold;
-            border-color: #8f3431;
+            font-weight: 900;
+            border-color: #8F3431;
         }
 
-        .admin-card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-            margin-top: 30px;
-            border-left: 5px solid #298538;
+        .gallery-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .image-preview-item {
             position: relative;
+            display: inline-block;
         }
 
-        .service-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 18px;
+        .image-preview-item img {
+            width: 78px;
+            height: 78px;
+            object-fit: cover;
+            border-radius: 16px;
+            border: 2px solid var(--border);
         }
 
-        .service-card {
-            background: #fafafa;
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            padding: 18px;
+        .remove-image-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            text-align: center;
+            cursor: pointer;
+            line-height: 24px;
+            font-size: 12px;
+            font-weight: 900;
+            box-shadow: 0 8px 20px rgba(176,65,62,0.28);
         }
 
-        .service-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 14px;
+        .simple-modal-card {
+            background: white;
+            padding: 1.8rem;
+            border-radius: 22px;
+            width: min(520px, 94vw);
+            box-shadow: 0 30px 90px rgba(0,0,0,0.28);
         }
 
-        .service-card-title {
-            font-weight: 800;
-            color: var(--essence);
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 1px;
+        .simple-modal-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1.4rem;
         }
 
-        .service-fields {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 14px;
-        }
-
-        .service-fields.full {
-            grid-template-columns: 1fr;
-        }
-
-        .service-fields textarea {
-            min-height: 90px;
-        }
-
-        .service-active-row {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #666;
-        }
-
-        .service-active-row input {
-            width: auto;
+        .sortable-ghost {
+            opacity: 0.45;
+            background-color: #F3F1EA;
         }
 
         .plain-amp {
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Playfair Display', serif;
             font-style: normal;
             font-weight: 600;
             font-size: 0.9em;
             margin: 0 4px;
-            vertical-align: 0.02em;
+        }
+
+        @media (max-width: 1180px) {
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .apt-row {
+                grid-template-columns: 1fr;
+            }
+
+            .row-actions {
+                justify-content: flex-start;
+            }
         }
 
         @media (max-width: 900px) {
-            .service-fields {
+            .topbar-inner,
+            .hero-admin,
+            .custom-modal {
                 grid-template-columns: 1fr;
+            }
+
+            .topbar-inner {
+                display: grid;
+            }
+
+            .topbar-actions {
+                justify-content: flex-start;
+            }
+
+            .modal-visual {
+                display: none;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .service-fields,
+            .service-fields.two,
+            .grid-2,
+            .grid-3,
+            .season-row {
+                grid-template-columns: 1fr;
+            }
+
+            .review-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 620px) {
+            .main {
+                padding: 1rem 4vw 0;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .modal-body {
+                padding: 1.2rem;
             }
         }
     </style>
 </head>
 
 <body>
+<div class="admin-shell">
+    <header class="topbar">
+        <div class="topbar-inner">
+            <a href="index.html" class="brand" aria-label="Balaton Essence főoldal">
+                <span class="brand-title">BALATON</span>
+                <span class="brand-subtitle">Essence admin</span>
+            </a>
 
-<header>
-    <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1;">
-        <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
-        <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: #1A1A1A; text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
-    </a>
-
-    <div style="display:flex; gap:10px;">
-        <button class="btn-outline" onclick="syncCalendars()">🔄 Szinkronizálás</button>
-        <button class="btn-outline" onclick="resetAdminToken()">Token csere</button>
-        <button class="btn-outline" onclick="location.href='index.html'">Kilépés</button>
-    </div>
-</header>
-
-<main>
-    <div class="section s-booking">
-        <div class="section-header">
-            <h2>Apartman Foglalások</h2>
+            <div class="topbar-actions">
+                <button class="btn btn-outline" onclick="syncCalendars()">🔄 Szinkronizálás</button>
+                <button class="btn btn-outline" onclick="resetAdminToken()">Token csere</button>
+                <button class="btn btn-outline" onclick="location.href='index.html'">Kilépés</button>
+            </div>
         </div>
+    </header>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Ingatlan</th>
-                    <th>Vendég</th>
-                    <th>Dátum</th>
-                    <th>Forrás</th>
-                    <th>Művelet</th>
-                </tr>
-            </thead>
-            <tbody id="booking-table-body"></tbody>
-        </table>
-    </div>
+    <main class="main">
+        <section class="hero-admin">
+            <div class="hero-panel">
+                <div class="kicker">Központi vezérlőpult</div>
+                <h1 class="hero-title">Foglalások, szolgáltatások és tartalmak egy helyen.</h1>
+                <p class="hero-lead">
+                    Itt kezelheted az apartmanokat, szezonális árakat, SUP & SUN szolgáltatásokat, reggeli rendeléseket,
+                    vendégvéleményeket és a tulajdonosi partnereket.
+                </p>
+            </div>
 
-    <div class="section s-breakfast">
-        <div class="section-header">
-            <h2>Reggeli Tál Rendelések</h2>
+            <div class="quick-panel">
+                <div>
+                    <div class="kicker">Gyors műveletek</div>
+                    <p>Új apartmant, véleményt vagy partnert adhatsz hozzá, illetve innen mentheted a szolgáltatási árakat.</p>
+                </div>
+                <div class="topbar-actions" style="justify-content:flex-start;">
+                    <button class="btn btn-outline" onclick="openAptModal(null)">+ Apartman</button>
+                    <button class="btn btn-outline" onclick="openReviewModal()">+ Vélemény</button>
+                    <button class="btn btn-outline" onclick="openOwnerModal()">+ Partner</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="stats-grid" id="stats-grid"></section>
+
+        <div class="dashboard-grid">
+            <section class="section section-booking">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">🏡</div>
+                        <div>
+                            <h2>Apartman foglalások</h2>
+                            <div class="section-subtitle">Webes, Booking és Szállás.hu foglalások áttekintése.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ingatlan</th>
+                                    <th>Vendég</th>
+                                    <th>Dátum</th>
+                                    <th>Forrás</th>
+                                    <th>Művelet</th>
+                                </tr>
+                            </thead>
+                            <tbody id="booking-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section section-breakfast">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">🥐</div>
+                        <div>
+                            <h2>Reggeli tál rendelések</h2>
+                            <div class="section-subtitle">Moments / reggeli szolgáltatások és rendelési adatok.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Apartman / Vendég</th>
+                                    <th>Dátum</th>
+                                    <th>Részletek</th>
+                                    <th style="text-align:center; width:110px;">Művelet</th>
+                                </tr>
+                            </thead>
+                            <tbody id="breakfast-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section section-rent">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">🏄</div>
+                        <div>
+                            <h2>Eszköz bérlések</h2>
+                            <div class="section-subtitle">SUP, napozószék, napernyő és hajó foglalások.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Eszköz</th>
+                                    <th>Vendég</th>
+                                    <th>Időpont</th>
+                                    <th>Megjegyzés</th>
+                                    <th>Művelet</th>
+                                </tr>
+                            </thead>
+                            <tbody id="rent-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section section-services">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">⚙️</div>
+                        <div>
+                            <h2>Szolgáltatások / Árak</h2>
+                            <div class="section-subtitle">Többnyelvű nevek, leírások, árak, képek és aktív státusz.</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-accent" onclick="saveServices()">Szolgáltatások mentése</button>
+                </div>
+                <div class="section-body">
+                    <div class="services-layout">
+                        <div>
+                            <div class="service-group-heading">
+                                <h3>SUP <span class="plain-amp">&amp;</span> SUN</h3>
+                                <span class="service-count" id="sun-service-count">0 szolgáltatás</span>
+                            </div>
+                            <div id="services-sun-container" class="service-grid"></div>
+                        </div>
+
+                        <div>
+                            <div class="service-group-heading">
+                                <h3>Moments / Reggeli tálak</h3>
+                                <span class="service-count" id="moments-service-count">0 szolgáltatás</span>
+                            </div>
+                            <div id="services-moments-container" class="service-grid"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section section-apartments">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">🏘️</div>
+                        <div>
+                            <h2>Ingatlanok</h2>
+                            <div class="section-subtitle">Apartmanok, szezonális árak, képek, iCal és kedvezmények.</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="openAptModal(null)">+ Új apartman</button>
+                </div>
+                <div class="section-body">
+                    <div id="apt-list-container" class="apt-list"></div>
+                </div>
+            </section>
+
+            <section class="section section-reviews">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">⭐</div>
+                        <div>
+                            <h2>Vendégvélemények</h2>
+                            <div class="section-subtitle">Publikus és jóváhagyásra váró többnyelvű vélemények.</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="openReviewModal()">+ Új vélemény</button>
+                </div>
+                <div class="section-body">
+                    <div id="reviews-list-container" class="review-list"></div>
+                </div>
+            </section>
+
+            <section class="section section-owners">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">🤝</div>
+                        <div>
+                            <h2>Partnerek & tulajdonosok</h2>
+                            <div class="section-subtitle">Partnerkódok és hozzájuk rendelt ingatlanok.</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="openOwnerModal()">+ Új partner</button>
+                </div>
+                <div class="section-body">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Név</th>
+                                    <th>Kód</th>
+                                    <th>Ingatlanok</th>
+                                    <th style="text-align:right;">Művelet</th>
+                                </tr>
+                            </thead>
+                            <tbody id="owners-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
         </div>
+    </main>
+</div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Apartman / Vendég</th>
-                    <th>Dátum</th>
-                    <th>Részletek</th>
-                    <th style="text-align: center; width: 100px;">Művelet</th>
-                </tr>
-            </thead>
-            <tbody id="breakfast-table-body"></tbody>
-        </table>
-    </div>
-
-    <div class="section s-rent">
-        <div class="section-header">
-            <h2>Eszköz Bérlések</h2>
-        </div>
-
-        <table>
-            <thead>
-                <tr>
-                    <th>Eszköz</th>
-                    <th>Vendég</th>
-                    <th>Időpont</th>
-                    <th>Megjegyzés</th>
-                    <th>Művelet</th>
-                </tr>
-            </thead>
-            <tbody id="rent-table-body"></tbody>
-        </table>
-    </div>
-
-    <div class="section">
-        <div class="section-header">
-            <h2>Szolgáltatások / Árak</h2>
-            <button class="btn-cta" onclick="saveServices()">Szolgáltatások mentése</button>
-        </div>
-
-        <div style="margin-bottom: 2rem;">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">
-                    SUP <span class="plain-amp">&amp;</span> SUN
-                </h3>
-            <div id="services-sun-container" class="service-grid"></div>
-        </div>
-
-        <div>
-            <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">
-                    Moments / Reggeli tálak
-                </h3>
-            <div id="services-moments-container" class="service-grid"></div>
-        </div>
-    </div>
-
-    <div class="section">
-        <div class="section-header">
-            <h2>Ingatlanok</h2>
-            <button class="btn-cta" onclick="openAptModal(null)">+ Új Apartman</button>
-        </div>
-
-        <div id="apt-list-container"></div>
-    </div>
-
-    <div class="section">
-        <div class="section-header">
-            <h2>Vendégvélemények</h2>
-            <button class="btn-cta" onclick="openReviewModal()">+ Új vélemény</button>
-        </div>
-
-        <div id="reviews-list-container"></div>
-    </div>
-
-    <div class="admin-card">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h2 style="margin: 0; font-family: 'Playfair Display', serif; font-size: 1.8rem; font-weight: 700; color: #1a1a1a;">Partnerek & Tulajdonosok</h2>
-            <button class="btn-cta" onclick="openOwnerModal()">+ ÚJ PARTNER</button>
-        </div>
-
-        <table>
-            <thead>
-                <tr style="text-align: left; color: #aaa; font-size: 0.8rem; text-transform: uppercase;">
-                    <th style="padding: 10px;">Név</th>
-                    <th style="padding: 10px;">Kód</th>
-                    <th style="padding: 10px;">Ingatlanok</th>
-                    <th style="padding: 10px; text-align: right;">Művelet</th>
-                </tr>
-            </thead>
-            <tbody id="owners-table-body"></tbody>
-        </table>
-    </div>
-</main>
-
-<div id="review-modal" class="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:3000; align-items:center; justify-content:center;">
-    <div style="background:white; padding:30px; border-radius:12px; width:90%; max-width:500px;">
-        <h2 style="font-family:'Playfair Display'; margin-bottom:25px;">Vélemény szerkesztése</h2>
+<div id="review-modal" class="modal">
+    <div class="simple-modal-card">
+        <h2>Vélemény szerkesztése</h2>
 
         <input type="hidden" id="review-id">
 
@@ -599,14 +1405,14 @@
 
         <div class="form-group">
             <label style="display:flex; align-items:center; gap:10px;">
-                <input type="checkbox" id="review-visible" checked style="width:auto;">
+                <input type="checkbox" id="review-visible" checked style="width:auto; accent-color:var(--accent);">
                 Látható a publikus oldalon
             </label>
         </div>
 
         <div style="display:flex; gap:10px;">
-            <button class="btn-cta" style="flex:2;" onclick="saveReview()">Mentés</button>
-            <button class="btn-outline" style="flex:1;" onclick="closeReviewModal()">Mégse</button>
+            <button class="btn btn-primary" style="flex:2;" onclick="saveReview()">Mentés</button>
+            <button class="btn btn-outline" style="flex:1;" onclick="closeReviewModal()">Mégse</button>
         </div>
     </div>
 </div>
@@ -616,116 +1422,124 @@
         <div class="modal-visual" id="apt-visual"></div>
 
         <div class="modal-body">
-            <h2 id="modal-title" style="font-family:'Playfair Display'; margin-bottom:1.5rem;">Apartman Szerkesztése</h2>
+            <div class="modal-title-row">
+                <div>
+                    <div class="kicker">Ingatlan adatlap</div>
+                    <h2 id="modal-title">Apartman szerkesztése</h2>
+                </div>
+                <button class="btn btn-outline btn-mini" onclick="closeModal()">Bezárás</button>
+            </div>
 
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px;">
-                <div class="form-group">
-                    <label>Név</label>
-                    <input type="text" id="a-name" placeholder="Pl.: Liget Residence">
+            <div class="modal-card">
+                <div class="modal-card-title">Alapadatok</div>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Név</label>
+                        <input type="text" id="a-name" placeholder="Pl.: Liget Residence">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Helyszín / város</label>
+                        <input type="text" id="a-loc" placeholder="Pl.: Fonyód">
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label>Helyszín / város</label>
-                    <input type="text" id="a-loc" placeholder="Pl.: Fonyód">
+                    <label>Pontos cím</label>
+                    <input type="text" id="a-address" placeholder="Pl.: 8640 Fonyód, Fürdő utca 40.">
+                </div>
+
+                <div class="form-group">
+                    <label>Tulajdonos</label>
+                    <select id="a-owner-select"></select>
                 </div>
             </div>
 
-            <div class="form-group">
-                <label>Pontos cím</label>
-                <input type="text" id="a-address" placeholder="Pl.: 8640 Fonyód, Fürdő utca 40.">
-            </div>
-
-            <div class="form-group">
-                <label>Tulajdonos</label>
-                <select id="a-owner-select"></select>
-            </div>
-
-            <div class="form-group" style="background:#f4f4f4; padding:1.5rem; border-radius:8px; border:1px solid #ddd; margin-top:10px;">
-                <label style="color:var(--text); font-weight:bold; margin-bottom:10px; display:block;">Szezonális Árak és Szabályok</label>
-
+            <div class="modal-card">
+                <div class="modal-card-title">Szezonális árak és szabályok</div>
                 <div id="seasons-container"></div>
-
-                <button type="button" class="btn-outline" style="font-size:0.8rem; padding:0.5rem 1rem; margin-top:10px;" onclick="addSeasonRow()">+ Új szezon hozzáadása</button>
+                <button type="button" class="btn btn-outline btn-mini" onclick="addSeasonRow()">+ Új szezon hozzáadása</button>
             </div>
 
-            <div class="form-group" style="background:#fff6f0; padding:1.5rem; border-radius:8px; border:1px solid #f0d2c5; margin-top:1.5rem;">
-    <label style="color:var(--danger); font-weight:bold; margin-bottom:10px; display:block;">
-        Akció / éjszakánkénti kedvezmény
-    </label>
+            <div class="modal-card" style="border-color:rgba(176,65,62,0.22); background:#fffafa;">
+                <div class="modal-card-title" style="color:var(--danger);">Akció / éjszakánkénti kedvezmény</div>
 
-    <div style="display:grid; grid-template-columns: 0.8fr 1fr; gap:14px; align-items:end; margin-bottom:14px;">
-        <label style="display:flex; align-items:center; gap:8px; font-size:0.8rem; font-weight:700;">
-            <input type="checkbox" id="a-discount-active" style="width:auto;">
-            Akció aktív
-        </label>
+                <div class="grid-2">
+                    <label style="display:flex; align-items:center; gap:10px; font-size:0.82rem; font-weight:800; color:var(--text);">
+                        <input type="checkbox" id="a-discount-active" style="width:auto; accent-color:var(--danger);">
+                        Akció aktív
+                    </label>
 
-        <div>
-            <label>Kedvezmény / éj</label>
-            <input type="number" id="a-discount-amount" placeholder="Pl. 15000">
-        </div>
-    </div>
-
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px; margin-bottom:14px;">
-        <div>
-            <label>Foglalási akció kezdete</label>
-            <input type="date" id="a-discount-booking-start">
-        </div>
-
-        <div>
-            <label>Foglalási akció vége</label>
-            <input type="date" id="a-discount-booking-end">
-        </div>
-    </div>
-
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:14px;">
-        <div>
-            <label>Mely napoktól jár?</label>
-            <input type="date" id="a-discount-stay-start">
-        </div>
-
-        <div>
-            <label>Mely napokig jár?</label>
-            <input type="date" id="a-discount-stay-end">
-        </div>
-    </div>
-
-    <p style="font-size:0.72rem; color:#777; line-height:1.6; margin-top:12px;">
-        A vendég akkor kap kedvezményt, ha az akció foglalási időszakában foglal,
-        és a kiválasztott éjszaka beleesik a megadott tartózkodási időszakba.
-    </p>
-</div>
-
-            <div class="form-group" style="margin-top:1.5rem;">
-                <label>Leírás - Magyar</label>
-                <textarea id="a-desc" rows="4" placeholder="Magyar leírás..."></textarea>
-            </div>
-
-            <div class="form-group" style="margin-top:1rem;">
-                <label>Leírás - Angol</label>
-                <textarea id="a-desc-en" rows="4" placeholder="English description..."></textarea>
-            </div>
-
-            <div class="form-group" style="margin-top:1rem;">
-                <label>Leírás - Német</label>
-                <textarea id="a-desc-de" rows="4" placeholder="Deutsche Beschreibung..."></textarea>
-            </div>
-
-            <div class="admin-calendar-wrapper" style="background:#f9f9f9; padding:1.5rem; border-radius:8px; border:1px solid #ddd; margin-top:1.5rem; margin-bottom:1.5rem;">
-                <h3 style="margin-bottom: 1rem; font-size: 1rem; color: var(--text);">Dátumok manuális letiltása</h3>
-
-                <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; font-size: 0.75rem; font-weight: bold;">
-                    <span style="color: #666;"><span style="display:inline-block; width:12px; height:12px; background:#fff; border:1px solid #ccc; margin-right:5px; vertical-align:middle;"></span> Szabad</span>
-                    <span style="color: #d35400;"><span style="display:inline-block; width:12px; height:12px; background:#f39c12; margin-right:5px; vertical-align:middle;"></span> Foglalt</span>
-                    <span style="color: #c0392b;"><span style="display:inline-block; width:12px; height:12px; background:#b0413e; margin-right:5px; vertical-align:middle;"></span> Letiltott</span>
+                    <div class="form-group">
+                        <label>Kedvezmény / éj</label>
+                        <input type="number" id="a-discount-amount" placeholder="Pl. 15000">
+                    </div>
                 </div>
 
-                <div class="admin-calendar-controls" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; background: white; padding: 10px; border-radius: 4px; border: 1px solid #eee;">
-                    <button type="button" onclick="changeAdminMonth(-1)" style="padding: 5px 15px; cursor:pointer; border: none; background: #eee; border-radius: 4px; font-weight: bold;">‹ Előző</button>
-                    <span id="admin-cal-month" style="font-weight: bold; font-family: 'Playfair Display'; font-size: 1.1rem; color: var(--essence);">2026. 05.</span>
-                    <button type="button" onclick="changeAdminMonth(1)" style="padding: 5px 15px; cursor:pointer; border: none; background: #eee; border-radius: 4px; font-weight: bold;">Következő ›</button>
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Foglalási akció kezdete</label>
+                        <input type="date" id="a-discount-booking-start">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Foglalási akció vége</label>
+                        <input type="date" id="a-discount-booking-end">
+                    </div>
                 </div>
 
-                <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.65rem; font-weight: 700; color: #999; margin-bottom: 8px;">
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Mely napoktól jár?</label>
+                        <input type="date" id="a-discount-stay-start">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Mely napokig jár?</label>
+                        <input type="date" id="a-discount-stay-end">
+                    </div>
+                </div>
+
+                <p style="font-size:0.76rem; color:var(--text-muted); line-height:1.6;">
+                    A vendég akkor kap kedvezményt, ha az akció foglalási időszakában foglal,
+                    és a kiválasztott éjszaka beleesik a megadott tartózkodási időszakba.
+                </p>
+            </div>
+
+            <div class="modal-card">
+                <div class="modal-card-title">Többnyelvű leírások</div>
+                <div class="form-group">
+                    <label>Leírás - Magyar</label>
+                    <textarea id="a-desc" rows="4" placeholder="Magyar leírás..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Leírás - Angol</label>
+                    <textarea id="a-desc-en" rows="4" placeholder="English description..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Leírás - Német</label>
+                    <textarea id="a-desc-de" rows="4" placeholder="Deutsche Beschreibung..."></textarea>
+                </div>
+            </div>
+
+            <div class="admin-calendar-wrapper">
+                <div class="modal-card-title">Dátumok manuális letiltása</div>
+
+                <div class="calendar-legend">
+                    <span><span class="legend-dot" style="background:#fff;"></span> Szabad</span>
+                    <span><span class="legend-dot" style="background:#f39c12; border-color:#f39c12;"></span> Foglalt</span>
+                    <span><span class="legend-dot" style="background:#b0413e; border-color:#b0413e;"></span> Letiltott</span>
+                </div>
+
+                <div class="admin-calendar-controls">
+                    <button type="button" class="btn btn-outline btn-mini" onclick="changeAdminMonth(-1)">‹ Előző</button>
+                    <span id="admin-cal-month" style="font-weight:900; font-family:'Playfair Display'; font-size:1.1rem; color:var(--essence);">2026. 05.</span>
+                    <button type="button" class="btn btn-outline btn-mini" onclick="changeAdminMonth(1)">Következő ›</button>
+                </div>
+
+                <div class="weekday-grid">
                     <div>HÉ</div>
                     <div>KE</div>
                     <div>SZE</div>
@@ -735,48 +1549,59 @@
                     <div>VAS</div>
                 </div>
 
-                <div id="admin-calendar-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center;"></div>
+                <div id="admin-calendar-days"></div>
             </div>
 
-            <div class="form-group" style="background:#f0f5ec; padding:1rem; border-radius:8px; border: 1px solid #d4e0c8;">
-                <label style="color:var(--essence); font-weight:bold;">Borítókép</label>
-                <input type="file" id="a-cover-image" accept="image/*" onchange="handleCoverUpload(event)">
-                <div id="a-cover-preview" style="margin-top: 10px;"></div>
+            <div class="modal-card">
+                <div class="modal-card-title">Képek</div>
+                <div class="form-group">
+                    <label>Borítókép</label>
+                    <input type="file" id="a-cover-image" accept="image/*" onchange="handleCoverUpload(event)">
+                    <div id="a-cover-preview" style="margin-top:10px;"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>További képek</label>
+                    <input type="file" id="a-gallery-images" multiple accept="image/*" onchange="handleGalleryUpload(event)">
+                    <div id="a-gallery-preview" class="gallery-preview"></div>
+                </div>
             </div>
 
-            <div class="form-group" style="margin-top:1.5rem;">
-                <label>További képek</label>
-                <input type="file" id="a-gallery-images" multiple accept="image/*" onchange="handleGalleryUpload(event)">
-                <div id="a-gallery-preview" class="gallery-preview"></div>
+            <div class="modal-card">
+                <div class="modal-card-title">iCal szinkron</div>
+                <div class="form-group">
+                    <label>Booking.com iCal URL</label>
+                    <input type="text" id="a-ical-b" placeholder="Booking.com iCal URL">
+                </div>
+                <div class="form-group">
+                    <label>Szállás.hu iCal URL</label>
+                    <input type="text" id="a-ical-sz" placeholder="Szállás.hu iCal URL">
+                </div>
             </div>
 
-            <div style="background:#f9f9f9; padding:1.5rem; border-radius:8px; margin-bottom:1.5rem; margin-top:1.5rem;">
-                <p style="font-size:0.6rem; font-weight:700; margin-bottom:1rem;">ICAL SZINKRON</p>
-                <input type="text" id="a-ical-b" placeholder="Booking.com iCal URL" style="margin-bottom:10px;">
-                <input type="text" id="a-ical-sz" placeholder="Szállás.hu iCal URL">
+            <div style="display:flex; gap:10px; margin-bottom:1rem;">
+                <button class="btn btn-primary" style="flex:2;" onclick="saveApt()">Mentés</button>
+                <button class="btn btn-outline" style="flex:1;" onclick="closeModal()">Mégse</button>
             </div>
-
-            <button class="btn-cta" style="width:100%;" onclick="saveApt()">Mentés</button>
-            <button class="btn-outline" style="width:100%; margin-top:10px; border:none;" onclick="closeModal()">Mégse</button>
         </div>
     </div>
 </div>
 
-<div id="owner-modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 3000; align-items: center; justify-content: center;">
-    <div class="modal-content" style="background: white; padding: 30px; border-radius: 15px; width: 400px; position: relative;">
-        <h2 style="margin-bottom: 25px; font-family: 'Playfair Display', serif;">Partner szerkesztése</h2>
+<div id="owner-modal" class="modal">
+    <div class="simple-modal-card">
+        <h2>Partner szerkesztése</h2>
 
         <input type="hidden" id="edit-owner-id">
         <input type="hidden" id="edit-owner-code">
 
-        <div style="margin-bottom: 25px;">
-            <label style="display: block; margin-bottom: 8px; font-size: 0.9rem; color: #666; font-weight: 600;">Partner neve</label>
-            <input type="text" id="edit-owner-name" placeholder="Pl. Liget Residence" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;">
+        <div class="form-group">
+            <label>Partner neve</label>
+            <input type="text" id="edit-owner-name" placeholder="Pl. Liget Residence">
         </div>
 
-        <div style="display: flex; gap: 10px;">
-            <button onclick="saveOwner()" style="flex: 2; padding: 12px; background: #2c3e50; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold;">Mentés</button>
-            <button onclick="closeModal()" style="flex: 1; padding: 12px; background: #eee; border: none; border-radius: 8px; cursor: pointer; color: #666;">Mégse</button>
+        <div style="display:flex; gap:10px;">
+            <button onclick="saveOwner()" class="btn btn-primary" style="flex:2;">Mentés</button>
+            <button onclick="closeModal()" class="btn btn-outline" style="flex:1;">Mégse</button>
         </div>
     </div>
 </div>
@@ -854,15 +1679,15 @@
             });
 
             if (res.ok) {
-                console.log("Sikeres mentés!");
+                console.log('Sikeres mentés!');
                 renderAll();
                 showSaveToast();
             } else {
                 const err = await res.json().catch(() => ({}));
-                alert(err.error || "Hiba a mentésnél!");
+                alert(err.error || 'Hiba a mentésnél!');
             }
         } catch (e) {
-            alert("Nem sikerült elérni a szervert!");
+            alert('Nem sikerült elérni a szervert!');
             console.error(e);
         }
     }
@@ -873,7 +1698,7 @@
         let code = document.getElementById('edit-owner-code').value;
 
         if (!name) {
-            alert("A partner neve kötelező.");
+            alert('A partner neve kötelező.');
             return;
         }
 
@@ -967,9 +1792,9 @@
 
         if (coverContainer) {
             coverContainer.innerHTML = currentCoverImage ? `
-                <div style="position:relative; display:inline-block;">
-                    <img src="${currentCoverImage}" style="width:120px; height:80px; object-fit:cover; border-radius:8px; border:3px solid var(--essence);">
-                    <div onclick="removeCoverImage()" style="position:absolute; top:-10px; right:-10px; background:var(--danger); color:white; width:24px; height:24px; border-radius:50%; text-align:center; cursor:pointer; line-height:24px; font-size:12px; font-weight:bold;">X</div>
+                <div class="image-preview-item">
+                    <img src="${currentCoverImage}" style="width:130px; height:88px; border-color:var(--essence);">
+                    <div onclick="removeCoverImage()" class="remove-image-btn">X</div>
                 </div>
             ` : '';
         }
@@ -978,9 +1803,9 @@
 
         if (galleryContainer) {
             galleryContainer.innerHTML = currentGalleryImages.map((img, idx) => `
-                <div style="position:relative; display:inline-block;">
-                    <img src="${img}" style="width:70px; height:70px; object-fit:cover; border-radius:8px; border:2px solid #eee;">
-                    <div onclick="removeGalleryImage(${idx})" style="position:absolute; top:-8px; right:-8px; background:var(--danger); color:white; width:22px; height:22px; border-radius:50%; text-align:center; cursor:pointer; line-height:22px; font-size:12px; font-weight:bold;">X</div>
+                <div class="image-preview-item">
+                    <img src="${img}">
+                    <div onclick="removeGalleryImage(${idx})" class="remove-image-btn">X</div>
                 </div>
             `).join('');
         }
@@ -1005,7 +1830,7 @@
         const rowId = 'season-' + Date.now() + Math.floor(Math.random() * 1000);
 
         const rowHtml = `
-            <div id="${rowId}" class="season-row" style="display:grid; grid-template-columns: 1.5fr 1fr 1fr 1fr 0.8fr 0.8fr 1fr 1fr auto; gap:8px; align-items:end; margin-bottom:10px; background:white; padding:10px; border-radius:6px; border:1px solid #eee; font-size: 0.8rem;">
+            <div id="${rowId}" class="season-row">
                 <div><label>Szezon</label><input type="text" class="s-name" value="${escapeHtml(name)}"></div>
                 <div><label>Kezdet</label><input type="date" class="s-start" value="${escapeHtml(start)}"></div>
                 <div><label>Vége</label><input type="date" class="s-end" value="${escapeHtml(end)}"></div>
@@ -1014,7 +1839,7 @@
                 <div><label>Max fő</label><input type="number" class="s-max" value="${escapeHtml(maxGuests)}"></div>
                 <div><label>Ár (3 fő)</label><input type="number" class="s-price3" value="${escapeHtml(price3)}" placeholder="Opc."></div>
                 <div><label>Ár (4 fő)</label><input type="number" class="s-price4" value="${escapeHtml(price4)}" placeholder="Opc."></div>
-                <button type="button" class="btn-del" style="background:#ff4d4d; color:white; border:none; border-radius:4px; cursor:pointer; height:35px;" onclick="document.getElementById('${rowId}').remove()">X</button>
+                <button type="button" class="btn btn-danger btn-mini" onclick="document.getElementById('${rowId}').remove()">X</button>
             </div>
         `;
 
@@ -1053,10 +1878,8 @@
             discount: {
                 active: document.getElementById('a-discount-active')?.checked === true,
                 amountPerNight: Number(document.getElementById('a-discount-amount')?.value || 0),
-
                 bookingStart: document.getElementById('a-discount-booking-start')?.value || '',
                 bookingEnd: document.getElementById('a-discount-booking-end')?.value || '',
-
                 stayStart: document.getElementById('a-discount-stay-start')?.value || '',
                 stayEnd: document.getElementById('a-discount-stay-end')?.value || ''
             },
@@ -1076,7 +1899,7 @@
         };
 
         if (!aptData.name) {
-            alert("Az apartman neve kötelező.");
+            alert('Az apartman neve kötelező.');
             return;
         }
 
@@ -1152,7 +1975,7 @@
             const a = db.apartments.find(apt => String(apt.id) === String(id));
 
             if (!a) {
-                alert("Hiba: Az apartman adatai nem elérhetőek.");
+                alert('Hiba: Az apartman adatai nem elérhetőek.');
                 return;
             }
 
@@ -1172,7 +1995,6 @@
             setVal('a-ical-sz', a.icalSzallas);
 
             const discount = a.discount || {};
-
             const discountActive = document.getElementById('a-discount-active');
 
             if (discountActive) {
@@ -1180,26 +2002,10 @@
             }
 
             setVal('a-discount-amount', discount.amountPerNight || '');
-
-            setVal(
-                'a-discount-booking-start',
-                discount.bookingStart || ''
-            );
-
-            setVal(
-                'a-discount-booking-end',
-                discount.bookingEnd || ''
-            );
-
-            setVal(
-                'a-discount-stay-start',
-                discount.stayStart || discount.start || ''
-            );
-
-            setVal(
-                'a-discount-stay-end',
-                discount.stayEnd || discount.end || ''
-            );
+            setVal('a-discount-booking-start', discount.bookingStart || '');
+            setVal('a-discount-booking-end', discount.bookingEnd || '');
+            setVal('a-discount-stay-start', discount.stayStart || discount.start || '');
+            setVal('a-discount-stay-end', discount.stayEnd || discount.end || '');
 
             currentCoverImage = a.coverImage || null;
             currentGalleryImages = Array.isArray(a.galleryImages) ? [...a.galleryImages] : [];
@@ -1221,8 +2027,8 @@
 
             document.getElementById('apt-modal').style.display = 'flex';
         } catch (error) {
-            console.error("Kritikus hiba a modal nyitásakor:", error);
-            alert("Hiba történt a szerkesztő megnyitásakor. Ellenőrizd a konzolt.");
+            console.error('Kritikus hiba a modal nyitásakor:', error);
+            alert('Hiba történt a szerkesztő megnyitásakor. Ellenőrizd a konzolt.');
         }
     }
 
@@ -1337,7 +2143,7 @@
 
     function toggleAdminBlock(aptId, dateStr, isBooked) {
         if (isBooked) {
-            alert("Ezt a napot már lefoglalták. Ha törölni akarod, előbb a foglalást kell visszavonni.");
+            alert('Ezt a napot már lefoglalták. Ha törölni akarod, előbb a foglalást kell visszavonni.');
             return;
         }
 
@@ -1357,6 +2163,87 @@
         renderAdminCalendar();
     }
 
+    function ensureDefaultSunServices() {
+        if (!db.services || typeof db.services !== 'object') {
+            db.services = {};
+        }
+
+        if (!Array.isArray(db.services.sun)) {
+            db.services.sun = [];
+        }
+
+        const defaults = [
+            {
+                id: 'sup',
+                name_hu: 'SUP',
+                name_en: 'SUP',
+                name_de: 'SUP',
+                price: 5900,
+                unit_hu: 'nap',
+                unit_en: 'day',
+                unit_de: 'Tag',
+                description_hu: '',
+                description_en: '',
+                description_de: '',
+                image: 'img/sup.png',
+                active: true
+            },
+            {
+                id: 'sunbed',
+                name_hu: 'Napozószék',
+                name_en: 'Sunbed',
+                name_de: 'Sonnenliege',
+                price: 1500,
+                unit_hu: 'nap',
+                unit_en: 'day',
+                unit_de: 'Tag',
+                description_hu: '',
+                description_en: '',
+                description_de: '',
+                image: 'img/napozoszek.png',
+                active: true
+            },
+            {
+                id: 'umbrella',
+                name_hu: 'Napernyő',
+                name_en: 'Beach umbrella',
+                name_de: 'Sonnenschirm',
+                price: 1000,
+                unit_hu: 'nap',
+                unit_en: 'day',
+                unit_de: 'Tag',
+                description_hu: '',
+                description_en: '',
+                description_de: '',
+                image: 'img/napernyo.png',
+                active: true
+            },
+            {
+                id: 'boat',
+                name_hu: 'Hajó',
+                name_en: 'Boat',
+                name_de: 'Boot',
+                price: 35000,
+                unit_hu: 'nap',
+                unit_en: 'day',
+                unit_de: 'Tag',
+                description_hu: '',
+                description_en: '',
+                description_de: '',
+                image: 'img/hajo.png',
+                active: true
+            }
+        ];
+
+        defaults.forEach(defaultService => {
+            const exists = db.services.sun.some(service => String(service.id) === String(defaultService.id));
+
+            if (!exists) {
+                db.services.sun.push(defaultService);
+            }
+        });
+    }
+
     function renderAll() {
         if (!db) return;
 
@@ -1371,6 +2258,9 @@
         if (!Array.isArray(db.services.sun)) db.services.sun = [];
         if (!Array.isArray(db.services.moments)) db.services.moments = [];
 
+        ensureDefaultSunServices();
+
+        renderStats();
         renderBookings();
         renderBreakfasts();
         renderExtras();
@@ -1380,18 +2270,55 @@
         renderReviews();
     }
 
+    function renderStats() {
+        const grid = document.getElementById('stats-grid');
+        if (!grid) return;
+
+        const bookings = db.bookings || [];
+        const breakfasts = db.breakfasts || [];
+        const extras = db.extras || [];
+        const apartments = db.apartments || [];
+        const owners = db.owners || [];
+        const pendingReviews = (db.reviews || []).filter(r => r.status === 'pending').length;
+
+        grid.innerHTML = `
+            ${statCard('Foglalások', bookings.length, 'Apartman foglalás összesen')}
+            ${statCard('Reggelik', breakfasts.length, 'Leadott reggeli rendelések')}
+            ${statCard('Eszköz bérlések', extras.length, 'SUP & SUN rendelések')}
+            ${statCard('Ingatlanok', apartments.length, `${owners.length} partnerhez rendelve`)}
+            ${statCard('Vélemények', (db.reviews || []).length, pendingReviews ? `${pendingReviews} jóváhagyásra vár` : 'Nincs függő vélemény')}
+        `;
+    }
+
+    function statCard(label, value, note) {
+        return `
+            <div class="stat-card">
+                <div class="stat-label">${escapeHtml(label)}</div>
+                <div class="stat-value">${Number(value || 0).toLocaleString('hu-HU')}</div>
+                <div class="stat-note">${escapeHtml(note || '')}</div>
+            </div>
+        `;
+    }
+
     function renderBookings() {
         const body = document.getElementById('booking-table-body');
         if (!body) return;
 
-        body.innerHTML = (db.bookings || []).map(b => {
+        const bookings = db.bookings || [];
+
+        if (bookings.length === 0) {
+            body.innerHTML = `<tr><td colspan="5"><div class="empty-state">Még nincs apartman foglalás.</div></td></tr>`;
+            return;
+        }
+
+        body.innerHTML = bookings.map(b => {
             const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
             const isIcalBooking = !!b.icalId;
             const price = Number(b.totalPrice || b.total || 0);
 
             const priceHtml = isIcalBooking
-                ? `<div style="font-size:0.75rem; color:#999; font-weight:700;">Külső foglalás</div>`
-                : `<div style="font-size:0.75rem; color:var(--accent); font-weight:700;">${price.toLocaleString('hu-HU')} Ft</div>`;
+                ? `<div class="muted" style="font-size:0.75rem; font-weight:800;">Külső foglalás</div>`
+                : `<div class="price-text">${price.toLocaleString('hu-HU')} Ft</div>`;
 
             const source = (b.source || 'web').toLowerCase();
 
@@ -1399,14 +2326,14 @@
                 <tr>
                     <td><strong>${escapeHtml(apt ? apt.name : 'Ismeretlen')}</strong></td>
                     <td>
-                        <div style="font-weight:600;">${escapeHtml(b.guestName || 'Vendég')}</div>
+                        <div style="font-weight:700;">${escapeHtml(b.guestName || 'Vendég')}</div>
                         ${priceHtml}
                     </td>
                     <td>
-                        <div style="font-size: 0.85rem;">${escapeHtml(b.checkIn || '')} &rarr; ${escapeHtml(b.checkOut || b.end || '')}</div>
+                        <div>${escapeHtml(b.checkIn || '')} &rarr; ${escapeHtml(b.checkOut || b.end || '')}</div>
                     </td>
                     <td><span class="badge badge-${escapeHtml(source)}">${escapeHtml(source.toUpperCase())}</span></td>
-                    <td style="text-align:center;"><button class="btn-outline btn-del" onclick="deleteItem('bookings', '${escapeHtml(b.id)}')">✕</button></td>
+                    <td><button class="btn btn-danger btn-mini" onclick="deleteItem('bookings', '${escapeHtml(b.id)}')">Törlés</button></td>
                 </tr>
             `;
         }).join('');
@@ -1416,21 +2343,28 @@
         const body = document.getElementById('breakfast-table-body');
         if (!body) return;
 
-        body.innerHTML = (db.breakfasts || []).map(b => {
+        const breakfasts = db.breakfasts || [];
+
+        if (breakfasts.length === 0) {
+            body.innerHTML = `<tr><td colspan="4"><div class="empty-state">Még nincs reggeli rendelés.</div></td></tr>`;
+            return;
+        }
+
+        body.innerHTML = breakfasts.map(b => {
             const amount = Number(b.amount || b.totalPrice || 0);
 
             return `
                 <tr>
                     <td>
                         <strong>${escapeHtml(b.apartment || b.aptName || '---')}</strong><br>
-                        <span style="font-size:0.85rem; color:#666;">${escapeHtml(b.guestName || '')}</span>
+                        <span class="muted">${escapeHtml(b.guestName || '')}</span>
                     </td>
                     <td>${escapeHtml(b.start || b.date || '')}</td>
                     <td>
-                        <div style="font-size:0.9rem;">${escapeHtml(b.items || b.note || '')}</div>
-                        <div style="font-weight:bold; color:#e67e22; margin-top:4px;">${amount.toLocaleString('hu-HU')} Ft</div>
+                        <div>${escapeHtml(b.items || b.note || '')}</div>
+                        <div class="price-text" style="color:#C47F14;">${amount.toLocaleString('hu-HU')} Ft</div>
                     </td>
-                    <td style="text-align:center;"><button class="btn-outline btn-del" onclick="deleteItem('breakfasts', '${escapeHtml(b.id)}')">✕</button></td>
+                    <td style="text-align:center;"><button class="btn btn-danger btn-mini" onclick="deleteItem('breakfasts', '${escapeHtml(b.id)}')">Törlés</button></td>
                 </tr>
             `;
         }).join('');
@@ -1440,19 +2374,26 @@
         const body = document.getElementById('rent-table-body');
         if (!body) return;
 
-        body.innerHTML = (db.extras || []).map(e => {
+        const extras = db.extras || [];
+
+        if (extras.length === 0) {
+            body.innerHTML = `<tr><td colspan="5"><div class="empty-state">Még nincs eszköz bérlés.</div></td></tr>`;
+            return;
+        }
+
+        body.innerHTML = extras.map(e => {
             const amount = Number(e.amount || e.totalPrice || 0);
 
             return `
                 <tr>
                     <td>
-                        <div style="font-weight:700; color:var(--accent);">${escapeHtml(e.items || '')}</div>
-                        <div style="font-size:0.75rem;">${amount.toLocaleString('hu-HU')} Ft</div>
+                        <div style="font-weight:800; color:var(--accent);">${escapeHtml(e.items || '')}</div>
+                        <div class="price-text">${amount.toLocaleString('hu-HU')} Ft</div>
                     </td>
-                    <td><div style="font-weight:600;">${escapeHtml(e.guestName || '')}</div></td>
-                    <td><div style="font-size:0.85rem;">${escapeHtml(e.start || '')} &rarr; ${escapeHtml(e.end || '')}</div></td>
+                    <td><div style="font-weight:700;">${escapeHtml(e.guestName || '')}</div></td>
+                    <td><div>${escapeHtml(e.start || '')} &rarr; ${escapeHtml(e.end || '')}</div></td>
                     <td>${escapeHtml(e.apartment || '')}</td>
-                    <td style="text-align:center;"><button class="btn-outline btn-del" onclick="deleteItem('extras', '${escapeHtml(e.id)}')">✕</button></td>
+                    <td><button class="btn btn-danger btn-mini" onclick="deleteItem('extras', '${escapeHtml(e.id)}')">Törlés</button></td>
                 </tr>
             `;
         }).join('');
@@ -1462,7 +2403,14 @@
         const container = document.getElementById('apt-list-container');
         if (!container) return;
 
-        container.innerHTML = (db.apartments || []).map(a => {
+        const apartments = db.apartments || [];
+
+        if (apartments.length === 0) {
+            container.innerHTML = `<div class="empty-state">Még nincs feltöltött apartman.</div>`;
+            return;
+        }
+
+        container.innerHTML = apartments.map(a => {
             const owner = (db.owners || []).find(o => String(o.id || o._id) === String(a.ownerId));
             const aptBookings = (db.bookings || []).filter(b => String(b.aptId) === String(a.id));
 
@@ -1479,50 +2427,46 @@
             });
 
             const thumb = a.coverImage
-                ? `<img src="${a.coverImage}" style="width:45px; height:45px; border-radius:8px; object-fit:cover; margin-right:15px;">`
-                : `<div style="width:45px; height:45px; border-radius:8px; background:#f5f5f5; margin-right:15px; display:flex; align-items:center; justify-content:center;">?</div>`;
-
-            const langBadges = `
-                <div style="font-size:0.7rem; color:#777; margin-top:4px;">
-                    HU ${a.description ? '✅' : '—'}
-                    EN ${a.description_en ? '✅' : '—'}
-                    DE ${a.description_de ? '✅' : '—'}
-                </div>
-            `;
+                ? `<img class="apt-thumb" src="${a.coverImage}" alt="${escapeHtml(a.name || 'Apartman')}">`
+                : `<div class="apt-thumb-placeholder">?</div>`;
 
             const discount = a.discount || {};
             const hasDiscount = discount.active === true && Number(discount.amountPerNight || 0) > 0;
 
             const discountBadge = hasDiscount ? `
-                <div style="font-size:0.7rem; color:var(--danger); font-weight:800; margin-top:5px;">
+                <div class="discount-badge">
                     AKCIÓ: -${Number(discount.amountPerNight || 0).toLocaleString('hu-HU')} Ft / éj
-                    ${discount.bookingStart && discount.bookingEnd ? ` • foglalás: ${escapeHtml(discount.bookingStart)} → ${escapeHtml(discount.bookingEnd)}` : ''}
-                    ${discount.stayStart && discount.stayEnd ? ` • napokra: ${escapeHtml(discount.stayStart)} → ${escapeHtml(discount.stayEnd)}` : ''}
                 </div>
             ` : '';
 
             return `
-                <div class="apt-row" data-id="${escapeHtml(a.id)}" style="display:grid; grid-template-columns: 2fr 3.5fr 1.2fr; padding:1.2rem; border-bottom:1px solid #f0f0f0; align-items:center; background: white;">
-                    <div style="display:flex; align-items:center;">
+                <div class="apt-row" data-id="${escapeHtml(a.id)}">
+                    <div class="apt-main">
                         ${thumb}
-                        <div>
-                            <div style="font-weight: 700;">${escapeHtml(a.name)}</div>
-                            <div style="font-size: 0.8rem; color: #777;">${escapeHtml(a.location)} • ${escapeHtml(owner ? owner.name : 'Nincs tulaj')}</div>
-                            ${a.address ? `<div style="font-size:0.72rem; color:#999; margin-top:3px;">${escapeHtml(a.address)}</div>` : ''}    
-                            ${langBadges}
+                        <div style="min-width:0;">
+                            <div class="apt-title">${escapeHtml(a.name)}</div>
+                            <div class="apt-meta">
+                                ${escapeHtml(a.location || '')} • ${escapeHtml(owner ? owner.name : 'Nincs tulaj')}<br>
+                                ${a.address ? escapeHtml(a.address) : ''}
+                            </div>
+                            <div class="lang-status">
+                                <span class="lang-pill ${a.description ? 'ok' : ''}">HU ${a.description ? '✓' : '—'}</span>
+                                <span class="lang-pill ${a.description_en ? 'ok' : ''}">EN ${a.description_en ? '✓' : '—'}</span>
+                                <span class="lang-pill ${a.description_de ? 'ok' : ''}">DE ${a.description_de ? '✓' : '—'}</span>
+                            </div>
                             ${discountBadge}
                         </div>
                     </div>
 
-                    <div style="display: flex; gap: 15px;">
+                    <div class="chart-row">
                         ${drawChart(Math.min(book * 10, 100), 'var(--booking)', 'Booking')}
-                        ${drawChart(Math.min(szal * 10, 100), 'var(--szallas)', 'Szallas')}
+                        ${drawChart(Math.min(szal * 10, 100), 'var(--szallas)', 'Szállás')}
                         ${drawChart(Math.min(web * 10, 100), 'var(--essence)', 'Web')}
                     </div>
 
-                    <div style="display:flex; gap:8px; justify-content: flex-end;">
-                        <button class="btn-outline" onclick="openAptModal('${escapeHtml(a.id)}')">Szerkesztés</button>
-                        <button class="btn-outline btn-del" onclick="deleteApt('${escapeHtml(a.id)}')">✕</button>
+                    <div class="row-actions">
+                        <button class="btn btn-outline btn-mini" onclick="openAptModal('${escapeHtml(a.id)}')">Szerkesztés</button>
+                        <button class="btn btn-danger btn-mini" onclick="deleteApt('${escapeHtml(a.id)}')">Törlés</button>
                     </div>
                 </div>
             `;
@@ -1535,21 +2479,26 @@
         const body = document.getElementById('owners-table-body');
         if (!body) return;
 
-        body.innerHTML = (db.owners || []).map(o => {
+        const owners = db.owners || [];
+
+        if (owners.length === 0) {
+            body.innerHTML = `<tr><td colspan="4"><div class="empty-state">Még nincs partner hozzáadva.</div></td></tr>`;
+            return;
+        }
+
+        body.innerHTML = owners.map(o => {
             const safeId = o.id || o._id || '';
             const aptCount = (db.apartments || []).filter(a => String(a.ownerId) === String(safeId)).length;
 
             return `
-                <tr style="border-bottom: 1px solid #f0f0f0;">
-                    <td style="padding: 15px;"><strong>${escapeHtml(o.name || 'Névtelen')}</strong></td>
-                    <td style="padding: 15px; color: #777;">#${escapeHtml(o.code || '---')}</td>
-                    <td style="padding: 15px;">
-                        <span class="badge" style="background: #f0f4f8; color: #555; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem;">${aptCount} ingatlan</span>
-                    </td>
-                    <td style="padding: 15px; text-align: right;">
-                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                            <button class="btn-outline" style="padding: 6px 12px;" onclick="openOwnerModal('${escapeHtml(safeId)}')">SZERKESZTÉS</button>
-                            <button class="btn-outline btn-del" style="width: 32px; height: 32px;" onclick="deleteOwner('${escapeHtml(safeId)}')">✕</button>
+                <tr>
+                    <td><strong>${escapeHtml(o.name || 'Névtelen')}</strong></td>
+                    <td><span class="badge badge-muted">#${escapeHtml(o.code || '---')}</span></td>
+                    <td><span class="badge bg-essence">${aptCount} ingatlan</span></td>
+                    <td>
+                        <div class="row-actions">
+                            <button class="btn btn-outline btn-mini" onclick="openOwnerModal('${escapeHtml(safeId)}')">Szerkesztés</button>
+                            <button class="btn btn-danger btn-mini" onclick="deleteOwner('${escapeHtml(safeId)}')">Törlés</button>
                         </div>
                     </td>
                 </tr>
@@ -1564,11 +2513,7 @@
         const reviews = db.reviews || [];
 
         if (reviews.length === 0) {
-            container.innerHTML = `
-                <div style="padding:2rem; text-align:center; color:#999;">
-                    Még nincs feltöltött vélemény.
-                </div>
-            `;
+            container.innerHTML = `<div class="empty-state">Még nincs feltöltött vélemény.</div>`;
             return;
         }
 
@@ -1577,21 +2522,22 @@
             const rating = Number(r.rating || 5);
 
             return `
-                <div style="display:grid; grid-template-columns: 1.2fr 0.8fr 3fr 1fr; gap:15px; align-items:center; padding:1rem; border-bottom:1px solid #eee;">
+                <div class="review-row">
                     <div><strong>${escapeHtml(r.name || 'Névtelen')}</strong></div>
-                    <div style="color:#e0a800;">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</div>
-                    <div style="font-size:0.85rem; color:#666;">
-                        ${escapeHtml(preview.slice(0, 160))}${preview.length > 160 ? '...' : ''}
-                        <div style="font-size:0.7rem; margin-top:4px; color:#999;">
-                            HU ${r.text_hu ? '✅' : '—'} EN ${r.text_en ? '✅' : '—'} DE ${r.text_de ? '✅' : '—'}
-                            ${r.source === 'guest' ? ' • vendég által beküldve' : ''}
-                            ${r.status === 'pending' ? ' • jóváhagyásra vár' : ''}
-                            ${r.isVisible === false ? ' • rejtett' : ' • publikus'}
+                    <div class="star-text">${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}</div>
+                    <div class="muted" style="font-size:0.84rem; line-height:1.55;">
+                        ${escapeHtml(preview.slice(0, 170))}${preview.length > 170 ? '...' : ''}
+                        <div class="lang-status">
+                            <span class="lang-pill ${r.text_hu ? 'ok' : ''}">HU ${r.text_hu ? '✓' : '—'}</span>
+                            <span class="lang-pill ${r.text_en ? 'ok' : ''}">EN ${r.text_en ? '✓' : '—'}</span>
+                            <span class="lang-pill ${r.text_de ? 'ok' : ''}">DE ${r.text_de ? '✓' : '—'}</span>
+                            <span class="lang-pill ${r.isVisible !== false ? 'ok' : ''}">${r.isVisible === false ? 'Rejtett' : 'Publikus'}</span>
+                            ${r.status === 'pending' ? '<span class="lang-pill">Jóváhagyásra vár</span>' : ''}
                         </div>
                     </div>
-                    <div style="display:flex; gap:8px; justify-content:flex-end;">
-                        <button class="btn-outline" onclick="openReviewModal('${escapeHtml(r.id)}')">Szerkesztés</button>
-                        <button class="btn-outline btn-del" onclick="deleteReview('${escapeHtml(r.id)}')">✕</button>
+                    <div class="row-actions">
+                        <button class="btn btn-outline btn-mini" onclick="openReviewModal('${escapeHtml(r.id)}')">Szerkesztés</button>
+                        <button class="btn btn-danger btn-mini" onclick="deleteReview('${escapeHtml(r.id)}')">Törlés</button>
                     </div>
                 </div>
             `;
@@ -1601,6 +2547,12 @@
     function renderServices() {
         renderServiceGroup('sun', 'services-sun-container');
         renderServiceGroup('moments', 'services-moments-container');
+
+        const sunCount = document.getElementById('sun-service-count');
+        const momentsCount = document.getElementById('moments-service-count');
+
+        if (sunCount) sunCount.innerText = `${(db.services?.sun || []).length} szolgáltatás`;
+        if (momentsCount) momentsCount.innerText = `${(db.services?.moments || []).length} szolgáltatás`;
     }
 
     function renderServiceGroup(groupKey, containerId) {
@@ -1611,7 +2563,7 @@
 
         if (services.length === 0) {
             container.innerHTML = `
-                <div style="padding:1.5rem; background:#fafafa; border:1px dashed #ddd; border-radius:10px; color:#777;">
+                <div class="empty-state">
                     Nincs még szolgáltatás ebben a kategóriában.
                 </div>
             `;
@@ -1626,7 +2578,7 @@
                     <div class="service-card-header">
                         <div>
                             <div class="service-card-title">${escapeHtml(item.id || 'service')}</div>
-                            <div style="font-size:0.75rem; color:#777;">${escapeHtml(item.name_hu || '')}</div>
+                            <div class="service-card-name">${escapeHtml(item.name_hu || '')}</div>
                         </div>
 
                         <label class="service-active-row">
@@ -1650,7 +2602,7 @@
                         </div>
                     </div>
 
-                    <div class="service-fields">
+                    <div class="service-fields ${isSun ? '' : 'two'}">
                         <div class="form-group">
                             <label>Ár / fő vagy nap</label>
                             <input type="number" class="svc-price" value="${escapeHtml(item.price || 0)}">
@@ -1664,7 +2616,7 @@
                         ${isSun ? `
                             <div class="form-group">
                                 <label>Egység HU / EN / DE</label>
-                                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;">
+                                <div class="unit-grid">
                                     <input type="text" class="svc-unit-hu" value="${escapeHtml(item.unit_hu || '')}" placeholder="nap">
                                     <input type="text" class="svc-unit-en" value="${escapeHtml(item.unit_en || '')}" placeholder="day">
                                     <input type="text" class="svc-unit-de" value="${escapeHtml(item.unit_de || '')}" placeholder="Tag">
@@ -1697,12 +2649,10 @@
     }
 
     function collectServicesFromAdmin() {
-        const result = {
+        return {
             sun: collectServiceGroupFromAdmin('sun'),
             moments: collectServiceGroupFromAdmin('moments')
         };
-
-        return result;
     }
 
     function collectServiceGroupFromAdmin(groupKey) {
@@ -1749,6 +2699,7 @@
 
             db.services = result.services || services;
             renderServices();
+            renderStats();
             showSaveToast();
         } catch (err) {
             console.error('Szolgáltatások mentési hiba:', err);
@@ -1762,13 +2713,13 @@
         const off = circ - (p / 100) * circ;
 
         return `
-            <div class="chart-box" style="text-align:center;">
-                <div style="font-size:0.5rem; font-weight:700;">${p}%</div>
-                <svg width="60" height="35" viewBox="0 0 60 35">
+            <div class="chart-box">
+                <div class="chart-percent">${p}%</div>
+                <svg width="60" height="35" viewBox="0 0 60 35" aria-hidden="true">
                     <path d="M6,30 A24,24 0 0,1 54,30" fill="none" stroke="#eee" stroke-width="5"/>
                     <path d="M6,30 A24,24 0 0,1 54,30" fill="none" stroke="${c}" stroke-width="5" style="stroke-dasharray:${circ}; stroke-dashoffset:${off}; transition:0.5s;"/>
                 </svg>
-                <div style="font-size:0.45rem; color:#999;">${l}</div>
+                <div class="chart-label">${escapeHtml(l)}</div>
             </div>
         `;
     }
@@ -1779,15 +2730,15 @@
         if (!t) {
             t = document.createElement('div');
             t.id = 'sort-toast';
-            t.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#333; color:white; padding:10px 20px; border-radius:30px; font-size:12px; z-index:9999; opacity:0; transition:0.3s;";
+            t.style = 'position:fixed; bottom:22px; left:50%; transform:translateX(-50%); background:#172318; color:white; padding:12px 22px; border-radius:999px; font-size:12px; z-index:9999; opacity:0; transition:0.3s; box-shadow:0 18px 40px rgba(0,0,0,0.25); font-weight:800; letter-spacing:0.8px;';
             document.body.appendChild(t);
         }
 
-        t.innerText = "Mentve! ✨";
-        t.style.opacity = "1";
+        t.innerText = 'Mentve! ✨';
+        t.style.opacity = '1';
 
         setTimeout(() => {
-            t.style.opacity = "0";
+            t.style.opacity = '0';
         }, 1500);
     }
 
@@ -1828,12 +2779,12 @@
             window.location.reload();
         } else {
             const err = await res.json().catch(() => ({}));
-            alert(err.error || "Nem sikerült a szinkronizálás.");
+            alert(err.error || 'Nem sikerült a szinkronizálás.');
         }
     }
 
     async function deleteItem(type, id) {
-        if (!confirm("Biztosan törlöd?")) return;
+        if (!confirm('Biztosan törlöd?')) return;
 
         const cleanId = String(id).split(':')[0].trim();
 
@@ -1846,7 +2797,7 @@
             window.location.reload();
         } else {
             const err = await res.json().catch(() => ({}));
-            alert(err.error || "Szerver hiba.");
+            alert(err.error || 'Szerver hiba.');
         }
     }
 
@@ -1901,7 +2852,7 @@
         };
 
         if (!review.name || (!review.text_hu && !review.text_en && !review.text_de)) {
-            alert("A név és legalább egy vélemény szöveg kötelező.");
+            alert('A név és legalább egy vélemény szöveg kötelező.');
             return;
         }
 
@@ -1913,7 +2864,7 @@
 
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            alert(err.error || "Nem sikerült menteni a véleményt.");
+            alert(err.error || 'Nem sikerült menteni a véleményt.');
             return;
         }
 
@@ -1931,11 +2882,12 @@
 
         closeReviewModal();
         renderReviews();
+        renderStats();
         showSaveToast();
     }
 
     async function deleteReview(id) {
-        if (!confirm("Biztosan törlöd ezt a véleményt?")) return;
+        if (!confirm('Biztosan törlöd ezt a véleményt?')) return;
 
         const res = await fetch(`/api/reviews/${id}`, {
             method: 'DELETE',
@@ -1944,24 +2896,25 @@
 
         if (!res.ok) {
             const err = await res.json().catch(() => ({}));
-            alert(err.error || "Nem sikerült törölni.");
+            alert(err.error || 'Nem sikerült törölni.');
             return;
         }
 
         db.reviews = (db.reviews || []).filter(r => String(r.id) !== String(id));
         renderReviews();
+        renderStats();
         showSaveToast();
     }
 
     async function deleteApt(id) {
-        if (!confirm("Törlöd az apartmant?")) return;
+        if (!confirm('Törlöd az apartmant?')) return;
 
         db.apartments = db.apartments.filter(a => String(a.id) !== String(id));
         await saveDb();
     }
 
     async function deleteOwner(id) {
-        if (!confirm("Törlöd a partnert?")) return;
+        if (!confirm('Törlöd a partnert?')) return;
 
         db.owners = db.owners.filter(o => String(o.id || o._id) !== String(id));
         await saveDb();
@@ -1971,6 +2924,5 @@
         initDatabase(renderAll);
     };
 </script>
-
 </body>
 </html>

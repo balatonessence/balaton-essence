@@ -3,134 +3,1195 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SUP Rental, Sunbed & Parasol Hire | Balaton Essence</title>
-    <meta name="description" content="Premium SUP rental on Lake Balaton! Comfortable sunbeds and parasols are also available for booking. Enjoy the water and worry-free beach time with us!">
-    <meta name="keywords" content="SUP rental Balaton, sunbed hire, parasol rental, water sports equipment, beach equipment Balaton">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
-    
+    <title>SUP Rental, Sunbed and Umbrella Hire | Balaton Essence</title>
+
+    <meta name="description" content="Premium SUP rental at Lake Balaton, sunbed and umbrella hire in Fonyód. Book beach equipment and enjoy carefree days by the lake.">
+    <meta name="keywords" content="SUP rental Balaton, sunbed rental, umbrella hire, beach equipment Balaton, Fonyód SUP">
+    <link rel="canonical" href="https://balatonessence.com/en/sun.html">
+
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://balatonessence.com/en/sun.html">
+    <meta property="og:title" content="SUP & Sun | Balaton Essence">
+    <meta property="og:description" content="SUP rental, sunbed and umbrella hire for carefree days at Lake Balaton.">
+    <meta property="og:image" content="https://balatonessence.com/img/sunkartya.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  
+
     <style>
-        :root { 
-            --bg: #FCFBF9; --bg-alt: #F4F2EC; --text: #2C3325; --text-light: #6A7063;  
-            --accent: #5C7A4D; --accent-hover: #48613A; --border: #E3E0D8; --shadow: rgba(44, 51, 37, 0.05);
+        :root {
+            --bg: #FCFBF9;
+            --bg-alt: #F4F2EC;
+            --text: #2C3325;
+            --text-light: #6A7063;
+            --accent: #5C7A4D;
+            --accent-hover: #48613A;
+            --gold: #C8A46B;
+            --border: #E3E0D8;
+            --warning: #B0413E;
+            --dark: #172318;
+            --shadow: rgba(44, 51, 37, 0.08);
         }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
 
-        header { padding: 2rem 5vw; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
-        .logo-container { display: flex; flex-direction: column; align-items: center; text-decoration: none; color: inherit; }
-        .logo-title { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 600; letter-spacing: 2px; }
-        .logo-sub { font-size: 0.5rem; font-weight: 500; letter-spacing: 4px; color: var(--text-light); text-transform: uppercase; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
 
-        .section-header { text-align: center; padding: 6rem 5vw 4rem; }
-        .section-header h1 { font-family: 'Playfair Display'; font-size: clamp(2.5rem, 5vw, 4rem); font-style: italic; }
+        html {
+            scroll-behavior: smooth;
+        }
 
-        main { max-width: 1200px; margin: 0 auto; padding: 0 5vw 8rem; }
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
 
-        .sun-cards-section { padding: 0 1rem 6rem 1rem; max-width: 1200px; margin: 0 auto; }
-        .sun-cards-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
-        .sun-item-card { background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 15px 35px rgba(0,0,0,0.05); border: 1px solid #f0f0f0; cursor: pointer; transition: transform 0.3s ease, box-shadow 0.3s ease; display: flex; flex-direction: column; }
-        .sun-item-card:hover { transform: translateY(-8px); box-shadow: 0 20px 45px rgba(0,0,0,0.08); }
-        .sun-card-img { width: 100%; height: 400px; background-position: center; background-size: cover; background-repeat: no-repeat; border-bottom: 1px solid #f0f0f0; }
-        .sun-card-content { padding: 2.5rem 1.5rem; text-align: center; background-color: #faf9f6; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
-        .sun-card-title { font-family: 'Playfair Display', serif; font-size: 1.8rem; color: #2c3e50; margin-bottom: 0.5rem; letter-spacing: 1px; }
-        .sun-card-price { font-size: 1.1rem; color: #5a6b5a; font-weight: 700; }
-        .sun-card-price small { font-size: 0.85rem; color: #888; font-weight: 400; }
+        a {
+            color: inherit;
+        }
 
-        @media (max-width: 950px) { .sun-cards-grid { grid-template-columns: repeat(2, 1fr); } }
-        @media (max-width: 650px) { .sun-cards-grid { grid-template-columns: 1fr; } .sun-card-img { height: 300px; } }
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2000;
+            padding: 1.6rem 6vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(
+                to bottom,
+                rgba(10, 16, 12, 0.68),
+                rgba(10, 16, 12, 0.15)
+            );
+            transition: 0.3s ease;
+        }
 
-        /* MODAL */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 51, 37, 0.7); backdrop-filter: blur(8px); z-index: 5000; display: none; justify-content: center; align-items: center; opacity: 0; transition: 0.4s; }
-        .modal-overlay.active { display: flex; opacity: 1; }
-        .modal-content { background: var(--bg); width: 90%; max-width: 450px; padding: 4rem 3rem; position: relative; }
-        .close-modal { position: absolute; top: 25px; right: 25px; font-size: 1.2rem; cursor: pointer; color: var(--text-light); }
-        
-        .qty-selector { display: flex; align-items: center; background: #fff; border: 1px solid #ddd; border-radius: 4px; padding: 2px 4px; }
-        .qty-btn { background: transparent; border: none; font-size: 1.2rem; color: #666; cursor: pointer; padding: 0 8px; }
-        .qty-val { font-weight: 600; font-size: 1rem; color: #333; min-width: 24px; text-align: center; user-select: none; }
+        .site-header.scrolled {
+            background: rgba(23, 35, 24, 0.95);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
 
-        .extras-item-label { display: flex; align-items: center; position: relative; cursor: pointer; gap: 12px; user-select: none; flex-grow: 1; }
-        .modal-overlay input[type="checkbox"] { position: absolute; opacity: 0; height: 0; width: 0; }
-        .custom-checkmark { position: relative; height: 22px; width: 22px; background-color: #fff; border: 1px solid #ccc; border-radius: 4px; transition: all 0.3s ease; }
-        .modal-overlay input:checked ~ .custom-checkmark { background-color: #5a6b5a; border-color: #5a6b5a; }
-        .custom-checkmark:after { content: ""; position: absolute; display: none; left: 7px; top: 3px; width: 5px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
-        .modal-overlay input:checked ~ .custom-checkmark:after { display: block; }
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+            text-decoration: none;
+            color: white;
+        }
 
-        .amp {
-            font-family: 'Cormorant Garamond', serif;
-            font-style: normal;
+        .logo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 7px;
+            color: white;
+        }
+
+        .logo-subtitle {
+            font-size: 0.64rem;
+            font-weight: 400;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.78);
+            margin-top: 0.35rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.4rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255,255,255,0.92);
+            font-size: 0.78rem;
             font-weight: 600;
-            font-size: 0.9em;
-            margin: 0 4px;
-            vertical-align: 0.02em;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.25s ease;
         }
 
-        .btn-book-extras { width: 100%; padding: 1.2rem; background: #5a6b5a; color: white; border: none; cursor: pointer; text-transform: uppercase; letter-spacing: 2px; font-weight: 600; }
-        .flatpickr-calendar { background: var(--bg); border: 1px solid var(--border); box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        .flatpickr-day.selected { background: var(--accent) !important; border-color: var(--accent) !important; }
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--gold);
+        }
+
+        .lang-dropdown {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.4rem;
+            padding: 10px 0;
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.9);
+            cursor: pointer;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-transform: uppercase;
+        }
+
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid rgba(255,255,255,0.85);
+            transition: 0.25s;
+        }
+
+        .lang-content {
+            display: none;
+            position: absolute;
+            top: calc(100% - 2px);
+            right: 0;
+            min-width: 130px;
+            background: rgba(20, 27, 18, 0.94);
+            border: 1px solid rgba(255,255,255,0.22);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+            backdrop-filter: blur(12px);
+            z-index: 9999;
+            border-radius: 6px;
+            overflow: hidden;
+            padding: 6px 0;
+        }
+
+        .lang-content a {
+            display: block;
+            padding: 12px 16px;
+            color: rgba(255,255,255,0.92) !important;
+            text-decoration: none;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: 0;
+            background: transparent !important;
+            text-shadow: none !important;
+        }
+
+        .lang-content a:hover {
+            background: rgba(255,255,255,0.12) !important;
+            color: #D7B889 !important;
+        }
+
+        .lang-dropdown:hover .lang-content,
+        .lang-dropdown:focus-within .lang-content {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .lang-dropdown:hover .arrow,
+        .lang-dropdown:focus-within .arrow {
+            transform: rotate(180deg);
+        }
+
+        .hero {
+            min-height: 88vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            padding: 9rem 7vw 7rem;
+            overflow: hidden;
+            color: white;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(10, 15, 12, 0.86) 0%,
+                    rgba(10, 15, 12, 0.55) 42%,
+                    rgba(10, 15, 12, 0.2) 100%
+                ),
+                url('../img/sunkartya.png') center/cover no-repeat;
+            z-index: 0;
+            transform: scale(1.02);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 70% 40%, rgba(200,164,107,0.2), transparent 34%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 760px;
+            position: relative;
+            z-index: 2;
+            margin-top: 2rem;
+        }
+
+        .hero-kicker {
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.84);
+            margin-bottom: 1.4rem;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3.2rem, 6vw, 6rem);
+            line-height: 1.05;
+            font-weight: 400;
+            color: white;
+            text-shadow: 0 8px 35px rgba(0,0,0,0.35);
+            margin-bottom: 1.8rem;
+        }
+
+        .hero-line {
+            width: 86px;
+            height: 3px;
+            background: var(--gold);
+            margin: 2rem 0;
+        }
+
+        .hero-text {
+            max-width: 560px;
+            font-size: clamp(1rem, 1.4vw, 1.18rem);
+            line-height: 1.85;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 2.4rem;
+        }
+
+        .hero-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: 1px solid var(--accent);
+            padding: 1rem 2.2rem;
+            border-radius: 3px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.76rem;
+            letter-spacing: 1.8px;
+            cursor: pointer;
+            transition: 0.35s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.22);
+        }
+
+        .btn-ghost {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.55);
+            padding: 1rem 2.2rem;
+            border-radius: 3px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.76rem;
+            letter-spacing: 1.8px;
+            cursor: pointer;
+            transition: 0.35s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .section {
+            padding: 7rem 6vw;
+        }
+
+        .section-light {
+            background: var(--bg);
+        }
+
+        .section-alt {
+            background: var(--bg-alt);
+        }
+
+        .section-header {
+            text-align: center;
+            max-width: 860px;
+            margin: 0 auto 4rem;
+        }
+
+        .section-kicker {
+            color: var(--gold);
+            text-transform: uppercase;
+            letter-spacing: 2.6px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            margin-bottom: 0.8rem;
+        }
+
+        .section-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.3rem, 4vw, 3.5rem);
+            font-weight: 400;
+            color: var(--text);
+            line-height: 1.12;
+        }
+
+        .section-lead {
+            color: var(--text-light);
+            line-height: 1.85;
+            margin-top: 1.1rem;
+            font-size: 1rem;
+        }
+
+        .info-grid {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 3rem;
+            align-items: stretch;
+        }
+
+        .info-card {
+            background: white;
+            border: 1px solid var(--border);
+            padding: clamp(2.2rem, 4vw, 3.5rem);
+            box-shadow: 0 24px 70px rgba(44, 51, 37, 0.06);
+        }
+
+        .info-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.1rem, 4vw, 3.2rem);
+            font-weight: 400;
+            line-height: 1.15;
+            margin-bottom: 1.3rem;
+        }
+
+        .info-card p {
+            color: var(--text-light);
+            line-height: 1.9;
+            margin-bottom: 1rem;
+        }
+
+        .contact-box {
+            background:
+                radial-gradient(circle at 84% 20%, rgba(200,164,107,0.18), transparent 24%),
+                linear-gradient(135deg, #172318, #243321);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: clamp(2.2rem, 4vw, 3.5rem);
+            box-shadow: 0 24px 70px rgba(44, 51, 37, 0.12);
+        }
+
+        .contact-box .section-kicker {
+            color: var(--gold);
+        }
+
+        .contact-box h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 1.2rem;
+        }
+
+        .contact-box p,
+        .contact-box a {
+            color: rgba(255,255,255,0.78);
+            text-decoration: none;
+            line-height: 1.8;
+            font-size: 0.95rem;
+        }
+
+        .contact-box a {
+            color: white;
+            font-weight: 800;
+        }
+
+        .contact-line {
+            margin-bottom: 1.2rem;
+        }
+
+        .sun-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.8rem;
+        }
+
+        .sun-item-card {
+            background: white;
+            border: 1px solid var(--border);
+            box-shadow: 0 26px 70px rgba(44, 51, 37, 0.07);
+            cursor: pointer;
+            transition: 0.35s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sun-item-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 34px 90px rgba(44, 51, 37, 0.13);
+        }
+
+        .sun-card-img {
+            width: 100%;
+            height: 320px;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+            transition: 0.6s ease;
+            background-color: #eee;
+        }
+
+        .sun-item-card:hover .sun-card-img {
+            transform: scale(1.045);
+        }
+
+        .sun-card-content {
+            padding: 2rem 1.3rem;
+            text-align: left;
+            background-color: white;
+            flex-grow: 1;
+        }
+
+        .sun-card-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.55rem;
+            font-weight: 400;
+            color: var(--text);
+            margin-bottom: 0.8rem;
+            line-height: 1.2;
+        }
+
+        .sun-card-price {
+            font-size: 1rem;
+            color: var(--gold);
+            font-weight: 900;
+            letter-spacing: 0.5px;
+        }
+
+        .sun-card-price small {
+            font-size: 0.78rem;
+            color: var(--text-light);
+            font-weight: 700;
+        }
+
+        .sun-card-action {
+            margin-top: 1.4rem;
+            display: inline-flex;
+            border: 1px solid rgba(92,122,77,0.5);
+            color: var(--accent);
+            background: transparent;
+            padding: 0.78rem 1.5rem;
+            border-radius: 4px;
+            font-size: 0.68rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            transition: 0.3s;
+        }
+
+        .sun-item-card:hover .sun-card-action {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 15, 12, 0.72);
+            backdrop-filter: blur(8px);
+            z-index: 5000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: 0.35s ease;
+            padding: 2rem 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--bg);
+            width: min(94vw, 560px);
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 3.4rem 2.6rem;
+            position: relative;
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 90px rgba(0,0,0,0.28);
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 1.4rem;
+            right: 1.4rem;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: var(--text-light);
+            transition: 0.25s;
+        }
+
+        .close-modal:hover {
+            color: var(--text);
+            transform: rotate(90deg);
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            font-weight: 400;
+            text-align: center;
+            margin-bottom: 0.7rem;
+        }
+
+        .modal-location {
+            text-align: center;
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 800;
+            margin-bottom: 1.8rem;
+            letter-spacing: 0.6px;
+            line-height: 1.7;
+        }
+
+        .items-box {
+            margin-bottom: 1.5rem;
+            text-align: left;
+            background: white;
+            padding: 1.2rem;
+            border: 1px solid var(--border);
+        }
+
+        .equipment-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.85rem 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .equipment-row:last-child {
+            border-bottom: none;
+        }
+
+        .extras-item-label {
+            display: flex;
+            align-items: center;
+            position: relative;
+            cursor: pointer;
+            gap: 12px;
+            user-select: none;
+            flex-grow: 1;
+        }
+
+        .modal-overlay input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .custom-checkmark {
+            position: relative;
+            height: 22px;
+            width: 22px;
+            flex: 0 0 22px;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .extras-item-label:hover input ~ .custom-checkmark {
+            border-color: var(--accent);
+        }
+
+        .modal-overlay input:checked ~ .custom-checkmark {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .custom-checkmark::after {
+            content: "";
+            position: absolute;
+            display: none;
+            left: 7px;
+            top: 3px;
+            width: 5px;
+            height: 10px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+
+        .modal-overlay input:checked ~ .custom-checkmark::after {
+            display: block;
+        }
+
+        .item-text-main {
+            font-size: 0.92rem;
+            color: var(--text);
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
+        .item-text-main small {
+            color: var(--text-light);
+            font-weight: 600;
+            font-size: 0.76rem;
+        }
+
+        .qty-selector {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 2px 4px;
+            flex: 0 0 auto;
+        }
+
+        .qty-btn {
+            background: transparent;
+            border: none;
+            font-size: 1.2rem;
+            color: #666;
+            cursor: pointer;
+            padding: 0 8px;
+            transition: color 0.2s ease;
+        }
+
+        .qty-btn:hover {
+            color: var(--accent);
+        }
+
+        .qty-val {
+            font-weight: 800;
+            font-size: 0.95rem;
+            color: var(--text);
+            min-width: 24px;
+            text-align: center;
+            user-select: none;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.9rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 0.9rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.68rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            font-weight: 800;
+            letter-spacing: 1.4px;
+            margin-bottom: 0.45rem;
+        }
+
+        .essence-input,
+        .modal-content input[type="text"],
+        .modal-content input[type="email"],
+        .modal-content input[type="tel"],
+        .modal-content select {
+            width: 100%;
+            padding: 0.95rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            background: white;
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text);
+            outline: none;
+            transition: 0.25s;
+        }
+
+        .essence-input:focus,
+        .modal-content input:focus,
+        .modal-content select:focus {
+            border-color: rgba(92,122,77,0.65);
+            box-shadow: 0 0 0 4px rgba(92,122,77,0.08);
+        }
+
+        .payment-box {
+            margin: 1.2rem 0;
+            text-align: left;
+        }
+
+        .payment-options {
+            display: flex;
+            gap: 1.2rem;
+            flex-wrap: wrap;
+            color: var(--text);
+            font-size: 0.9rem;
+        }
+
+        .payment-options input {
+            accent-color: var(--accent);
+        }
+
+        .total-box {
+            padding: 1.3rem;
+            background: white;
+            text-align: right;
+            border-radius: 4px;
+            margin: 1.2rem 0;
+            border-left: 4px solid var(--accent);
+        }
+
+        .total-label {
+            font-size: 0.72rem;
+            color: var(--text-light);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            display: block;
+            margin-bottom: 0.25rem;
+            font-weight: 800;
+        }
+
+        #modal-total-amount {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            font-family: 'Playfair Display', serif;
+        }
+
+        .btn-book-extras {
+            width: 100%;
+            padding: 1.15rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 800;
+            border-radius: 4px;
+            transition: 0.3s;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .btn-book-extras:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-book-extras:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .success-card {
+            background: white;
+            padding: 3rem 2rem;
+            border-radius: 8px;
+            max-width: 460px;
+            width: 92%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            color: var(--accent);
+            margin-bottom: 1.5rem;
+        }
+
+        .success-card h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 400;
+            color: var(--text);
+            margin-bottom: 1rem;
+        }
+
+        #success-details {
+            color: var(--text-light);
+            line-height: 1.7;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .footer {
+            background: #111a12;
+            color: white;
+            padding: 4rem 6vw 2rem;
+        }
+
+        .footer-grid {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .footer .logo-title {
+            color: white;
+            letter-spacing: 4px;
+        }
+
+        .footer .logo-subtitle {
+            color: rgba(255,255,255,0.65);
+        }
+
+        .footer p,
+        .footer a,
+        .footer li {
+            color: rgba(255,255,255,0.68);
+            font-size: 0.82rem;
+            line-height: 1.9;
+            text-decoration: none;
+        }
+
+        .footer h4 {
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer ul {
+            list-style: none;
+        }
+
+        .footer a:hover {
+            color: var(--gold);
+        }
+
+        .footer-bottom {
+            max-width: 1320px;
+            margin: 3rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            color: rgba(255,255,255,0.45);
+            font-size: 0.75rem;
+        }
+
+        .flatpickr-calendar {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .flatpickr-day.selected,
+        .flatpickr-day.selected:hover {
+            background: var(--accent) !important;
+            border-color: var(--accent) !important;
+        }
+
+        @media (max-width: 1150px) {
+            .nav-links {
+                gap: 1.25rem;
+            }
+
+            .nav-links a {
+                font-size: 0.7rem;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sun-cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 820px) {
+            .site-header {
+                padding: 1rem 5vw;
+                align-items: flex-start;
+                background: rgba(23,35,24,0.94);
+            }
+
+            .logo-title {
+                font-size: 1.35rem;
+                letter-spacing: 4px;
+            }
+
+            .logo-subtitle {
+                font-size: 0.55rem;
+                letter-spacing: 3px;
+            }
+
+            .nav-links {
+                justify-content: flex-end;
+                flex-wrap: wrap;
+                gap: 0.8rem;
+            }
+
+            .nav-links a {
+                font-size: 0.62rem;
+            }
+
+            .hero {
+                min-height: 78vh;
+                padding: 8rem 5vw 5rem;
+            }
+
+            .hero-title {
+                font-size: clamp(2.7rem, 12vw, 4rem);
+            }
+
+            .section {
+                padding: 5rem 5vw;
+            }
+
+            .sun-cards-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .sun-card-img {
+                height: 300px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .modal-content {
+                padding: 3rem 1.5rem 2rem;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
+
+    <link rel="stylesheet" href="../mobile.css?v=3">
 </head>
+
 <body>
 
-<header>
-    <a href="index.html" class="logo-container">
+<header class="site-header" id="site-header">
+    <a href="index.html" class="logo-container" aria-label="Balaton Essence homepage">
         <span class="logo-title">BALATON</span>
-        <span class="logo-sub">Essence</span>
+        <span class="logo-subtitle">Essence</span>
     </a>
 
-    <a href="index.html" style="text-decoration: none; font-size: 0.7rem; font-weight: 600; text-transform: uppercase; color: var(--text);">← Back</a>
+    <nav class="nav-links" aria-label="Main navigation">
+        <a href="index.html#apartments">Apartments</a>
+        <a href="index.html#services" class="active">Services</a>
+        <a href="about.html">About us</a>
+        <a href="#contact">Contact</a>
+
+        <div class="lang-dropdown">
+            <button class="lang-btn" type="button">EN <span class="arrow"></span></button>
+            <div class="lang-content">
+                <a href="../sun.html">Magyar</a>
+                <a href="sun.html">English</a>
+                <a href="../de/sun.html">Deutsch</a>
+            </div>
+        </div>
+    </nav>
 </header>
 
-<main>
-    <div class="section-header" style="text-align: center; margin-top: 4rem; margin-bottom: 3rem;">
-        <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem;">SUP <span class="amp">&</span> SUN</h3>
-        <p style="font-size: 0.9rem; color: #777; letter-spacing: 2px; text-transform: uppercase;">Experience Booking</p>
-        <br>
-        <div style="max-width: 700px; margin: 0 auto 3rem; text-align: center; background: #fff; border: 1px solid var(--border); padding: 1.5rem; border-radius: 8px;">
-            <p style="font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #777; margin-bottom: 0.8rem;">
-                SUP & SUN CONTACT
-            </p>
-            <p style="font-size: 1rem; color: var(--text); margin-bottom: 0.5rem;">
-                Phone: <a href="tel:+36208598201" style="color: var(--accent); text-decoration: none; font-weight: 600;">+36 20 859 8201</a>
-            </p>
-            
-            <p style="font-size: 0.9rem; color: #666;">
-                For SUP rental and beach equipment inquiries, please contact us at this number.
-            </p>
-            <p style="font-size: 0.9rem; color: #666;">
-                📍 Pick-up and drop-off location:<br> Fonyód, Fürdő utca 40
-            </p>
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-kicker">SUP & SUN</div>
+
+        <h1 class="hero-title">
+            Water adventures and carefree days by Lake Balaton.
+        </h1>
+
+        <div class="hero-line"></div>
+
+        <p class="hero-text">
+            Rent a SUP, sunbed or beach umbrella in Fonyód and enjoy the lakeside comfortably with simple online booking.
+        </p>
+
+        <div class="hero-actions">
+            <a href="#equipment" class="btn-primary">Equipment</a>
+            <a href="tel:+36208598201" class="btn-ghost">Call us</a>
         </div>
     </div>
+</section>
 
-   <section class="sun-cards-section">
-        <div id="sun-cards-grid" class="sun-cards-grid"></div>
-    </section>
-</main>
+<section class="section section-light">
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="section-kicker">Lake Balaton experience</div>
+            <h2>Easy booking, convenient pick-up.</h2>
+
+            <p>
+                SUPs and beach equipment can be picked up and returned in Fonyód. During booking, simply select the equipment, rental period and payment method.
+            </p>
+
+            <p>
+                This service is available both for our guests and external visitors. If you have any questions about SUP rental or beach equipment, we are happy to help by phone.
+            </p>
+        </div>
+
+        <div class="contact-box">
+            <div class="section-kicker">SUP & SUN contact</div>
+            <h3>Information and pick-up</h3>
+
+            <div class="contact-line">
+                <p>Phone:</p>
+                <a href="tel:+36208598201">+36 20 859 8201</a>
+            </div>
+
+            <p>
+                For questions before booking or special requests, please contact us on this number.
+            </p>
+            <br>
+            <div class="contact-line">
+                <p>Pick-up and return location:</p>
+                <p><strong>Fonyód, Fürdő utca 40</strong></p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="equipment" class="section section-alt">
+    <div class="section-header">
+        <div class="section-kicker">Available equipment</div>
+        <h2 class="section-title">Choose what you need for your perfect day at the lake.</h2>
+        <p class="section-lead">
+            Prices are daily rates. Multiple items and multiple days can be booked at the same time.
+        </p>
+    </div>
+
+    <div class="sun-cards-grid">
+        <div class="sun-item-card" id="card-sup" onclick="openRentModal('sup')">
+            <div class="sun-card-img" id="card-img-sup" style="background-image: url('../img/sup.png');"></div>
+            <div class="sun-card-content">
+                <h3 class="sun-card-title">SUP</h3>
+                <p class="sun-card-price" id="card-price-sup">5,900 HUF <small>/ day</small></p>
+                <span class="sun-card-action">Book now</span>
+            </div>
+        </div>
+
+        <div class="sun-item-card" id="card-sunbed" onclick="openRentModal('sunbed')">
+            <div class="sun-card-img" id="card-img-sunbed" style="background-image: url('../img/napozoszek.png');"></div>
+            <div class="sun-card-content">
+                <h3 class="sun-card-title">Sunbed</h3>
+                <p class="sun-card-price" id="card-price-sunbed">1,500 HUF <small>/ day</small></p>
+                <span class="sun-card-action">Book now</span>
+            </div>
+        </div>
+
+        <div class="sun-item-card" id="card-umbrella" onclick="openRentModal('umbrella')">
+            <div class="sun-card-img" id="card-img-umbrella" style="background-image: url('../img/napernyo.png');"></div>
+            <div class="sun-card-content">
+                <h3 class="sun-card-title">Beach umbrella</h3>
+                <p class="sun-card-price" id="card-price-umbrella">1,000 HUF <small>/ day</small></p>
+                <span class="sun-card-action">Book now</span>
+            </div>
+        </div>
+
+        <div class="sun-item-card" id="card-boat" onclick="openRentModal('boat')">
+            <div class="sun-card-img" id="card-img-boat" style="background-image: url('../img/hajo.png');"></div>
+            <div class="sun-card-content">
+                <h3 class="sun-card-title">Boat</h3>
+                <p class="sun-card-price" id="card-price-boat">35,000 HUF <small>/ day</small></p>
+                <span class="sun-card-action">Book now</span>
+            </div>
+        </div>
+    </div>
+</section>
 
 <div id="rent-modal" class="modal-overlay" onclick="closeRentModal()">
     <div class="modal-content" onclick="event.stopPropagation()">
-        <span class="close-modal" onclick="closeRentModal()">&times;</span>
-        <h2 style="font-family: 'Playfair Display', serif; margin-bottom: 0.5rem; text-align: center;">Equipment Booking</h2>
-        
-        <p style="text-align: center; color: #5a6b5a; font-size: 0.85rem; font-weight: 600; margin-bottom: 1.5rem; letter-spacing: 0.5px;">
-            📍 Pickup & Drop-off Location:<br> Fonyód, Fürdő utca 40
-        </p>
-        
-        <form id="rent-form" onsubmit="submitRentForm(event)">
-            <div style="margin-bottom: 1.5rem; text-align: left; background: #fbfbfb; padding: 15px; border-radius: 8px; border: 1px solid #eee;">
-                
-                <div id="sun-modal-items" style="margin-bottom: 1.5rem; text-align: left; background: #fbfbfb; padding: 15px; border-radius: 8px; border: 1px solid #eee;"></div>
+        <span class="close-modal" onclick="closeRentModal()">✕</span>
 
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+        <h2 class="modal-title">Book equipment</h2>
+
+        <p class="modal-location">
+            📍 Pick-up and return location:<br>
+            Fonyód, Fürdő utca 40
+        </p>
+
+        <form id="rent-form" onsubmit="submitRentForm(event)">
+            <div class="items-box">
+                <div class="equipment-row">
                     <label class="extras-item-label">
-                        <input type="checkbox" id="item-sunbed" onchange="updateLiveTotal()"> 
+                        <input type="checkbox" id="item-sup" onchange="updateLiveTotal()">
                         <span class="custom-checkmark"></span>
-                        <span class="item-text-main">Sunbed <small style="color: #777;">(1,500 HUF/day)</small></span>
+                        <span class="item-text-main">SUP <small id="modal-price-sup">(5,900 HUF/day)</small></span>
                     </label>
+
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-sup', -1)">−</button>
+                        <span id="qty-sup" class="qty-val">1</span>
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-sup', 1)">+</button>
+                    </div>
+                </div>
+
+                <div class="equipment-row">
+                    <label class="extras-item-label">
+                        <input type="checkbox" id="item-sunbed" onchange="updateLiveTotal()">
+                        <span class="custom-checkmark"></span>
+                        <span class="item-text-main">Sunbed <small id="modal-price-sunbed">(1,500 HUF/day)</small></span>
+                    </label>
+
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" onclick="changeQty('qty-sunbed', -1)">−</button>
                         <span id="qty-sunbed" class="qty-val">1</span>
@@ -138,66 +1199,136 @@
                     </div>
                 </div>
 
-                <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div class="equipment-row">
                     <label class="extras-item-label">
-                        <input type="checkbox" id="item-umbrella" onchange="updateLiveTotal()"> 
+                        <input type="checkbox" id="item-umbrella" onchange="updateLiveTotal()">
                         <span class="custom-checkmark"></span>
-                        <span class="item-text-main">Parasol <small style="color: #777;">(1,000 HUF/day)</small></span>
+                        <span class="item-text-main">Beach umbrella <small id="modal-price-umbrella">(1,000 HUF/day)</small></span>
                     </label>
+
                     <div class="qty-selector">
                         <button type="button" class="qty-btn" onclick="changeQty('qty-umbrella', -1)">−</button>
                         <span id="qty-umbrella" class="qty-val">1</span>
                         <button type="button" class="qty-btn" onclick="changeQty('qty-umbrella', 1)">+</button>
                     </div>
                 </div>
+
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <label class="extras-item-label">
+                        <input type="checkbox" id="item-boat" onchange="updateLiveTotal()"> 
+                        <span class="custom-checkmark"></span>
+                        <span class="item-text-main">Boat <small id="modal-price-boat" style="color: #777;">(35,000 HUF/day)</small></span>
+                    </label>
+                    <div class="qty-selector">
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-boat', -1)">−</button>
+                        <span id="qty-boat" class="qty-val">1</span>
+                        <button type="button" class="qty-btn" onclick="changeQty('qty-boat', 1)">+</button>
+                    </div>
+                </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
+            <div class="form-grid">
                 <div>
-                    <label style="display: block; font-size: 0.7rem; color: #999; text-transform: uppercase; margin-bottom: 4px; text-align: left;">Start Date</label>
-                    <input type="text" id="r-start" required onchange="updateLiveTotal()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <label class="form-label" for="r-start">Start date</label>
+                    <input type="text" id="r-start" required onchange="updateLiveTotal()">
                 </div>
+
                 <div>
-                    <label style="display: block; font-size: 0.7rem; color: #999; text-transform: uppercase; margin-bottom: 4px; text-align: left;">End Date</label>
-                    <input type="text" id="r-end" required onchange="updateLiveTotal()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <label class="form-label" for="r-end">End date</label>
+                    <input type="text" id="r-end" required onchange="updateLiveTotal()">
                 </div>
             </div>
 
-            <input type="text" id="r-name" placeholder="Full Name" required style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
-            <input type="email" id="r-email" placeholder="Email Address" required style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
-            <input type="tel" id="r-phone" placeholder="Phone Number" required style="width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 4px;">
-            
-            <select id="r-apt" required style="width: 100%; padding: 12px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px; background: white;">
-                <option value="" disabled selected>Select Apartment...</option>
-                <option value="EXTERNAL">EXTERNAL (Non-guest)</option>
-            </select>
+            <div class="form-group">
+                <input type="text" id="r-name" placeholder="Full name" required>
+            </div>
 
-            <div style="margin-bottom: 20px; text-align: left;">
-                <label style="display: block; font-size: 0.7rem; color: #999; text-transform: uppercase; margin-bottom: 8px;">Payment Method</label>
-                <div style="display: flex; gap: 20px;">
-                    <label><input type="radio" name="s-payment" value="cash" checked> Cash</label>
-                    <label><input type="radio" name="s-payment" value="card"> Credit Card (Online)</label>
+            <div class="form-group">
+                <input type="email" id="r-email" placeholder="Email address" required>
+            </div>
+
+            <div class="form-group">
+                <input type="tel" id="r-phone" placeholder="Phone number" required>
+            </div>
+
+            <div class="form-group">
+                <select id="r-apt" required>
+                    <option value="" disabled selected>Select apartment...</option>
+                    <option value="EXTERNAL">EXTERNAL GUEST</option>
+                </select>
+            </div>
+
+            <div class="payment-box">
+                <label class="form-label">Payment method</label>
+                <div class="payment-options">
+                    <label>
+                        <input type="radio" name="s-payment" value="cash" checked>
+                        Cash
+                    </label>
+
+                    <label>
+                        <input type="radio" name="s-payment" value="card">
+                        Online card payment
+                    </label>
                 </div>
             </div>
 
-            <div id="live-total-display" style="padding: 20px; background: #faf9f6; text-align: right; border-radius: 8px; margin-bottom: 20px; border: 1px solid #eee;">
-                <span style="font-size: 0.8rem; color: #777;">TOTAL ESTIMATE:</span>
-                <div id="modal-total-amount" style="font-size: 2rem; font-weight: 700; color: #5a6b5a; font-family: 'Playfair Display', serif;">0 HUF</div>
+            <div class="total-box">
+                <span class="total-label">Estimated total</span>
+                <div id="modal-total-amount">0 HUF</div>
             </div>
 
-            <button type="submit" class="btn-book-extras">Place Booking</button>
+            <button type="submit" class="btn-book-extras">Submit booking</button>
         </form>
     </div>
 </div>
 
-<div id="success-popup" class="modal-overlay" style="display: none; align-items: center; justify-content: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; backdrop-filter: blur(4px);">
-    <div style="background: white; padding: 3rem 2rem; border-radius: 12px; max-width: 450px; width: 90%; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.2);">
-        <div style="font-size: 4rem; color: #5a6b5a; margin-bottom: 1.5rem;">✓</div>
-        <h2 style="font-family: 'Playfair Display', serif; font-size: 2rem; color: #333; margin-bottom: 1rem;">Success!</h2>
-        <div id="success-details" style="color: #666; line-height: 1.6; margin-bottom: 2rem; font-size: 1rem;"></div>
-        <button onclick="window.location.href='index.html'" class="btn-book-extras" style="width: 100%; margin: 0; cursor: pointer;">Back to Home</button>
+<div id="success-popup" class="modal-overlay" style="display: none;">
+    <div class="success-card">
+        <div class="success-icon">✓</div>
+        <h2>Booking successful!</h2>
+        <div id="success-details"></div>
+        <button onclick="window.location.href='index.html'" class="btn-book-extras">Back to homepage</button>
     </div>
 </div>
+
+<footer class="footer" id="contact">
+    <div class="footer-grid">
+        <div>
+            <a href="index.html" class="logo-container">
+                <span class="logo-title">BALATON</span>
+                <span class="logo-subtitle">Essence</span>
+            </a>
+            <p style="margin-top: 1.3rem;">
+                Premium accommodation and experiences at Lake Balaton.
+            </p>
+        </div>
+
+        <div>
+            <h4>Navigation</h4>
+            <ul>
+                <li><a href="index.html#apartments">Apartments</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="about.html">About us</a></li>
+                <li><a href="terms.html">Terms & Conditions</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4>Contact</h4>
+            <ul>
+                <li><a href="tel:+36204995484">+36 20 499 5484</a></li>
+                <li><a href="tel:+36208598201">SUP & SUN: +36 20 859 8201</a></li>
+                <li><a href="mailto:info@balatonessence.com">info@balatonessence.com</a></li>
+                <li>8640 Fonyód, Hungary</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        © 2026 Balaton Essence. All rights reserved.
+    </div>
+</footer>
 
 <script src="https://js.stripe.com/v3/"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -205,138 +1336,138 @@
 <script>
     const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0');
 
-    let sunServices = [];
-
-    const itemMap = {};
+    let itemMap = {
+        sup: {
+            checkboxId: 'item-sup',
+            qtyId: 'qty-sup',
+            label: 'SUP',
+            price: 5900,
+            unit: 'day',
+            image: '../img/sup.png',
+            active: true
+        },
+        sunbed: {
+            checkboxId: 'item-sunbed',
+            qtyId: 'qty-sunbed',
+            label: 'Sunbed',
+            price: 1500,
+            unit: 'day',
+            image: '../img/napozoszek.png',
+            active: true
+        },
+        umbrella: {
+            checkboxId: 'item-umbrella',
+            qtyId: 'qty-umbrella',
+            label: 'Beach umbrella',
+            price: 1000,
+            unit: 'day',
+            image: '../img/napernyo.png',
+            active: true
+        },
+        boat: {
+            checkboxId: 'item-boat',
+            qtyId: 'qty-boat',
+            label: 'Boat',
+            price: 35000,
+            unit: 'day',
+            image: '../img/hajo.png',
+            active: true
+        }
+    };
 
     document.addEventListener('DOMContentLoaded', async function() {
+        initHeaderScroll();
         await loadSunServices();
         await loadApartments();
         initDatePickers();
         updateLiveTotal();
     });
 
+    function initHeaderScroll() {
+        const header = document.getElementById('site-header');
+
+        if (!header) return;
+
+        const update = () => {
+            if (window.scrollY > 20) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        };
+
+        update();
+        window.addEventListener('scroll', update);
+    }
+
     async function loadSunServices() {
-    try {
-        const res = await fetch('/api/services?t=' + Date.now());
+        try {
+            const res = await fetch('/api/services?t=' + Date.now());
 
-        if (!res.ok) {
-            throw new Error('Could not load services.');
+            if (!res.ok) {
+                throw new Error('Could not load service prices.');
+            }
+
+            const data = await res.json();
+            const services = data.services?.sun || [];
+
+            services.forEach(service => {
+                if (!service.id || !itemMap[service.id]) return;
+
+                itemMap[service.id] = {
+                    ...itemMap[service.id],
+                    label: service.name_en || service.name_hu || itemMap[service.id].label,
+                    price: Number(service.price || itemMap[service.id].price),
+                    unit: service.unit_en || itemMap[service.id].unit || 'day',
+                    image: service.image || itemMap[service.id].image,
+                    active: service.active !== false
+                };
+            });
+
+            renderSunServiceTexts();
+        } catch (err) {
+            console.error('SUP & SUN price loading error:', err);
+            renderSunServiceTexts();
         }
+    }
 
-        const data = await res.json();
+    function renderSunServiceTexts() {
+        Object.entries(itemMap).forEach(([key, item]) => {
+            const priceText = `${Number(item.price || 0).toLocaleString('en-US')} HUF`;
+            const unitText = item.unit || 'day';
 
-        sunServices = (data.services?.sun || [])
-            .filter(item => item.active !== false);
+            const card = document.getElementById(`card-${key}`);
+            const cardPrice = document.getElementById(`card-price-${key}`);
+            const modalPrice = document.getElementById(`modal-price-${key}`);
+            const cardImg = document.getElementById(`card-img-${key}`);
+            const cardTitle = card ? card.querySelector('.sun-card-title') : null;
+            const modalLabel = document.querySelector(`#${item.checkboxId}`)?.closest('.extras-item-label')?.querySelector('.item-text-main');
 
-        sunServices.forEach(service => {
-            const id = String(service.id || '').trim();
+            if (card) {
+                card.style.display = item.active === false ? 'none' : 'flex';
+            }
 
-            if (!id) return;
+            if (cardTitle) {
+                cardTitle.innerText = item.label || key;
+            }
 
-            itemMap[id] = {
-                checkboxId: `item-${id}`,
-                qtyId: `qty-${id}`,
-                label: service.name_en || service.name_hu || id,
-                price: Number(service.price || 0),
-                image: service.image || '',
-                unit: service.unit_en || 'day'
-            };
+            if (cardPrice) {
+                cardPrice.innerHTML = `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
+            }
+
+            if (modalPrice) {
+                modalPrice.innerText = `(${priceText}/${unitText})`;
+            }
+
+            if (modalLabel && modalPrice) {
+                modalLabel.childNodes[0].nodeValue = `${item.label || key} `;
+            }
+
+            if (cardImg && item.image) {
+                cardImg.style.backgroundImage = `url('${escapeHtml(safeImageUrl(item.image))}')`;
+            }
         });
-
-        renderSunCards();
-        renderSunModalItems();
-    } catch (err) {
-        console.error('Sun services loading error:', err);
-
-        const grid = document.getElementById('sun-cards-grid');
-        if (grid) {
-            grid.innerHTML = `
-                <div style="grid-column: 1 / -1; text-align:center; color:#b0413e;">
-                    Beach equipment is currently unavailable.
-                </div>
-            `;
-        }
     }
-}
-
-function safeImageUrl(value) {
-    const url = String(value || '').trim();
-
-    if (!url) return '';
-    if (url.startsWith('../img/')) return url;
-    if (url.startsWith('/img/')) return url;
-    if (url.startsWith('https://')) return url;
-
-    if (url.startsWith('img/')) {
-        return `../${url}`;
-    }
-
-    return '';
-}
-
-function formatPrice(value) {
-    return Number(value || 0).toLocaleString('en-US');
-}
-
-function renderSunCards() {
-    const grid = document.getElementById('sun-cards-grid');
-    if (!grid) return;
-
-    if (sunServices.length === 0) {
-        grid.innerHTML = `
-            <div style="grid-column: 1 / -1; text-align:center; color:#777;">
-                No available beach equipment.
-            </div>
-        `;
-        return;
-    }
-
-    grid.innerHTML = sunServices.map(service => {
-        const id = String(service.id || '').trim();
-        const name = service.name_en || service.name_hu || id;
-        const price = Number(service.price || 0);
-        const unit = service.unit_en || 'day';
-        const image = safeImageUrl(service.image);
-
-        return `
-            <div class="sun-item-card" onclick="openRentModal('${escapeHtml(id)}')">
-                <div class="sun-card-img" style="background-image: url('${escapeHtml(image)}');"></div>
-                <div class="sun-card-content">
-                    <h3 class="sun-card-title">${escapeHtml(name)}</h3>
-                    <p class="sun-card-price">${formatPrice(price)} HUF <small>/ ${escapeHtml(unit)}</small></p>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
-
-function renderSunModalItems() {
-    const modalItemsContainer = document.getElementById('sun-modal-items');
-    if (!modalItemsContainer) return;
-
-    modalItemsContainer.innerHTML = sunServices.map(service => {
-        const id = String(service.id || '').trim();
-        const name = service.name_en || service.name_hu || id;
-        const price = Number(service.price || 0);
-        const unit = service.unit_en || 'day';
-
-        return `
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <label class="extras-item-label">
-                    <input type="checkbox" id="item-${escapeHtml(id)}" onchange="updateLiveTotal()"> 
-                    <span class="custom-checkmark"></span>
-                    <span class="item-text-main">${escapeHtml(name)} <small style="color: #777;">(${formatPrice(price)} HUF/${escapeHtml(unit)})</small></span>
-                </label>
-                <div class="qty-selector">
-                    <button type="button" class="qty-btn" onclick="changeQty('qty-${escapeHtml(id)}', -1)">−</button>
-                    <span id="qty-${escapeHtml(id)}" class="qty-val">1</span>
-                    <button type="button" class="qty-btn" onclick="changeQty('qty-${escapeHtml(id)}', 1)">+</button>
-                </div>
-            </div>
-        `;
-    }).join('');
-}
 
     async function loadApartments() {
         const aptSelect = document.getElementById('r-apt');
@@ -346,7 +1477,7 @@ function renderSunModalItems() {
             const res = await fetch('/api/get-db-content?t=' + Date.now());
 
             if (!res.ok) {
-                throw new Error('Could not load database.');
+                throw new Error('Could not load the database.');
             }
 
             const database = await res.json();
@@ -361,7 +1492,7 @@ function renderSunModalItems() {
                 aptSelect.appendChild(opt);
             });
         } catch (err) {
-            console.error('Apartment loading error:', err);
+            console.error('Error while loading apartments:', err);
         }
     }
 
@@ -397,10 +1528,10 @@ function renderSunModalItems() {
             return 0;
         }
 
-        const d1 = new Date(start);
-        const d2 = new Date(end);
+        const d1 = parseLocalDate(start);
+        const d2 = parseLocalDate(end);
 
-        if (isNaN(d1.getTime()) || isNaN(d2.getTime()) || d2 < d1) {
+        if (!d1 || !d2 || isNaN(d1.getTime()) || isNaN(d2.getTime()) || d2 < d1) {
             return 0;
         }
 
@@ -411,6 +1542,8 @@ function renderSunModalItems() {
         const selected = [];
 
         Object.values(itemMap).forEach(item => {
+            if (item.active === false) return;
+
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
 
@@ -421,8 +1554,8 @@ function renderSunModalItems() {
             selected.push({
                 label: item.label,
                 qty,
-                price: item.price,
-                dailyTotal: qty * item.price
+                price: Number(item.price || 0),
+                dailyTotal: qty * Number(item.price || 0)
             });
         });
 
@@ -437,6 +1570,7 @@ function renderSunModalItems() {
         const total = dailyTotal * days;
 
         const totalEl = document.getElementById('modal-total-amount');
+
         if (totalEl) {
             totalEl.innerText = total.toLocaleString('en-US') + ' HUF';
         }
@@ -465,7 +1599,10 @@ function renderSunModalItems() {
 
         if (preselectedItem && itemMap[preselectedItem]) {
             const checkbox = document.getElementById(itemMap[preselectedItem].checkboxId);
-            if (checkbox) checkbox.checked = true;
+
+            if (checkbox) {
+                checkbox.checked = true;
+            }
         }
 
         const modal = document.getElementById('rent-modal');
@@ -475,6 +1612,7 @@ function renderSunModalItems() {
             modal.classList.add('active');
         }, 10);
 
+        document.body.style.overflow = 'hidden';
         updateLiveTotal();
     }
 
@@ -485,30 +1623,27 @@ function renderSunModalItems() {
 
         setTimeout(() => {
             modal.style.display = 'none';
-        }, 400);
+            document.body.style.overflow = 'auto';
+        }, 350);
     }
 
     function showSuccessPopup(orderData) {
         const detailsDiv = document.getElementById('success-details');
 
         detailsDiv.innerHTML = `
-            <p>Items booked: <strong>${escapeHtml(orderData.items)}</strong></p>
-            <p>Pick-up location: <strong>Fonyód, Fürdő utca 40</strong></p>
-            <p>Period: <strong>${escapeHtml(orderData.start)} — ${escapeHtml(orderData.end)}</strong></p>
-            <p>Total: <strong>${Number(orderData.amount || 0).toLocaleString('en-US')} HUF</strong></p>
-            <p>Payment: <strong>Cash on pickup</strong></p>
+            <p>Booked items: <strong>${escapeHtml(orderData.items)}</strong></p>
+            <p>Pick-up: <strong>Fonyód, Fürdő utca 40</strong></p>
+            <p>Rental period: <strong>${escapeHtml(orderData.start)} — ${escapeHtml(orderData.end)}</strong></p>
+            <p>Total amount: <strong>${Number(orderData.amount || 0).toLocaleString('en-US')} HUF</strong></p>
+            <p>Payment: <strong>${orderData.method === 'card' ? 'Online card payment' : 'Cash on pick-up'}</strong></p>
         `;
 
-        document.getElementById('success-popup').style.display = 'flex';
-    }
+        const popup = document.getElementById('success-popup');
+        popup.style.display = 'flex';
 
-    function escapeHtml(value) {
-        return String(value || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+        setTimeout(() => {
+            popup.classList.add('active');
+        }, 10);
     }
 
     async function submitRentForm(e) {
@@ -551,7 +1686,7 @@ function renderSunModalItems() {
 
         const orderData = {
             type: 'EXTRA',
-            serviceName: 'Beach Equipment Rental',
+            serviceName: 'Beach equipment rental',
             items: itemsText,
             guestName,
             email,
@@ -565,7 +1700,7 @@ function renderSunModalItems() {
             method,
             lang: 'en',
             pickupLocation: 'Fonyód, Fürdő utca 40',
-            details: `Location: Fonyód, Fürdő utca 40 | Items: ${itemsText} | Period: ${start} - ${end}`
+            details: `Location: Fonyód, Fürdő utca 40 | Equipment: ${itemsText} | Period: ${start} - ${end}`
         };
 
         const submitBtn = document.querySelector('.btn-book-extras');
@@ -598,14 +1733,49 @@ function renderSunModalItems() {
             showSuccessPopup(orderData);
         } catch (err) {
             console.error('Error:', err);
-            alert('Network error occurred.');
+            alert('A network error occurred.');
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
-                submitBtn.innerText = 'Place Booking';
+                submitBtn.innerText = 'Submit booking';
             }
         }
     }
+
+    function parseLocalDate(dateStr) {
+        if (!dateStr) return null;
+
+        const parts = String(dateStr).split('-').map(Number);
+
+        if (parts.length !== 3 || parts.some(Number.isNaN)) {
+            return null;
+        }
+
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function safeImageUrl(value) {
+        const url = String(value || '').trim();
+
+        if (!url) return '';
+        if (url.startsWith('data:image/')) return url;
+        if (url.startsWith('../img/')) return url;
+        if (url.startsWith('img/')) return '../' + url;
+        if (url.startsWith('/img/')) return '..' + url;
+        if (url.startsWith('https://')) return url;
+
+        return '';
+    }
+
+    function escapeHtml(value) {
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
 </script>
+
 </body>
 </html>
