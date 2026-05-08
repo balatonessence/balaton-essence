@@ -972,18 +972,23 @@
             }
 
             .hero {
-                padding: 8rem 5vw 18rem;
-                align-items: flex-start;
+                min-height: 620px !important;
+                height: auto !important;
+                padding: 7.2rem 5vw 2.5rem !important;
+                align-items: center !important;
+                overflow: hidden !important;
             }
 
             .hero::before {
                 background:
                     linear-gradient(
                         90deg,
-                        rgba(10, 15, 12, 0.9) 0%,
-                        rgba(10, 15, 12, 0.68) 100%
+                        rgba(10, 15, 12, 0.84) 0%,
+                        rgba(10, 15, 12, 0.58) 48%,
+                        rgba(10, 15, 12, 0.25) 100%
                     ),
-                    url('img/hatter.jpg') center/cover no-repeat;
+                    url('img/hatter.jpg') 58% center / cover no-repeat !important;
+                transform: none !important;
             }
 
             .hero-content {
@@ -995,24 +1000,42 @@
             }
 
             .hero-feature-strip {
-                grid-template-columns: 1fr;
-                bottom: 0;
-                width: 100%;
-                border-left: none;
-                border-right: none;
+                position: relative !important;
+                left: auto !important;
+                bottom: auto !important;
+                transform: none !important;
+                width: 100% !important;
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                margin: 0 !important;
+                border-left: none !important;
+                border-right: none !important;
             }
 
             .feature-item {
-                min-height: 68px;
-                justify-content: flex-start;
-                padding-left: 8vw;
-                border-right: none;
-                border-bottom: 1px solid rgba(255,255,255,0.1);
+                min-height: 72px !important;
+                justify-content: flex-start !important;
+                padding: 1rem 8vw !important;
+                border-right: none !important;
+                border-bottom: 1px solid rgba(255,255,255,0.1) !important;
             }
 
             .feature-item:nth-child(n+4) {
-                display: none;
+                display: none !important;
             }
+
+            @media (max-width: 520px) {
+                .hero {
+                    min-height: 640px !important;
+                    padding-top: 6.8rem !important;
+                    padding-bottom: 2rem !important;
+                }
+
+                .hero-title {
+                    font-size: clamp(2.35rem, 13vw, 3.7rem) !important;
+                }
+            }
+        
 
             .scroll-indicator {
                 display: none;
@@ -1042,7 +1065,7 @@
         }
     </style>
 
-    <link rel="stylesheet" href="mobile.css?v=3"
+    <link rel="stylesheet" href="mobile.css?v=30">
 </head>
 
 <body>
@@ -1053,7 +1076,7 @@
         <span class="logo-subtitle">ESSENCE</span>
     </a>
 
-    <button class="mobile-menu-toggle" type="button" aria-label="Menü megnyitása" onclick="toggleMobileMenu()">
+    <button class="mobile-menu-toggle" type="button" aria-label="Menü megnyitása">
         <span></span>
         <span></span>
         <span></span>

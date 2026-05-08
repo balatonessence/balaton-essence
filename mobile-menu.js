@@ -1,24 +1,33 @@
-function toggleMobileMenu() {
+document.addEventListener('DOMContentLoaded', function () {
     const header = document.getElementById('site-header') || document.querySelector('.site-header');
-    if (!header) return;
+    const toggle = document.querySelector('.mobile-menu-toggle');
 
-    header.classList.toggle('mobile-open');
-}
-
-document.addEventListener('click', function(event) {
-    const header = document.getElementById('site-header') || document.querySelector('.site-header');
-    if (!header) return;
-
-    if (!header.contains(event.target)) {
-        header.classList.remove('mobile-open');
+    if (!header || !toggle) {
+        console.warn('Mobile menu: header vagy gomb nem található.');
+        return;
     }
-});
 
-document.addEventListener('keydown', function(event) {
-    if (event.key !== 'Escape') return;
+    toggle.addEventListener('click', function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        header.classList.toggle('mobile-open');
+    });
 
-    const header = document.getElementById('site-header') || document.querySelector('.site-header');
-    if (!header) return;
+    header.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', function () {
+            header.classList.remove('mobile-open');
+        });
+    });
 
-    header.classList.remove('mobile-open');
+    document.addEventListener('click', function (event) {
+        if (!header.contains(event.target)) {
+            header.classList.remove('mobile-open');
+        }
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape') {
+            header.classList.remove('mobile-open');
+        }
+    });
 });
