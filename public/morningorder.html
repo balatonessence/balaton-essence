@@ -328,8 +328,8 @@
                 </div>
 
                 <div class="form-floating">
-                    <input type="number" id="guests" min="1" max="10" value="2" placeholder=" " required>
-                    <label for="guests" data-i18n="guestsLabel">Személyek</label>
+                    <input type="number" id="guests" min="1" max="10" value="1" placeholder=" " required>
+                    <label for="guests" data-i18n="guestsLabel">Tálak száma</label>
                 </div>
             </div>
 
@@ -364,7 +364,7 @@
     <script>
         const STRIPE_PUBLIC_KEY = 'pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0';
 
-        let PRICE_PER_PERSON_PER_DAY = 4500;
+        let PRICE_PER_PLATE_PER_DAY = 4500;
 
         async function loadBreakfastPrice() {
             try {
@@ -383,7 +383,7 @@
                 );
 
                 if (breakfastService && Number(breakfastService.price) > 0) {
-                    PRICE_PER_PERSON_PER_DAY = Number(breakfastService.price);
+                    PRICE_PER_PLATE_PER_DAY = Number(breakfastService.price);
                 }
             } catch (err) {
                 console.error('Reggeli ár betöltési hiba:', err);
@@ -411,7 +411,7 @@
                 emailLabel: "E-mail cím",
                 phoneLabel: "Telefonszám",
                 aptLabel: "Apartman",
-                guestsLabel: "Személyek",
+                guestsLabel: "Tálak száma",
                 dateLabel: "Napok kiválasztása",
                 detailsLabel: "Milyen reggelit kértek? Kívánságok",
                 paymentLabel: "Fizetési mód",
@@ -437,7 +437,7 @@
                 emailLabel: "Email address",
                 phoneLabel: "Phone number",
                 aptLabel: "Apartment",
-                guestsLabel: "Guests",
+                guestsLabel: "Number of plates",
                 dateLabel: "Select days",
                 detailsLabel: "Breakfast preferences / requests",
                 paymentLabel: "Payment method",
@@ -463,7 +463,7 @@
                 emailLabel: "E-Mail-Adresse",
                 phoneLabel: "Telefonnummer",
                 aptLabel: "Apartment",
-                guestsLabel: "Personen",
+                guestsLabel: "Anzahl der Platten",
                 dateLabel: "Tage auswählen",
                 detailsLabel: "Frühstückswünsche / Bemerkungen",
                 paymentLabel: "Zahlungsart",
@@ -634,16 +634,16 @@
                 return;
             }
 
-            const guestsCount = Number(document.getElementById('guests').value || 0);
+            const plateCount = Number(document.getElementById('guests').value || 0);
 
-            if (!Number.isFinite(guestsCount) || guestsCount < 1) {
+            if (!Number.isFinite(plateCount) || plateCount < 1) {
                 showMessage(translations[currentLang].genericError);
                 return;
             }
 
             const paymentMethod = document.getElementById('paymentMethod').value;
             const daysCount = selectedDates.length;
-            const totalAmount = daysCount * guestsCount * PRICE_PER_PERSON_PER_DAY;
+            const totalAmount = daysCount * plateCount * PRICE_PER_PLATE_PER_DAY;
 
             const formatDate = date => fpInstance.formatDate(date, 'Y-m-d');
             const dateList = selectedDates.map(formatDate).join(', ');
@@ -661,7 +661,7 @@
                 start: formatDate(selectedDates[0]),
                 end: formatDate(selectedDates[selectedDates.length - 1]),
                 days: daysCount,
-                items: `${orderDetails} | Napok: ${dateList} | Személyek: ${guestsCount}`,
+                items: `${orderDetails} | Napok: ${dateList} | Tálak: ${plateCount}`,
                 method: paymentMethod,
                 amount: totalAmount
             };
