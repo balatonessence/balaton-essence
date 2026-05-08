@@ -1240,7 +1240,7 @@
     if (!discount) {
         return `
             <div>
-                <p class="apt-price-normal">${minDisplayPrice.toLocaleString('hu-HU')} Ft-tól / éjszaka</p>
+                <p class="apt-price-normal">${minDisplayPrice.toLocaleString('hu-HU')} Ft-tól</p>
             </div>
         `;
     }
@@ -1249,9 +1249,9 @@
 
     return `
         <div>
-            <div class="apt-sale-badge">Akció: -${discount.amount.toLocaleString('hu-HU')} Ft / éjszaka</div>
-            <div class="apt-price-old">${minDisplayPrice.toLocaleString('hu-HU')} Ft-tól / éjszaka</div>
-            <p class="apt-price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft-tól / éjszaka</p>
+            <div class="apt-sale-badge">Akció: -${discount.amount.toLocaleString('hu-HU')} Ft</div>
+            <div class="apt-price-old">${minDisplayPrice.toLocaleString('hu-HU')} Ft-tól</div>
+            <p class="apt-price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft-tól</p>
         </div>
     `;
 }
