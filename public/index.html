@@ -1225,36 +1225,36 @@
     }
 
     function renderIndexPriceHtml(apt) {
-        const minDisplayPrice = getApartmentMinDisplayPrice(apt);
+    const minDisplayPrice = getApartmentMinDisplayPrice(apt);
 
-        if (minDisplayPrice <= 0) {
-            return `
-                <div>
-                    <p class="apt-price-normal">Hamarosan foglalható</p>
-                </div>
-            `;
-        }
-
-        const discount = getActiveNightlyDiscount(apt);
-
-        if (!discount) {
-            return `
-                <div>
-                    <p class="apt-price-normal">${minDisplayPrice.toLocaleString('hu-HU')} Ft / éj-től</p>
-                </div>
-            `;
-        }
-
-        const discountedPrice = Math.max(0, minDisplayPrice - discount.amount);
-
+    if (minDisplayPrice <= 0) {
         return `
             <div>
-                <div class="apt-sale-badge">Akció: -${discount.amount.toLocaleString('hu-HU')} Ft / éj</div>
-                <div class="apt-price-old">${minDisplayPrice.toLocaleString('hu-HU')} Ft / éj-től</div>
-                <p class="apt-price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft / éj-től</p>
+                <p class="apt-price-normal">Hamarosan foglalható</p>
             </div>
         `;
     }
+
+    const discount = getActiveNightlyDiscount(apt);
+
+    if (!discount) {
+        return `
+            <div>
+                <p class="apt-price-normal">${minDisplayPrice.toLocaleString('hu-HU')} Ft-tól / éjszaka</p>
+            </div>
+        `;
+    }
+
+    const discountedPrice = Math.max(0, minDisplayPrice - discount.amount);
+
+    return `
+        <div>
+            <div class="apt-sale-badge">Akció: -${discount.amount.toLocaleString('hu-HU')} Ft / éjszaka</div>
+            <div class="apt-price-old">${minDisplayPrice.toLocaleString('hu-HU')} Ft-tól / éjszaka</div>
+            <p class="apt-price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft-tól / éjszaka</p>
+        </div>
+    `;
+}
 
     function getApartmentShortDescription(apt) {
         const text = String(apt.description || '').trim();
