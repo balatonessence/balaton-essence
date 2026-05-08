@@ -1173,11 +1173,11 @@
 
                 if (discountAmount > 0) {
                     priceTag.innerHTML = `
-                        <div class="price-old">From${originalPrice.toLocaleString('hu-HU')} HUF</div>
-                        <div class="price-sale">From${discountedPrice.toLocaleString('hu-HU')} HUF</div>
+                        <div class="price-old">From ${originalPrice.toLocaleString('hu-HU')} HUF</div>
+                        <div class="price-sale">From ${discountedPrice.toLocaleString('hu-HU')} HUF</div>
                     `;
                 } else {
-                    priceTag.innerHTML = `<span class="price-num">From${originalPrice.toLocaleString('hu-HU')} HUF</span>`;
+                    priceTag.innerHTML = `<span class="price-num">From ${originalPrice.toLocaleString('hu-HU')} HUF</span>`;
                 }
             }
 
