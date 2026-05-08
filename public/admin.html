@@ -2545,12 +2545,30 @@
             let szal = 0;
 
             aptBookings.forEach(b => {
-                const s = (b.source || '').toLowerCase();
+                const s = String(b.source || 'web').toLowerCase();
 
-                if (s === 'booking') book++;
-                else if (s === 'szallas') szal++;
-                else web++;
+                if (s === 'booking') {
+                    book++;
+                } else if (s === 'szallas' || s === 'szállás' || s === 'szallas.hu') {
+                    szal++;
+                } else {
+                    web++;
+                }
             });
+
+            const totalSourceBookings = book + szal + web;
+
+            const bookPct = totalSourceBookings > 0
+                ? Math.round((book / totalSourceBookings) * 100)
+                : 0;
+
+            const szalPct = totalSourceBookings > 0
+                ? Math.round((szal / totalSourceBookings) * 100)
+                : 0;
+
+            const webPct = totalSourceBookings > 0
+                ? Math.max(0, 100 - bookPct - szalPct)
+                : 0;
 
             const thumb = a.coverImage
                 ? `<img class="apt-thumb" src="${a.coverImage}" alt="${escapeHtml(a.name || 'Apartman')}">`
@@ -2585,9 +2603,9 @@
                     </div>
 
                     <div class="chart-row">
-                        ${drawChart(Math.min(book * 10, 100), 'var(--booking)', 'Booking')}
-                        ${drawChart(Math.min(szal * 10, 100), 'var(--szallas)', 'Szállás')}
-                        ${drawChart(Math.min(web * 10, 100), 'var(--essence)', 'Web')}
+                        ${drawChart(bookPct, 'var(--booking)', 'Booking')}
+                        ${drawChart(szalPct, 'var(--szallas)', 'Szállás')}
+                        ${drawChart(webPct, 'var(--essence)', 'Web')}
                     </div>
 
                     <div class="row-actions">
