@@ -4,18 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <title>Balaton Essence | Luxury Apartments & Experiences</title>
-    <meta name="description" content="Premium apartments, breakfast delivery, SUP rental and unforgettable experiences on the shores of Lake Balaton. Book your stay with Balaton Essence.">
-    <meta name="keywords" content="Balaton apartment rental, Lake Balaton accommodation, SUP rental Balaton, premium apartment Balaton, luxury accommodation Hungary">
+    <title>Balaton Essence | Luxury Apartments and Balaton Experiences</title>
+    <meta name="description" content="Premium apartments, breakfast delivery, SUP rental and unforgettable Balaton experiences. Discover Balaton Essence.">
+    <meta name="keywords" content="Balaton apartment, premium accommodation Balaton, SUP rental Balaton, breakfast delivery apartment, Balaton Essence">
     <link rel="canonical" href="https://balatonessence.com/en/">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://balatonessence.com/en/">
-    <meta property="og:title" content="Balaton Essence | Luxury Apartments & Experiences">
-    <meta property="og:description" content="Premium apartments, breakfast delivery, SUP rental and unforgettable experiences on the shores of Lake Balaton.">
+    <meta property="og:title" content="Balaton Essence | Luxury Apartments and Balaton Experiences">
+    <meta property="og:description" content="Premium accommodation, Balaton experiences, SUP rental and comfort services.">
     <meta property="og:image" content="https://balatonessence.com/img/hatter.jpg">
 
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -25,12 +25,12 @@
             --text-light: #6A7063;
             --accent: #5C7A4D;
             --accent-hover: #48613A;
-            --gold: #D7B889;
-            --gold-dark: #B9935F;
+            --gold: #C8A46B;
+            --gold-soft: rgba(200, 164, 107, 0.28);
             --border: #E3E0D8;
             --warning: #B0413E;
+            --dark: #172318;
             --shadow: rgba(44, 51, 37, 0.08);
-            --dark: #111A13;
         }
 
         * {
@@ -60,13 +60,25 @@
             top: 0;
             left: 0;
             width: 100%;
-            padding: 1.6rem 5vw;
+            z-index: 2000;
+            padding: 1.6rem 6vw;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            z-index: 1000;
-            background: linear-gradient(to bottom, rgba(8, 13, 10, 0.62), rgba(8, 13, 10, 0));
+            justify-content: space-between;
+            background: linear-gradient(
+                to bottom,
+                rgba(10, 16, 12, 0.68),
+                rgba(10, 16, 12, 0.15)
+            );
             transition: 0.3s ease;
+        }
+
+        .site-header.scrolled {
+            background: rgba(23, 35, 24, 0.95);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-top: 1rem;
+            padding-bottom: 1rem;
         }
 
         .logo-container {
@@ -74,74 +86,62 @@
             flex-direction: column;
             line-height: 1.1;
             text-decoration: none;
+            color: white;
         }
 
         .logo-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.7rem;
+            font-size: 1.8rem;
             font-weight: 700;
-            color: #fff;
-            letter-spacing: 4px;
+            letter-spacing: 7px;
+            color: white;
         }
 
         .logo-subtitle {
-            font-family: 'Montserrat', sans-serif;
-            font-size: 0.6rem;
+            font-size: 0.64rem;
             font-weight: 400;
-            color: rgba(255,255,255,0.8);
+            letter-spacing: 5px;
             text-transform: uppercase;
-            letter-spacing: 6px;
-            margin-top: 6px;
+            color: rgba(255,255,255,0.78);
+            margin-top: 0.35rem;
         }
 
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 2.2rem;
+            gap: 2.4rem;
         }
 
         .nav-links a {
             text-decoration: none;
-            color: rgba(255,255,255,0.9);
+            color: rgba(255,255,255,0.92);
+            font-size: 0.78rem;
             font-weight: 600;
-            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 1.8px;
-            transition: 0.25s;
+            letter-spacing: 2px;
+            transition: 0.25s ease;
         }
 
         .nav-links a:hover {
             color: var(--gold);
         }
 
-        .nav-booking {
-            border: 1px solid rgba(215, 184, 137, 0.8);
-            padding: 0.9rem 1.7rem;
+        .nav-book-btn {
+            border: 1px solid rgba(255,255,255,0.6);
+            padding: 0.95rem 1.7rem;
             color: white !important;
         }
 
-        .nav-booking:hover {
-            background: rgba(215, 184, 137, 0.16);
-        }
-
-        .menu-lines {
-            width: 28px;
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .menu-lines span {
-            display: block;
-            height: 2px;
-            background: rgba(255,255,255,0.9);
+        .nav-book-btn:hover {
+            border-color: var(--gold);
+            background: rgba(200,164,107,0.12);
         }
 
         .lang-dropdown {
             position: relative;
             display: inline-flex;
             align-items: center;
-            margin-left: 0.2rem;
+            margin-left: 1.5rem;
             padding: 10px 0;
         }
 
@@ -150,14 +150,14 @@
             border: none;
             font-family: 'Montserrat', sans-serif;
             font-size: 0.75rem;
-            font-weight: 700;
+            font-weight: 600;
             letter-spacing: 1px;
             color: rgba(255,255,255,0.9);
             cursor: pointer;
             padding: 8px 0;
             display: flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
             text-transform: uppercase;
         }
 
@@ -201,7 +201,7 @@
 
         .lang-content a:hover {
             background: rgba(255,255,255,0.12) !important;
-            color: var(--gold) !important;
+            color: #D7B889 !important;
         }
 
         .lang-dropdown:hover .lang-content,
@@ -220,7 +220,7 @@
             position: relative;
             display: flex;
             align-items: center;
-            padding: 8rem 7vw 6rem;
+            padding: 9rem 7vw 8rem;
             overflow: hidden;
             color: white;
         }
@@ -229,44 +229,52 @@
             content: "";
             position: absolute;
             inset: 0;
-            background: url('../img/hatter.jpg') center/cover no-repeat;
+            background:
+                linear-gradient(
+                    90deg,
+                    rgba(10, 15, 12, 0.84) 0%,
+                    rgba(10, 15, 12, 0.52) 38%,
+                    rgba(10, 15, 12, 0.18) 70%,
+                    rgba(10, 15, 12, 0.38) 100%
+                ),
+                url('../img/hatter.jpg') center/cover no-repeat;
             z-index: 0;
-            filter: brightness(0.78) contrast(1.08) saturate(1.1);
+            transform: scale(1.02);
         }
 
         .hero::after {
             content: "";
             position: absolute;
             inset: 0;
-            background:
-                linear-gradient(to right, rgba(8, 13, 10, 0.74) 0%, rgba(8, 13, 10, 0.38) 44%, rgba(8, 13, 10, 0.1) 100%),
-                linear-gradient(to bottom, rgba(8, 13, 10, 0.1) 0%, rgba(8, 13, 10, 0.18) 64%, rgba(8, 13, 10, 0.58) 100%);
+            background: radial-gradient(circle at 70% 45%, rgba(200,164,107,0.2), transparent 36%);
             z-index: 1;
+            pointer-events: none;
         }
 
         .hero-content {
+            max-width: 710px;
             position: relative;
             z-index: 2;
-            max-width: 690px;
-            margin-top: 4rem;
+            margin-top: 2rem;
         }
 
         .hero-kicker {
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 2.8px;
-            color: rgba(255,255,255,0.88);
+            font-size: 0.82rem;
             font-weight: 600;
-            margin-bottom: 1.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.86);
+            margin-bottom: 1.5rem;
         }
 
         .hero-title {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(3.1rem, 5.7vw, 5.7rem);
+            font-size: clamp(3.2rem, 6vw, 6.2rem);
             line-height: 1.05;
             font-weight: 400;
-            margin-bottom: 2rem;
-            text-shadow: 0 18px 50px rgba(0,0,0,0.35);
+            color: white;
+            text-shadow: 0 8px 35px rgba(0,0,0,0.32);
+            margin-bottom: 1.8rem;
         }
 
         .hero-line {
@@ -277,56 +285,90 @@
         }
 
         .hero-text {
-            font-size: 1.1rem;
-            line-height: 1.7;
-            color: rgba(255,255,255,0.92);
-            max-width: 480px;
-            margin-bottom: 2.2rem;
+            max-width: 450px;
+            font-size: clamp(1rem, 1.4vw, 1.18rem);
+            line-height: 1.8;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 2.4rem;
         }
 
-        .btn-outline-hero {
-            display: inline-flex;
+        .hero-actions {
+            display: flex;
             align-items: center;
-            justify-content: center;
-            text-decoration: none;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
             color: white;
-            border: 1px solid rgba(215, 184, 137, 0.85);
-            padding: 1.1rem 2.3rem;
+            border: 1px solid var(--accent);
+            padding: 1rem 2.2rem;
+            border-radius: 3px;
+            font-weight: 800;
             text-transform: uppercase;
+            font-size: 0.76rem;
             letter-spacing: 1.8px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            transition: 0.3s;
+            cursor: pointer;
+            transition: 0.35s;
+            text-decoration: none;
+            display: inline-block;
         }
 
-        .btn-outline-hero:hover {
-            background: rgba(215, 184, 137, 0.16);
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
             transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.22);
         }
 
-        .hero-features {
+        .btn-ghost {
+            background: transparent;
+            color: white;
+            border: 1px solid rgba(255,255,255,0.55);
+            padding: 1rem 2.2rem;
+            border-radius: 3px;
+            font-weight: 800;
+            text-transform: uppercase;
+            font-size: 0.76rem;
+            letter-spacing: 1.8px;
+            cursor: pointer;
+            transition: 0.35s;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-ghost:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            background: rgba(255,255,255,0.06);
+        }
+
+        .hero-feature-strip {
             position: absolute;
             left: 50%;
             bottom: 0;
             transform: translateX(-50%);
-            width: min(1180px, 88vw);
+            width: min(1180px, 86vw);
             z-index: 3;
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            background: rgba(12, 18, 14, 0.62);
-            backdrop-filter: blur(12px);
+            background: rgba(11, 17, 13, 0.72);
+            backdrop-filter: blur(16px);
             border: 1px solid rgba(255,255,255,0.12);
+            border-bottom: none;
+            box-shadow: 0 -20px 60px rgba(0,0,0,0.25);
         }
 
         .feature-item {
-            min-height: 94px;
-            padding: 1.2rem 1rem;
+            min-height: 95px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 1rem;
-            color: rgba(255,255,255,0.88);
-            border-right: 1px solid rgba(255,255,255,0.14);
+            padding: 1.2rem 1rem;
+            color: rgba(255,255,255,0.86);
+            border-right: 1px solid rgba(255,255,255,0.12);
         }
 
         .feature-item:last-child {
@@ -336,341 +378,331 @@
         .feature-icon {
             width: 42px;
             height: 42px;
-            color: rgba(255,255,255,0.9);
-            flex: 0 0 auto;
+            flex: 0 0 42px;
+            color: var(--gold);
+            opacity: 0.95;
         }
 
         .feature-icon svg {
             width: 100%;
             height: 100%;
-            display: block;
-        }
-
-        .feature-icon path,
-        .feature-icon circle,
-        .feature-icon line,
-        .feature-icon polyline {
-            fill: none;
             stroke: currentColor;
-            stroke-width: 2;
+            fill: none;
+            stroke-width: 1.35;
             stroke-linecap: round;
             stroke-linejoin: round;
         }
 
         .feature-text {
-            font-size: 0.76rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            line-height: 1.55;
+            font-size: 0.74rem;
             font-weight: 700;
-        }
-
-        .scroll-indicator {
-            position: absolute;
-            left: 50%;
-            bottom: 18px;
-            z-index: 4;
-            transform: translateX(-50%);
-            color: white;
-            font-size: 2.2rem;
-            opacity: 0.85;
+            text-transform: uppercase;
+            line-height: 1.55;
+            letter-spacing: 1.1px;
         }
 
         .section {
-            padding: 7rem 5vw;
+            padding: 7rem 6vw;
         }
 
-        .section-inner {
-            max-width: 1320px;
-            margin: 0 auto;
+        .section-light {
+            background: var(--bg);
+        }
+
+        .section-alt {
+            background: var(--bg-alt);
         }
 
         .section-header {
             text-align: center;
-            margin-bottom: 3.5rem;
+            margin-bottom: 3.6rem;
         }
 
         .section-kicker {
-            font-size: 0.75rem;
-            color: var(--gold-dark);
+            color: var(--gold);
             text-transform: uppercase;
-            letter-spacing: 2px;
+            letter-spacing: 2.6px;
+            font-size: 0.76rem;
             font-weight: 800;
             margin-bottom: 0.8rem;
         }
 
-        .section-header h2 {
+        .section-title {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(2.2rem, 4vw, 3.4rem);
+            font-size: clamp(2.3rem, 4vw, 3.5rem);
             font-weight: 400;
             color: var(--text);
+            line-height: 1.12;
         }
 
         .apt-grid {
+            max-width: 1320px;
+            margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
+            gap: 2.2rem;
         }
 
         .apartment-card {
             background: white;
             border: 1px solid var(--border);
-            box-shadow: 0 18px 50px rgba(44, 51, 37, 0.08);
-            overflow: hidden;
+            box-shadow: 0 26px 70px rgba(44, 51, 37, 0.07);
             text-decoration: none;
             color: inherit;
-            transition: 0.32s ease;
+            transition: 0.35s ease;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
         }
 
         .apartment-card:hover {
             transform: translateY(-8px);
-            box-shadow: 0 28px 70px rgba(44, 51, 37, 0.14);
+            box-shadow: 0 34px 90px rgba(44, 51, 37, 0.13);
+        }
+
+        .apt-image-wrap {
+            position: relative;
+            height: 245px;
+            background: #eee;
+            overflow: hidden;
         }
 
         .apt-image {
-            position: relative;
-            height: 245px;
+            width: 100%;
+            height: 100%;
             background-size: cover;
             background-position: center;
-            background-color: var(--bg-alt);
+            transition: 0.6s ease;
         }
 
-        .guest-badge {
+        .apartment-card:hover .apt-image {
+            transform: scale(1.045);
+        }
+
+        .apt-capacity {
             position: absolute;
-            top: 14px;
-            right: 14px;
+            top: 1rem;
+            right: 1rem;
             background: var(--accent);
             color: white;
+            padding: 0.42rem 0.72rem;
             border-radius: 4px;
-            padding: 0.42rem 0.68rem;
             font-size: 0.7rem;
             font-weight: 800;
+            letter-spacing: 0.6px;
+        }
+
+        .apt-sale-badge {
+            position: absolute;
+            left: 1rem;
+            top: 1rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--warning);
+            color: white;
+            border-radius: 4px;
+            padding: 0.45rem 0.75rem;
+            font-size: 0.62rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .apt-body {
-            padding: 1.7rem 1.7rem 1.9rem;
+            padding: 2rem 1.8rem 1.6rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .apt-title {
             font-family: 'Playfair Display', serif;
             font-size: 1.55rem;
             font-weight: 700;
+            line-height: 1.2;
             margin-bottom: 0.65rem;
             color: var(--text);
         }
 
         .apt-location {
-            color: var(--text-light);
             font-size: 0.78rem;
-            font-weight: 700;
-            margin-bottom: 1rem;
+            color: var(--text-light);
+            font-weight: 600;
+            margin-bottom: 1.1rem;
             display: flex;
-            gap: 0.4rem;
             align-items: center;
+            gap: 0.45rem;
+        }
+
+        .apt-location span {
+            color: var(--warning);
         }
 
         .apt-desc {
-            font-size: 0.86rem;
-            color: var(--text);
+            font-size: 0.87rem;
             line-height: 1.65;
-            min-height: 4.2rem;
-            margin-bottom: 1.7rem;
+            color: #4f554a;
+            margin-bottom: 1.9rem;
+            flex: 1;
         }
 
-        .apt-card-bottom {
+        .apt-footer {
             display: flex;
+            align-items: center;
             justify-content: space-between;
             gap: 1rem;
-            align-items: center;
+            margin-top: auto;
         }
 
-        .apt-price-normal {
-            color: var(--gold-dark);
-            font-weight: 800;
-            letter-spacing: 0.4px;
+        .apt-price {
+            color: var(--gold);
+            font-weight: 900;
+            letter-spacing: 0.5px;
             font-size: 1rem;
         }
 
-        .apt-sale-badge {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(176, 65, 62, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(176, 65, 62, 0.25);
-            border-radius: 999px;
-            padding: 0.35rem 0.65rem;
-            font-size: 0.58rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.4rem;
-        }
-
         .apt-price-old {
-            color: var(--text-light);
+            display: block;
+            color: #9a9a9a;
             text-decoration: line-through;
-            font-size: 0.78rem;
-            font-weight: 600;
-            margin-bottom: 0.2rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            margin-bottom: 0.28rem;
         }
 
         .apt-price-sale {
             color: var(--warning);
             font-weight: 900;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.5px;
             font-size: 1rem;
         }
 
-        .apt-discount-small {
-            font-size: 0.62rem;
-            color: var(--text-light);
-            font-weight: 700;
-            line-height: 1.45;
-            margin-top: 0.35rem;
-        }
-
-        .btn-small {
-            border: 1px solid rgba(92, 122, 77, 0.55);
+        .apt-btn {
+            border: 1px solid rgba(92,122,77,0.5);
             color: var(--accent);
-            padding: 0.75rem 1.45rem;
+            background: transparent;
+            padding: 0.78rem 1.5rem;
+            border-radius: 4px;
+            font-size: 0.68rem;
+            font-weight: 900;
             text-transform: uppercase;
-            letter-spacing: 1.2px;
-            font-size: 0.66rem;
-            font-weight: 800;
+            letter-spacing: 1.4px;
             white-space: nowrap;
             transition: 0.3s;
         }
 
-        .apartment-card:hover .btn-small {
+        .apartment-card:hover .apt-btn {
             background: var(--accent);
             color: white;
+            border-color: var(--accent);
         }
 
-        .all-apartments-wrap {
+        .loader-wrap {
+            grid-column: 1 / -1;
+            min-height: 220px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
             text-align: center;
-            margin-top: 2.4rem;
         }
 
-        .btn-primary {
-            background: var(--accent);
-            color: white;
-            border: 1px solid var(--accent);
-            padding: 0.9rem 2rem;
-            border-radius: 4px;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 0.72rem;
-            letter-spacing: 1.3px;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-primary:hover {
-            background: var(--accent-hover);
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            border: 1px solid rgba(92, 122, 77, 0.55);
-            color: var(--accent);
-            padding: 0.9rem 2rem;
-            border-radius: 4px;
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 0.72rem;
-            letter-spacing: 1.3px;
-            cursor: pointer;
-            transition: 0.3s;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .btn-secondary:hover {
-            background: var(--accent);
-            color: white;
+        .loader-spinner {
+            width: 42px;
+            height: 42px;
+            border: 3px solid #eee;
+            border-top: 3px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
         }
 
         .promo-grid {
+            max-width: 1320px;
+            margin: 0 auto;
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            margin-top: 4rem;
+            gap: 2.2rem;
         }
 
         .promo-card {
-            min-height: 250px;
-            padding: 2.4rem;
-            background-size: cover;
-            background-position: center;
+            min-height: 310px;
             position: relative;
             overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 28px 75px rgba(44, 51, 37, 0.08);
+            background: #ddd;
             display: flex;
             align-items: center;
-            border: 1px solid var(--border);
+            padding: 3rem;
         }
 
         .promo-card::before {
             content: "";
             position: absolute;
             inset: 0;
-            background: linear-gradient(to right, rgba(252,251,249,0.93) 0%, rgba(252,251,249,0.78) 48%, rgba(252,251,249,0.2) 100%);
-            z-index: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(252,251,249,0.96) 0%,
+                rgba(252,251,249,0.78) 48%,
+                rgba(252,251,249,0.22) 100%
+            );
+            z-index: 1;
+        }
+
+        .promo-breakfast {
+            background: url('../img/moments.png') center/cover no-repeat;
+        }
+
+        .promo-sun {
+            background: url('../img/sunkartya.png') center/cover no-repeat;
         }
 
         .promo-content {
             position: relative;
-            z-index: 1;
-            max-width: 420px;
+            z-index: 2;
+            max-width: 390px;
         }
 
-        .promo-content h3 {
+        .promo-title {
             font-family: 'Playfair Display', serif;
-            font-size: 1.9rem;
+            font-size: 2rem;
             font-weight: 400;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.6rem;
         }
 
         .promo-kicker {
-            color: var(--gold-dark);
-            font-size: 0.72rem;
+            color: var(--gold);
             text-transform: uppercase;
-            letter-spacing: 1.5px;
-            font-weight: 800;
-            margin-bottom: 1rem;
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 1.8px;
+            margin-bottom: 1.1rem;
         }
 
-        .promo-content p {
-            font-size: 0.9rem;
-            line-height: 1.65;
-            color: var(--text);
-            margin-bottom: 1.4rem;
-        }
-
-        .plain-amp {
-            font-family: Arial, sans-serif;
-            font-style: normal;
-            font-weight: 500;
-        }
-
-        .reviews-section {
-            background: var(--bg);
-            padding-top: 4rem;
+        .promo-text {
+            color: #3d4338;
+            font-size: 0.95rem;
+            line-height: 1.7;
+            margin-bottom: 1.5rem;
         }
 
         .reviews-grid {
+            max-width: 1320px;
+            margin: 0 auto;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 2rem;
+            gap: 2.2rem;
         }
 
         .review-card {
             background: white;
             border: 1px solid var(--border);
-            padding: 2.4rem;
-            box-shadow: 0 20px 60px rgba(44, 51, 37, 0.06);
+            padding: 2.6rem 2.2rem;
+            box-shadow: 0 22px 65px rgba(44, 51, 37, 0.06);
             position: relative;
             overflow: hidden;
         }
@@ -678,26 +710,28 @@
         .review-card::before {
             content: "“";
             position: absolute;
-            top: -24px;
+            top: -20px;
             right: 22px;
             font-family: 'Playfair Display', serif;
             font-size: 7rem;
-            color: rgba(92, 122, 77, 0.08);
+            color: rgba(92,122,77,0.08);
             line-height: 1;
         }
 
         .review-stars {
-            color: #c99a3e;
+            color: var(--gold);
             letter-spacing: 3px;
             margin-bottom: 1.2rem;
+            font-size: 0.95rem;
         }
 
         .review-text {
             font-family: 'Playfair Display', serif;
-            font-size: 1.16rem;
+            font-size: 1.2rem;
             line-height: 1.65;
             font-style: italic;
-            margin-bottom: 1.5rem;
+            color: var(--text);
+            margin-bottom: 1.6rem;
             position: relative;
             z-index: 1;
         }
@@ -710,21 +744,137 @@
             font-weight: 800;
         }
 
-        .nav-weather-pill {
-            background-color: rgba(255, 255, 255, 0.12);
-            border: 1px solid rgba(255,255,255,0.18);
-            border-radius: 50px;
-            padding: 6px 14px;
-            display: none;
-            align-items: center;
-            font-size: 0.8rem;
+        .contact-section {
+            background: white;
+            padding: 5rem 6vw;
+            border-top: 1px solid var(--border);
+        }
+
+        .contact-grid {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.2fr 1fr 1fr;
+            gap: 4rem;
+        }
+
+        .contact-logo .logo-container {
+            color: var(--text);
+        }
+
+        .contact-logo .logo-title {
+            color: var(--text);
+            letter-spacing: 4px;
+        }
+
+        .contact-logo .logo-subtitle {
+            color: var(--accent);
+        }
+
+        .contact-section h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.25rem;
+            margin-bottom: 1.4rem;
+        }
+
+        .contact-section p,
+        .contact-section li {
+            color: #5d6458;
+            font-size: 0.88rem;
+            line-height: 1.8;
+        }
+
+        .contact-section ul {
+            list-style: none;
+        }
+
+        .contact-section a {
+            color: #5d6458;
+            text-decoration: none;
+            transition: 0.25s;
+        }
+
+        .contact-section a:hover {
+            color: var(--accent);
+        }
+
+        .footer {
+            background:
+                radial-gradient(circle at 88% 50%, rgba(200,164,107,0.15), transparent 20%),
+                linear-gradient(135deg, #172318, #243321);
             color: white;
+            padding: 4rem 6vw 2rem;
+        }
+
+        .footer-grid {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .footer .logo-title {
+            color: white;
+            letter-spacing: 4px;
+        }
+
+        .footer .logo-subtitle {
+            color: rgba(255,255,255,0.65);
+        }
+
+        .footer p,
+        .footer a,
+        .footer li {
+            color: rgba(255,255,255,0.68);
+            font-size: 0.82rem;
+            line-height: 1.9;
+            text-decoration: none;
+        }
+
+        .footer h4 {
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer ul {
+            list-style: none;
+        }
+
+        .footer a:hover {
+            color: var(--gold);
+        }
+
+        .footer-bottom {
+            max-width: 1320px;
+            margin: 3rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            color: rgba(255,255,255,0.45);
+            font-size: 0.75rem;
+        }
+
+        #weather-widget {
+            display: none;
+        }
+
+        .nav-weather-pill {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.18);
+            border-radius: 999px;
+            padding: 0.45rem 0.9rem;
+            color: white;
+            font-size: 0.78rem;
         }
 
         .weather-pill-content {
             display: flex;
             align-items: center;
-            gap: 7px;
+            gap: 0.45rem;
         }
 
         .weather-pill-content.hidden {
@@ -736,200 +886,144 @@
             color: white;
         }
 
+        .water-temp {
+            font-weight: 800;
+            color: #a9d7ff;
+        }
+
         .weather-divider {
             color: rgba(255,255,255,0.35);
         }
 
-        .water-temp {
-            font-weight: 800;
-            color: #b9e3ff;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-
-        .contact-section {
-            background: #172418;
-            color: rgba(255,255,255,0.82);
-            padding: 4rem 5vw 2rem;
-        }
-
-        .contact-grid {
-            max-width: 1320px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1.4fr 1fr 1fr 1fr;
-            gap: 3rem;
-            border-bottom: 1px solid rgba(255,255,255,0.12);
-            padding-bottom: 3rem;
-        }
-
-        .footer-logo .logo-title,
-        .footer-logo .logo-subtitle {
-            color: white;
-        }
-
-        .contact-section h4 {
-            color: white;
-            font-family: 'Playfair Display', serif;
-            font-size: 1.2rem;
-            margin-bottom: 1.4rem;
-        }
-
-        .contact-section p,
-        .contact-section li,
-        .contact-section a {
-            color: rgba(255,255,255,0.72);
-            font-size: 0.85rem;
-            line-height: 1.9;
-            text-decoration: none;
-        }
-
-        .contact-section a:hover {
-            color: var(--gold);
-        }
-
-        .footer-bottom {
-            max-width: 1320px;
-            margin: 0 auto;
-            padding-top: 1.7rem;
-            text-align: center;
-            font-size: 0.72rem;
-            color: rgba(255,255,255,0.48);
-        }
-
-        .loader-wrap {
-            text-align: center;
-            padding: 5rem 5vw;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--text-light);
-            grid-column: 1 / -1;
-        }
-
-        .loader-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid #eee;
-            border-top: 3px solid var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin-bottom: 1rem;
-        }
-
-        @media (max-width: 1100px) {
+        @media (max-width: 1150px) {
             .nav-links {
-                gap: 1rem;
+                gap: 1.25rem;
             }
 
-            .nav-links a:not(.nav-booking) {
-                display: none;
+            .nav-links a {
+                font-size: 0.7rem;
             }
 
-            .hero-features {
+            .hero-feature-strip {
+                width: 94vw;
+            }
+
+            .feature-text {
+                font-size: 0.65rem;
+            }
+
+            .apt-grid {
                 grid-template-columns: repeat(2, 1fr);
-                position: relative;
-                bottom: auto;
-                left: auto;
-                transform: none;
-                width: 100%;
-                margin-top: -1px;
-            }
-
-            .scroll-indicator {
-                display: none;
-            }
-
-            .apt-grid,
-            .reviews-grid {
-                grid-template-columns: 1fr 1fr;
             }
 
             .promo-grid,
-            .contact-grid {
-                grid-template-columns: 1fr;
+            .reviews-grid,
+            .contact-grid,
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
             }
         }
 
-        @media (max-width: 720px) {
+        @media (max-width: 820px) {
             .site-header {
-                padding: 1.1rem 5vw;
+                padding: 1rem 5vw;
+                align-items: flex-start;
+                background: rgba(23,35,24,0.94);
             }
 
             .logo-title {
                 font-size: 1.35rem;
-            }
-
-            .logo-subtitle {
-                font-size: 0.5rem;
                 letter-spacing: 4px;
             }
 
-            .nav-booking,
-            .menu-lines,
-            .nav-weather-pill {
-                display: none !important;
+            .logo-subtitle {
+                font-size: 0.55rem;
+                letter-spacing: 3px;
+            }
+
+            .nav-links {
+                justify-content: flex-end;
+                flex-wrap: wrap;
+                gap: 0.8rem;
+            }
+
+            .nav-links a {
+                font-size: 0.62rem;
+            }
+
+            .nav-book-btn {
+                padding: 0.55rem 0.8rem;
             }
 
             .hero {
-                min-height: 92vh;
-                padding: 7rem 5vw 4rem;
+                padding: 8rem 5vw 18rem;
+                align-items: flex-start;
+            }
+
+            .hero::before {
+                background:
+                    linear-gradient(
+                        90deg,
+                        rgba(10, 15, 12, 0.9) 0%,
+                        rgba(10, 15, 12, 0.68) 100%
+                    ),
+                    url('../img/hatter.jpg') center/cover no-repeat;
+            }
+
+            .hero-content {
+                margin-top: 3rem;
             }
 
             .hero-title {
-                font-size: clamp(2.8rem, 12vw, 4rem);
+                font-size: clamp(2.7rem, 12vw, 4rem);
             }
 
-            .hero-features {
+            .hero-feature-strip {
                 grid-template-columns: 1fr;
+                bottom: 0;
+                width: 100%;
+                border-left: none;
+                border-right: none;
             }
 
             .feature-item {
+                min-height: 68px;
                 justify-content: flex-start;
-                padding-left: 2rem;
+                padding-left: 8vw;
+                border-right: none;
+                border-bottom: 1px solid rgba(255,255,255,0.1);
             }
 
-            .apt-grid,
-            .reviews-grid {
-                grid-template-columns: 1fr;
+            .feature-item:nth-child(n+4) {
+                display: none;
             }
 
             .section {
                 padding: 5rem 5vw;
             }
 
-            .apt-image {
-                height: 220px;
+            .apt-grid,
+            .promo-grid,
+            .reviews-grid,
+            .contact-grid,
+            .footer-grid {
+                grid-template-columns: 1fr;
             }
 
-            .apt-card-bottom {
-                align-items: flex-start;
-                flex-direction: column;
+            .promo-card {
+                padding: 2rem;
+                min-height: 280px;
             }
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(5px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes spin {
-            0% {
-                transform: rotate(0deg);
-            }
-
-            100% {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
     </style>
 
@@ -938,8 +1032,8 @@
 
 <body>
 
-<header class="site-header">
-    <a href="index.html" class="logo-container" aria-label="Balaton Essence home">
+<header class="site-header" id="site-header">
+    <a href="index.html" class="logo-container" aria-label="Balaton Essence homepage">
         <span class="logo-title">BALATON</span>
         <span class="logo-subtitle">Essence</span>
     </a>
@@ -955,7 +1049,7 @@
                 <span title="Air temperature">☀️</span>
                 <span id="weather-temp" class="air-temp"></span>
                 <span class="weather-divider">|</span>
-                <span title="Lake Balaton water" class="water-temp">🌊 <span id="water-temp-val"></span></span>
+                <span title="Lake Balaton water temperature" class="water-temp">🌊 <span id="water-temp-val"></span></span>
             </div>
         </div>
 
@@ -973,68 +1067,75 @@
 <section class="hero">
     <div class="hero-content">
         <div class="hero-kicker">The essence of Balaton</div>
+
         <h1 class="hero-title">
             Where experiences<br>
             become memories.
         </h1>
+
         <div class="hero-line"></div>
+
         <p class="hero-text">
-            Premium stays, special moments and unforgettable experiences on the shores of Lake Balaton.
+            Premium stays, special moments and unforgettable Balaton experiences in one place.
         </p>
-        <a href="#apartments" class="btn-outline-hero">Explore</a>
+
+        <div class="hero-actions">
+            <a href="#apartments" class="btn-primary">Discover</a>
+            <a href="#services" class="btn-ghost">Services</a>
+        </div>
     </div>
 
-    <div class="hero-features">
+    <div class="hero-feature-strip">
         <div class="feature-item">
             <div class="feature-icon">
                 <svg viewBox="0 0 64 64">
-                    <path d="M12 50h40"></path>
-                    <path d="M18 50V22h28v28"></path>
-                    <path d="M24 50V34h16v16"></path>
-                    <path d="M24 28h4"></path>
-                    <path d="M36 28h4"></path>
-                    <path d="M24 16h16"></path>
-                    <path d="M28 16v-5h8v5"></path>
+                    <path d="M10 31h44v23H10z"></path>
+                    <path d="M16 31V17h32v14"></path>
+                    <path d="M22 54V39h20v15"></path>
+                    <path d="M22 24h4M31 24h4M40 24h4"></path>
                 </svg>
             </div>
-            <div class="feature-text">Premium<br>apartments</div>
+            <div class="feature-text">Premium<br>stays</div>
         </div>
 
         <div class="feature-item">
             <div class="feature-icon">
                 <svg viewBox="0 0 64 64">
-                    <path d="M32 10v38"></path>
-                    <path d="M16 30c4-12 12-18 16-18s12 6 16 18"></path>
-                    <path d="M16 30c5-4 11-4 16 0"></path>
-                    <path d="M32 30c5-4 11-4 16 0"></path>
-                    <path d="M22 52h20"></path>
+                    <path d="M12 48h40"></path>
+                    <path d="M18 44l12-24"></path>
+                    <path d="M30 20l18 24"></path>
+                    <path d="M16 44h34"></path>
+                    <path d="M42 18c6 4 9 10 8 18"></path>
+                    <path d="M42 18c-5 5-8 11-8 18"></path>
+                    <path d="M42 18c-1 7 1 13 8 18"></path>
                 </svg>
             </div>
-            <div class="feature-text">Sunbeds and<br>parasols</div>
+            <div class="feature-text">Sunbed and<br>parasol rental</div>
         </div>
 
         <div class="feature-item">
             <div class="feature-icon">
                 <svg viewBox="0 0 64 64">
-                    <path d="M18 45c8 4 20 4 28 0"></path>
-                    <path d="M22 42l10-26"></path>
-                    <path d="M32 16l10 26"></path>
-                    <path d="M26 28h12"></path>
-                    <path d="M12 51c5 3 10 3 15 0s10-3 15 0 10 3 15 0"></path>
+                    <path d="M14 45c9 5 27 5 36 0"></path>
+                    <path d="M15 36c9 5 25 5 34 0"></path>
+                    <path d="M32 12c8 7 13 16 13 23"></path>
+                    <path d="M32 12c-8 7-13 16-13 23"></path>
+                    <path d="M32 12v39"></path>
                 </svg>
             </div>
-            <div class="feature-text">SUP and water<br>experiences</div>
+            <div class="feature-text">SUP and<br>water experiences</div>
         </div>
 
         <div class="feature-item">
             <div class="feature-icon">
                 <svg viewBox="0 0 64 64">
-                    <path d="M18 40h28"></path>
-                    <path d="M22 40c1-10 8-16 10-16s9 6 10 16"></path>
-                    <path d="M15 46h34"></path>
-                    <path d="M32 18v-5"></path>
-                    <path d="M28 13h8"></path>
-                    <path d="M24 52h16"></path>
+                    <path d="M15 38h34"></path>
+                    <path d="M18 38c1-12 9-20 14-20s13 8 14 20"></path>
+                    <path d="M13 43h38"></path>
+                    <path d="M25 18c0-4 3-7 7-7s7 3 7 7"></path>
+                    <path d="M23 51h18"></path>
+                    <path d="M27 25l-4 5"></path>
+                    <path d="M37 25l4 5"></path>
                 </svg>
             </div>
             <div class="feature-text">Breakfast and<br>surprises</div>
@@ -1051,136 +1152,191 @@
             <div class="feature-text">Personal<br>guest experience</div>
         </div>
     </div>
-
 </section>
 
-<section id="apartments" class="section" style="background: var(--bg);">
-    <div class="section-inner">
-        <div class="section-header">
-            <div class="section-kicker">Selected apartments</div>
-            <h2>Featured stays</h2>
-        </div>
+<section id="apartments" class="section section-light">
+    <div class="section-header">
+        <div class="section-kicker">Selected apartments</div>
+        <h2 class="section-title">Featured stays</h2>
+    </div>
 
-        <div id="apartment-grid" class="apt-grid">
-            <div class="loader-wrap">
-                <div class="loader-spinner"></div>
-                <div>Apartments loading...</div>
+    <div id="apartment-grid" class="apt-grid">
+        <div class="loader-wrap">
+            <div class="loader-spinner"></div>
+            <div>Loading apartments...</div>
+        </div>
+    </div>
+</section>
+
+<section id="services" class="section section-alt">
+    <div class="promo-grid">
+        <div class="promo-card promo-breakfast">
+            <div class="promo-content">
+                <h3 class="promo-title">Breakfast order</h3>
+                <div class="promo-kicker">Comfort from the morning</div>
+                <p class="promo-text">
+                    Start your day with fresh breakfast delivered to your apartment. Order easily online, and we bring it to your door.
+                </p>
+                <a href="morning.html" class="btn-primary">Order breakfast</a>
             </div>
         </div>
 
-        <div id="services" class="promo-grid">
-            <div class="promo-card" style="background-image: url('../img/moments.png');">
-                <div class="promo-content">
-                    <h3>Breakfast order</h3>
-                    <div class="promo-kicker">Comfort from the morning</div>
-                    <p>
-                        Start the day with fresh breakfast delivered to your apartment. Order in advance and enjoy a calm, effortless morning.
-                    </p>
-                    <a href="morning.html" class="btn-primary">Order breakfast</a>
-                </div>
-            </div>
-
-            <div class="promo-card" style="background-image: url('../img/sunkartya.png');">
-                <div class="promo-content">
-                    <h3>SUP <span class="plain-amp">/</span> water experiences</h3>
-                    <div class="promo-kicker">The call of the water</div>
-                    <p>
-                        Discover Lake Balaton with SUP rental, sunbeds and beach equipment for easy summer moments by the water.
-                    </p>
-                    <a href="sun.html" class="btn-primary">Explore experiences</a>
-                </div>
+        <div class="promo-card promo-sun">
+            <div class="promo-content">
+                <h3 class="promo-title">SUP / Water experiences</h3>
+                <div class="promo-kicker">The call of the water</div>
+                <p class="promo-text">
+                    Discover Lake Balaton on a SUP board, or rent beach equipment and enjoy carefree summer moments.
+                </p>
+                <a href="sun.html" class="btn-primary">Explore experiences</a>
             </div>
         </div>
     </div>
 </section>
 
-<section id="reviews-section" class="section reviews-section">
-    <div class="section-inner">
-        <div class="section-header">
-            <div class="section-kicker">Our guests said</div>
-            <h2>Real experiences from real guests.</h2>
-        </div>
-
-        <div id="reviews-grid" class="reviews-grid"></div>
+<section id="reviews-section" class="section section-light">
+    <div class="section-header">
+        <div class="section-kicker">What our guests say</div>
+        <h2 class="section-title">Real experiences from real guests.</h2>
     </div>
+
+    <div id="reviews-grid" class="reviews-grid"></div>
 </section>
 
 <section id="contact" class="contact-section">
     <div class="contact-grid">
-        <div>
-            <a href="index.html" class="logo-container footer-logo" style="margin-bottom: 1.4rem;">
+        <div class="contact-logo">
+            <a href="index.html" class="logo-container" style="margin-bottom: 1.5rem;">
                 <span class="logo-title">BALATON</span>
                 <span class="logo-subtitle">Essence</span>
             </a>
 
-            <p style="margin-top: 1.2rem;">
-                Premium stays and memorable experiences on the shores of Lake Balaton.
+            <p>
+                Premium apartments and unforgettable experiences by Lake Balaton. We take care of your comfort, so you can focus on relaxing.
+            </p>
+        </div>
+
+        <div>
+            <h4>Contact</h4>
+            <ul>
+                <li>📍 8640 Fonyód, Hungary</li>
+                <li>📞 <a href="tel:+36204995484">+36 20 499 5484</a></li>
+                <li>✉️ <a href="mailto:info@balatonessence.com">info@balatonessence.com</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4>Navigation</h4>
+            <ul>
+                <li><a href="#apartments">Apartments</a></li>
+                <li><a href="rolunk.html">About us</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#contact">Contact</a></li>
+                <li><a href="aszf.html">Terms and Conditions</a></li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<footer class="footer">
+    <div class="footer-grid">
+        <div>
+            <a href="index.html" class="logo-container">
+                <span class="logo-title">BALATON</span>
+                <span class="logo-subtitle">Essence</span>
+            </a>
+            <p style="margin-top: 1.3rem;">
+                Premium stays and experiences by Lake Balaton.
             </p>
         </div>
 
         <div>
             <h4>Quick links</h4>
-            <p><a href="#apartments">Apartments</a></p>
-            <p><a href="#services">Services</a></p>
-            <p><a href="#reviews-section">Experiences</a></p>
-            <p><a href="#contact">Contact</a></p>
+            <ul>
+                <li><a href="#apartments">Apartments</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#reviews-section">Experiences</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
         </div>
 
         <div>
             <h4>Contact</h4>
-            <p>📍 8640 Fonyód, Hungary</p>
-            <p>📞 <a href="tel:+36204995484">+36 20 499 5484</a></p>
-            <p>✉️ <a href="mailto:info@balatonessence.com">info@balatonessence.com</a></p>
+            <ul>
+                <li><a href="tel:+36204995484">+36 20 499 5484</a></li>
+                <li><a href="mailto:info@balatonessence.com">info@balatonessence.com</a></li>
+                <li>8640 Fonyód, Hungary</li>
+            </ul>
         </div>
 
         <div>
             <h4>Useful information</h4>
-            <p><a href="#">FAQ</a></p>
-            <p><a href="#">Booking terms</a></p>
-            <p><a href="#">Privacy policy</a></p>
-            <p><a href="#">Terms & Conditions</a></p>
+            <ul>
+                <li><a href="aszf.html">Terms and Conditions</a></li>
+                <li><a href="#">Booking conditions</a></li>
+                <li><a href="#">Privacy policy</a></li>
+            </ul>
         </div>
     </div>
 
     <div class="footer-bottom">
         © 2026 Balaton Essence. All rights reserved.
     </div>
-</section>
+</footer>
 
 <script type="application/ld+json">
 {
     "@context": "https://schema.org",
     "@type": "LodgingBusiness",
     "name": "Balaton Essence",
-    "description": "Premium apartments, breakfast delivery, SUP rental and experiences at Lake Balaton.",
+    "description": "Premium apartments and Balaton experiences.",
     "url": "https://balatonessence.com/en/",
     "address": {
         "@type": "PostalAddress",
-        "addressLocality": "Fonyód",
         "addressCountry": "HU"
     },
     "areaServed": [
         "Fonyód",
-        "Balatonszemes",
+        "Lake Balaton",
         "Balatonederics",
-        "Lake Balaton"
+        "Balatonszemes"
     ]
 }
 </script>
 
-<script src="../database.js?v=2.2"></script>
+<script src="../database.js?v=2.1"></script>
 <script src="../figyelmeztetes.js"></script>
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
+        initHeaderScroll();
         initApartments();
         initWeather();
         renderReviews();
     });
 
+    function initHeaderScroll() {
+        const header = document.getElementById('site-header');
+
+        if (!header) return;
+
+        const update = () => {
+            if (window.scrollY > 20) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        };
+
+        update();
+        window.addEventListener('scroll', update);
+    }
+
     function initApartments() {
         if (typeof initDatabase === "function") {
-            initDatabase(renderIndexApartments);
+            initDatabase(() => {
+                renderIndexApartments();
+            });
         } else {
             console.error("database.js failed to load.");
             showApartmentError("Apartments could not be loaded at the moment.");
@@ -1209,7 +1365,7 @@
             ]);
 
             if (!airRes.ok || !waterRes.ok) {
-                throw new Error("Weather data unavailable.");
+                throw new Error("Weather data is not available.");
             }
 
             const airData = await airRes.json();
@@ -1243,7 +1399,7 @@
             const res = await fetch('/api/reviews');
 
             if (!res.ok) {
-                throw new Error("Reviews unavailable.");
+                throw new Error("Reviews are not available.");
             }
 
             const reviews = await res.json();
@@ -1280,29 +1436,13 @@
     }
 
     function getActiveNightlyDiscount(apt, date = new Date()) {
-        const discount = apt?.discount || apt?.nightlyDiscount || null;
+        const discount = apt?.discount || null;
 
-        if (!discount) {
+        if (!discount || discount.active !== true) {
             return null;
         }
 
-        const isActive =
-            discount.active === true ||
-            discount.active === 'true' ||
-            discount.enabled === true ||
-            discount.enabled === 'true';
-
-        if (!isActive) {
-            return null;
-        }
-
-        const amount = Number(
-            discount.amountPerNight ||
-            discount.amount ||
-            discount.value ||
-            apt.discountAmount ||
-            0
-        );
+        const amount = Number(discount.amountPerNight || 0);
 
         if (amount <= 0) {
             return null;
@@ -1310,19 +1450,8 @@
 
         const todayStr = getLocalDateStringForIndex(date);
 
-        const bookingStart =
-            discount.bookingStart ||
-            discount.booking_start ||
-            discount.start ||
-            discount.startDate ||
-            '';
-
-        const bookingEnd =
-            discount.bookingEnd ||
-            discount.booking_end ||
-            discount.end ||
-            discount.endDate ||
-            '';
+        const bookingStart = discount.bookingStart || discount.start || '';
+        const bookingEnd = discount.bookingEnd || discount.end || '';
 
         if (bookingStart && todayStr < bookingStart) {
             return null;
@@ -1336,16 +1465,8 @@
             amount,
             bookingStart,
             bookingEnd,
-            stayStart:
-                discount.stayStart ||
-                discount.stay_start ||
-                discount.validFrom ||
-                '',
-            stayEnd:
-                discount.stayEnd ||
-                discount.stay_end ||
-                discount.validTo ||
-                ''
+            stayStart: discount.stayStart || discount.start || '',
+            stayEnd: discount.stayEnd || discount.end || ''
         };
     }
 
@@ -1374,103 +1495,46 @@
             : basePrice;
     }
 
-    function formatIndexDiscountDate(dateStr) {
-        if (!dateStr) return '';
-
-        const parts = String(dateStr).split('-').map(Number);
-
-        if (parts.length !== 3 || parts.some(Number.isNaN)) {
-            return dateStr;
-        }
-
-        const d = new Date(parts[0], parts[1] - 1, parts[2]);
-
-        return new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: 'numeric'
-        }).format(d);
-    }
-
-    function renderIndexPriceHtml(apt) {
-        const minDisplayPrice = getApartmentMinDisplayPrice(apt);
-
-        if (minDisplayPrice <= 0) {
-            return `
-                <div>
-                    <div class="apt-price-normal">Available soon</div>
-                </div>
-            `;
-        }
-
-        const discount = getActiveNightlyDiscount(apt);
-
-        if (!discount) {
-            return `
-                <div>
-                    <div class="apt-price-normal">${minDisplayPrice.toLocaleString('en-US')} HUF / night</div>
-                </div>
-            `;
-        }
-
-        const discountedPrice = Math.max(0, minDisplayPrice - discount.amount);
-
-        const bookingEndText = discount.bookingEnd
-            ? `Book by ${formatIndexDiscountDate(discount.bookingEnd)}`
-            : 'Limited offer';
-
-        let stayText = '';
-
-        if (discount.stayStart && discount.stayEnd) {
-            stayText = `Valid for stays: ${formatIndexDiscountDate(discount.stayStart)} – ${formatIndexDiscountDate(discount.stayEnd)}`;
-        } else if (discount.stayStart) {
-            stayText = `Valid from ${formatIndexDiscountDate(discount.stayStart)}`;
-        } else if (discount.stayEnd) {
-            stayText = `Valid until ${formatIndexDiscountDate(discount.stayEnd)}`;
-        }
-
-        return `
-            <div>
-                <div class="apt-sale-badge">Offer: -${discount.amount.toLocaleString('en-US')} HUF / night</div>
-                <div class="apt-price-old">${minDisplayPrice.toLocaleString('en-US')} HUF / night</div>
-                <div class="apt-price-sale">${discountedPrice.toLocaleString('en-US')} HUF / night</div>
-                <div class="apt-discount-small">
-                    ${bookingEndText}${stayText ? `<br>${stayText}` : ''}
-                </div>
-            </div>
-        `;
-    }
-
-    function getApartmentDescription(apt) {
-        return (
+    function getApartmentShortDescription(apt) {
+        const text = String(
             apt.description_en ||
             apt.descriptionEn ||
             apt.desc_en ||
             apt.descEn ||
             apt.description ||
             ''
-        );
-    }
+        ).trim();
 
-    function shortenText(text, maxLength = 118) {
-        const clean = String(text || '').trim();
-
-        if (clean.length <= maxLength) {
-            return clean;
+        if (!text) {
+            return 'A premium apartment with comfortable amenities and a relaxed Balaton atmosphere.';
         }
 
-        return clean.slice(0, maxLength).trim() + '...';
+        return text.length > 115
+            ? `${text.slice(0, 115)}...`
+            : text;
     }
 
-    function getMaxGuests(apt) {
-        const seasonMaxGuests = Array.isArray(apt.seasons)
-            ? apt.seasons.map(s => Number(s.maxGuests || 0)).filter(n => n > 0)
-            : [];
+    function renderIndexPriceHtml(apt) {
+        const minDisplayPrice = getApartmentMinDisplayPrice(apt);
 
-        const maxGuests = seasonMaxGuests.length > 0
-            ? Math.max(...seasonMaxGuests)
-            : Number(apt.maxGuests || 2);
+        if (minDisplayPrice <= 0) {
+            return `<div class="apt-price">Available soon</div>`;
+        }
 
-        return maxGuests || 2;
+        const discount = getActiveNightlyDiscount(apt);
+
+        if (!discount) {
+            return `<div class="apt-price">From ${minDisplayPrice.toLocaleString('en-US')} HUF</div>`;
+        }
+
+        const discountedPrice = Math.max(0, minDisplayPrice - discount.amount);
+
+        return `
+            <div>
+                <span class="apt-price-old">From ${minDisplayPrice.toLocaleString('en-US')} HUF</span>
+                <span class="apt-price-sale">From ${discountedPrice.toLocaleString('en-US')} HUF</span>
+            </div>
+        `;
     }
 
     function renderIndexApartments() {
@@ -1490,36 +1554,49 @@
         grid.innerHTML = "";
 
         db.apartments.forEach(apt => {
+            const discount = getActiveNightlyDiscount(apt);
             const priceHtml = renderIndexPriceHtml(apt);
-            const maxGuests = getMaxGuests(apt);
-            const desc = shortenText(getApartmentDescription(apt));
+            const maxGuests = getApartmentMaxGuests(apt);
+            const desc = getApartmentShortDescription(apt);
+
+            const aptName =
+                apt.name_en ||
+                apt.nameEn ||
+                apt.nameEN ||
+                apt.name ||
+                'Apartment';
+
+            const aptLocation =
+                apt.location_en ||
+                apt.locationEn ||
+                apt.locationEN ||
+                apt.location ||
+                'Lake Balaton';
 
             const card = document.createElement('a');
             card.href = `apartman.html?id=${encodeURIComponent(apt.id)}`;
             card.className = 'apartment-card';
 
             card.innerHTML = `
-                <div class="apt-image" style="background-image: url('${safeUrl(apt.coverImage || '')}');">
-                    <div class="guest-badge">${maxGuests} guests</div>
+                <div class="apt-image-wrap">
+                    <div class="apt-image" style="background-image: url('${safeUrl(apt.coverImage || '')}');"></div>
+                    ${discount ? `<div class="apt-sale-badge">Offer</div>` : ''}
+                    <div class="apt-capacity">${maxGuests} guests</div>
                 </div>
 
                 <div class="apt-body">
-                    <h3 class="apt-title">
-                        ${escapeHtml(apt.name_en || apt.nameEn || apt.name || 'Apartment')}
-                    </h3>
+                    <h3 class="apt-title">${escapeHtml(aptName)}</h3>
 
                     <div class="apt-location">
-                        <span>📍</span>
-                        <span>${escapeHtml(apt.location_en || apt.locationEn || apt.location || '')}</span>
+                        <span>●</span>
+                        ${escapeHtml(aptLocation)}
                     </div>
 
-                    <div class="apt-desc">
-                        ${escapeHtml(desc || 'Premium Balaton apartment for a comfortable stay.')}
-                    </div>
+                    <p class="apt-desc">${escapeHtml(desc)}</p>
 
-                    <div class="apt-card-bottom">
+                    <div class="apt-footer">
                         ${priceHtml}
-                        <span class="btn-small">View</span>
+                        <span class="apt-btn">View</span>
                     </div>
                 </div>
             `;
@@ -1528,8 +1605,23 @@
         });
     }
 
+    function getApartmentMaxGuests(apt) {
+        if (Array.isArray(apt.seasons) && apt.seasons.length > 0) {
+            const values = apt.seasons
+                .map(s => Number(s.maxGuests || 0))
+                .filter(n => n > 0);
+
+            if (values.length > 0) {
+                return Math.max(...values);
+            }
+        }
+
+        return Number(apt.maxGuests || 2);
+    }
+
     function showApartmentError(message) {
         const grid = document.getElementById('apartment-grid');
+
         if (!grid) return;
 
         grid.innerHTML = `
