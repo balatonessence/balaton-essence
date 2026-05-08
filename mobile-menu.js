@@ -1,3 +1,10 @@
+function toggleMobileMenu() {
+    const header = document.getElementById('site-header') || document.querySelector('.site-header');
+    if (!header) return;
+
+    header.classList.toggle('mobile-open');
+}
+
 document.addEventListener('DOMContentLoaded', function () {
     const header = document.getElementById('site-header') || document.querySelector('.site-header');
     const toggle = document.querySelector('.mobile-menu-toggle');
@@ -10,7 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
     toggle.addEventListener('click', function (event) {
         event.preventDefault();
         event.stopPropagation();
-        header.classList.toggle('mobile-open');
+        toggleMobileMenu();
     });
 
     header.querySelectorAll('.nav-links a').forEach(link => {
