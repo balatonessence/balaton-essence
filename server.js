@@ -1377,7 +1377,7 @@ app.post('/api/create-checkout-session', async (req, res) => {
     try {
         const newB = req.body.booking || req.body;
 
-        if (!newB || !newB.aptId || !newB.checkIn || !newB.checkOut || !newB.email) {
+        if (!newB || !newB.aptId || !newB.checkIn || !newB.checkOut || !newB.email || !newB.guestName) {
             return res.status(400).json({ error: 'Hiányos foglalási adatok.' });
         }
 
@@ -1500,12 +1500,52 @@ app.get('/api/finalize-booking', async (req, res) => {
                 throw err;
             }
 
+            const apartment = (db.apartments || []).find(apt =>
+                String(apt.id) === String(rawBooking.aptId)
+            );
+
+            if (!apartment) {
+                const err = new Error('Az apartman nem található.');
+                err.statusCode = 400;
+                throw err;
+            }
+
+            if (hasDisabledDateInBookingRange(apartment, rawBooking)) {
+                const err = new Error('A kiválasztott időszak letiltott napot tartalmaz.');
+                err.statusCode = 400;
+                throw err;
+            }
+
+            const priceCalculation = calculateBookingTotalOnServer(apartment, rawBooking);
+
+            if (!priceCalculation.valid) {
+                const err = new Error(priceCalculation.error);
+                err.statusCode = 400;
+                throw err;
+            }
+
+            const expectedDeposit = Math.round(Number(priceCalculation.total || 0) / 2);
+            const paidDeposit = Number(session.amount_total || 0) / 100;
+
+            if (Math.round(paidDeposit) !== expectedDeposit) {
+                const err = new Error('A fizetett előleg nem egyezik a szerver által számolt összeggel.');
+                err.statusCode = 400;
+                throw err;
+            }
+
             const newBooking = {
                 ...rawBooking,
                 id: generateId('ord'),
                 stripeId: session_id,
                 paymentIntentId: session.payment_intent || null,
-                paidDeposit: Number(session.amount_total || 0) / 100,
+
+                aptName: apartment.name || rawBooking.aptName || 'Balaton Essence',
+                totalPrice: Number(priceCalculation.total || 0),
+                originalTotalPrice: Number(priceCalculation.originalTotal || 0),
+                discountTotal: Number(priceCalculation.discountTotal || 0),
+                nights: Number(priceCalculation.nights || 0),
+
+                paidDeposit,
                 paymentStatus: session.payment_status,
                 status: 'confirmed',
                 lang: normalizeLang(rawBooking.lang || 'hu'),
