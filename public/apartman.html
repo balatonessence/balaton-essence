@@ -1173,11 +1173,11 @@
 
                 if (discountAmount > 0) {
                     priceTag.innerHTML = `
-                        <div class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft / éjszaka</div>
-                        <div class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft / éjszaka</div>
+                        <div class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft-tól</div>
+                        <div class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft-tól</div>
                     `;
                 } else {
-                    priceTag.innerHTML = `<span class="price-num">${originalPrice.toLocaleString('hu-HU')} Ft</span> / éjszaka`;
+                    priceTag.innerHTML = `<span class="price-num">${originalPrice.toLocaleString('hu-HU')} Ft-tól</span>`;
                 }
             }
 

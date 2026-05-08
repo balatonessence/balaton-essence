@@ -1168,11 +1168,11 @@
 
                 if (discountAmount > 0) {
                     priceTag.innerHTML = `
-                        <div class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft / Nacht</div>
-                        <div class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft / Nacht</div>
+                        <div class="price-old">Ab${originalPrice.toLocaleString('hu-HU')} Ft</div>
+                        <div class="price-sale">Ab${discountedPrice.toLocaleString('hu-HU')} Ft</div>
                     `;
                 } else {
-                    priceTag.innerHTML = `<span class="price-num">${originalPrice.toLocaleString('hu-HU')} Ft</span> / Nacht`;
+                    priceTag.innerHTML = `<span class="price-num">Ab${originalPrice.toLocaleString('hu-HU')} Ft</span>`;
                 }
             }
 
