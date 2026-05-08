@@ -502,3 +502,204 @@
     margin-top: 20px;
     text-transform: uppercase;
 }
+
+/* =========================
+   MOBILE NAV FIX
+========================= */
+
+.mobile-menu-toggle {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .site-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 5000 !important;
+        padding: 0.9rem 5vw !important;
+        display: grid !important;
+        grid-template-columns: auto auto !important;
+        align-items: center !important;
+        gap: 1rem !important;
+        background: rgba(18, 27, 19, 0.96) !important;
+        backdrop-filter: blur(16px) !important;
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    }
+
+    .site-header .logo-container {
+        margin: 0 !important;
+        align-items: flex-start !important;
+        text-align: left !important;
+        color: white !important;
+        z-index: 2 !important;
+    }
+
+    .site-header .logo-title {
+        font-size: 1.28rem !important;
+        letter-spacing: 4px !important;
+        color: white !important;
+        line-height: 1 !important;
+    }
+
+    .site-header .logo-subtitle,
+    .site-header .logo-sub {
+        font-size: 0.5rem !important;
+        letter-spacing: 3px !important;
+        color: rgba(255,255,255,0.72) !important;
+        margin-top: 0.28rem !important;
+    }
+
+    .mobile-menu-toggle {
+        display: inline-flex !important;
+        width: 44px !important;
+        height: 44px !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-direction: column !important;
+        gap: 5px !important;
+        justify-self: end !important;
+        border: 1px solid rgba(255,255,255,0.24) !important;
+        border-radius: 999px !important;
+        background: rgba(255,255,255,0.08) !important;
+        cursor: pointer !important;
+        z-index: 2 !important;
+    }
+
+    .mobile-menu-toggle span {
+        width: 18px !important;
+        height: 2px !important;
+        background: white !important;
+        border-radius: 999px !important;
+        transition: 0.25s ease !important;
+    }
+
+    .site-header.mobile-open .mobile-menu-toggle span:nth-child(1) {
+        transform: translateY(7px) rotate(45deg) !important;
+    }
+
+    .site-header.mobile-open .mobile-menu-toggle span:nth-child(2) {
+        opacity: 0 !important;
+    }
+
+    .site-header.mobile-open .mobile-menu-toggle span:nth-child(3) {
+        transform: translateY(-7px) rotate(-45deg) !important;
+    }
+
+    .site-header .nav-links {
+        position: absolute !important;
+        top: 100% !important;
+        left: 0 !important;
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 0 !important;
+        padding: 0.6rem 5vw 1rem !important;
+        background: rgba(18, 27, 19, 0.98) !important;
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+        box-shadow: 0 24px 50px rgba(0,0,0,0.28) !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+        transform: translateY(-8px) !important;
+        transition: 0.25s ease !important;
+    }
+
+    .site-header.mobile-open .nav-links {
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: translateY(0) !important;
+    }
+
+    .site-header .nav-links a {
+        display: block !important;
+        padding: 0.95rem 0 !important;
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+        color: rgba(255,255,255,0.92) !important;
+        font-size: 0.78rem !important;
+        font-weight: 800 !important;
+        letter-spacing: 1.8px !important;
+        text-transform: uppercase !important;
+        text-decoration: none !important;
+        text-align: left !important;
+    }
+
+    .site-header .nav-links a:hover,
+    .site-header .nav-links a.active {
+        color: var(--gold, #C8A46B) !important;
+    }
+
+    .site-header .nav-weather-pill {
+        width: 100% !important;
+        margin: 0.9rem 0 0 !important;
+        padding: 0.75rem 1rem !important;
+        justify-content: center !important;
+        background: rgba(255,255,255,0.08) !important;
+        border: 1px solid rgba(255,255,255,0.14) !important;
+        color: white !important;
+        border-radius: 999px !important;
+    }
+
+    .site-header .lang-dropdown {
+        width: 100% !important;
+        margin: 0.8rem 0 0 !important;
+        padding: 0 !important;
+        display: block !important;
+    }
+
+    .site-header .lang-btn {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 0.8rem 1rem !important;
+        border: 1px solid rgba(255,255,255,0.14) !important;
+        border-radius: 999px !important;
+        background: rgba(255,255,255,0.08) !important;
+        color: white !important;
+        font-size: 0.72rem !important;
+    }
+
+    .site-header .lang-content {
+        position: static !important;
+        display: none !important;
+        width: 100% !important;
+        margin-top: 0.5rem !important;
+        background: rgba(255,255,255,0.08) !important;
+        border: 1px solid rgba(255,255,255,0.12) !important;
+        box-shadow: none !important;
+    }
+
+    .site-header .lang-dropdown:hover .lang-content,
+    .site-header .lang-dropdown:focus-within .lang-content {
+        display: block !important;
+    }
+
+    .site-header .lang-content a {
+        text-align: center !important;
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
+    }
+
+    .hero {
+        padding-top: 7.5rem !important;
+    }
+}
+
+@media (max-width: 520px) {
+    .site-header {
+        padding: 0.8rem 4vw !important;
+    }
+
+    .site-header .logo-title {
+        font-size: 1.12rem !important;
+        letter-spacing: 3px !important;
+    }
+
+    .site-header .logo-subtitle,
+    .site-header .logo-sub {
+        font-size: 0.46rem !important;
+        letter-spacing: 2.4px !important;
+    }
+
+    .hero {
+        padding-top: 7.2rem !important;
+    }
+}

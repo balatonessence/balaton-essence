@@ -1042,7 +1042,7 @@
         }
     </style>
 
-    <!-- <link rel="stylesheet" href="mobile.css?v=3"> -->
+    <link rel="stylesheet" href="mobile.css?v=3"
 </head>
 
 <body>
@@ -1050,23 +1050,25 @@
 <header class="site-header" id="site-header">
     <a href="index.html" class="logo-container" aria-label="Balaton Essence főoldal">
         <span class="logo-title">BALATON</span>
-        <span class="logo-subtitle">Essence</span>
+        <span class="logo-subtitle">ESSENCE</span>
     </a>
 
-    <nav class="nav-links" aria-label="Fő navigáció">
+    <button class="mobile-menu-toggle" type="button" aria-label="Menü megnyitása" onclick="toggleMobileMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <nav class="nav-links" id="main-nav" aria-label="Fő navigáció">
         <a href="#apartments">Szállások</a>
         <a href="#services">Szolgáltatások</a>
-        <a href="#reviews-section">Élmények</a>
+        <a href="#experiences">Élmények</a>
         <a href="#contact">Kapcsolat</a>
         <a href="rolunk.html">Rólunk</a>
 
-        <div class="nav-weather-pill" id="weather-widget">
-            <div id="weather-content" class="weather-pill-content hidden">
-                <span title="Levegő">☀️</span>
-                <span id="weather-temp" class="air-temp"></span>
-                <span class="weather-divider">|</span>
-                <span title="Balaton vízhőfok" class="water-temp">🌊 <span id="water-temp-val"></span></span>
-            </div>
+        <div class="nav-weather-pill">
+            <span>☀️ 22°C</span>
+            <span>🌊 16°C</span>
         </div>
 
         <div class="lang-dropdown">
@@ -1655,6 +1657,6 @@
         return '';
     }
 </script>
-
+<script src="mobile-menu.js?v=1"></script>
 </body>
 </html>
