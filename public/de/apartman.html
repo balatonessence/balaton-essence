@@ -5,19 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apartment Details | Balaton Essence</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
 
     <style>
         :root {
             --bg: #FCFBF9;
+            --bg-alt: #F4F2EC;
             --text: #2C3325;
             --text-light: #6A7063;
             --accent: #5C7A4D;
-            --accent-soft: #5c7a4d33;
+            --accent-hover: #48613A;
+            --gold: #C8A46B;
+            --gold-soft: rgba(200, 164, 107, 0.28);
             --border: #E3E0D8;
             --warning: #B0413E;
+            --dark: #172318;
             --shadow: rgba(44, 51, 37, 0.08);
-            --transition: all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+            --transition: all 0.45s ease;
         }
 
         * {
@@ -26,33 +30,97 @@
             padding: 0;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
         body {
             font-family: 'Montserrat', sans-serif;
             background: var(--bg);
             color: var(--text);
-            padding-top: 40px;
             -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
         }
 
-        header {
+        a {
+            color: inherit;
+        }
+
+        .site-header {
             position: fixed;
-            top: 40px;
+            top: 0;
             left: 0;
             width: 100%;
-            padding: 1.5rem 5vw;
-            background: rgba(252, 251, 249, 0.96);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--border);
-            z-index: 1000;
+            z-index: 2000;
+            padding: 1.6rem 6vw;
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(
+                to bottom,
+                rgba(10, 16, 12, 0.68),
+                rgba(10, 16, 12, 0.15)
+            );
+            transition: 0.3s ease;
+        }
+
+        .site-header.scrolled {
+            background: rgba(23, 35, 24, 0.95);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+            text-decoration: none;
+            color: white;
+        }
+
+        .logo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 7px;
+            color: white;
+        }
+
+        .logo-subtitle {
+            font-size: 0.64rem;
+            font-weight: 400;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.78);
+            margin-top: 0.35rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.4rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255,255,255,0.92);
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.25s ease;
+        }
+
+        .nav-links a:hover {
+            color: var(--gold);
         }
 
         main {
-            max-width: 1300px;
-            margin: 160px auto 100px;
-            padding: 0 5vw;
+            max-width: 1320px;
+            margin: 0 auto 100px;
+            padding: 9.5rem 6vw 0;
         }
 
         .apt-container {
@@ -63,37 +131,41 @@
 
         @media (min-width: 992px) {
             .apt-container {
-                grid-template-columns: 1.6fr 1fr;
-                gap: 6rem;
+                grid-template-columns: 1.6fr 0.9fr;
+                gap: 5rem;
+                align-items: start;
             }
-        }
-
-        .apt-title {
-            font-family: 'Playfair Display';
-            font-size: clamp(2.8rem, 5vw, 4.5rem);
-            font-style: italic;
-            margin-bottom: 0.5rem;
-            line-height: 1.1;
-            color: var(--text);
         }
 
         .apt-location-tag {
             text-transform: uppercase;
-            letter-spacing: 3px;
-            color: var(--accent);
-            font-weight: 600;
-            font-size: 0.7rem;
+            letter-spacing: 2.8px;
+            color: var(--gold);
+            font-weight: 800;
+            font-size: 0.72rem;
             margin-bottom: 1rem;
+        }
+
+        .apt-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 5vw, 5.2rem);
+            font-style: normal;
+            font-weight: 400;
+            margin-bottom: 1.2rem;
+            line-height: 1.05;
+            color: var(--text);
         }
 
         .apt-address-box {
             display: none;
-            background: #f9fbf8;
+            background: white;
             border: 1px solid var(--border);
-            border-radius: 12px;
+            border-left: 4px solid var(--gold);
+            border-radius: 6px;
             padding: 1rem 1.2rem;
             margin-top: 1.3rem;
             max-width: 620px;
+            box-shadow: 0 18px 45px rgba(44, 51, 37, 0.05);
         }
 
         .apt-address-label {
@@ -101,7 +173,7 @@
             text-transform: uppercase;
             letter-spacing: 1.5px;
             color: var(--text-light);
-            font-weight: 700;
+            font-weight: 800;
             margin-bottom: 0.35rem;
         }
 
@@ -112,9 +184,9 @@
         }
 
         .main-image-wrapper {
-            margin: 3.5rem 0;
-            box-shadow: 0 40px 80px rgba(44, 51, 37, 0.1);
-            border-radius: 2px;
+            margin: 3rem 0 2.5rem;
+            box-shadow: 0 35px 90px rgba(44, 51, 37, 0.16);
+            border-radius: 4px;
             overflow: hidden;
             background: #eee;
             aspect-ratio: 16 / 10;
@@ -123,15 +195,16 @@
         .gallery-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 25px;
-            margin-top: 5rem;
+            gap: 22px;
+            margin-top: 3rem;
         }
 
         .img-container {
             background: #eee;
-            border-radius: 2px;
+            border-radius: 4px;
             overflow: hidden;
             aspect-ratio: 4 / 3;
+            box-shadow: 0 18px 45px rgba(44, 51, 37, 0.08);
         }
 
         .gallery-img {
@@ -141,65 +214,72 @@
             cursor: pointer;
             transition: var(--transition);
             display: block;
-            opacity: 1;
-            transform: translateY(0);
         }
 
         .gallery-img:hover {
-            transform: scale(1.03);
-            opacity: 0.9;
+            transform: scale(1.035);
+            opacity: 0.92;
+        }
+
+        #apt-desc {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 2rem;
+            box-shadow: 0 22px 65px rgba(44, 51, 37, 0.06);
+            margin-top: 2.5rem !important;
+            font-size: 1rem !important;
+            line-height: 1.8 !important;
+            color: #4f554a !important;
         }
 
         .booking-card {
             background: white;
             border: 1px solid var(--border);
-            padding: 3.5rem 3rem;
+            padding: 2.8rem 2.5rem;
             position: sticky;
-            top: 180px;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.04);
-            border-radius: 4px;
+            top: 120px;
+            box-shadow: 0 30px 80px rgba(44, 51, 37, 0.12);
+            border-radius: 6px;
+        }
+
+        .booking-card h3 {
+            font-family: 'Playfair Display', serif !important;
+            font-size: 2rem !important;
+            font-style: normal !important;
+            font-weight: 400 !important;
+            margin-bottom: 1.2rem !important;
         }
 
         .price-tag {
-            font-size: 1.6rem;
-            font-weight: 300;
+            font-size: 1.25rem;
+            font-weight: 500;
             color: var(--text-light);
-            margin-bottom: 2rem;
+            margin-bottom: 1.5rem;
         }
 
         .price-num {
-            font-weight: 600;
-            color: var(--text);
+            font-weight: 900;
+            color: var(--gold);
         }
 
         .price-old {
             display: block;
-            color: #999;
+            color: #9a9a9a;
             text-decoration: line-through;
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-bottom: 0.35rem;
+            white-space: nowrap;
         }
 
         .price-sale {
             display: block;
             color: var(--warning);
-            font-size: 1.6rem;
-            font-weight: 700;
-        }
-
-        .sale-badge {
-            display: inline-block;
-            background: rgba(176, 65, 62, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(176, 65, 62, 0.25);
-            border-radius: 999px;
-            padding: 0.45rem 0.8rem;
-            font-size: 0.62rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.8rem;
+            font-size: 1.35rem;
+            font-weight: 900;
+            line-height: 1.2;
+            white-space: nowrap;
         }
 
         .apt-discount-box {
@@ -241,33 +321,48 @@
 
         .btn-booking {
             width: 100%;
-            background: #EAE8E2;
-            color: #888;
-            border: none;
-            padding: 1.3rem;
-            border-radius: 50px;
-            font-weight: 700;
+            background: var(--accent);
+            color: white;
+            border: 1px solid var(--accent);
+            padding: 1.1rem 1.4rem;
+            border-radius: 4px;
+            font-weight: 900;
             text-transform: uppercase;
             margin-top: 2rem;
-            letter-spacing: 2px;
-            font-size: 0.7rem;
-            transition: var(--transition);
+            letter-spacing: 1.8px;
+            font-size: 0.72rem;
+            transition: 0.35s;
         }
 
         .btn-booking:not(:disabled) {
             cursor: pointer;
         }
 
+        .btn-booking:not(:disabled):hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px rgba(44, 51, 37, 0.16);
+        }
+
+        .btn-booking:disabled {
+            background: #EAE8E2;
+            color: #888;
+            border-color: #EAE8E2;
+        }
+
         .dev-status {
-            color: var(--warning);
+            color: var(--text-light);
             font-weight: 600;
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            line-height: 1.6;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 0.75rem;
+            text-transform: none;
+            letter-spacing: 0;
+            line-height: 1.7;
+            display: block;
+        }
+
+        .dev-status strong {
+            color: var(--text);
         }
 
         .lightbox {
@@ -446,6 +541,52 @@
             transition: background 0.3s;
         }
 
+        @media (max-width: 820px) {
+            .site-header {
+                padding: 1rem 5vw;
+                align-items: flex-start;
+                background: rgba(23,35,24,0.94);
+            }
+
+            .logo-title {
+                font-size: 1.35rem;
+                letter-spacing: 4px;
+            }
+
+            .logo-subtitle {
+                font-size: 0.55rem;
+                letter-spacing: 3px;
+            }
+
+            .nav-links {
+                justify-content: flex-end;
+                flex-wrap: wrap;
+                gap: 0.8rem;
+            }
+
+            .nav-links a {
+                font-size: 0.62rem;
+            }
+
+            main {
+                padding: 7.5rem 5vw 0;
+            }
+
+            .apt-title {
+                font-size: clamp(2.4rem, 11vw, 3.6rem);
+            }
+
+            .gallery-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .booking-card {
+                position: relative;
+                top: auto;
+                padding: 2rem 1.5rem;
+            }
+        }
+
         @keyframes popupAnim {
             from {
                 transform: scale(0.8);
@@ -475,20 +616,22 @@
         }
     </style>
 
-    <link rel="stylesheet" href="../mobile.css">
+    <link rel="stylesheet" href="../mobile.css?v=3">
 </head>
 
 <body>
 
-<header>
-    <a href="index.html" class="logo-container" style="text-decoration: none; display: flex; flex-direction: column; line-height: 1.1;">
-        <span style="font-family: 'Playfair Display'; font-size: 1.6rem; font-weight: 700; color: #1A1A1A; letter-spacing: 2px;">BALATON</span>
-        <span style="font-family: 'Montserrat'; font-size: 0.65rem; font-weight: 400; color: #1A1A1A; text-transform: uppercase; letter-spacing: 6px; margin-top: 4px;">Essence</span>
+<header class="site-header" id="site-header">
+    <a href="index.html" class="logo-container" aria-label="Balaton Essence Startseite">
+        <span class="logo-title">BALATON</span>
+        <span class="logo-subtitle">Essence</span>
     </a>
 
-    <nav class="nav-links" style="display: flex; gap: 2rem;">
-        <a href="index.html#apartments" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Apartments</a>
-        <a href="rolunk.html" style="text-decoration: none; color: #1A1A1A; font-weight: 700; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; transition: 0.3s;">Über uns</a>
+    <nav class="nav-links" aria-label="Hauptnavigation">
+        <a href="index.html#apartments">Unterkünfte</a>
+        <a href="index.html#services">Services</a>
+        <a href="index.html#reviews-section">Erlebnisse</a>
+        <a href="index.html#contact">Kontakt</a>
     </nav>
 </header>
 
@@ -509,12 +652,13 @@
 
             <div id="apt-gallery" class="gallery-grid"></div>
 
-            <div id="apt-desc" style="margin-top: 1.5rem; font-size: 1.1rem; line-height: 1.6; color: #555;"></div>
+            <div id="apt-desc"></div>
         </div>
 
         <div>
             <div class="booking-card">
-                <h3 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 1rem; font-style: italic;">Buchung</h3>
+                <h3>Buchung</h3>
+
                 <p id="apt-price" class="price-tag"></p>
 
                 <div id="apt-discount-box" class="apt-discount-box">
@@ -530,7 +674,7 @@
 
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0;">
 
-                <button class="btn-booking" id="booking-btn" disabled>BUCHEN</button>
+                <button class="btn-booking" id="booking-btn" disabled>Buchen</button>
             </div>
         </div>
     </div>
@@ -603,7 +747,7 @@
             <div id="grand-total" style="font-size: 2rem; font-weight: 700; font-family: 'Playfair Display';">0 Ft</div>
         </div>
 
-        <button onclick="sendBookingRequest()" id="submit-booking-btn" class="btn-booking" style="width: 100%; padding: 1.2rem; border-radius: 50px; border: none; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; transition: 0.3s; opacity: 0.5;" disabled>
+        <button onclick="sendBookingRequest()" id="submit-booking-btn" class="btn-booking" style="width: 100%; padding: 1.2rem; border-radius: 4px; border: none; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; transition: 0.3s; opacity: 0.5;" disabled>
             Datum wählen!
         </button>
     </div>
@@ -643,6 +787,23 @@
     const MIN_BOOKING_HOURS_AHEAD = 48;
     const CHECK_IN_HOUR = 14;
 
+    function initHeaderScroll() {
+        const header = document.getElementById('site-header');
+
+        if (!header) return;
+
+        const update = () => {
+            if (window.scrollY > 20) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        };
+
+        update();
+        window.addEventListener('scroll', update);
+    }
+
     function getCheckInDateTime(dateStr) {
         const date = parseLocalDate(dateStr);
 
@@ -670,6 +831,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', async () => {
+        initHeaderScroll();
+
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
 
@@ -688,7 +851,10 @@
                 }
 
                 renderDetails();
-                updateSEO(currentApt.name || 'Apartment', currentApt.location || 'Balaton');
+                updateSEO(
+                    currentApt.name_de || currentApt.nameDe || currentApt.name || 'Apartment',
+                    currentApt.location_de || currentApt.locationDe || currentApt.location || 'Balaton'
+                );
 
                 const mainContent = document.getElementById('main-content');
                 if (mainContent) {
@@ -735,215 +901,214 @@
         }).format(d);
     }
 
-   function getDiscountConfig(apt) {
-    const discount = apt?.discount || apt?.nightlyDiscount || null;
+    function getDiscountConfig(apt) {
+        const discount = apt?.discount || apt?.nightlyDiscount || null;
 
-    if (!discount) {
-        return null;
+        if (!discount) {
+            return null;
+        }
+
+        const isActive =
+            discount.active === true ||
+            discount.active === 'true' ||
+            discount.enabled === true ||
+            discount.enabled === 'true';
+
+        if (!isActive) {
+            return null;
+        }
+
+        const amount = Number(
+            discount.amountPerNight ||
+            discount.amount ||
+            discount.value ||
+            apt.discountAmount ||
+            0
+        );
+
+        if (amount <= 0) {
+            return null;
+        }
+
+        return {
+            amount,
+            bookingStart:
+                discount.bookingStart ||
+                discount.booking_start ||
+                discount.start ||
+                discount.startDate ||
+                '',
+
+            bookingEnd:
+                discount.bookingEnd ||
+                discount.booking_end ||
+                discount.end ||
+                discount.endDate ||
+                '',
+
+            stayStart:
+                discount.stayStart ||
+                discount.stay_start ||
+                discount.validFrom ||
+                '',
+
+            stayEnd:
+                discount.stayEnd ||
+                discount.stay_end ||
+                discount.validTo ||
+                ''
+        };
     }
 
-    const isActive =
-        discount.active === true ||
-        discount.active === 'true' ||
-        discount.enabled === true ||
-        discount.enabled === 'true';
+    function isDiscountBookingPeriodActive(apt) {
+        const discount = getDiscountConfig(apt);
 
-    if (!isActive) {
-        return null;
+        if (!discount) {
+            return false;
+        }
+
+        const todayStr = getLocalDateString(new Date());
+
+        if (discount.bookingStart && todayStr < discount.bookingStart) {
+            return false;
+        }
+
+        if (discount.bookingEnd && todayStr > discount.bookingEnd) {
+            return false;
+        }
+
+        return true;
     }
 
-    const amount = Number(
-        discount.amountPerNight ||
-        discount.amount ||
-        discount.value ||
-        apt.discountAmount ||
-        0
-    );
+    function isDiscountActiveForNight(apt, nightDateStr) {
+        const discount = getDiscountConfig(apt);
 
-    if (amount <= 0) {
-        return null;
+        if (!discount) {
+            return false;
+        }
+
+        if (!isDiscountBookingPeriodActive(apt)) {
+            return false;
+        }
+
+        if (discount.stayStart && nightDateStr < discount.stayStart) {
+            return false;
+        }
+
+        if (discount.stayEnd && nightDateStr > discount.stayEnd) {
+            return false;
+        }
+
+        return true;
     }
 
-    return {
-        amount,
+    function getDiscountAmountForNight(apt, nightDateStr) {
+        if (!isDiscountActiveForNight(apt, nightDateStr)) {
+            return 0;
+        }
 
-        bookingStart:
-            discount.bookingStart ||
-            discount.booking_start ||
-            discount.start ||
-            discount.startDate ||
-            '',
-
-        bookingEnd:
-            discount.bookingEnd ||
-            discount.booking_end ||
-            discount.end ||
-            discount.endDate ||
-            '',
-
-        stayStart:
-            discount.stayStart ||
-            discount.stay_start ||
-            discount.validFrom ||
-            '',
-
-        stayEnd:
-            discount.stayEnd ||
-            discount.stay_end ||
-            discount.validTo ||
-            ''
-    };
-}
-
-function isDiscountBookingPeriodActive(apt) {
-    const discount = getDiscountConfig(apt);
-
-    if (!discount) {
-        return false;
+        const discount = getDiscountConfig(apt);
+        return Number(discount.amount || 0);
     }
 
-    const todayStr = getLocalDateString(new Date());
+    function formatDiscountDate(dateStr) {
+        if (!dateStr) return '-';
 
-    if (discount.bookingStart && todayStr < discount.bookingStart) {
-        return false;
+        const d = parseLocalDate(dateStr);
+
+        if (!d || isNaN(d.getTime())) {
+            return dateStr;
+        }
+
+        return new Intl.DateTimeFormat('de-DE', {
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric'
+        }).format(d);
     }
 
-    if (discount.bookingEnd && todayStr > discount.bookingEnd) {
-        return false;
+    function renderDiscountBox() {
+        const box = document.getElementById('apt-discount-box');
+        const label = document.getElementById('apt-discount-label');
+        const main = document.getElementById('apt-discount-main');
+        const small = document.getElementById('apt-discount-small');
+
+        if (!box || !label || !main || !small || !currentApt) {
+            return;
+        }
+
+        const discount = getDiscountConfig(currentApt);
+
+        if (!discount || !isDiscountBookingPeriodActive(currentApt)) {
+            box.style.display = 'none';
+            return;
+        }
+
+        const amountText = discount.amount.toLocaleString('hu-HU');
+
+        label.innerText = `Rabatt: -${amountText} Ft / Nacht`;
+
+        const bookingEndText = discount.bookingEnd
+            ? formatDiscountDate(discount.bookingEnd)
+            : 'bis auf Widerruf';
+
+        let stayRangeText = 'für alle buchbaren Zeiträume';
+
+        if (discount.stayStart && discount.stayEnd) {
+            stayRangeText = `${formatDiscountDate(discount.stayStart)} – ${formatDiscountDate(discount.stayEnd)}`;
+        } else if (discount.stayStart) {
+            stayRangeText = `ab ${formatDiscountDate(discount.stayStart)}`;
+        } else if (discount.stayEnd) {
+            stayRangeText = `bis ${formatDiscountDate(discount.stayEnd)}`;
+        }
+
+        main.innerText = `Der Rabatt gilt, wenn Sie spätestens bis zum ${bookingEndText} buchen.`;
+
+        small.innerText = `Gültiger Aufenthaltszeitraum: ${stayRangeText}. Der Rabatt wird nur für diese Nächte abgezogen.`;
+
+        box.style.display = 'block';
     }
-
-    return true;
-}
-
-function isDiscountActiveForNight(apt, nightDateStr) {
-    const discount = getDiscountConfig(apt);
-
-    if (!discount) {
-        return false;
-    }
-
-    if (!isDiscountBookingPeriodActive(apt)) {
-        return false;
-    }
-
-    if (discount.stayStart && nightDateStr < discount.stayStart) {
-        return false;
-    }
-
-    if (discount.stayEnd && nightDateStr > discount.stayEnd) {
-        return false;
-    }
-
-    return true;
-}
-
-function getDiscountAmountForNight(apt, nightDateStr) {
-    if (!isDiscountActiveForNight(apt, nightDateStr)) {
-        return 0;
-    }
-
-    const discount = getDiscountConfig(apt);
-    return Number(discount.amount || 0);
-}
-
-function formatDiscountDate(dateStr) {
-    if (!dateStr) return '-';
-
-    const d = parseLocalDate(dateStr);
-
-    if (!d || isNaN(d.getTime())) {
-        return dateStr;
-    }
-
-    return new Intl.DateTimeFormat('de-DE', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    }).format(d);
-}
-
-function renderDiscountBox() {
-    const box = document.getElementById('apt-discount-box');
-    const label = document.getElementById('apt-discount-label');
-    const main = document.getElementById('apt-discount-main');
-    const small = document.getElementById('apt-discount-small');
-
-    if (!box || !label || !main || !small || !currentApt) {
-        return;
-    }
-
-    const discount = getDiscountConfig(currentApt);
-
-    if (!discount || !isDiscountBookingPeriodActive(currentApt)) {
-        box.style.display = 'none';
-        return;
-    }
-
-    const amountText = discount.amount.toLocaleString('hu-HU');
-
-    label.innerText = `Rabatt: -${amountText} Ft / Nacht`;
-
-    const bookingEndText = discount.bookingEnd
-        ? formatDiscountDate(discount.bookingEnd)
-        : 'bis auf Widerruf';
-
-    let stayRangeText = 'für alle buchbaren Zeiträume';
-
-    if (discount.stayStart && discount.stayEnd) {
-        stayRangeText = `${formatDiscountDate(discount.stayStart)} – ${formatDiscountDate(discount.stayEnd)}`;
-    } else if (discount.stayStart) {
-        stayRangeText = `ab ${formatDiscountDate(discount.stayStart)}`;
-    } else if (discount.stayEnd) {
-        stayRangeText = `bis ${formatDiscountDate(discount.stayEnd)}`;
-    }
-
-    main.innerText = `Der Rabatt gilt, wenn Sie spätestens bis zum ${bookingEndText} buchen.`;
-
-    small.innerText = `Gültiger Aufenthaltszeitraum: ${stayRangeText}. Der Rabatt wird pro Nacht nur für diese Nächte abgezogen.`;
-
-    box.style.display = 'block';
-}
 
     function getNextBookableInfo(apt) {
-    const today = new Date();
+        const today = new Date();
 
-    for (let i = 0; i < 370; i++) {
-        const testDate = new Date(today);
-        testDate.setDate(today.getDate() + i);
+        for (let i = 0; i < 370; i++) {
+            const testDate = new Date(today);
+            testDate.setDate(today.getDate() + i);
 
-        const dateStr = getLocalDateString(testDate);
+            const dateStr = getLocalDateString(testDate);
 
-        const isBlockedByAdmin = Array.isArray(apt.disabledDates)
-            && apt.disabledDates.includes(dateStr);
+            const isBlockedByAdmin = Array.isArray(apt.disabledDates)
+                && apt.disabledDates.includes(dateStr);
 
-        if (isBlockedByAdmin) {
-            continue;
+            if (isBlockedByAdmin) {
+                continue;
+            }
+
+            const info = getAptStatusAndPrice(apt, testDate);
+
+            if (info.status === 'OPEN') {
+                return {
+                    ...info,
+                    dateStr
+                };
+            }
         }
 
-        const info = getAptStatusAndPrice(apt, testDate);
-
-        if (info.status === 'OPEN') {
-            return {
-                ...info,
-                dateStr
-            };
-        }
+        return {
+            status: 'CLOSED',
+            price: 0,
+            label: '',
+            minNights: 1,
+            maxGuests: 2,
+            dateStr: ''
+        };
     }
 
-    return {
-        status: 'CLOSED',
-        price: 0,
-        label: '',
-        minNights: 1,
-        maxGuests: 2,
-        dateStr: ''
-    };
-}
-
     function renderDetails() {
-    if (!currentApt) return;
+        if (!currentApt) return;
 
-    const info = getNextBookableInfo(currentApt);
+        const info = getNextBookableInfo(currentApt);
 
         const setSafeText = (id, text) => {
             const el = document.getElementById(id);
@@ -958,6 +1123,7 @@ function renderDiscountBox() {
             currentApt.name ||
             'Unbekanntes Apartment'
         );
+
         setSafeText(
             'apt-loc',
             currentApt.location_de ||
@@ -978,6 +1144,7 @@ function renderDiscountBox() {
         }
 
         const descEl = document.getElementById('apt-desc');
+
         if (descEl) {
             descEl.innerText =
                 currentApt.description_de ||
@@ -1000,11 +1167,10 @@ function renderDiscountBox() {
                 const discountedPrice = Math.max(0, originalPrice - discountAmount);
 
                 if (discountAmount > 0) {
-                priceTag.innerHTML = `
-                    <span class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft / Nacht</span>
-                    <span class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft / Nacht</span>
-                `;
-
+                    priceTag.innerHTML = `
+                        <div class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft / Nacht</div>
+                        <div class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft / Nacht</div>
+                    `;
                 } else {
                     priceTag.innerHTML = `<span class="price-num">${originalPrice.toLocaleString('hu-HU')} Ft</span> / Nacht`;
                 }
@@ -1073,6 +1239,7 @@ function renderDiscountBox() {
                 gal.appendChild(wrapper);
             });
         }
+
         renderDiscountBox();
     }
 
@@ -1114,6 +1281,7 @@ function renderDiscountBox() {
         currentIndex = (currentIndex + dir + allImages.length) % allImages.length;
 
         const lbImg = document.getElementById('lightbox-img');
+
         if (lbImg) {
             lbImg.src = allImages[currentIndex];
         }
@@ -1142,7 +1310,11 @@ function renderDiscountBox() {
         const modalAptName = document.getElementById('modal-apt-name');
 
         if (modalAptName) {
-            modalAptName.innerText = currentApt.name || '';
+            modalAptName.innerText =
+                currentApt.name_de ||
+                currentApt.nameDe ||
+                currentApt.name ||
+                '';
         }
 
         selectedStart = null;
@@ -1193,6 +1365,7 @@ function renderDiscountBox() {
 
     function closeBookingModal() {
         const modal = document.getElementById('booking-modal');
+
         if (!modal) return;
 
         modal.classList.remove('active');
@@ -1268,86 +1441,86 @@ function renderDiscountBox() {
     }
 
     function renderCalendar() {
-    const daysContainer = document.getElementById('calendar-days');
-    const monthYearLabel = document.getElementById('calendar-month-year');
+        const daysContainer = document.getElementById('calendar-days');
+        const monthYearLabel = document.getElementById('calendar-month-year');
 
-    if (!daysContainer || !monthYearLabel) return;
+        if (!daysContainer || !monthYearLabel) return;
 
-    const year = calDate.getFullYear();
-    const month = calDate.getMonth();
+        const year = calDate.getFullYear();
+        const month = calDate.getMonth();
 
-    const monthName = new Intl.DateTimeFormat('de-DE', {
-        month: 'long'
-    }).format(calDate);
+        const monthName = new Intl.DateTimeFormat('de-DE', {
+            month: 'long'
+        }).format(calDate);
 
-    monthYearLabel.innerText = `${monthName} ${year}`;
+        monthYearLabel.innerText = `${monthName} ${year}`;
 
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+        const firstDay = new Date(year, month, 1).getDay();
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+        const startOffset = firstDay === 0 ? 6 : firstDay - 1;
 
-    const blockedDates = getBlockedDatesSet();
+        const blockedDates = getBlockedDatesSet();
 
-    let htmlContent = '';
+        let htmlContent = '';
 
-    for (let i = 0; i < startOffset; i++) {
-        htmlContent += `<div class="cal-day empty"></div>`;
-    }
-
-    for (let d = 1; d <= daysInMonth; d++) {
-        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-
-        let className = 'cal-day';
-        let onClickAttr = `onclick="selectDate('${dateStr}')"`;
-
-        const isTooSoon = !isCheckInAllowedByLeadTime(dateStr);
-        const isBlocked = blockedDates.has(dateStr);
-
-        let canBeCheckoutDay = false;
-
-        if (
-            selectedStart &&
-            !selectedEnd &&
-            dateStr > selectedStart &&
-            isCheckInAllowedByLeadTime(selectedStart) &&
-            !hasBlockedDateInRange(selectedStart, dateStr)
-        ) {
-            canBeCheckoutDay = true;
+        for (let i = 0; i < startOffset; i++) {
+            htmlContent += `<div class="cal-day empty"></div>`;
         }
 
-        if (isTooSoon) {
-            className += ' past';
-            onClickAttr = '';
-        }
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
 
-        if (isBlocked) {
-            className += ' booked';
+            let className = 'cal-day';
+            let onClickAttr = `onclick="selectDate('${dateStr}')"`;
 
-            if (canBeCheckoutDay) {
-                className += ' end-allowed';
-                onClickAttr = `onclick="selectDate('${dateStr}')"`;
-            } else {
+            const isTooSoon = !isCheckInAllowedByLeadTime(dateStr);
+            const isBlocked = blockedDates.has(dateStr);
+
+            let canBeCheckoutDay = false;
+
+            if (
+                selectedStart &&
+                !selectedEnd &&
+                dateStr > selectedStart &&
+                isCheckInAllowedByLeadTime(selectedStart) &&
+                !hasBlockedDateInRange(selectedStart, dateStr)
+            ) {
+                canBeCheckoutDay = true;
+            }
+
+            if (isTooSoon) {
+                className += ' past';
                 onClickAttr = '';
             }
+
+            if (isBlocked) {
+                className += ' booked';
+
+                if (canBeCheckoutDay) {
+                    className += ' end-allowed';
+                    onClickAttr = `onclick="selectDate('${dateStr}')"`;
+                } else {
+                    onClickAttr = '';
+                }
+            }
+
+            if (selectedStart && dateStr === selectedStart) {
+                className += ' selected-start';
+            }
+
+            if (selectedEnd && dateStr === selectedEnd) {
+                className += ' selected-end';
+            }
+
+            if (selectedStart && selectedEnd && dateStr > selectedStart && dateStr < selectedEnd) {
+                className += ' selected-range';
+            }
+
+            htmlContent += `<div class="${className}" ${onClickAttr}>${d}</div>`;
         }
 
-        if (selectedStart && dateStr === selectedStart) {
-            className += ' selected-start';
-        }
-
-        if (selectedEnd && dateStr === selectedEnd) {
-            className += ' selected-end';
-        }
-
-        if (selectedStart && selectedEnd && dateStr > selectedStart && dateStr < selectedEnd) {
-            className += ' selected-range';
-        }
-
-        htmlContent += `<div class="${className}" ${onClickAttr}>${d}</div>`;
+        daysContainer.innerHTML = htmlContent;
     }
-
-    daysContainer.innerHTML = htmlContent;
-}
 
     function selectDate(dateStr) {
         if (!isCheckInAllowedByLeadTime(dateStr)) {
@@ -1441,58 +1614,58 @@ function renderDiscountBox() {
 
         const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
 
-let total = 0;
-let originalTotal = 0;
-let discountTotal = 0;
-let minNightsRequired = 1;
+        let total = 0;
+        let originalTotal = 0;
+        let discountTotal = 0;
+        let minNightsRequired = 1;
 
-for (let i = 0; i < nights; i++) {
-    const currentDay = new Date(start);
-    currentDay.setDate(currentDay.getDate() + i);
+        for (let i = 0; i < nights; i++) {
+            const currentDay = new Date(start);
+            currentDay.setDate(currentDay.getDate() + i);
 
-    const currentDateStr = getLocalDateString(currentDay);
-    const info = getAptStatusAndPrice(currentApt, currentDay, guests);
+            const currentDateStr = getLocalDateString(currentDay);
+            const info = getAptStatusAndPrice(currentApt, currentDay, guests);
 
-    if (info.status === 'OPEN') {
-        const nightlyPrice = Number(info.price || 0);
-        const nightlyDiscount = getDiscountAmountForNight(currentApt, currentDateStr);
-        const finalNightlyPrice = Math.max(0, nightlyPrice - nightlyDiscount);
+            if (info.status === 'OPEN') {
+                const nightlyPrice = Number(info.price || 0);
+                const nightlyDiscount = getDiscountAmountForNight(currentApt, currentDateStr);
+                const finalNightlyPrice = Math.max(0, nightlyPrice - nightlyDiscount);
 
-        originalTotal += nightlyPrice;
-        discountTotal += nightlyPrice - finalNightlyPrice;
-        total += finalNightlyPrice;
+                originalTotal += nightlyPrice;
+                discountTotal += nightlyPrice - finalNightlyPrice;
+                total += finalNightlyPrice;
 
-        if (Number(info.minNights || 1) > minNightsRequired) {
-            minNightsRequired = Number(info.minNights || 1);
+                if (Number(info.minNights || 1) > minNightsRequired) {
+                    minNightsRequired = Number(info.minNights || 1);
+                }
+            } else {
+                infoText.innerHTML = `<span style="color:var(--warning)">Das Apartment ist an den ausgewählten Tagen geschlossen.</span>`;
+                totalBox.innerText = 'Geschlossen';
+                totalBox.dataset.finalTotal = '0';
+                btn.innerText = 'Nicht verfügbar';
+                btn.style.background = 'var(--warning)';
+                btn.style.color = 'white';
+                return;
+            }
         }
-    } else {
-        infoText.innerHTML = `<span style="color:var(--warning)">Das Apartment ist an den ausgewählten Tagen geschlossen.</span>`;
-        totalBox.innerText = 'Geschlossen';
-        totalBox.dataset.finalTotal = '0';
-        btn.innerText = 'Nicht verfügbar';
-        btn.style.background = 'var(--warning)';
-        btn.style.color = 'white';
-        return;
-    }
-}
 
-totalBox.dataset.finalTotal = String(total);
+        totalBox.dataset.finalTotal = String(total);
 
-if (discountTotal > 0) {
-    totalBox.innerHTML = `
-        <div style="font-size:0.9rem; color:#999; text-decoration:line-through; margin-bottom:4px;">
-            ${originalTotal.toLocaleString('hu-HU')} Ft
-        </div>
-        <div>
-            ${total.toLocaleString('hu-HU')} Ft
-        </div>
-        <div style="font-size:0.75rem; color:var(--accent); font-family:'Montserrat'; font-weight:700; margin-top:4px;">
-            Rabatt: -${discountTotal.toLocaleString('hu-HU')} Ft
-        </div>
-    `;
-} else {
-    totalBox.innerText = `${total.toLocaleString('hu-HU')} Ft`;
-}
+        if (discountTotal > 0) {
+            totalBox.innerHTML = `
+                <div style="font-size:0.9rem; color:#999; text-decoration:line-through; margin-bottom:4px;">
+                    ${originalTotal.toLocaleString('hu-HU')} Ft
+                </div>
+                <div>
+                    ${total.toLocaleString('hu-HU')} Ft
+                </div>
+                <div style="font-size:0.75rem; color:var(--accent); font-family:'Montserrat'; font-weight:700; margin-top:4px;">
+                    Rabatt: -${discountTotal.toLocaleString('hu-HU')} Ft
+                </div>
+            `;
+        } else {
+            totalBox.innerText = `${total.toLocaleString('hu-HU')} Ft`;
+        }
 
         if (nights < minNightsRequired) {
             infoText.innerHTML = `<span style="color:var(--warning)">Der Mindestaufenthalt beträgt in diesem Zeitraum ${minNightsRequired} Nächte.</span>`;
@@ -1524,7 +1697,11 @@ if (discountTotal > 0) {
 
         const data = {
             aptId: currentApt.id,
-            aptName: currentApt.name,
+            aptName:
+                currentApt.name_de ||
+                currentApt.nameDe ||
+                currentApt.name ||
+                'Balaton Essence Apartment',
             guestName: document.getElementById('book-name').value.trim(),
             email: document.getElementById('book-email').value.trim(),
             phone: document.getElementById('book-phone').value.trim(),
@@ -1563,7 +1740,6 @@ if (discountTotal > 0) {
             );
             return;
         }
-
 
         if (!isCheckInAllowedByLeadTime(data.checkIn)) {
             showSuccess(
