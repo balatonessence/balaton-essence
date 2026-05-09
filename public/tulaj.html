@@ -652,67 +652,67 @@
         });
 
         async function initPage() {
-            await loadDb();
+            const savedCode = sessionStorage.getItem('OWNER_CODE');
 
-            const savedOwner = sessionStorage.getItem('loggedOwner');
-
-            if (savedOwner) {
-                try {
-                    const parsedOwner = JSON.parse(savedOwner);
-                    const freshOwner = findOwnerById(parsedOwner.id || parsedOwner._id);
-
-                    if (freshOwner) {
-                        currentOwner = freshOwner;
-                        renderDashboard();
-                        showApp();
-                        return;
-                    }
-                } catch (err) {
-                    console.warn('Mentett tulajdonos adat hibás:', err);
-                }
+            if (savedCode) {
+                await loadOwnerDashboard(savedCode);
+                return;
             }
 
             showLogin();
         }
 
-        async function loadDb() {
+        async function loadOwnerDashboard(code) {
             try {
                 const res = await fetch('/api/owner-dashboard', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        code
-                    })
+                    body: JSON.stringify({ code })
                 });
 
-                if (!res.ok) {
-                    throw new Error('Nem sikerült betölteni az adatbázist.');
+                const result = await res.json().catch(() => null);
+
+                if (!res.ok || !result || result.success !== true) {
+                    throw new Error(result?.error || 'Hibás partnerkód.');
                 }
 
-                db = await res.json();
+                db = {
+                    apartments: result.apartments || [],
+                    bookings: result.bookings || [],
+                    breakfasts: result.breakfasts || [],
+                    extras: result.extras || []
+                };
 
-                ensureDbShape();
+                currentOwner = result.owner;
+
+                sessionStorage.setItem('OWNER_CODE', code);
+                sessionStorage.setItem('loggedOwner', JSON.stringify(currentOwner));
+
+                renderDashboard();
+                showApp();
             } catch (err) {
                 console.error(err);
-                document.getElementById('loading').innerText = 'Nem sikerült betölteni az adatokat.';
+
+                const error = document.getElementById('login-error');
+                if (error) {
+                    error.innerText = err.message || 'Nem sikerült belépni.';
+                }
+
+                showLogin();
             }
         }
 
         async function refreshData() {
-            await loadDb();
+            const savedCode = sessionStorage.getItem('OWNER_CODE');
 
-            if (currentOwner) {
-                const freshOwner = findOwnerById(currentOwner.id || currentOwner._id);
-
-                if (freshOwner) {
-                    currentOwner = freshOwner;
-                    sessionStorage.setItem('loggedOwner', JSON.stringify(currentOwner));
-                }
-
-                renderDashboard();
+            if (!savedCode) {
+                logoutOwner();
+                return;
             }
+
+            await loadOwnerDashboard(savedCode);
         }
 
         function ensureDbShape() {
@@ -751,27 +751,19 @@
                 return;
             }
 
-            const owner = (db.owners || []).find(o =>
-                String(o.code || '').trim() === String(code).trim()
-            );
-
-            if (!owner) {
-                error.innerText = 'Hibás partnerkód.';
-                return;
-            }
-
-            currentOwner = owner;
-            sessionStorage.setItem('loggedOwner', JSON.stringify(owner));
-
-            renderDashboard();
-            showApp();
+            loadOwnerDashboard(code);
         }
 
         function logoutOwner() {
+            sessionStorage.removeItem('OWNER_CODE');
             sessionStorage.removeItem('loggedOwner');
+
             currentOwner = null;
             ownerApartments = [];
-            document.getElementById('owner-code').value = '';
+
+            const input = document.getElementById('owner-code');
+            if (input) input.value = '';
+
             showLogin();
         }
 
