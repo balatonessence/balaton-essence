@@ -3,40 +3,1216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Partner Portfólió | Balaton Essence</title>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet">
+    <title>Tulajdonosi portál | Balaton Essence</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+
     <style>
-        :root { --bg: #F9F9F7; --text: #1A1A1A; --accent: #E76F51; }
-        body { font-family: 'Montserrat', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 5rem; }
-        header { padding: 2.5rem 5vw; display: flex; justify-content: space-between; align-items: center; background: #fff; border-bottom: 1px solid rgba(0,0,0,0.05); }
-        .logo { font-family: 'Playfair Display'; font-size: 1.5rem; font-weight: 700; }
-        main { max-width: 1200px; margin: 5rem auto; padding: 0 5vw; }
-        .property-card { background: #fff; padding: 4rem; margin-bottom: 4rem; box-shadow: 0 20px 40px rgba(0,0,0,0.03); display: grid; grid-template-columns: 1fr 1.5fr; gap: 4rem; }
-        .visual { height: 400px; background-size: cover; background-position: center; border-radius: 2px; }
-        h1 { font-family: 'Playfair Display'; font-size: 4rem; margin-bottom: 3rem; }
-        h2 { font-family: 'Playfair Display'; font-size: 2.5rem; margin-bottom: 1rem; }
-        .stat-box { border-top: 1px solid #eee; padding-top: 2rem; margin-top: 2rem; display: flex; gap: 4rem; }
-        .stat-box span { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; color: #999; }
-        .stat-box p { font-family: 'Playfair Display'; font-size: 2rem; color: var(--accent); }
+        :root {
+            --bg: #F4F2EC;
+            --surface: #FFFFFF;
+            --surface-soft: #FCFBF9;
+            --text: #172318;
+            --text-muted: #6A7063;
+            --accent: #5C7A4D;
+            --gold: #C8A46B;
+            --danger: #B0413E;
+            --warning: #E9A93F;
+            --border: #E3E0D8;
+            --shadow: 0 18px 50px rgba(23, 35, 24, 0.08);
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background:
+                radial-gradient(circle at 10% 0%, rgba(200,164,107,0.16), transparent 28%),
+                linear-gradient(180deg, #FCFBF9 0%, var(--bg) 100%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        button,
+        input {
+            font-family: inherit;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .topbar {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: rgba(252, 251, 249, 0.9);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 5vw;
+        }
+
+        .topbar-inner {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .brand {
+            line-height: 1.05;
+        }
+
+        .brand-title {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            letter-spacing: 3px;
+        }
+
+        .brand-subtitle {
+            margin-top: 0.3rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.6rem;
+            letter-spacing: 4px;
+            font-weight: 700;
+        }
+
+        .btn {
+            border: 1px solid transparent;
+            border-radius: 999px;
+            padding: 0.8rem 1.2rem;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.1px;
+            cursor: pointer;
+            transition: 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 12px 28px rgba(92, 122, 77, 0.22);
+        }
+
+        .btn-primary:hover {
+            background: #48613A;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: rgba(255,255,255,0.72);
+            color: var(--text);
+            border-color: var(--border);
+        }
+
+        .btn-outline:hover {
+            background: white;
+            transform: translateY(-1px);
+        }
+
+        .login-screen {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 480px;
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            padding: 2.4rem;
+            text-align: center;
+        }
+
+        .login-card h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.1rem, 6vw, 3rem);
+            margin-bottom: 0.8rem;
+        }
+
+        .login-card p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 1.6rem;
+        }
+
+        .login-card input {
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 1rem 1.2rem;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: var(--surface-soft);
+            outline: none;
+            margin-bottom: 1rem;
+        }
+
+        .login-card input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(92,122,77,0.08);
+            background: white;
+        }
+
+        .login-error {
+            color: var(--danger);
+            font-weight: 700;
+            font-size: 0.85rem;
+            min-height: 1.4rem;
+            margin-top: 0.8rem;
+        }
+
+        .main {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 2rem 5vw 5rem;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.6fr);
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .hero-panel,
+        .summary-panel {
+            background: rgba(255,255,255,0.86);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: clamp(1.5rem, 3vw, 2.2rem);
+            box-shadow: var(--shadow);
+        }
+
+        .kicker {
+            color: var(--gold);
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 0.7rem;
+        }
+
+        .hero h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.2rem, 5vw, 4rem);
+            line-height: 1.02;
+            margin-bottom: 0.8rem;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            line-height: 1.75;
+            max-width: 760px;
+        }
+
+        .summary-panel {
+            background:
+                radial-gradient(circle at 90% 10%, rgba(200,164,107,0.2), transparent 32%),
+                linear-gradient(135deg, #172318, #253421);
+            color: white;
+        }
+
+        .summary-panel p {
+            color: rgba(255,255,255,0.72);
+            line-height: 1.7;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .stat-card {
+            background: rgba(255,255,255,0.88);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.2rem;
+            box-shadow: 0 10px 30px rgba(23,35,24,0.05);
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.3px;
+            font-weight: 900;
+            margin-bottom: 0.45rem;
+        }
+
+        .stat-value {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .stat-note {
+            margin-top: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            line-height: 1.45;
+        }
+
+        .section {
+            background: rgba(255,255,255,0.9);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 1.2rem;
+        }
+
+        .section-header {
+            padding: 1.35rem 1.55rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(252,251,249,0.9));
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.7rem;
+        }
+
+        .section-subtitle {
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            margin-top: 0.3rem;
+            line-height: 1.5;
+        }
+
+        .section-body {
+            padding: 1.35rem 1.55rem 1.55rem;
+        }
+
+        .property-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .property-card {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            display: grid;
+            grid-template-columns: 340px minmax(0, 1fr);
+            box-shadow: 0 10px 28px rgba(23,35,24,0.05);
+        }
+
+        .property-image {
+            min-height: 260px;
+            background-size: cover;
+            background-position: center;
+            background-color: #172318;
+        }
+
+        .property-content {
+            padding: 1.4rem;
+        }
+
+        .property-location {
+            color: var(--gold);
+            text-transform: uppercase;
+            font-size: 0.68rem;
+            font-weight: 900;
+            letter-spacing: 1.3px;
+            margin-bottom: 0.4rem;
+        }
+
+        .property-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.55rem;
+        }
+
+        .property-desc {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.92rem;
+            margin-bottom: 1rem;
+        }
+
+        .mini-stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.7rem;
+        }
+
+        .mini-stat {
+            background: var(--surface-soft);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 0.85rem;
+        }
+
+        .mini-stat span {
+            display: block;
+            color: var(--text-muted);
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            font-weight: 900;
+            letter-spacing: 1px;
+            margin-bottom: 0.35rem;
+        }
+
+        .mini-stat strong {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+        }
+
+        .table-wrap {
+            overflow-x: auto;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            background: white;
+        }
+
+        table {
+            width: 100%;
+            min-width: 860px;
+            border-collapse: collapse;
+        }
+
+        th {
+            text-align: left;
+            padding: 0.95rem 1rem;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface-soft);
+        }
+
+        td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+            font-size: 0.84rem;
+            vertical-align: middle;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.35rem 0.65rem;
+            border-radius: 999px;
+            font-size: 0.62rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            white-space: nowrap;
+        }
+
+        .badge-web {
+            background: rgba(92,122,77,0.12);
+            color: var(--accent);
+        }
+
+        .badge-booking {
+            background: rgba(0,53,128,0.1);
+            color: #003580;
+        }
+
+        .badge-szallas {
+            background: rgba(230,46,46,0.1);
+            color: #E62E2E;
+        }
+
+        .badge-muted {
+            background: rgba(106,112,99,0.12);
+            color: var(--text-muted);
+        }
+
+        .badge-paid {
+            background: rgba(92,122,77,0.12);
+            color: var(--accent);
+        }
+
+        .badge-pending {
+            background: rgba(233,169,63,0.16);
+            color: #B77912;
+        }
+
+        .muted {
+            color: var(--text-muted);
+        }
+
+        .empty-state {
+            padding: 2rem;
+            border: 1px dashed var(--border);
+            border-radius: var(--radius-md);
+            background: white;
+            color: var(--text-muted);
+            text-align: center;
+            line-height: 1.7;
+        }
+
+        .loading {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        @media (max-width: 980px) {
+            .hero {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .property-card {
+                grid-template-columns: 1fr;
+            }
+
+            .property-image {
+                min-height: 240px;
+            }
+
+            .mini-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 620px) {
+            .topbar-inner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .stats-grid,
+            .mini-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .login-card {
+                padding: 1.6rem;
+            }
+        }
     </style>
 </head>
+
 <body>
-    <header><div class="logo">Balaton<span>.</span>Essence PARTNER</div><button onclick="sessionStorage.clear(); window.location.href='index.html'" style="background:none; border:1px solid #000; padding:10px 20px; border-radius:50px; cursor:pointer;">Kijelentkezés</button></header>
-    <main>
-        <h1 id="welcome">Üdvözöljük!</h1>
-        <div id="my-properties"></div>
-    </main>
-    <script src="database.js"></script>
+    <div id="loading" class="loading">Adatok betöltése...</div>
+
+    <section id="login-screen" class="login-screen hidden">
+        <div class="login-card">
+            <div class="brand" style="margin-bottom: 1.6rem;">
+                <div class="brand-title">BALATON</div>
+                <div class="brand-subtitle">Essence partner</div>
+            </div>
+
+            <h1>Tulajdonosi belépés</h1>
+            <p>Adja meg a partnerkódját az apartmanjai és foglalásai megtekintéséhez.</p>
+
+            <input id="owner-code" type="password" inputmode="numeric" placeholder="Partnerkód" autocomplete="off">
+
+            <button class="btn btn-primary" style="width:100%;" onclick="loginOwner()">Belépés</button>
+
+            <div id="login-error" class="login-error"></div>
+        </div>
+    </section>
+
+    <div id="app" class="hidden">
+        <header class="topbar">
+            <div class="topbar-inner">
+                <div class="brand">
+                    <div class="brand-title">BALATON</div>
+                    <div class="brand-subtitle">Essence partner</div>
+                </div>
+
+                <div style="display:flex; gap:0.6rem; flex-wrap:wrap;">
+                    <button class="btn btn-outline" onclick="refreshData()">Frissítés</button>
+                    <button class="btn btn-outline" onclick="logoutOwner()">Kijelentkezés</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="main">
+            <section class="hero">
+                <div class="hero-panel">
+                    <div class="kicker">Tulajdonosi portál</div>
+                    <h1 id="welcome-title">Üdvözöljük!</h1>
+                    <p>
+                        Itt láthatók az Ön apartmanjaihoz tartozó foglalások, bevételek, rendelési adatok és az aktuális portfólió-összesítés.
+                    </p>
+                </div>
+
+                <div class="summary-panel">
+                    <div class="kicker">Áttekintés</div>
+                    <p id="owner-summary">
+                        Az adatok betöltése folyamatban.
+                    </p>
+                </div>
+            </section>
+
+            <section class="stats-grid" id="stats-grid"></section>
+
+            <section class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Ingatlanok</h2>
+                        <div class="section-subtitle">Az Ön partnerkódjához rendelt apartmanok összesítése.</div>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div id="properties-container" class="property-grid"></div>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Foglalások</h2>
+                        <div class="section-subtitle">Webes és külső foglalások az Ön apartmanjaihoz.</div>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div id="bookings-container"></div>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Reggeli rendelések</h2>
+                        <div class="section-subtitle">Az Ön apartmanjaihoz kapcsolódó reggeli / Moments rendelések.</div>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div id="breakfasts-container"></div>
+                </div>
+            </section>
+
+            <section class="section">
+                <div class="section-header">
+                    <div>
+                        <h2>Eszközbérlések</h2>
+                        <div class="section-subtitle">SUP, napozószék, napernyő és egyéb kiegészítő szolgáltatások.</div>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div id="extras-container"></div>
+                </div>
+            </section>
+        </main>
+    </div>
+
     <script>
-        const owner = JSON.parse(sessionStorage.getItem('loggedOwner'));
-        if(!owner) window.location.href='index.html';
-        document.getElementById('welcome').innerText = `Üdvözöljük,\n${owner.name}`;
-        const myApts = db.apartments.filter(a => a.ownerId === owner.id);
-        const cont = document.getElementById('my-properties');
-        myApts.forEach(apt => {
-            const income = db.bookings.filter(b => b.aptName === apt.name).reduce((sum, b) => sum + b.totalPrice, 0);
-            cont.innerHTML += `<div class="property-card"><div class="visual" style="background-image: ${apt.mainImage?`url(${apt.mainImage})`:`linear-gradient(45deg, #E76F51, #06111C)`}"></div><div class="info"><span>${apt.location}</span><h2>${apt.name}</h2><p>${apt.desc}</p><div class="stat-box"><div><span>Összes bevétel</span><p>${income.toLocaleString()} Ft</p></div><div><span>Foglaltság</span><p>${apt.occupancy}%</p></div></div></div></div>`;
+        let db = {};
+        let currentOwner = null;
+        let ownerApartments = [];
+
+        document.addEventListener('DOMContentLoaded', initPage);
+
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Enter' && !document.getElementById('login-screen').classList.contains('hidden')) {
+                loginOwner();
+            }
         });
+
+        async function initPage() {
+            await loadDb();
+
+            const savedOwner = sessionStorage.getItem('loggedOwner');
+
+            if (savedOwner) {
+                try {
+                    const parsedOwner = JSON.parse(savedOwner);
+                    const freshOwner = findOwnerById(parsedOwner.id || parsedOwner._id);
+
+                    if (freshOwner) {
+                        currentOwner = freshOwner;
+                        renderDashboard();
+                        showApp();
+                        return;
+                    }
+                } catch (err) {
+                    console.warn('Mentett tulajdonos adat hibás:', err);
+                }
+            }
+
+            showLogin();
+        }
+
+        async function loadDb() {
+            try {
+                const res = await fetch('/api/get-db-content?t=' + Date.now());
+
+                if (!res.ok) {
+                    throw new Error('Nem sikerült betölteni az adatbázist.');
+                }
+
+                db = await res.json();
+
+                ensureDbShape();
+            } catch (err) {
+                console.error(err);
+                document.getElementById('loading').innerText = 'Nem sikerült betölteni az adatokat.';
+            }
+        }
+
+        async function refreshData() {
+            await loadDb();
+
+            if (currentOwner) {
+                const freshOwner = findOwnerById(currentOwner.id || currentOwner._id);
+
+                if (freshOwner) {
+                    currentOwner = freshOwner;
+                    sessionStorage.setItem('loggedOwner', JSON.stringify(currentOwner));
+                }
+
+                renderDashboard();
+            }
+        }
+
+        function ensureDbShape() {
+            if (!db || typeof db !== 'object') db = {};
+            if (!Array.isArray(db.apartments)) db.apartments = [];
+            if (!Array.isArray(db.owners)) db.owners = [];
+            if (!Array.isArray(db.bookings)) db.bookings = [];
+            if (!Array.isArray(db.breakfasts)) db.breakfasts = [];
+            if (!Array.isArray(db.extras)) db.extras = [];
+        }
+
+        function showLogin() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('login-screen').classList.remove('hidden');
+
+            setTimeout(() => {
+                document.getElementById('owner-code')?.focus();
+            }, 100);
+        }
+
+        function showApp() {
+            document.getElementById('loading').classList.add('hidden');
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app').classList.remove('hidden');
+        }
+
+        function loginOwner() {
+            const code = document.getElementById('owner-code').value.trim();
+            const error = document.getElementById('login-error');
+
+            error.innerText = '';
+
+            if (!code) {
+                error.innerText = 'Adja meg a partnerkódot.';
+                return;
+            }
+
+            const owner = (db.owners || []).find(o =>
+                String(o.code || '').trim() === String(code).trim()
+            );
+
+            if (!owner) {
+                error.innerText = 'Hibás partnerkód.';
+                return;
+            }
+
+            currentOwner = owner;
+            sessionStorage.setItem('loggedOwner', JSON.stringify(owner));
+
+            renderDashboard();
+            showApp();
+        }
+
+        function logoutOwner() {
+            sessionStorage.removeItem('loggedOwner');
+            currentOwner = null;
+            ownerApartments = [];
+            document.getElementById('owner-code').value = '';
+            showLogin();
+        }
+
+        function findOwnerById(id) {
+            return (db.owners || []).find(o =>
+                String(o.id || o._id) === String(id)
+            );
+        }
+
+        function renderDashboard() {
+            const ownerId = currentOwner.id || currentOwner._id;
+
+            ownerApartments = (db.apartments || []).filter(apt =>
+                String(apt.ownerId) === String(ownerId)
+            );
+
+            document.getElementById('welcome-title').innerText = `Üdvözöljük, ${currentOwner.name || 'Partner'}!`;
+
+            renderSummary();
+            renderStats();
+            renderProperties();
+            renderBookings();
+            renderBreakfasts();
+            renderExtras();
+        }
+
+        function getOwnerBookings() {
+            const aptIds = new Set(ownerApartments.map(apt => String(apt.id)));
+
+            return (db.bookings || []).filter(booking =>
+                aptIds.has(String(booking.aptId))
+            );
+        }
+
+        function getRealOwnerBookings() {
+            return getOwnerBookings().filter(booking => !isBlockedBooking(booking));
+        }
+
+        function getWebOwnerBookings() {
+            return getRealOwnerBookings().filter(booking => {
+                const source = String(booking.source || '').toLowerCase();
+
+                return !booking.icalId && !source;
+            });
+        }
+
+        function getUpcomingBookings() {
+            const today = dateOnly(new Date());
+
+            return getRealOwnerBookings()
+                .filter(booking => {
+                    const checkIn = parseDateOnly(booking.checkIn || booking.start);
+                    return checkIn && checkIn >= today;
+                })
+                .sort((a, b) => {
+                    const da = parseDateOnly(a.checkIn || a.start);
+                    const dbb = parseDateOnly(b.checkIn || b.start);
+                    return da - dbb;
+                });
+        }
+
+        function renderSummary() {
+            const totalIncome = getWebOwnerBookings().reduce((sum, booking) => {
+                return sum + Number(booking.totalPrice || booking.total || 0);
+            }, 0);
+
+            const upcoming = getUpcomingBookings();
+
+            document.getElementById('owner-summary').innerHTML = `
+                <strong>${escapeHtml(ownerApartments.length)} apartman</strong> tartozik ehhez a partnerhez.<br>
+                Webes foglalások összértéke: <strong>${formatMoney(totalIncome)} Ft</strong>.<br>
+                Következő érkezések száma: <strong>${upcoming.length}</strong>.
+            `;
+        }
+
+        function renderStats() {
+            const grid = document.getElementById('stats-grid');
+
+            const ownerBookings = getRealOwnerBookings();
+            const webBookings = getWebOwnerBookings();
+            const upcoming = getUpcomingBookings();
+
+            const totalIncome = webBookings.reduce((sum, booking) => {
+                return sum + Number(booking.totalPrice || booking.total || 0);
+            }, 0);
+
+            const externalBookings = ownerBookings.filter(booking => {
+                const source = String(booking.source || '').toLowerCase();
+                return booking.icalId || source;
+            });
+
+            grid.innerHTML = `
+                ${statCard('Ingatlanok', ownerApartments.length, 'Önhöz rendelt apartmanok')}
+                ${statCard('Foglalások', ownerBookings.length, `${webBookings.length} webes, ${externalBookings.length} külső`)}
+                ${statCard('Webes bevétel', formatMoney(totalIncome) + ' Ft', 'Csak saját weboldali foglalásokból')}
+                ${statCard('Következő érkezések', upcoming.length, upcoming[0] ? `${formatDate(upcoming[0].checkIn || upcoming[0].start)} - ${upcoming[0].guestName || 'Vendég'}` : 'Nincs közelgő érkezés')}
+            `;
+        }
+
+        function statCard(label, value, note) {
+            return `
+                <div class="stat-card">
+                    <div class="stat-label">${escapeHtml(label)}</div>
+                    <div class="stat-value">${escapeHtml(value)}</div>
+                    <div class="stat-note">${escapeHtml(note || '')}</div>
+                </div>
+            `;
+        }
+
+        function renderProperties() {
+            const container = document.getElementById('properties-container');
+
+            if (ownerApartments.length === 0) {
+                container.innerHTML = `<div class="empty-state">Ehhez a partnerhez jelenleg nincs apartman rendelve.</div>`;
+                return;
+            }
+
+            container.innerHTML = ownerApartments.map(apt => {
+                const allAptBookings = getRealOwnerBookings().filter(booking =>
+                    String(booking.aptId) === String(apt.id)
+                );
+
+                const webAptBookings = allAptBookings.filter(booking =>
+                    !booking.icalId && !String(booking.source || '').trim()
+                );
+
+                const income = webAptBookings.reduce((sum, booking) => {
+                    return sum + Number(booking.totalPrice || booking.total || 0);
+                }, 0);
+
+                const upcoming = allAptBookings.filter(booking => {
+                    const checkIn = parseDateOnly(booking.checkIn || booking.start);
+                    return checkIn && checkIn >= dateOnly(new Date());
+                });
+
+                const occupancy = calculateOccupancyPercent(apt, 90);
+
+                const image = apt.coverImage ||
+                    (Array.isArray(apt.galleryImages) && apt.galleryImages.length ? apt.galleryImages[0] : '');
+
+                const imageStyle = image
+                    ? `background-image:url('${escapeAttr(image)}')`
+                    : `background-image:linear-gradient(135deg, #5C7A4D, #172318)`;
+
+                return `
+                    <article class="property-card">
+                        <div class="property-image" style="${imageStyle}"></div>
+
+                        <div class="property-content">
+                            <div class="property-location">${escapeHtml(apt.location || 'Balaton Essence')}</div>
+                            <h3 class="property-title">${escapeHtml(apt.name || 'Apartman')}</h3>
+                            <p class="property-desc">${escapeHtml(apt.description || apt.description_hu || 'Nincs leírás megadva.')}</p>
+
+                            <div class="mini-stats">
+                                <div class="mini-stat">
+                                    <span>Webes bevétel</span>
+                                    <strong>${formatMoney(income)} Ft</strong>
+                                </div>
+
+                                <div class="mini-stat">
+                                    <span>Foglalások</span>
+                                    <strong>${allAptBookings.length}</strong>
+                                </div>
+
+                                <div class="mini-stat">
+                                    <span>Közelgő</span>
+                                    <strong>${upcoming.length}</strong>
+                                </div>
+
+                                <div class="mini-stat">
+                                    <span>90 napos foglaltság</span>
+                                    <strong>${occupancy}%</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </article>
+                `;
+            }).join('');
+        }
+
+        function renderBookings() {
+            const container = document.getElementById('bookings-container');
+            const bookings = getRealOwnerBookings()
+                .sort((a, b) => {
+                    const da = parseDateOnly(a.checkIn || a.start) || new Date(0);
+                    const dbb = parseDateOnly(b.checkIn || b.start) || new Date(0);
+                    return da - dbb;
+                });
+
+            if (bookings.length === 0) {
+                container.innerHTML = `<div class="empty-state">Még nincs foglalás az Ön apartmanjaihoz.</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Apartman</th>
+                                <th>Vendég</th>
+                                <th>Időszak</th>
+                                <th>Forrás</th>
+                                <th>Összeg</th>
+                                <th>Státusz</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${bookings.map(booking => {
+                                const apt = ownerApartments.find(a => String(a.id) === String(booking.aptId));
+                                const source = getBookingSource(booking);
+                                const isExternal = booking.icalId || source !== 'web';
+                                const amount = Number(booking.totalPrice || booking.total || 0);
+
+                                return `
+                                    <tr>
+                                        <td><strong>${escapeHtml(apt?.name || booking.aptName || 'Ismeretlen apartman')}</strong></td>
+                                        <td>${escapeHtml(isExternal ? 'Külső foglalás' : (booking.guestName || 'Vendég'))}</td>
+                                        <td>${escapeHtml(formatDate(booking.checkIn || booking.start))} → ${escapeHtml(formatDate(booking.checkOut || booking.end))}</td>
+                                        <td><span class="badge badge-${escapeHtml(source)}">${escapeHtml(source)}</span></td>
+                                        <td>${isExternal ? '<span class="muted">—</span>' : `<strong>${formatMoney(amount)} Ft</strong>`}</td>
+                                        <td><span class="badge badge-muted">${escapeHtml(booking.status || 'confirmed')}</span></td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderBreakfasts() {
+            const container = document.getElementById('breakfasts-container');
+            const aptNames = new Set(ownerApartments.map(apt => normalizeText(apt.name)));
+            const aptIds = new Set(ownerApartments.map(apt => String(apt.id)));
+
+            const breakfasts = (db.breakfasts || []).filter(order => {
+                return aptIds.has(String(order.aptId || order.apartmentId || order.bookingAptId)) ||
+                    aptNames.has(normalizeText(order.apartment || order.aptName || order.apartmentName));
+            });
+
+            if (breakfasts.length === 0) {
+                container.innerHTML = `<div class="empty-state">Még nincs reggeli rendelés az Ön apartmanjaihoz.</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Apartman</th>
+                                <th>Vendég</th>
+                                <th>Dátum</th>
+                                <th>Tételek</th>
+                                <th>Összeg</th>
+                                <th>Fizetés</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${breakfasts.map(order => `
+                                <tr>
+                                    <td><strong>${escapeHtml(order.apartment || order.aptName || '—')}</strong></td>
+                                    <td>${escapeHtml(order.guestName || 'Vendég')}</td>
+                                    <td>${escapeHtml(formatDate(order.start || order.date || ''))}</td>
+                                    <td>${escapeHtml(order.items || order.details || order.note || '—')}</td>
+                                    <td><strong>${formatMoney(order.amount || order.totalPrice || 0)} Ft</strong></td>
+                                    <td>${paymentBadge(order)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function renderExtras() {
+            const container = document.getElementById('extras-container');
+            const aptNames = new Set(ownerApartments.map(apt => normalizeText(apt.name)));
+            const aptIds = new Set(ownerApartments.map(apt => String(apt.id)));
+
+            const extras = (db.extras || []).filter(order => {
+                return aptIds.has(String(order.aptId || order.apartmentId || order.bookingAptId)) ||
+                    aptNames.has(normalizeText(order.apartment || order.aptName || order.apartmentName));
+            });
+
+            if (extras.length === 0) {
+                container.innerHTML = `<div class="empty-state">Még nincs eszközbérlés az Ön apartmanjaihoz.</div>`;
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Apartman</th>
+                                <th>Vendég</th>
+                                <th>Időszak</th>
+                                <th>Tételek</th>
+                                <th>Összeg</th>
+                                <th>Fizetés</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${extras.map(order => `
+                                <tr>
+                                    <td><strong>${escapeHtml(order.apartment || order.aptName || '—')}</strong></td>
+                                    <td>${escapeHtml(order.guestName || 'Vendég')}</td>
+                                    <td>${escapeHtml(formatDate(order.start || ''))} → ${escapeHtml(formatDate(order.end || ''))}</td>
+                                    <td>${escapeHtml(order.items || order.details || '—')}</td>
+                                    <td><strong>${formatMoney(order.amount || order.totalPrice || 0)} Ft</strong></td>
+                                    <td>${paymentBadge(order)}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+        }
+
+        function paymentBadge(order) {
+            const status = String(order.paymentStatus || order.method || '').toLowerCase();
+
+            if (status === 'paid') {
+                return `<span class="badge badge-paid">Fizetve</span>`;
+            }
+
+            if (status === 'cash') {
+                return `<span class="badge badge-muted">Helyszíni KP</span>`;
+            }
+
+            if (status === 'pending') {
+                return `<span class="badge badge-pending">Fizetésre vár</span>`;
+            }
+
+            return `<span class="badge badge-muted">${escapeHtml(status || '—')}</span>`;
+        }
+
+        function getBookingSource(booking) {
+            const source = String(booking.source || '').toLowerCase();
+
+            if (source.includes('booking')) return 'booking';
+            if (source.includes('szallas') || source.includes('szállás')) return 'szallas';
+            if (booking.icalId && !source) return 'booking';
+
+            return 'web';
+        }
+
+        function isBlockedBooking(booking) {
+            const guest = normalizeText(booking.guestName || '');
+            const type = normalizeText(booking.type || '');
+            const status = normalizeText(booking.status || '');
+
+            return guest === 'zarolt idoszak' ||
+                type === 'blocked' ||
+                type === 'manual-block' ||
+                status === 'blocked';
+        }
+
+        function calculateOccupancyPercent(apt, daysAhead = 90) {
+            const today = dateOnly(new Date());
+            const end = new Date(today);
+            end.setDate(end.getDate() + daysAhead);
+
+            const occupied = new Set();
+
+            (db.bookings || [])
+                .filter(booking => String(booking.aptId) === String(apt.id) && !isBlockedBooking(booking))
+                .forEach(booking => {
+                    const start = parseDateOnly(booking.checkIn || booking.start);
+                    const checkout = parseDateOnly(booking.checkOut || booking.end);
+
+                    if (!start || !checkout) return;
+
+                    const curr = new Date(Math.max(start.getTime(), today.getTime()));
+                    const last = new Date(Math.min(checkout.getTime(), end.getTime()));
+
+                    while (curr < last) {
+                        occupied.add(toDateString(curr));
+                        curr.setDate(curr.getDate() + 1);
+                    }
+                });
+
+            return Math.round((occupied.size / daysAhead) * 100);
+        }
+
+        function parseDateOnly(value) {
+            if (!value) return null;
+
+            const parts = String(value).slice(0, 10).split('-').map(Number);
+
+            if (parts.length !== 3 || parts.some(Number.isNaN)) {
+                return null;
+            }
+
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+
+        function dateOnly(date) {
+            return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        }
+
+        function toDateString(date) {
+            return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        }
+
+        function formatDate(value) {
+            if (!value) return '—';
+
+            const date = parseDateOnly(value);
+
+            if (!date) return String(value);
+
+            return new Intl.DateTimeFormat('hu-HU', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            }).format(date);
+        }
+
+        function formatMoney(value) {
+            return Number(value || 0).toLocaleString('hu-HU');
+        }
+
+        function normalizeText(value) {
+            return String(value || '')
+                .toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim();
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function escapeAttr(value) {
+            return String(value ?? '')
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '&quot;')
+                .replace(/\n/g, '');
+        }
     </script>
 </body>
 </html>
