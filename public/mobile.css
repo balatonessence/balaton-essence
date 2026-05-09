@@ -776,3 +776,16 @@
     margin-top: 20px;
     text-transform: uppercase;
 }
+
+@media (max-width: 900px) {
+    .about-hero::before {
+        background:
+            linear-gradient(
+                90deg,
+                rgba(10, 15, 12, 0.88) 0%,
+                rgba(10, 15, 12, 0.66) 54%,
+                rgba(10, 15, 12, 0.34) 100%
+            ),
+            url('img/rolunk.png') center / cover no-repeat !important;
+    }
+}
