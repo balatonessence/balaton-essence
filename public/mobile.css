@@ -382,14 +382,18 @@
         z-index: 0 !important;
         transform: none !important;
 
-        background:
+        background-image:
             linear-gradient(
                 90deg,
                 rgba(10, 15, 12, 0.88) 0%,
                 rgba(10, 15, 12, 0.66) 54%,
                 rgba(10, 15, 12, 0.34) 100%
             ),
-            url('img/hatter.jpg') 58% center / cover no-repeat !important;
+            var(--mobile-hero-image, url('img/hatter.jpg')) !important;
+
+        background-position: center, 58% center !important;
+        background-size: auto, cover !important;
+        background-repeat: no-repeat, no-repeat !important;
     }
 
     .hero::after {
