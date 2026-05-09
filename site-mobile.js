@@ -1,5 +1,8 @@
+/* site-mobile.js */
+/* Balaton Essence global mobile behaviour */
+
 (function () {
-    function initMobileMenu() {
+    function ensureMobileButtons() {
         document.querySelectorAll('.site-header').forEach(function (header) {
             const nav = header.querySelector('.nav-links');
             const logo = header.querySelector('.logo-container');
@@ -23,42 +26,93 @@
                 }
             }
 
-            button.addEventListener('click', function (event) {
+            button.setAttribute('type', 'button');
+            button.setAttribute('aria-expanded', header.classList.contains('mobile-open') ? 'true' : 'false');
+        });
+    }
+
+    function closeAllMenusExcept(exceptHeader) {
+        document.querySelectorAll('.site-header.mobile-open').forEach(function (header) {
+            if (header === exceptHeader) return;
+
+            header.classList.remove('mobile-open');
+
+            const button = header.querySelector('.mobile-menu-toggle');
+            if (button) {
+                button.setAttribute('aria-expanded', 'false');
+            }
+        });
+    }
+
+    function toggleHeader(header) {
+        if (!header) return;
+
+        const button = header.querySelector('.mobile-menu-toggle');
+        const isOpen = !header.classList.contains('mobile-open');
+
+        closeAllMenusExcept(header);
+
+        header.classList.toggle('mobile-open', isOpen);
+
+        if (button) {
+            button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        }
+    }
+
+    function closeHeader(header) {
+        if (!header) return;
+
+        header.classList.remove('mobile-open');
+
+        const button = header.querySelector('.mobile-menu-toggle');
+        if (button) {
+            button.setAttribute('aria-expanded', 'false');
+        }
+    }
+
+    function initMobileMenu() {
+        ensureMobileButtons();
+
+        document.addEventListener('click', function (event) {
+            const toggle = event.target.closest('.mobile-menu-toggle');
+
+            if (toggle) {
                 event.preventDefault();
                 event.stopPropagation();
 
-                const isOpen = header.classList.toggle('mobile-open');
-                button.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
-            });
+                const header = toggle.closest('.site-header');
+                toggleHeader(header);
+                return;
+            }
 
-            nav.querySelectorAll('a').forEach(function (link) {
-                link.addEventListener('click', function () {
-                    header.classList.remove('mobile-open');
-                    button.setAttribute('aria-expanded', 'false');
-                });
-            });
-        });
+            const navLink = event.target.closest('.site-header .nav-links a');
 
-        document.addEventListener('click', function (event) {
-            document.querySelectorAll('.site-header.mobile-open').forEach(function (header) {
-                if (!header.contains(event.target)) {
-                    header.classList.remove('mobile-open');
+            if (navLink) {
+                const header = navLink.closest('.site-header');
+                closeHeader(header);
+                return;
+            }
 
-                    const button = header.querySelector('.mobile-menu-toggle');
-                    if (button) button.setAttribute('aria-expanded', 'false');
-                }
-            });
-        });
+            const clickedInsideHeader = event.target.closest('.site-header');
+
+            if (!clickedInsideHeader) {
+                closeAllMenusExcept(null);
+            }
+        }, true);
 
         document.addEventListener('keydown', function (event) {
-            if (event.key !== 'Escape') return;
+            if (event.key === 'Escape') {
+                closeAllMenusExcept(null);
+            }
+        });
 
-            document.querySelectorAll('.site-header.mobile-open').forEach(function (header) {
-                header.classList.remove('mobile-open');
+        const observer = new MutationObserver(function () {
+            ensureMobileButtons();
+        });
 
-                const button = header.querySelector('.mobile-menu-toggle');
-                if (button) button.setAttribute('aria-expanded', 'false');
-            });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
         });
     }
 
