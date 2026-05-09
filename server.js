@@ -1415,37 +1415,50 @@ app.post('/api/owner-dashboard', async (req, res) => {
             );
         };
 
+        function belongsToOwnerApartment(item) {
+            const itemAptId = String(item.aptId || item.apartmentId || item.bookingAptId || '');
+            const itemAptName = normalizeText(
+                item.aptName ||
+                item.apartment ||
+                item.apartmentName ||
+                ''
+            );
+
+            return apartmentIds.has(itemAptId) || apartmentNames.has(itemAptName);
+        }
+
         const bookings = (db.bookings || [])
             .filter(booking =>
-                apartmentIds.has(String(booking.aptId)) &&
+                belongsToOwnerApartment(booking) &&
                 !isBlockedBooking(booking)
             )
             .map(booking => {
-                const isExternal = !!booking.icalId || !!booking.source;
+                const sourceRaw = String(booking.source || '').toLowerCase();
+
+                const source = sourceRaw ||
+                    booking.importedFrom ||
+                    (booking.icalId ? 'external' : 'web');
+
+                const isExternal = !!booking.icalId || source !== 'web';
 
                 return {
                     id: booking.id,
-                    aptId: booking.aptId,
-                    aptName: booking.aptName,
-                    guestName: isExternal ? 'Külső foglalás' : booking.guestName,
+                    aptId: booking.aptId || '',
+                    aptName: booking.aptName || booking.apartment || booking.apartmentName || '',
+                    guestName: isExternal ? (booking.guestName || 'Külső foglalás') : booking.guestName,
                     checkIn: booking.checkIn || booking.start || '',
                     checkOut: booking.checkOut || booking.end || '',
-                    source: booking.source || (booking.icalId ? 'external' : 'web'),
+                    source,
                     status: booking.status || 'confirmed',
                     totalPrice: isExternal ? 0 : Number(booking.totalPrice || booking.total || 0),
                     paidDeposit: isExternal ? 0 : Number(booking.paidDeposit || 0),
                     nights: Number(booking.nights || 0),
-                    createdAt: booking.createdAt || ''
+                    createdAt: booking.createdAt || booking.syncedAt || ''
                 };
             });
 
         const breakfasts = (db.breakfasts || [])
-            .filter(order => {
-                const orderAptId = String(order.aptId || order.apartmentId || order.bookingAptId || '');
-                const orderAptName = normalizeText(order.apartment || order.aptName || order.apartmentName || '');
-
-                return apartmentIds.has(orderAptId) || apartmentNames.has(orderAptName);
-            })
+            .filter(order => belongsToOwnerApartment(order))
             .map(order => ({
                 id: order.id,
                 aptId: order.aptId || order.apartmentId || order.bookingAptId || '',
@@ -1460,12 +1473,7 @@ app.post('/api/owner-dashboard', async (req, res) => {
             }));
 
         const extras = (db.extras || [])
-            .filter(order => {
-                const orderAptId = String(order.aptId || order.apartmentId || order.bookingAptId || '');
-                const orderAptName = normalizeText(order.apartment || order.aptName || order.apartmentName || '');
-
-                return apartmentIds.has(orderAptId) || apartmentNames.has(orderAptName);
-            })
+            .filter(order => belongsToOwnerApartment(order))
             .map(order => ({
                 id: order.id,
                 aptId: order.aptId || order.apartmentId || order.bookingAptId || '',

@@ -791,11 +791,7 @@
         }
 
         function getOwnerBookings() {
-            const aptIds = new Set(ownerApartments.map(apt => String(apt.id)));
-
-            return (db.bookings || []).filter(booking =>
-                aptIds.has(String(booking.aptId))
-            );
+            return db.bookings || [];
         }
 
         function getRealOwnerBookings() {
