@@ -1369,6 +1369,165 @@ function calculateBookingTotalOnServer(apt, booking) {
     };
 }
 
+app.post('/api/owner-dashboard', async (req, res) => {
+    try {
+        const code = String(req.body?.code || '').trim();
+
+        if (!code) {
+            return res.status(400).json({
+                error: 'Hiányzó partnerkód.'
+            });
+        }
+
+        const db = await getDbContent();
+
+        const owner = (db.owners || []).find(o =>
+            String(o.code || '').trim() === code
+        );
+
+        if (!owner) {
+            return res.status(401).json({
+                error: 'Hibás partnerkód.'
+            });
+        }
+
+        const ownerId = String(owner.id || owner._id);
+
+        const apartments = (db.apartments || []).filter(apt =>
+            String(apt.ownerId) === ownerId
+        );
+
+        const apartmentIds = new Set(apartments.map(apt => String(apt.id)));
+        const apartmentNames = new Set(
+            apartments.map(apt => normalizeText(apt.name))
+        );
+
+        const isBlockedBooking = booking => {
+            const guest = normalizeText(booking.guestName || '');
+            const type = normalizeText(booking.type || '');
+            const status = normalizeText(booking.status || '');
+
+            return (
+                guest === 'zarolt idoszak' ||
+                type === 'blocked' ||
+                type === 'manual-block' ||
+                status === 'blocked'
+            );
+        };
+
+        const bookings = (db.bookings || [])
+            .filter(booking =>
+                apartmentIds.has(String(booking.aptId)) &&
+                !isBlockedBooking(booking)
+            )
+            .map(booking => {
+                const isExternal = !!booking.icalId || !!booking.source;
+
+                return {
+                    id: booking.id,
+                    aptId: booking.aptId,
+                    aptName: booking.aptName,
+                    guestName: isExternal ? 'Külső foglalás' : booking.guestName,
+                    checkIn: booking.checkIn || booking.start || '',
+                    checkOut: booking.checkOut || booking.end || '',
+                    source: booking.source || (booking.icalId ? 'external' : 'web'),
+                    status: booking.status || 'confirmed',
+                    totalPrice: isExternal ? 0 : Number(booking.totalPrice || booking.total || 0),
+                    paidDeposit: isExternal ? 0 : Number(booking.paidDeposit || 0),
+                    nights: Number(booking.nights || 0),
+                    createdAt: booking.createdAt || ''
+                };
+            });
+
+        const breakfasts = (db.breakfasts || [])
+            .filter(order => {
+                const orderAptId = String(order.aptId || order.apartmentId || order.bookingAptId || '');
+                const orderAptName = normalizeText(order.apartment || order.aptName || order.apartmentName || '');
+
+                return apartmentIds.has(orderAptId) || apartmentNames.has(orderAptName);
+            })
+            .map(order => ({
+                id: order.id,
+                aptId: order.aptId || order.apartmentId || order.bookingAptId || '',
+                apartment: order.apartment || order.aptName || order.apartmentName || '',
+                guestName: order.guestName || '',
+                start: order.start || order.date || '',
+                end: order.end || '',
+                items: order.items || order.details || order.note || '',
+                amount: Number(order.amount || order.totalPrice || 0),
+                paymentStatus: order.paymentStatus || order.method || '',
+                createdAt: order.createdAt || ''
+            }));
+
+        const extras = (db.extras || [])
+            .filter(order => {
+                const orderAptId = String(order.aptId || order.apartmentId || order.bookingAptId || '');
+                const orderAptName = normalizeText(order.apartment || order.aptName || order.apartmentName || '');
+
+                return apartmentIds.has(orderAptId) || apartmentNames.has(orderAptName);
+            })
+            .map(order => ({
+                id: order.id,
+                aptId: order.aptId || order.apartmentId || order.bookingAptId || '',
+                apartment: order.apartment || order.aptName || order.apartmentName || '',
+                guestName: order.guestName || '',
+                start: order.start || '',
+                end: order.end || '',
+                items: order.items || order.details || '',
+                amount: Number(order.amount || order.totalPrice || 0),
+                paymentStatus: order.paymentStatus || order.method || '',
+                createdAt: order.createdAt || ''
+            }));
+
+        const safeApartments = apartments.map(apt => ({
+            id: apt.id,
+            name: apt.name || '',
+            location: apt.location || '',
+            address: apt.address || '',
+            description: apt.description || '',
+            coverImage: apt.coverImage || '',
+            galleryImages: Array.isArray(apt.galleryImages) ? apt.galleryImages.slice(0, 6) : [],
+            seasons: Array.isArray(apt.seasons) ? apt.seasons : [],
+            disabledDates: Array.isArray(apt.disabledDates) ? apt.disabledDates : []
+        }));
+
+        const webBookings = bookings.filter(booking =>
+            String(booking.source || '').toLowerCase() === 'web'
+        );
+
+        const totalWebIncome = webBookings.reduce((sum, booking) => {
+            return sum + Number(booking.totalPrice || 0);
+        }, 0);
+
+        res.json({
+            success: true,
+            owner: {
+                id: owner.id || owner._id,
+                name: owner.name || '',
+                code: owner.code || ''
+            },
+            apartments: safeApartments,
+            bookings,
+            breakfasts,
+            extras,
+            summary: {
+                apartmentCount: safeApartments.length,
+                bookingCount: bookings.length,
+                webBookingCount: webBookings.length,
+                totalWebIncome,
+                breakfastCount: breakfasts.length,
+                extraCount: extras.length
+            }
+        });
+    } catch (err) {
+        console.error('Owner dashboard hiba:', err);
+
+        res.status(500).json({
+            error: 'Nem sikerült betölteni a tulajdonosi adatokat.'
+        });
+    }
+});
+
 // -----------------------------------------------------------------------------
 // API - STRIPE BOOKING CHECKOUT
 // -----------------------------------------------------------------------------
