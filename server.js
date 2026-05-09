@@ -2841,6 +2841,10 @@ app.get('/apartman', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'apartman.html'));
 });
 
+app.get('/partner', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'tulaj.html'));
+});
+
 app.get('/en/apartman', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'en', 'apartman.html'));
 });
