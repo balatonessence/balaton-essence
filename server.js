@@ -2941,8 +2941,7 @@ function startScheduledGuestEmails() {
 
 startScheduledGuestEmails();
 
-function startAutomaticCalendarSync() {
-    const AUTO_SYNC_INTERVAL_MS = 30 * 60 * 1000;
+const AUTO_SYNC_INTERVAL_MS = 30 * 60 * 1000;
 
 let lastCalendarSyncAt = null;
 let nextAutomaticCalendarSyncAt = null;
@@ -2985,7 +2984,6 @@ function startAutomaticCalendarSync() {
 
 startAutomaticCalendarSync();
 
-}
 
 // -----------------------------------------------------------------------------
 // START
