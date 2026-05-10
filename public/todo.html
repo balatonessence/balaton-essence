@@ -642,6 +642,18 @@
     </div>
 </div>
 
+<div class="modal-overlay" id="chatDeleteModal">
+    <div class="modal-box">
+        <div class="modal-icon">💬</div>
+        <h2 class="modal-title">Üzenet törlése</h2>
+        <p class="modal-text">Biztosan törölni szeretnéd ezt az üzenetet? A törlés végleges.</p>
+        <div class="modal-buttons">
+            <button class="btn-confirm" id="confirmChatDeleteBtn">Törlés</button>
+            <button class="btn-cancel" onclick="closeChatDeleteModal()">Mégsem</button>
+        </div>
+    </div>
+</div>
+
 <script>
     const container = document.getElementById('todoContainer');
     const addForm = document.getElementById('addForm');
@@ -696,6 +708,9 @@
     const modal = document.getElementById('customModal');
     const confirmBtn = document.getElementById('confirmDeleteBtn');
     let todoIdToDelete = null;
+    let chatMessageIdToDelete = null;
+    const chatDeleteModal = document.getElementById('chatDeleteModal');
+    const confirmChatDeleteBtn = document.getElementById('confirmChatDeleteBtn');
 
     // Lista betöltése
     async function fetchTodos() {
@@ -805,25 +820,14 @@ function renderMessages(messages) {
     }).join('');
 }
 
-async function deleteChatMessage(id) {
-    if (!confirm('Biztosan törlöd ezt az üzenetet?')) return;
+function deleteChatMessage(id) {
+    chatMessageIdToDelete = id;
+    chatDeleteModal.classList.add('active');
+}
 
-    try {
-        const res = await fetch('/api/delete-todo-message', {
-            method: 'POST',
-            headers: getJsonHeaders(),
-            body: JSON.stringify({ id })
-        });
-
-        if (!res.ok) {
-            throw new Error('Szerver hiba');
-        }
-
-        latestMessageSignature = '';
-        await fetchMessages();
-    } catch (err) {
-        alert('Nem sikerült törölni az üzenetet.');
-    }
+function closeChatDeleteModal() {
+    chatMessageIdToDelete = null;
+    chatDeleteModal.classList.remove('active');
 }
 
 function startChatAutoRefresh() {
@@ -971,6 +975,10 @@ function renderCurrentMessagesAgain() {
         if (e.target === modal) closeModal();
     });
 
+    chatDeleteModal.addEventListener('click', function(e) {
+        if (e.target === chatDeleteModal) closeChatDeleteModal();
+    });
+
     // Törlés végrehajtása a gombnyomásra
     confirmBtn.addEventListener('click', async () => {
         if (!todoIdToDelete) return;
@@ -1003,6 +1011,34 @@ function renderCurrentMessagesAgain() {
     currentProfileName.textContent = currentProfile;
     profileScreen.classList.add('hidden');
 }
+
+confirmChatDeleteBtn.addEventListener('click', async () => {
+    if (!chatMessageIdToDelete) return;
+
+    confirmChatDeleteBtn.disabled = true;
+    confirmChatDeleteBtn.textContent = 'Törlés...';
+
+    try {
+        const res = await fetch('/api/delete-todo-message', {
+            method: 'POST',
+            headers: getJsonHeaders(),
+            body: JSON.stringify({ id: chatMessageIdToDelete })
+        });
+
+        if (!res.ok) {
+            throw new Error('Nincs jogosultság vagy szerverhiba');
+        }
+
+        latestMessageSignature = '';
+        await fetchMessages();
+        closeChatDeleteModal();
+    } catch (err) {
+        alert('Nem sikerült törölni az üzenetet.');
+    } finally {
+        confirmChatDeleteBtn.disabled = false;
+        confirmChatDeleteBtn.textContent = 'Törlés';
+    }
+});
 
     // Kezdeti betöltés
     fetchTodos();
