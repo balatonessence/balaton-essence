@@ -2503,9 +2503,11 @@ async function syncAllCalendars() {
                         if (existingIndex === -1) {
                             db.bookings.push({
                                 id: generateId('ical'),
-                                ...incoming
+                                ...incoming,
+                                firstSeenAt: new Date().toISOString()
                             });
                             hasChange = true;
+
                         } else {
                             const existing = db.bookings[existingIndex];
 
