@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reggeli rendelés | Balaton Essence</title>
+    <title>Moments rendelés | Balaton Essence</title>
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600&family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -330,7 +330,7 @@
             <button class="lang-btn" type="button" data-lang="de">DE</button>
         </div>
 
-        <h1 data-i18n="h1">Reggeli rendelés</h1>
+        <h1 data-i18n="h1">Moments rendelés</h1>
         <div class="subtitle" data-i18n="subtitle">Balaton Essence Luxury Apartments</div>
         <div class="notice" data-i18n="notice">Másnapi kiszállításhoz a rendelést ma 16:00-ig adhatja le.</div>
 
@@ -368,8 +368,15 @@
             </div>
 
             <div class="form-floating">
-                <textarea id="orderDetails" rows="3" placeholder=" " required></textarea>
-                <label for="orderDetails" data-i18n="detailsLabel">Milyen reggelit kértek? Kívánságok</label>
+                <select id="selectedPlate" required>
+                    <option value="" disabled selected></option>
+                </select>
+                <label for="selectedPlate" data-i18n="plateLabel">Választott tál</label>
+            </div>
+
+            <div class="form-floating">
+                <textarea id="orderNote" rows="3" placeholder=" "></textarea>
+                <label for="orderNote" data-i18n="noteLabel">Megjegyzés, esetleges allergia</label>
             </div>
 
             <div class="form-floating">
@@ -393,29 +400,37 @@
     <script>
         const STRIPE_PUBLIC_KEY = 'pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0';
 
-        let PRICE_PER_PLATE_PER_DAY = 4500;
+        let availablePlates = [];
+        let selectedPlatePrice = 0;
 
-        async function loadBreakfastPrice() {
+        async function loadPlateOptions() {
             try {
                 const response = await fetch('/api/services?t=' + Date.now());
 
                 if (!response.ok) {
-                    throw new Error('Nem sikerült betölteni a szolgáltatás árát.');
+                    throw new Error('Nem sikerült betölteni a tálakat.');
                 }
 
                 const data = await response.json();
-                const moments = data.services?.moments || [];
 
-                const breakfastService = moments.find(item =>
-                    item.id === 'breakfast_plate' ||
-                    item.name_hu === 'Reggeli tál'
-                );
+                availablePlates = Array.isArray(data.services?.moments)
+                    ? data.services.moments.filter(item => item.active !== false)
+                    : [];
 
-                if (breakfastService && Number(breakfastService.price) > 0) {
-                    PRICE_PER_PLATE_PER_DAY = Number(breakfastService.price);
-                }
+                const select = document.getElementById('selectedPlate');
+
+                if (!select) return;
+
+                select.innerHTML = `<option value="" disabled selected></option>`;
+
+                availablePlates.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.id;
+                    option.textContent = `${item.name_hu} – ${Number(item.price || 0).toLocaleString('hu-HU')} Ft / tál`;
+                    select.appendChild(option);
+                });
             } catch (err) {
-                console.error('Reggeli ár betöltési hiba:', err);
+                console.error('Tálak betöltési hiba:', err);
             }
         }
 
@@ -432,8 +447,8 @@
 
         const translations = {
             hu: {
-                title: "Reggeli rendelés | Balaton Essence",
-                h1: "Reggeli rendelés",
+                title: "Moments rendelés | Balaton Essence",
+                h1: "Moments rendelés",
                 subtitle: "Balaton Essence Luxury Apartments",
                 notice: "Másnapi kiszállításhoz a rendelést ma 16:00-ig adhatja le.",
                 nameLabel: "Név",
@@ -442,7 +457,8 @@
                 aptLabel: "Apartman",
                 guestsLabel: "Tálak száma",
                 dateLabel: "Napok kiválasztása",
-                detailsLabel: "Milyen reggelit kértek? Kívánságok",
+                plateLabel: "Választott tál",
+                noteLabel: "Megjegyzés, esetleges allergia",
                 paymentLabel: "Fizetési mód",
                 payCash: "Helyszíni készpénz",
                 payCard: "Online bankkártya",
@@ -458,8 +474,8 @@
                 networkError: "Hálózati hiba. Kérjük, próbálja újra."
             },
             en: {
-                title: "Breakfast order | Balaton Essence",
-                h1: "Breakfast order",
+                title: "Moments order | Balaton Essence",
+                h1: "Moments order",
                 subtitle: "Balaton Essence Luxury Apartments",
                 notice: "For next-day delivery, please order by 16:00 today.",
                 nameLabel: "Name",
@@ -468,7 +484,8 @@
                 aptLabel: "Apartment",
                 guestsLabel: "Number of plates",
                 dateLabel: "Select days",
-                detailsLabel: "Breakfast preferences / requests",
+                plateLabel: "Selected platter",
+                noteLabel: "Note or possible allergy",
                 paymentLabel: "Payment method",
                 payCash: "Cash on site",
                 payCard: "Online card payment",
@@ -484,8 +501,8 @@
                 networkError: "Network error. Please try again."
             },
             de: {
-                title: "Frühstücksbestellung | Balaton Essence",
-                h1: "Frühstücksbestellung",
+                title: "Reihenfolge der Momente | Balaton Essence",
+                h1: "Reihenfolge der Momente",
                 subtitle: "Balaton Essence Luxury Apartments",
                 notice: "Für eine Lieferung am nächsten Tag bestellen Sie bitte bis 16:00 Uhr.",
                 nameLabel: "Name",
@@ -494,7 +511,8 @@
                 aptLabel: "Apartment",
                 guestsLabel: "Anzahl der Platten",
                 dateLabel: "Tage auswählen",
-                detailsLabel: "Frühstückswünsche / Bemerkungen",
+                plateLabel: "Ausgewählte Platte",
+                noteLabel: "Bemerkung oder mögliche Allergie",
                 paymentLabel: "Zahlungsart",
                 payCash: "Barzahlung vor Ort",
                 payCard: "Online-Kartenzahlung",
@@ -608,10 +626,10 @@
 
                     if (msg) {
                         msg.textContent = currentLang === 'hu'
-                            ? 'Reggeli rendelés jelenleg csak fonyódi apartmanokhoz kérhető.'
+                            ? 'Moments rendelés jelenleg csak fonyódi apartmanokhoz kérhető.'
                             : currentLang === 'de'
-                                ? 'Frühstücksbestellungen sind derzeit nur für Apartments in Fonyód verfügbar.'
-                                : 'Breakfast orders are currently available only for apartments in Fonyód.';
+                                ? 'Reihenfolge der Momente sind derzeit nur für Apartments in Fonyód verfügbar.'
+                                : 'Moments orders are currently available only for apartments in Fonyód.';
 
                         msg.style.color = '#dc3545';
                     }
@@ -636,9 +654,9 @@
         });
 
         document.addEventListener('DOMContentLoaded', async () => {
-        await loadBreakfastPrice();
+            await loadPlateOptions();
 
-        fpInstance = flatpickr("#date", {
+            fpInstance = flatpickr("#date", {
                 mode: "multiple",
                 minDate: getMinDate(),
                 dateFormat: "Y-m-d",
@@ -670,14 +688,22 @@
                 return;
             }
 
+            const selectedPlateId = document.getElementById('selectedPlate').value;
+            const selectedPlate = availablePlates.find(item => String(item.id) === String(selectedPlateId));
+
+            if (!selectedPlate) {
+                showMessage(translations[currentLang].genericError);
+                return;
+            }
+
             const paymentMethod = document.getElementById('paymentMethod').value;
             const daysCount = selectedDates.length;
-            const totalAmount = daysCount * plateCount * PRICE_PER_PLATE_PER_DAY;
+            const totalAmount = daysCount * plateCount * Number(selectedPlate.price || 0);
 
             const formatDate = date => fpInstance.formatDate(date, 'Y-m-d');
             const dateList = selectedDates.map(formatDate).join(', ');
 
-            const orderDetails = escapeOrderText(document.getElementById('orderDetails').value);
+            const orderNote = escapeOrderText(document.getElementById('orderNote').value);
             const phone = escapeOrderText(document.getElementById('phone').value);
 
             const payload = {
@@ -690,7 +716,7 @@
                 start: formatDate(selectedDates[0]),
                 end: formatDate(selectedDates[selectedDates.length - 1]),
                 days: daysCount,
-                items: `${orderDetails} | Napok: ${dateList} | Tálak: ${plateCount}`,
+                items: `${selectedPlate.name_hu} | Napok: ${dateList} | Darab: ${plateCount}${orderNote ? ` | Megjegyzés: ${orderNote}` : ''}`,
                 method: paymentMethod,
                 amount: totalAmount
             };
