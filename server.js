@@ -2522,8 +2522,29 @@ async function syncAllCalendars() {
                                 db.bookings[existingIndex] = {
                                     ...existing,
                                     ...incoming,
-                                    id: existing.id
+                                    id: existing.id,
+
+                                    // Ha adminból kézzel megadtuk a vendégadatokat,
+                                    // az iCal szinkron ezeket ne írja felül.
+                                    guestName: existing.manualGuestData === true
+                                        ? existing.guestName
+                                        : incoming.guestName,
+
+                                    email: existing.manualGuestData === true
+                                        ? existing.email
+                                        : existing.email,
+
+                                    phone: existing.manualGuestData === true
+                                        ? existing.phone
+                                        : existing.phone,
+
+                                    lang: existing.manualGuestData === true
+                                        ? existing.lang
+                                        : existing.lang,
+
+                                    manualGuestData: existing.manualGuestData === true
                                 };
+
                                 hasChange = true;
                             } else {
                                 db.bookings[existingIndex].syncedAt = new Date().toISOString();
