@@ -218,6 +218,12 @@ function buildPreArrivalEmailHtml(db, booking) {
     const aptAddress = getBookingApartmentAddress(db, booking);
     const baseUrl = getPublicBaseUrl();
 
+    const apartment = (db.apartments || []).find(a =>
+        String(a.id) === String(booking.aptId)
+    );
+
+    const breakfastAvailable = isFonyodApartment(apartment);
+
     const morningUrl = `${baseUrl}/morningorder.html?id=${encodeURIComponent(booking.id)}&lang=${lang}`;
 
     const sunPath = lang === 'en'
@@ -289,6 +295,7 @@ function buildPreArrivalEmailHtml(db, booking) {
                 <p><strong>${escapeHtml(t.dates)}:</strong> ${escapeHtml(booking.checkIn || booking.start || '')} – ${escapeHtml(booking.checkOut || booking.end || '')}</p>
             </div>
 
+            ${breakfastAvailable ? `
             <div style="background:#ffffff; border:1px solid #e2e8df; border-radius:10px; padding:20px; margin-bottom:18px;">
                 <h3 style="margin-top:0; color:#5c7a4d;">${escapeHtml(t.breakfast)}</h3>
                 <p>${escapeHtml(t.breakfastText)}</p>
@@ -296,6 +303,7 @@ function buildPreArrivalEmailHtml(db, booking) {
                     ${escapeHtml(t.breakfastBtn)}
                 </a>
             </div>
+        ` : ''}
 
             <div style="background:#ffffff; border:1px solid #e2e8df; border-radius:10px; padding:20px; margin-bottom:25px;">
                 <h3 style="margin-top:0; color:#5c7a4d;">${escapeHtml(t.sun)}</h3>
@@ -920,6 +928,14 @@ async function sendGuestBookingEmail(req, newB) {
     const t = bookingEmailTranslations[guestLang] || bookingEmailTranslations.hu;
     const balance = Number(newB.totalPrice || 0) - Number(newB.paidDeposit || 0);
 
+    const db = await getDbContent();
+
+    const apartment = (db.apartments || []).find(a =>
+        String(a.id) === String(newB.aptId)
+    );
+
+    const breakfastAvailable = isFonyodApartment(apartment);
+
     const cancelUrl = `https://${req.get('host')}/cancel.html?id=${encodeURIComponent(newB.id)}&token=${encodeURIComponent(newB.cancelToken || '')}&lang=${guestLang}`;
     const breakfastUrl = `https://${req.get('host')}/morningorder.html?id=${encodeURIComponent(newB.id)}&lang=${guestLang}`;
 
@@ -1000,6 +1016,7 @@ async function sendGuestBookingEmail(req, newB) {
                                 ${escapeHtml(extraT.title)}
                             </h3>
 
+                            ${breakfastAvailable ? `
                             <div style="padding: 15px 0; border-bottom: 1px solid #e2e8df;">
                                 <p style="margin: 0 0 6px 0; font-weight: bold; color: #2C3325;">
                                     ${escapeHtml(extraT.breakfastTitle)}
@@ -1011,6 +1028,7 @@ async function sendGuestBookingEmail(req, newB) {
                                     ${escapeHtml(extraT.breakfastBtn)}
                                 </a>
                             </div>
+                        ` : ''}
 
                             <div style="padding: 15px 0 0 0;">
                                 <p style="margin: 0 0 6px 0; font-weight: bold; color: #2C3325;">
@@ -1925,6 +1943,12 @@ app.get('/api/verify-booking/:id', async (req, res) => {
             });
         }
 
+        const apartment = (db.apartments || []).find(a =>
+            String(a.id) === String(booking.aptId)
+        );
+
+        const breakfastAvailable = isFonyodApartment(apartment);
+
         res.json({
             valid: true,
             id: booking.id,
@@ -1935,7 +1959,8 @@ app.get('/api/verify-booking/:id', async (req, res) => {
             aptName: booking.aptName || '',
             checkIn: booking.checkIn || '',
             checkOut: booking.checkOut || '',
-            lang: normalizeLang(booking.lang || 'hu')
+            lang: normalizeLang(booking.lang || 'hu'),
+            breakfastAvailable
         });
     } catch (e) {
         console.error('Foglalás ellenőrzési hiba:', e);

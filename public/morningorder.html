@@ -618,6 +618,20 @@
                     updateLang(booking.lang);
                 }
 
+                if (booking.breakfastAvailable !== true) {
+                    submitBtn.disabled = true;
+
+                    showMessage(
+                        currentLang === 'hu'
+                            ? 'Reggeli rendelés jelenleg csak fonyódi apartmanokhoz kérhető.'
+                            : currentLang === 'de'
+                                ? 'Frühstücksbestellungen sind derzeit nur für Apartments in Fonyód verfügbar.'
+                                : 'Breakfast orders are currently available only for apartments in Fonyód.'
+                    );
+
+                    return;
+                }
+
                 clearMessage();
             } catch (err) {
                 console.error('Booking verification error:', err);
