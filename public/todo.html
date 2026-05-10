@@ -271,6 +271,176 @@
             background: rgba(200, 164, 107, 1);
         }
 
+                .chat-section {
+            margin-top: 34px;
+            padding-top: 30px;
+            border-top: 2px solid var(--bg);
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .chat-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .sender-select {
+            width: auto;
+            min-width: 170px;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: #faf9f6;
+            font-family: inherit;
+            color: var(--text);
+            outline: none;
+        }
+
+        .chat-box {
+            height: 380px;
+            overflow-y: auto;
+            padding: 18px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .chat-empty {
+            color: #aaa;
+            text-align: center;
+            font-style: italic;
+            margin: auto;
+        }
+
+        .chat-message-row {
+            display: flex;
+            flex-direction: column;
+            max-width: 82%;
+        }
+
+        .chat-message-row.mine {
+            align-self: flex-end;
+            align-items: flex-end;
+        }
+
+        .chat-message-row.other {
+            align-self: flex-start;
+            align-items: flex-start;
+        }
+
+        .chat-sender {
+            font-size: 11px;
+            font-weight: 700;
+            color: #8a8f84;
+            margin: 0 8px 5px;
+        }
+
+        .chat-bubble {
+            padding: 12px 15px;
+            border-radius: 18px;
+            line-height: 1.5;
+            font-size: 14px;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .chat-message-row.mine .chat-bubble {
+            background: var(--primary);
+            color: white;
+            border-bottom-right-radius: 5px;
+        }
+
+        .chat-message-row.other .chat-bubble {
+            background: white;
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px 8px 0;
+            font-size: 11px;
+            color: #8a8f84;
+        }
+
+        .chat-delete {
+            background: transparent;
+            border: none;
+            color: #a4a89f;
+            cursor: pointer;
+            font-size: 11px;
+            padding: 0;
+        }
+
+        .chat-delete:hover {
+            color: #b0413e;
+        }
+
+        .chat-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .chat-input {
+            flex: 1;
+        }
+
+        .chat-send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 22px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .chat-send-btn:hover {
+            background: #4a633e;
+            transform: translateY(-2px);
+        }
+
+        .chat-send-btn:disabled {
+            background: #b2b9bf;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 620px) {
+            .chat-header {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .sender-select {
+                width: 100%;
+            }
+
+            .chat-message-row {
+                max-width: 92%;
+            }
+
+            .chat-form {
+                flex-direction: column;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -287,6 +457,33 @@
     <div id="todoContainer">
         <div class="loading">Betöltés...</div>
     </div>
+
+    <section class="chat-section">
+    <div class="chat-header">
+        <h2 class="chat-title">Közös chat</h2>
+
+        <select id="chatSender" class="sender-select">
+            <option value="Kristóf">Kristóf</option>
+            <option value="Balaton Essence">Balaton Essence</option>
+        </select>
+    </div>
+
+    <div id="chatBox" class="chat-box">
+        <div class="loading">Üzenetek betöltése...</div>
+    </div>
+
+    <form id="chatForm" class="chat-form">
+        <input
+            type="text"
+            id="chatText"
+            class="chat-input"
+            placeholder="Írj üzenetet..."
+            autocomplete="off"
+            required
+        >
+        <button type="submit" class="chat-send-btn">Küldés</button>
+    </form>
+</section>
 </div>
 
 <div class="modal-overlay" id="customModal">
@@ -304,6 +501,13 @@
 <script>
     const container = document.getElementById('todoContainer');
     const addForm = document.getElementById('addForm');
+    const chatBox = document.getElementById('chatBox');
+    const chatForm = document.getElementById('chatForm');
+    const chatText = document.getElementById('chatText');
+    const chatSender = document.getElementById('chatSender');
+
+    let latestMessageSignature = '';
+    let chatRefreshTimer = null;
     
     function getAdminToken() {
     let token = sessionStorage.getItem('ADMIN_TOKEN');
@@ -342,6 +546,129 @@
             container.innerHTML = '<div style="color:#cc0000; text-align:center;">Hiba a betöltéskor. Nézd meg a konzolt!</div>';
         }
     }
+
+    function formatMessageTime(value) {
+    if (!value) return '';
+
+    return new Date(value).toLocaleString('hu-HU', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+function escapeHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+async function fetchMessages(keepScroll = false) {
+    try {
+        const wasNearBottom =
+            chatBox.scrollHeight - chatBox.scrollTop - chatBox.clientHeight < 80;
+
+        const res = await fetch('/api/todo-messages', {
+            headers: {
+                'x-admin-token': getAdminToken()
+            }
+        });
+
+        if (!res.ok) {
+            throw new Error('Szerver hiba');
+        }
+
+        const messages = await res.json();
+
+        const signature = JSON.stringify(
+            messages.map(message => ({
+                id: message.id,
+                sender: message.sender,
+                text: message.text,
+                createdAt: message.createdAt
+            }))
+        );
+
+        if (signature === latestMessageSignature) {
+            return;
+        }
+
+        latestMessageSignature = signature;
+        renderMessages(messages);
+
+        if (!keepScroll || wasNearBottom) {
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+    } catch (err) {
+        chatBox.innerHTML = '<div style="color:#cc0000; text-align:center;">Hiba az üzenetek betöltésekor.</div>';
+    }
+}
+
+function renderMessages(messages) {
+    if (!messages.length) {
+        chatBox.innerHTML = '<div class="chat-empty">Még nincs üzenet.</div>';
+        return;
+    }
+
+    const currentSender = chatSender.value;
+
+    chatBox.innerHTML = messages.map(message => {
+        const mine = message.sender === currentSender;
+
+        return `
+            <div class="chat-message-row ${mine ? 'mine' : 'other'}">
+                <div class="chat-sender">${escapeHtml(message.sender)}</div>
+                <div class="chat-bubble">${escapeHtml(message.text)}</div>
+                <div class="chat-meta">
+                    <span>${escapeHtml(formatMessageTime(message.createdAt))}</span>
+                    <button
+                        type="button"
+                        class="chat-delete"
+                        onclick="deleteChatMessage('${escapeHtml(message.id)}')"
+                    >
+                        törlés
+                    </button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+async function deleteChatMessage(id) {
+    if (!confirm('Biztosan törlöd ezt az üzenetet?')) return;
+
+    try {
+        const res = await fetch('/api/delete-todo-message', {
+            method: 'POST',
+            headers: getJsonHeaders(),
+            body: JSON.stringify({ id })
+        });
+
+        if (!res.ok) {
+            throw new Error('Szerver hiba');
+        }
+
+        latestMessageSignature = '';
+        await fetchMessages();
+    } catch (err) {
+        alert('Nem sikerült törölni az üzenetet.');
+    }
+}
+
+function startChatAutoRefresh() {
+    if (chatRefreshTimer) {
+        clearInterval(chatRefreshTimer);
+    }
+
+    chatRefreshTimer = setInterval(() => {
+        fetchMessages(true);
+    }, 5000);
+}
 
     // Lista kirajzolása
     function renderTodos(todos) {
@@ -393,6 +720,48 @@
         }
     });
 
+    chatForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const sender = chatSender.value;
+    const text = chatText.value.trim();
+    const btn = chatForm.querySelector('.chat-send-btn');
+
+    if (!text) return;
+
+    btn.disabled = true;
+
+    try {
+        const res = await fetch('/api/add-todo-message', {
+            method: 'POST',
+            headers: getJsonHeaders(),
+            body: JSON.stringify({ sender, text })
+        });
+
+        if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            throw new Error(err.error || 'Szerver hiba');
+        }
+
+        chatText.value = '';
+        latestMessageSignature = '';
+        await fetchMessages();
+    } catch (err) {
+        alert('Nem sikerült elküldeni az üzenetet.');
+    } finally {
+        btn.disabled = false;
+    }
+});
+
+chatSender.addEventListener('change', () => {
+    renderCurrentMessagesAgain();
+});
+
+function renderCurrentMessagesAgain() {
+    latestMessageSignature = '';
+    fetchMessages(true);
+}
+
     // --- POPUP LOGIKA ---
 
     // Popup megnyitása
@@ -442,6 +811,8 @@
 
     // Kezdeti betöltés
     fetchTodos();
+    fetchMessages();
+    startChatAutoRefresh();
 </script>
 
 </body>

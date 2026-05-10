@@ -588,6 +588,7 @@ function ensureDbShape(db) {
     if (!Array.isArray(db.breakfasts)) db.breakfasts = [];
     if (!Array.isArray(db.reviews)) db.reviews = [];
     if (!Array.isArray(db.todos)) db.todos = [];
+    if (!Array.isArray(db.todoMessages)) db.todoMessages = [];
     if (!Array.isArray(db.pendingBookings)) db.pendingBookings = [];
     if (!Array.isArray(db.aboutHeritageImages)) db.aboutHeritageImages = [];
 
@@ -2806,6 +2807,76 @@ app.post('/api/delete-todo', requireAdmin, async (req, res) => {
         res.json({ success: true });
     } catch (e) {
         console.error('Hiba a feladat törlésekor:', e);
+        res.status(500).json({ error: 'Szerver hiba' });
+    }
+});
+
+app.get('/api/todo-messages', requireAdmin, async (req, res) => {
+    try {
+        const db = await getDbContent();
+
+        const messages = (db.todoMessages || [])
+            .sort((a, b) => new Date(a.createdAt || 0) - new Date(b.createdAt || 0));
+
+        res.json(messages);
+    } catch (e) {
+        console.error('Todo chat lekérési hiba:', e);
+        res.status(500).json({ error: 'Szerver hiba' });
+    }
+});
+
+app.post('/api/add-todo-message', requireAdmin, async (req, res) => {
+    try {
+        const sender = String(req.body?.sender || '').trim();
+        const text = String(req.body?.text || '').trim();
+
+        if (!['Kristóf', 'Balaton Essence'].includes(sender)) {
+            return res.status(400).json({ error: 'Hibás feladó.' });
+        }
+
+        if (!text) {
+            return res.status(400).json({ error: 'Üres üzenet nem küldhető.' });
+        }
+
+        const message = {
+            id: generateId('msg'),
+            sender,
+            text,
+            createdAt: new Date().toISOString()
+        };
+
+        await updateDbContent(async db => {
+            if (!Array.isArray(db.todoMessages)) db.todoMessages = [];
+            db.todoMessages.push(message);
+            return db;
+        });
+
+        res.json(message);
+    } catch (e) {
+        console.error('Todo chat mentési hiba:', e);
+        res.status(500).json({ error: 'Szerver hiba' });
+    }
+});
+
+app.post('/api/delete-todo-message', requireAdmin, async (req, res) => {
+    try {
+        const id = String(req.body?.id || '').trim();
+
+        if (!id) {
+            return res.status(400).json({ error: 'Hiányzó üzenetazonosító.' });
+        }
+
+        await updateDbContent(async db => {
+            db.todoMessages = (db.todoMessages || []).filter(
+                message => String(message.id) !== id
+            );
+
+            return db;
+        });
+
+        res.json({ success: true });
+    } catch (e) {
+        console.error('Todo chat törlési hiba:', e);
         res.status(500).json({ error: 'Szerver hiba' });
     }
 });
