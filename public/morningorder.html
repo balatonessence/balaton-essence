@@ -154,11 +154,15 @@
             box-shadow: 0 0 0 4px rgba(92, 122, 77, 0.1);
         }
 
-        .form-floating input[readonly],
+        .form-floating input[readonly]:not(#date),
         .form-floating select:disabled {
             background-color: rgba(227, 224, 216, 0.45);
             color: var(--text-light);
             cursor: not-allowed;
+        }
+
+        #date[readonly] {
+            cursor: pointer;
         }
 
         .form-floating label {
@@ -441,6 +445,18 @@
                 .replace(/[\u0300-\u036f]/g, '');
         }
 
+        function parseLocalDate(dateStr) {
+            if (!dateStr) return null;
+
+            const parts = String(dateStr).split('-').map(Number);
+
+            if (parts.length !== 3 || parts.some(Number.isNaN)) {
+                return null;
+            }
+
+            return new Date(parts[0], parts[1] - 1, parts[2]);
+        }
+
         function isFonyodApartmentName(value) {
             return normalizeText(value).includes('fonyod');
         }
@@ -531,6 +547,7 @@
 
         let currentLang = 'hu';
         let fpInstance = null;
+        let currentBooking = null;
 
         const urlParams = new URLSearchParams(window.location.search);
         const bookingId = urlParams.get('id');
@@ -606,6 +623,8 @@
                     return;
                 }
 
+                currentBooking = booking;
+
                 document.getElementById('name').value = booking.guestName || '';
                 document.getElementById('email').value = booking.email || '';
 
@@ -652,17 +671,35 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             await loadPlateOptions();
+            await loadBookingData();
 
             fpInstance = flatpickr("#date", {
-                mode: "multiple",
-                minDate: getMinDate(),
-                dateFormat: "Y-m-d",
-                locale: currentLang === 'en' ? 'default' : currentLang,
-                conjunction: ", "
-            });
+            mode: "multiple",
+            minDate: getMinDate(),
+            dateFormat: "Y-m-d",
+            locale: currentLang === 'en' ? 'default' : currentLang,
+            conjunction: ", ",
+            enable: [
+                function(date) {
+                    if (!currentBooking?.checkIn || !currentBooking?.checkOut) {
+                        return false;
+                    }
+
+                    const selectedDay = new Date(
+                        date.getFullYear(),
+                        date.getMonth(),
+                        date.getDate()
+                    );
+
+                    const checkIn = parseLocalDate(currentBooking.checkIn);
+                    const checkOut = parseLocalDate(currentBooking.checkOut);
+
+                    return selectedDay >= checkIn && selectedDay < checkOut;
+                }
+            ]
+        });
 
             updateLang(currentLang);
-            loadBookingData();
         });
 
         form.addEventListener('submit', async event => {
