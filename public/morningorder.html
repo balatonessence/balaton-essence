@@ -618,23 +618,6 @@
                     updateLang(booking.lang);
                 }
 
-                if (!isFonyodApartmentName(booking.aptName || booking.apartment || '')) {
-                    const btn = document.getElementById('submitBtn');
-                    const msg = document.getElementById('message');
-
-                    if (btn) btn.disabled = true;
-
-                    if (msg) {
-                        msg.textContent = currentLang === 'hu'
-                            ? 'Moments rendelés jelenleg csak fonyódi apartmanokhoz kérhető.'
-                            : currentLang === 'de'
-                                ? 'Reihenfolge der Momente sind derzeit nur für Apartments in Fonyód verfügbar.'
-                                : 'Moments orders are currently available only for apartments in Fonyód.';
-
-                        msg.style.color = '#dc3545';
-                    }
-                }
-
                 clearMessage();
             } catch (err) {
                 console.error('Booking verification error:', err);
