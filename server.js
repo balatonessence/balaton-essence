@@ -581,8 +581,17 @@ function ensureDbShape(db) {
     if (!Array.isArray(db.reviews)) db.reviews = [];
     if (!Array.isArray(db.todos)) db.todos = [];
     if (!Array.isArray(db.pendingBookings)) db.pendingBookings = [];
+    if (!Array.isArray(db.aboutHeritageImages)) db.aboutHeritageImages = [];
 
     if (!db.services || typeof db.services !== 'object') db.services = {};
+
+    if (!db.siteContent || typeof db.siteContent !== 'object') {
+        db.siteContent = {};
+    }
+
+    if (!Array.isArray(db.siteContent.aboutGalleryImages)) {
+        db.siteContent.aboutGalleryImages = [];
+    }
 
     if (!Array.isArray(db.services.sun)) {
         db.services.sun = [

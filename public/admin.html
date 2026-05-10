@@ -1209,6 +1209,31 @@
         margin: 0 4px;
     }
 
+    .section-about .section-icon {
+        background: rgba(200,164,107,0.17);
+        color: #9A753B;
+    }
+
+    .about-gallery-admin {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 14px;
+    }
+
+    .about-gallery-admin .image-preview-item img {
+        width: 150px;
+        height: 110px;
+        object-fit: cover;
+    }
+
+    .about-gallery-note {
+        margin-top: 0.8rem;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        line-height: 1.6;
+    }
+
     @media (max-width: 1180px) {
         .stats-grid {
             grid-template-columns: repeat(3, 1fr);
@@ -1507,6 +1532,38 @@
                             </div>
                             <div id="services-moments-container" class="service-grid"></div>
                         </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section section-about">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">🖼️</div>
+                        <div>
+                            <h2>Rólunk oldal képei</h2>
+                            <div class="section-subtitle">A Bor Mámor Ederics képgaléria 4 szerkeszthető képe.</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-accent" onclick="saveAboutHeritageImages()">Képek mentése</button>
+                </div>
+
+                <div class="section-body">
+                    <div class="form-group">
+                        <label>Képek feltöltése</label>
+                        <input
+                            type="file"
+                            id="about-heritage-images"
+                            multiple
+                            accept="image/*"
+                            onchange="handleAboutHeritageUpload(event)"
+                        >
+
+                        <div class="about-gallery-note">
+                            Legfeljebb 4 kép használható. A sorrend húzással módosítható, ez lesz a megjelenési sorrend a magyar, angol és német Rólunk oldalon is.
+                        </div>
+
+                        <div id="about-heritage-preview" class="about-gallery-admin"></div>
                     </div>
                 </div>
             </section>
@@ -1819,6 +1876,8 @@
     let activeOId = null;
     let currentCoverImage = null;
     let currentGalleryImages = [];
+    let currentAboutHeritageImages = [];
+    let aboutHeritageSortable = null;
     let adminCalDate = new Date();
     let currentEditingAptId = null;
     let gallerySortable = null;
@@ -1987,6 +2046,76 @@
 
         renderImagePreviews();
         event.target.value = '';
+    }
+
+    async function handleAboutHeritageUpload(event) {
+        const files = Array.from(event.target.files || []);
+
+        for (const file of files) {
+            if (currentAboutHeritageImages.length >= 4) {
+                alert('Legfeljebb 4 kép tölthető fel ide.');
+                break;
+            }
+
+            const base64 = await compressImage(file);
+            currentAboutHeritageImages.push(base64);
+        }
+
+        renderAboutHeritagePreviews();
+        event.target.value = '';
+    }
+
+    function removeAboutHeritageImage(index) {
+        currentAboutHeritageImages.splice(index, 1);
+        renderAboutHeritagePreviews();
+    }
+
+    function renderAboutHeritagePreviews() {
+        const container = document.getElementById('about-heritage-preview');
+
+        if (!container) return;
+
+        container.innerHTML = currentAboutHeritageImages.map((img, idx) => `
+            <div class="image-preview-item gallery-sort-item about-heritage-sort-item" data-index="${idx}">
+                <span class="gallery-drag-handle">↕</span>
+                <img src="${img}">
+                <div onclick="removeAboutHeritageImage(${idx})" class="remove-image-btn">X</div>
+            </div>
+        `).join('');
+
+        initAboutHeritageSorting();
+    }
+
+    function initAboutHeritageSorting() {
+        const container = document.getElementById('about-heritage-preview');
+
+        if (!container || typeof Sortable === 'undefined') return;
+
+        if (aboutHeritageSortable) {
+            aboutHeritageSortable.destroy();
+            aboutHeritageSortable = null;
+        }
+
+        aboutHeritageSortable = new Sortable(container, {
+            animation: 160,
+            handle: '.gallery-drag-handle',
+            ghostClass: 'sortable-ghost',
+            onEnd: function () {
+                const newOrder = Array.from(container.querySelectorAll('.about-heritage-sort-item'))
+                    .map(item => Number(item.dataset.index))
+                    .filter(index => !Number.isNaN(index))
+                    .map(index => currentAboutHeritageImages[index])
+                    .filter(Boolean);
+
+                currentAboutHeritageImages = newOrder;
+                renderAboutHeritagePreviews();
+            }
+        });
+    }
+
+    async function saveAboutHeritageImages() {
+        db.aboutHeritageImages = currentAboutHeritageImages.slice(0, 4);
+        await saveDb();
     }
 
     function removeCoverImage() {
@@ -2617,12 +2746,15 @@ function initSyncCountdown() {
         if (!Array.isArray(db.extras)) db.extras = [];
         if (!Array.isArray(db.breakfasts)) db.breakfasts = [];
         if (!Array.isArray(db.reviews)) db.reviews = [];
+        if (!Array.isArray(db.aboutHeritageImages)) db.aboutHeritageImages = [];
 
         if (!db.services || typeof db.services !== 'object') db.services = {};
         if (!Array.isArray(db.services.sun)) db.services.sun = [];
         if (!Array.isArray(db.services.moments)) db.services.moments = [];
 
         ensureDefaultSunServices();
+        currentAboutHeritageImages = [...db.aboutHeritageImages];
+        renderAboutHeritagePreviews();
 
         renderStats();
         renderBookings();

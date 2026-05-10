@@ -389,14 +389,38 @@
             align-items: center;
         }
 
-        .heritage-image {
+        .heritage-gallery {
             min-height: 520px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .heritage-gallery-item {
+            min-height: 252px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 50px rgba(44, 51, 37, 0.12);
+            background-color: #ddd;
+            background-position: center;
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .heritage-gallery.is-single {
+            grid-template-columns: 1fr;
+        }
+
+        .heritage-gallery.is-single .heritage-gallery-item {
+            min-height: 520px;
+        }
+
+        .heritage-gallery-placeholder {
+            min-height: 520px;
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 80px rgba(44, 51, 37, 0.12);
             background:
                 linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
                 url('../img/bor-mamor-ederics.jpg') center/cover no-repeat;
-            border: 1px solid var(--border);
-            box-shadow: 0 30px 80px rgba(44, 51, 37, 0.12);
-            background-color: #ddd;
         }
 
         .heritage-content {
@@ -699,7 +723,17 @@
                 padding: 5rem 5vw;
             }
 
-            .heritage-image {
+            .heritage-gallery {
+                min-height: 0;
+                gap: 0.8rem;
+            }
+
+            .heritage-gallery-item {
+                min-height: 165px;
+            }
+
+            .heritage-gallery.is-single .heritage-gallery-item,
+            .heritage-gallery-placeholder {
                 min-height: 320px;
             }
 
@@ -813,7 +847,7 @@
 
 <section class="heritage-section">
     <div class="heritage-grid">
-        <div class="heritage-image" aria-label="Bor Mámor Ederics Gästehaus"></div>
+        <div id="heritage-gallery" class="heritage-gallery" aria-label="Galerie des Bor Mámor Ederics Gästehauses"></div>
 
         <div class="heritage-content">
             <div class="section-kicker">Der Ort der Anfänge</div>
@@ -956,6 +990,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         initHeaderScroll();
+        loadHeritageGallery();
     });
 
     function initHeaderScroll() {
@@ -973,6 +1008,39 @@
 
         update();
         window.addEventListener('scroll', update);
+    }
+
+    async function loadHeritageGallery() {
+        const gallery = document.getElementById('heritage-gallery');
+
+        if (!gallery) return;
+
+        try {
+            const res = await fetch('/api/get-db-content?t=' + Date.now());
+            const db = await res.json();
+
+            const images = Array.isArray(db.aboutHeritageImages)
+                ? db.aboutHeritageImages.filter(Boolean)
+                : [];
+
+            if (images.length === 0) {
+                gallery.className = 'heritage-gallery-placeholder';
+                return;
+            }
+
+            gallery.className = `heritage-gallery ${images.length === 1 ? 'is-single' : ''}`;
+            gallery.innerHTML = images.slice(0, 4).map(img => `
+                <div
+                    class="heritage-gallery-item"
+                    style="background-image:
+                        linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
+                        url('${img}')"
+                ></div>
+            `).join('');
+        } catch (err) {
+            console.error('Heritage gallery load error:', err);
+            gallery.className = 'heritage-gallery-placeholder';
+        }
     }
 </script>
 <link rel="stylesheet" href="../mobile.css?v=107">

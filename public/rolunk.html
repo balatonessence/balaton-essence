@@ -389,7 +389,34 @@
             align-items: center;
         }
 
-        .heritage-image {
+        .heritage-gallery {
+            min-height: 520px;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-rows: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+        }
+
+        .heritage-gallery-item {
+            min-height: 250px;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            border: 1px solid var(--border);
+            box-shadow: 0 18px 45px rgba(44, 51, 37, 0.12);
+            background-color: #ddd;
+        }
+
+        .heritage-gallery.is-single {
+            display: block;
+        }
+
+        .heritage-gallery.is-single .heritage-gallery-item {
+            min-height: 520px;
+        }
+
+        .heritage-gallery-placeholder {
+            grid-column: 1 / -1;
             min-height: 520px;
             background:
                 linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
@@ -699,7 +726,17 @@
                 padding: 5rem 5vw;
             }
 
-            .heritage-image {
+            .heritage-gallery {
+                min-height: 0;
+                gap: 0.8rem;
+            }
+
+            .heritage-gallery-item {
+                min-height: 165px;
+            }
+
+            .heritage-gallery.is-single .heritage-gallery-item,
+            .heritage-gallery-placeholder {
                 min-height: 320px;
             }
 
@@ -813,7 +850,9 @@
 
 <section class="heritage-section">
     <div class="heritage-grid">
-        <div class="heritage-image" aria-label="Bor Mámor Ederics Vendégház"></div>
+        <div id="heritage-gallery" class="heritage-gallery" aria-label="Bor Mámor Ederics Vendégház képei">
+            <div class="heritage-gallery-placeholder"></div>
+        </div>
 
         <div class="heritage-content">
             <div class="section-kicker">A kezdetek helye</div>
@@ -955,6 +994,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', () => {
         initHeaderScroll();
+        initAboutGallery();
     });
 
     function initHeaderScroll() {
@@ -972,6 +1012,78 @@
 
         update();
         window.addEventListener('scroll', update);
+    }
+
+    async function initAboutGallery() {
+        const gallery = document.getElementById('heritage-gallery');
+
+        if (!gallery) return;
+
+        try {
+            const res = await fetch('/api/get-db-content?t=' + Date.now());
+
+            if (!res.ok) {
+                throw new Error('Nem sikerült betölteni a galéria képeit.');
+            }
+
+            const db = await res.json();
+
+            const images = Array.isArray(db?.siteContent?.aboutGalleryImages)
+                ? db.siteContent.aboutGalleryImages
+                    .map(img => safeImageUrl(img))
+                    .filter(Boolean)
+                    .slice(0, 4)
+                : [];
+
+            renderAboutGallery(images);
+        } catch (error) {
+            console.error('Rólunk galéria betöltési hiba:', error);
+            renderAboutGallery([]);
+        }
+    }
+
+    function renderAboutGallery(images) {
+        const gallery = document.getElementById('heritage-gallery');
+
+        if (!gallery) return;
+
+        if (!Array.isArray(images) || images.length === 0) {
+            gallery.classList.add('is-single');
+            gallery.innerHTML = `
+                <div
+                    class="heritage-gallery-item"
+                    style="background-image:
+                        linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
+                        url('img/bor-mamor-ederics.jpg');"
+                    aria-label="Bor Mámor Ederics Vendégház"
+                ></div>
+            `;
+            return;
+        }
+
+        gallery.classList.toggle('is-single', images.length === 1);
+
+        gallery.innerHTML = images.map((image, index) => `
+            <div
+                class="heritage-gallery-item"
+                style="background-image:
+                    linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
+                    url('${image}');"
+                aria-label="Bor Mámor Ederics Vendégház kép ${index + 1}"
+            ></div>
+        `).join('');
+    }
+
+    function safeImageUrl(value) {
+        const url = String(value || '').trim();
+
+        if (!url) return '';
+        if (url.startsWith('data:image/')) return url;
+        if (url.startsWith('img/')) return url;
+        if (url.startsWith('/img/')) return url;
+        if (url.startsWith('https://')) return url;
+
+        return '';
     }
 </script>
 <link rel="stylesheet" href="mobile.css?v=107">
