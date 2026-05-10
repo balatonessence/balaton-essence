@@ -2456,22 +2456,7 @@ app.post('/api/sync', requireAdmin, async (req, res) => {
                             });
                         }
 
-                        const incomingIds = new Set(incomingEvents.map(ev => ev.icalId));
-                        const beforeCount = db.bookings.length;
-
-                        db.bookings = db.bookings.filter(b => {
-                            const isMatchingImportedBooking =
-                                String(b.aptId) === String(apt.id) &&
-                                b.source === sourceDef.name &&
-                                !!b.icalId;
-
-                            if (!isMatchingImportedBooking) return true;
-                            return incomingIds.has(b.icalId);
-                        });
-
-                        if (db.bookings.length !== beforeCount) {
-                            hasChange = true;
-                        }
+                        
 
                         for (const incoming of incomingEvents) {
                             const existingIndex = db.bookings.findIndex(
