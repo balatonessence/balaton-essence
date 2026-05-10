@@ -154,6 +154,10 @@
     const t = assistantData[lang];
 
     let liveApartments = [];
+    let liveServices = {
+    sun: [],
+    moments: []
+};
 let liveBookings = [];
 
 async function loadLiveData() {
@@ -169,6 +173,11 @@ async function loadLiveData() {
         liveApartments = Array.isArray(db.apartments)
             ? db.apartments
             : [];
+
+        liveServices = db.services || {
+            sun: [],
+            moments: []
+        };
 
         liveBookings = Array.isArray(db.bookings)
             ? db.bookings
@@ -661,6 +670,25 @@ function isSimilarWord(word, target, maxDistance = 1) {
 function extractGuestCount(question) {
     const q = normalize(question);
 
+    const hasGuestContext = [
+        'fo',
+        'fos',
+        'fore',
+        'ember',
+        'szemely',
+        'mennenk',
+        'mennek',
+        'megyunk',
+        'mennénk',
+        'mennék',
+        'megyünk'
+    ].some(word => q.includes(normalize(word)));
+
+    // Ha semmi nem utal vendégszámra, ne próbáljon számot kitalálni
+    if (!hasGuestContext) {
+        return null;
+    }
+
     // 4en, 4 fő, 4 főre, 4 fős, 4-en
     const numericMatch = q.match(/(\d{1,2})\s*[- ]?(fo|fos|fore|en)\b/);
 
@@ -672,6 +700,7 @@ function extractGuestCount(question) {
 
     const numberWords = {
         egy: 1,
+        egyedul: 1,
         ketto: 2,
         ketten: 2,
         harom: 3,
@@ -693,6 +722,48 @@ function extractGuestCount(question) {
     }
 
     return null;
+}
+
+function findServiceAnswer(question) {
+    const q = normalize(question);
+
+    const allServices = [
+        ...(liveServices.sun || []),
+        ...(liveServices.moments || [])
+    ];
+
+    const service = allServices.find(item => {
+        const names = [
+            item.name_hu,
+            item.name_en,
+            item.name_de,
+            item.id
+        ]
+            .filter(Boolean)
+            .map(name => normalize(name));
+
+        return names.some(name => q.includes(name));
+    });
+
+    if (!service) {
+        return null;
+    }
+
+    const asksPrice =
+        q.includes('mennyibe') ||
+        q.includes('mennyi') ||
+        q.includes('ar') ||
+        q.includes('ár') ||
+        q.includes('kerul') ||
+        q.includes('kerül');
+
+    if (asksPrice) {
+        const unit = service.unit_hu ? ` / ${service.unit_hu}` : '';
+        return `${service.name_hu} ára: ${formatPrice(service.price)}${unit}.`;
+    }
+
+    return service.description_hu ||
+        `${service.name_hu} elérhető szolgáltatásunk, ára ${formatPrice(service.price)}${service.unit_hu ? ` / ${service.unit_hu}` : ''}.`;
 }
 
 function findApartmentAnswer(question) {
@@ -787,6 +858,12 @@ function findApartmentAnswer(question) {
 }
 
 function findAnswer(question) {
+    const serviceAnswer = findServiceAnswer(question);
+
+    if (serviceAnswer) {
+        return serviceAnswer;
+    }
+
     const apartmentAnswer = findApartmentAnswer(question);
 
     if (apartmentAnswer) {
