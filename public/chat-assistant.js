@@ -720,6 +720,42 @@ function findApartmentAnswer(question) {
     return `${apt.name} ${apt.location} településen található. Címe: ${apt.address}. ${getSeasonPriceText(apt)}.`;
 }
 
+function findAnswer(question) {
+    const apartmentAnswer = findApartmentAnswer(question);
+
+    if (apartmentAnswer) {
+        return apartmentAnswer;
+    }
+
+    const q = normalize(question);
+
+    const matchedAnswers = t.answers
+        .map(item => {
+            const matches = item.keywords.filter(keyword =>
+                q.includes(normalize(keyword))
+            );
+
+            return {
+                item,
+                score: matches.length
+            };
+        })
+        .filter(result => result.score > 0)
+        .sort((a, b) => b.score - a.score);
+
+    if (matchedAnswers.length === 0) {
+        return t.fallback;
+    }
+
+    const bestMatch = matchedAnswers[0];
+
+    if (bestMatch.score === 1 && q.split(' ').length >= 4) {
+        return t.fallback;
+    }
+
+    return bestMatch.item.answer;
+}
+
     function sendMessage(text) {
         if (!text.trim()) return;
 
