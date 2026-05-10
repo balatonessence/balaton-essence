@@ -2874,7 +2874,7 @@ function renderBookings() {
     const bookings = (db.bookings || []).filter(b => !isBlockedBooking(b));
 
     if (bookings.length === 0) {
-        body.innerHTML = `<tr><td colspan="5"><div class="empty-state">Még nincs valódi apartman foglalás.</div></td></tr>`;
+        body.innerHTML = `<tr><td colspan="6"><div class="empty-state">Még nincs valódi apartman foglalás.</div></td></tr>`;
         return;
     }
 
@@ -2904,8 +2904,8 @@ function renderBookings() {
                 ${
                     b.createdAt
                         ? new Date(b.createdAt).toLocaleDateString('hu-HU')
-                        : b.syncedAt
-                            ? `Szinkron: ${new Date(b.syncedAt).toLocaleDateString('hu-HU')}`
+                        : b.firstSeenAt
+                            ? new Date(b.firstSeenAt).toLocaleDateString('hu-HU')
                             : '—'
                 }
             </td>

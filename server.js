@@ -2511,6 +2511,11 @@ async function syncAllCalendars() {
                         } else {
                             const existing = db.bookings[existingIndex];
 
+                            if (!existing.firstSeenAt) {
+                                existing.firstSeenAt = existing.syncedAt || new Date().toISOString();
+                                hasChange = true;
+                            }
+
                             const changed =
                                 existing.guestName !== incoming.guestName ||
                                 existing.checkIn !== incoming.checkIn ||
