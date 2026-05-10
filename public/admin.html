@@ -2692,7 +2692,10 @@ function renderBlockedBookings() {
 
         container.innerHTML = apartments.map(a => {
             const owner = (db.owners || []).find(o => String(o.id || o._id) === String(a.ownerId));
-            const aptBookings = (db.bookings || []).filter(b => String(b.aptId) === String(a.id));
+            const aptBookings = (db.bookings || []).filter(b =>
+                String(b.aptId) === String(a.id) &&
+                !isBlockedBooking(b)
+            );
 
             let web = 0;
             let book = 0;
