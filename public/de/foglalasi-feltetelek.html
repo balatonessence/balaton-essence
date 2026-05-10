@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Foglalási feltételek | Balaton Essence</title>
-    <meta name="description" content="A Balaton Essence apartmanfoglalási feltételei.">
+    <title>Buchungsbedingungen | Balaton Essence</title>
+    <meta name="description" content="Buchungsbedingungen für die Apartments von Balaton Essence.">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="mobile.css?v=106">
+    <link rel="stylesheet" href="../mobile.css?v=106">
 
     <style>
         :root {
@@ -89,7 +89,7 @@
             padding: 10rem 6vw 4rem;
             background:
                 linear-gradient(135deg, rgba(23,35,24,0.96), rgba(36,51,33,0.92)),
-                url('img/hatter.jpg') center / cover no-repeat;
+                url('../img/hatter.jpg') center / cover no-repeat;
             color: white;
         }
 
@@ -119,6 +119,14 @@
 
         .legal-wrap {
             padding: 4rem 6vw 5rem;
+        }
+
+        .translation-note {
+            background: rgba(200, 164, 107, 0.12);
+            border-left: 4px solid var(--gold);
+            padding: 1.1rem 1.25rem;
+            margin-bottom: 2rem;
+            font-size: 0.92rem;
         }
 
         .highlight {
@@ -190,85 +198,89 @@
 
 <body>
 <header class="site-header">
-    <a href="index.html" class="logo-container">
+    <a href="index.html" class="logo-container" aria-label="Balaton Essence Startseite">
         <span class="logo-title">BALATON</span>
         <span class="logo-subtitle">ESSENCE</span>
     </a>
 
-    <button class="mobile-menu-toggle" type="button" aria-label="Menü megnyitása">
+    <button class="mobile-menu-toggle" type="button" aria-label="Menü öffnen">
         <span></span><span></span><span></span>
     </button>
 
-    <nav class="nav-links">
-        <a href="index.html#apartments">Szállások</a>
-        <a href="index.html#services">Szolgáltatások</a>
-        <a href="rolunk.html">Rólunk</a>
-        <a href="index.html#contact">Kapcsolat</a>
+    <nav class="nav-links" aria-label="Hauptnavigation">
+        <a href="index.html#apartments">Apartments</a>
+        <a href="index.html#services">Leistungen</a>
+        <a href="ueber-uns.html">Über uns</a>
+        <a href="index.html#contact">Kontakt</a>
     </nav>
 </header>
 
 <section class="legal-hero">
     <div class="legal-hero-inner">
-        <div class="legal-kicker">Foglalás</div>
-        <h1 class="legal-title">Foglalási feltételek</h1>
+        <div class="legal-kicker">Buchung</div>
+        <h1 class="legal-title">Buchungsbedingungen</h1>
     </div>
 </section>
 
 <main class="legal-wrap">
-    <div class="highlight">
-        Apartmanfoglalás esetén a foglalás véglegesítéséhez 50% előleg online megfizetése szükséges.
-        A fennmaradó 50% érkezéskor fizetendő készpénzzel vagy bankkártyával.
+    <div class="translation-note">
+        Diese Übersetzung dient der besseren Verständlichkeit. Im Falle von Abweichungen ist die ungarische Fassung maßgeblich.
     </div>
 
-    <h2>1. Foglalás menete</h2>
+    <div class="highlight">
+        Bei Apartmentbuchungen ist zur endgültigen Bestätigung der Buchung eine Online-Anzahlung von 50% erforderlich.
+        Die verbleibenden 50% sind bei der Ankunft in bar oder per Bankkarte zu zahlen.
+    </div>
+
+    <h2>1. Buchungsablauf</h2>
     <ul>
-        <li>A Vendég kiválasztja az apartmant és a kívánt időszakot.</li>
-        <li>Megadja a foglaláshoz szükséges adatokat.</li>
-        <li>A foglalás az előleg online megfizetésével és a visszaigazolással válik véglegessé.</li>
+        <li>Der Gast wählt das gewünschte Apartment und den gewünschten Zeitraum aus.</li>
+        <li>Der Gast gibt die für die Buchung erforderlichen Daten an.</li>
+        <li>Die Buchung wird mit der Online-Zahlung der Anzahlung und der Bestätigung durch den Dienstleister verbindlich.</li>
     </ul>
 
-    <h2>2. Előleg és fizetés</h2>
+    <h2>2. Anzahlung und Zahlungsbedingungen</h2>
     <p>
-        Apartmanfoglalás esetén a teljes szállásdíj 50%-ának megfelelő előleg fizetendő online.
-        A fennmaradó 50% érkezéskor fizetendő készpénzzel vagy bankkártyával.
+        Bei Apartmentbuchungen ist eine Anzahlung in Höhe von 50% des gesamten Unterkunftspreises online zu zahlen.
+        Die verbleibenden 50% sind bei der Ankunft in bar oder per Bankkarte zu entrichten.
     </p>
     <p>
-        Az előleg kizárólag apartmanfoglalásra vonatkozik. Egyéb szolgáltatások esetében az adott
-        szolgáltatásnál feltüntetett fizetési feltételek az irányadók.
-    </p>
-
-    <h2>3. Lemondás</h2>
-    <p>
-        Érkezés előtt legalább 14 nappal történő lemondás esetén az előleg teljes összege visszajár.
-    </p>
-    <p>
-        Érkezés előtt 14 napon belüli lemondás esetén az előleg nem visszatérítendő.
+        Die Anzahlung gilt ausschließlich für Apartmentbuchungen. Für sonstige Leistungen gelten die auf der jeweiligen
+        Leistungsseite angegebenen Zahlungsbedingungen.
     </p>
 
-    <h2>4. Módosítás</h2>
+    <h2>3. Stornierung</h2>
     <p>
-        A foglalás módosítására kizárólag elérhetőség függvényében van lehetőség, előzetes egyeztetés alapján.
-        Módosítási igényt az info@balatonessence.com email címen lehet jelezni.
+        Wird die Buchung mindestens 14 Tage vor der Anreise storniert, wird die Anzahlung vollständig zurückerstattet.
+    </p>
+    <p>
+        Wird die Buchung innerhalb von 14 Tagen vor der Anreise storniert, ist die Anzahlung nicht erstattungsfähig.
     </p>
 
-    <h2>5. Érkezés és távozás</h2>
+    <h2>4. Änderungen der Buchung</h2>
     <p>
-        Érkezés: 15:00–17:00 között.<br>
-        Távozás: 10:00 óráig.
-    </p>
-    <p>
-        Ettől eltérő érkezési időpont csak előzetes egyeztetés esetén lehetséges.
+        Änderungen einer Buchung sind nur nach Verfügbarkeit und vorheriger Absprache möglich.
+        Änderungswünsche können an info@balatonessence.com gesendet werden.
     </p>
 
-    <h2>6. Meg nem érkezés</h2>
+    <h2>5. Anreise und Abreise</h2>
     <p>
-        Amennyiben a Vendég a foglalás napján nem érkezik meg, és előzetesen nem jelzi a módosítási vagy
-        lemondási szándékát, a foglalás lemondottnak tekinthető, az előleg nem visszatérítendő.
+        Check-in: zwischen 15:00 und 17:00 Uhr.<br>
+        Check-out: bis 10:00 Uhr.
+    </p>
+    <p>
+        Abweichende Anreisezeiten sind nur nach vorheriger Vereinbarung möglich.
     </p>
 
-    <h2>7. Kapcsolat</h2>
+    <h2>6. Nichterscheinen</h2>
     <p>
-        Email: info@balatonessence.com<br>
+        Erscheint der Gast am gebuchten Tag nicht und informiert den Dienstleister nicht im Voraus über eine Änderung
+        oder Stornierung, kann die Buchung als storniert betrachtet werden; die Anzahlung ist in diesem Fall nicht erstattungsfähig.
+    </p>
+
+    <h2>7. Kontakt</h2>
+    <p>
+        E-Mail: info@balatonessence.com<br>
         Telefon: +36 30 859 4822
     </p>
 </main>
@@ -280,33 +292,33 @@
                 <span class="logo-title">BALATON</span>
                 <span class="logo-subtitle">ESSENCE</span>
             </a>
-            <p style="margin-top:1rem;">Prémium szállások és élmények a Balaton partján.</p>
+            <p style="margin-top:1rem;">Premium-Unterkünfte und Erlebnisse am Balaton.</p>
         </div>
 
         <div>
-            <h4>Jogi információk</h4>
+            <h4>Rechtliche Informationen</h4>
             <ul>
-                <li><a href="aszf.html">ÁSZF</a></li>
-                <li><a href="foglalasi-feltetelek.html">Foglalási feltételek</a></li>
-                <li><a href="adatvedelem.html">Adatvédelem</a></li>
+                <li><a href="agb.html">AGB</a></li>
+                <li><a href="buchungsbedingungen.html">Buchungsbedingungen</a></li>
+                <li><a href="datenschutz.html">Datenschutz</a></li>
             </ul>
         </div>
 
         <div>
-            <h4>Kapcsolat</h4>
+            <h4>Kontakt</h4>
             <ul>
                 <li><a href="tel:+36308594822">+36 30 859 4822</a></li>
                 <li><a href="mailto:info@balatonessence.com">info@balatonessence.com</a></li>
-                <li>8640 Fonyód</li>
+                <li>8640 Fonyód, Ungarn</li>
             </ul>
         </div>
     </div>
 
     <div class="footer-bottom">
-        © 2026 Balaton Essence. Minden jog fenntartva.
+        © 2026 Balaton Essence. Alle Rechte vorbehalten.
     </div>
 </footer>
 
-<script src="site-mobile.js?v=106"></script>
+<script src="../site-mobile.js?v=106"></script>
 </body>
 </html>
