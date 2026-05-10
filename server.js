@@ -2540,12 +2540,35 @@ async function syncAllCalendars() {
 
 app.post('/api/sync', requireAdmin, async (req, res) => {
     try {
+        calendarSyncInProgress = true;
+
         const result = await syncAllCalendars();
-        res.json(result);
+        lastCalendarSyncAt = new Date().toISOString();
+
+        // Kézi szinkron után újraindítjuk a 30 perces automatikus ciklust
+        scheduleNextAutomaticCalendarSync(AUTO_SYNC_INTERVAL_MS);
+
+        res.json({
+            ...result,
+            lastSyncAt: lastCalendarSyncAt,
+            nextSyncAt: nextAutomaticCalendarSyncAt
+        });
     } catch (e) {
         console.error('Általános sync hiba:', e);
         res.status(500).json({ error: e.message });
+    } finally {
+        calendarSyncInProgress = false;
     }
+});
+
+app.get('/api/sync-status', requireAdmin, async (req, res) => {
+    res.json({
+        success: true,
+        lastSyncAt: lastCalendarSyncAt,
+        nextSyncAt: nextAutomaticCalendarSyncAt,
+        inProgress: calendarSyncInProgress,
+        intervalMinutes: AUTO_SYNC_INTERVAL_MS / 60000
+    });
 });
 
 // -----------------------------------------------------------------------------
@@ -2919,23 +2942,50 @@ function startScheduledGuestEmails() {
 startScheduledGuestEmails();
 
 function startAutomaticCalendarSync() {
-    const run = () => {
-        syncAllCalendars()
-            .then(result => {
-                console.log(
-                    `Automatikus iCal sync lefutott | változás: ${result.changed ? 'igen' : 'nem'} | foglalások: ${result.bookingsCount}`
-                );
-            })
-            .catch(err => {
-                console.error('Automatikus iCal sync hiba:', err);
-            });
-    };
+    const AUTO_SYNC_INTERVAL_MS = 30 * 60 * 1000;
 
-    setTimeout(run, 60 * 1000); // szerverindulás után 1 perccel első sync
-    setInterval(run, 30 * 60 * 1000); // utána 30 percenként
+let lastCalendarSyncAt = null;
+let nextAutomaticCalendarSyncAt = null;
+let automaticCalendarSyncTimer = null;
+let calendarSyncInProgress = false;
+
+async function runAutomaticCalendarSync() {
+    calendarSyncInProgress = true;
+
+    try {
+        const result = await syncAllCalendars();
+        lastCalendarSyncAt = new Date().toISOString();
+
+        console.log(
+            `Automatikus iCal sync lefutott | változás: ${result.changed ? 'igen' : 'nem'} | foglalások: ${result.bookingsCount}`
+        );
+    } catch (err) {
+        console.error('Automatikus iCal sync hiba:', err);
+    } finally {
+        calendarSyncInProgress = false;
+    }
+}
+
+function scheduleNextAutomaticCalendarSync(delayMs = AUTO_SYNC_INTERVAL_MS) {
+    if (automaticCalendarSyncTimer) {
+        clearTimeout(automaticCalendarSyncTimer);
+    }
+
+    nextAutomaticCalendarSyncAt = new Date(Date.now() + delayMs).toISOString();
+
+    automaticCalendarSyncTimer = setTimeout(async () => {
+        await runAutomaticCalendarSync();
+        scheduleNextAutomaticCalendarSync(AUTO_SYNC_INTERVAL_MS);
+    }, delayMs);
+}
+
+function startAutomaticCalendarSync() {
+    scheduleNextAutomaticCalendarSync(60 * 1000); // első sync szerverindulás után 1 perccel
 }
 
 startAutomaticCalendarSync();
+
+}
 
 // -----------------------------------------------------------------------------
 // START

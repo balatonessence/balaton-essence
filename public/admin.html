@@ -143,6 +143,61 @@
         flex-wrap: wrap;
     }
 
+    .sync-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        min-height: 42px;
+        padding: 0.72rem 1rem;
+        border: 1px solid var(--border-strong);
+        border-radius: 999px;
+        background: rgba(255,255,255,0.68);
+        color: var(--text);
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.6px;
+        white-space: nowrap;
+    }
+
+    .sync-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--accent);
+        box-shadow: 0 0 0 4px rgba(92,122,77,0.12);
+        flex: 0 0 auto;
+    }
+
+    .sync-status.is-running .sync-dot {
+        background: var(--warning);
+        box-shadow: 0 0 0 4px rgba(243,156,18,0.15);
+        animation: syncPulse 1s infinite ease-in-out;
+    }
+
+    .sync-status.is-error .sync-dot {
+        background: var(--danger);
+        box-shadow: 0 0 0 4px rgba(176,65,62,0.14);
+    }
+
+    @keyframes syncPulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+
+        50% {
+            transform: scale(1.2);
+            opacity: 0.65;
+        }
+    }
+
+    @media (max-width: 900px) {
+        .sync-status {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
     .btn {
         display: inline-flex;
         align-items: center;
@@ -1274,6 +1329,11 @@
             </a>
 
             <div class="topbar-actions">
+                <div class="sync-status" id="sync-status">
+                    <span class="sync-dot"></span>
+                    <span id="sync-status-text">Szinkron állapot betöltése...</span>
+                </div>
+
                 <button class="btn btn-outline" onclick="syncCalendars()">🔄 Szinkronizálás</button>
                 <button class="btn btn-outline" onclick="resetAdminToken()">Token csere</button>
                 <button class="btn btn-outline" onclick="location.href='index.html'">Kilépés</button>
@@ -1762,6 +1822,9 @@
     let adminCalDate = new Date();
     let currentEditingAptId = null;
     let gallerySortable = null;
+    let nextSyncAt = null;
+    let syncStatusRefreshTimer = null;
+    let syncCountdownTimer = null;
 
     function getAdminToken() {
         let token = sessionStorage.getItem('ADMIN_TOKEN');
@@ -2459,6 +2522,91 @@ function initGallerySorting() {
             }
         });
     }
+
+    function formatSyncCountdown(ms) {
+    if (ms <= 0) {
+        return 'hamarosan';
+    }
+
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+}
+
+async function loadSyncStatus() {
+    const wrapper = document.getElementById('sync-status');
+    const text = document.getElementById('sync-status-text');
+
+    if (!wrapper || !text) return;
+
+    try {
+        const res = await fetch('/api/sync-status?t=' + Date.now(), {
+            headers: getAdminHeaders()
+        });
+
+        if (!res.ok) {
+            throw new Error('Nem sikerült lekérni a szinkron állapotát.');
+        }
+
+        const status = await res.json();
+
+        nextSyncAt = status.nextSyncAt || null;
+
+        wrapper.classList.remove('is-error');
+        wrapper.classList.toggle('is-running', status.inProgress === true);
+
+        if (status.inProgress) {
+            text.innerText = 'Szinkronizálás folyamatban...';
+            return;
+        }
+
+        updateSyncCountdown();
+    } catch (err) {
+        console.error('Sync státusz hiba:', err);
+
+        wrapper.classList.remove('is-running');
+        wrapper.classList.add('is-error');
+        text.innerText = 'Szinkron státusz nem elérhető';
+    }
+}
+
+function updateSyncCountdown() {
+    const wrapper = document.getElementById('sync-status');
+    const text = document.getElementById('sync-status-text');
+
+    if (!wrapper || !text) return;
+
+    if (!nextSyncAt) {
+        text.innerText = 'Következő szinkron: nincs adat';
+        return;
+    }
+
+    const diff = new Date(nextSyncAt).getTime() - Date.now();
+
+    if (diff <= 0) {
+        text.innerText = 'Következő szinkron: hamarosan';
+        return;
+    }
+
+    text.innerText = `Következő szinkron: ${formatSyncCountdown(diff)} múlva`;
+}
+
+function initSyncCountdown() {
+    loadSyncStatus();
+
+    if (syncCountdownTimer) {
+        clearInterval(syncCountdownTimer);
+    }
+
+    if (syncStatusRefreshTimer) {
+        clearInterval(syncStatusRefreshTimer);
+    }
+
+    syncCountdownTimer = setInterval(updateSyncCountdown, 1000);
+    syncStatusRefreshTimer = setInterval(loadSyncStatus, 15000);
+}
 
     function renderAll() {
         if (!db) return;
@@ -3223,6 +3371,7 @@ function renderBlockedBookings() {
 
     window.onload = () => {
         initDatabase(renderAll);
+        initSyncCountdown();
     };
 </script>
 </body>
