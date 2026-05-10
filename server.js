@@ -2776,9 +2776,17 @@ app.get('/api/get-todos', requireAdmin, async (req, res) => {
 
 app.post('/api/add-todo', requireAdmin, async (req, res) => {
     try {
+        const createdBy = String(req.body.createdBy || '').trim();
+
+        if (!['Kristóf', 'Balaton Essence'].includes(createdBy)) {
+            return res.status(400).json({ error: 'Hibás profil.' });
+        }
+
         const newTodo = {
             id: Date.now(),
-            text: String(req.body.text || '').trim()
+            text: String(req.body.text || '').trim(),
+            createdBy,
+            createdAt: new Date().toISOString()
         };
 
         if (!newTodo.text) {

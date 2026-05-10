@@ -291,18 +291,6 @@
             margin: 0;
         }
 
-        .sender-select {
-            width: auto;
-            min-width: 170px;
-            padding: 10px 14px;
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            background: #faf9f6;
-            font-family: inherit;
-            color: var(--text);
-            outline: none;
-        }
-
         .chat-box {
             height: 380px;
             overflow-y: auto;
@@ -441,13 +429,174 @@
             }
         }
 
+                .profile-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 5000;
+            background:
+                radial-gradient(circle at 20% 10%, rgba(212,163,115,0.18), transparent 28%),
+                linear-gradient(135deg, #101711, #172318);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .profile-screen.hidden {
+            display: none;
+        }
+
+        .profile-screen-inner {
+            width: min(720px, 100%);
+            text-align: center;
+            color: white;
+        }
+
+        .profile-screen-inner h1 {
+            color: white;
+            font-size: clamp(32px, 5vw, 48px);
+            margin-bottom: 12px;
+        }
+
+        .profile-screen-inner p {
+            color: rgba(255,255,255,0.68);
+            margin: 0 0 34px;
+        }
+
+        .profile-choice-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 18px;
+        }
+
+        .profile-choice-card {
+            min-height: 210px;
+            border: 1px solid rgba(255,255,255,0.14);
+            border-radius: 24px;
+            background: rgba(255,255,255,0.06);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 18px;
+            font-weight: 600;
+            transition: 0.25s ease;
+        }
+
+        .profile-choice-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.11);
+            border-color: rgba(200,164,107,0.65);
+        }
+
+        .profile-avatar {
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--primary);
+            font-size: 34px;
+            font-weight: 600;
+            font-family: 'Playfair Display', serif;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.24);
+        }
+
+        .page-heading {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            margin-bottom: 30px;
+        }
+
+        .current-profile-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 8px 10px 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .current-profile-box button {
+            border: none;
+            background: var(--primary);
+            color: white;
+            border-radius: 999px;
+            padding: 8px 12px;
+            font-family: inherit;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .todo-meta {
+            margin-top: 5px;
+            color: #8a8f84;
+            font-size: 12px;
+            font-weight: 400;
+        }
+
+        @media (max-width: 620px) {
+            .profile-choice-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-choice-card {
+                min-height: 160px;
+            }
+
+            .page-heading {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+
     </style>
 </head>
 <body>
 
+<div id="profileScreen" class="profile-screen">
+    <div class="profile-screen-inner">
+        <h1>Ki használja most az oldalt?</h1>
+        <p>Válassz profilt a folytatáshoz.</p>
+
+        <div class="profile-choice-grid">
+            <button type="button" class="profile-choice-card" onclick="chooseProfile('Kristóf')">
+                <span class="profile-avatar">K</span>
+                <span>Kristóf</span>
+            </button>
+
+            <button type="button" class="profile-choice-card" onclick="chooseProfile('Balaton Essence')">
+                <span class="profile-avatar">B</span>
+                <span>Balaton Essence</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <div class="container">
-    <h1>Közös Fejlesztési Lista</h1>
-    <div class="subtitle">Balaton Essence x Kristóf</div>
+    <div class="page-heading">
+        <div>
+            <h1>Közös Fejlesztési Lista</h1>
+            <div class="subtitle">Balaton Essence x Kristóf</div>
+        </div>
+
+        <div class="current-profile-box">
+            <span id="currentProfileName"></span>
+            <button type="button" onclick="changeProfile()">Profilváltás</button>
+        </div>
+    </div>
 
     <form class="add-todo-form" id="addForm">
         <input type="text" id="todoText" placeholder="Új feladat leírása..." required autocomplete="off">
@@ -461,11 +610,6 @@
     <section class="chat-section">
     <div class="chat-header">
         <h2 class="chat-title">Közös chat</h2>
-
-        <select id="chatSender" class="sender-select">
-            <option value="Kristóf">Kristóf</option>
-            <option value="Balaton Essence">Balaton Essence</option>
-        </select>
     </div>
 
     <div id="chatBox" class="chat-box">
@@ -501,13 +645,32 @@
 <script>
     const container = document.getElementById('todoContainer');
     const addForm = document.getElementById('addForm');
+    const profileScreen = document.getElementById('profileScreen');
+    const currentProfileName = document.getElementById('currentProfileName');
+
+    let currentProfile = localStorage.getItem('todoCurrentProfile') || '';
     const chatBox = document.getElementById('chatBox');
     const chatForm = document.getElementById('chatForm');
     const chatText = document.getElementById('chatText');
-    const chatSender = document.getElementById('chatSender');
 
     let latestMessageSignature = '';
     let chatRefreshTimer = null;
+
+    function chooseProfile(profile) {
+        if (!['Kristóf', 'Balaton Essence'].includes(profile)) return;
+
+        currentProfile = profile;
+        localStorage.setItem('todoCurrentProfile', profile);
+
+        currentProfileName.textContent = profile;
+        profileScreen.classList.add('hidden');
+    }
+
+    function changeProfile() {
+        currentProfile = '';
+        localStorage.removeItem('todoCurrentProfile');
+        profileScreen.classList.remove('hidden');
+    }
     
     function getAdminToken() {
     let token = sessionStorage.getItem('ADMIN_TOKEN');
@@ -615,7 +778,7 @@ function renderMessages(messages) {
         return;
     }
 
-    const currentSender = chatSender.value;
+    const currentSender = currentProfile;
 
     chatBox.innerHTML = messages.map(message => {
         const mine = message.sender === currentSender;
@@ -686,17 +849,41 @@ function startChatAutoRefresh() {
             li.className = 'todo-item';
             // Itt már a custom popupot hívjuk meg a sima deleteTodo helyett
             li.innerHTML = `
-                <span class="todo-text">${todo.text}</span>
-                <button class="delete-btn" onclick="openModal(${todo.id})">KÉSZ / TÖRLÉS</button>
-            `;
+            <div class="todo-text">
+                <div>${todo.text}</div>
+                <div class="todo-meta">
+                    ${todo.createdBy ? `Írta: ${todo.createdBy}` : 'Régebbi feladat'}
+                    ${todo.createdAt ? ` · ${formatTodoDate(todo.createdAt)}` : ''}
+                </div>
+            </div>
+            <button class="delete-btn" onclick="openModal(${todo.id})">KÉSZ / TÖRLÉS</button>
+        `;
             list.appendChild(li);
         });
         container.appendChild(list);
     }
 
+    function formatTodoDate(value) {
+    if (!value) return '';
+
+    return new Date(value).toLocaleString('hu-HU', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
     // Új feladat küldése
     addForm.addEventListener('submit', async (e) => {
         e.preventDefault();
+
+        if (!currentProfile) {
+            alert('Előbb válassz profilt.');
+            return;
+        }
+
         const text = document.getElementById('todoText').value;
         const btn = addForm.querySelector('.add-btn');
         btn.disabled = true;
@@ -705,7 +892,10 @@ function startChatAutoRefresh() {
             const res = await fetch('/api/add-todo', {
                 method: 'POST',
                 headers: getJsonHeaders(),
-                body: JSON.stringify({ text })
+                body: JSON.stringify({
+                    text,
+                    createdBy: currentProfile
+                })
             });
 
             if (!res.ok) {
@@ -723,7 +913,7 @@ function startChatAutoRefresh() {
     chatForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const sender = chatSender.value;
+    const sender = currentProfile;
     const text = chatText.value.trim();
     const btn = chatForm.querySelector('.chat-send-btn');
 
@@ -753,9 +943,6 @@ function startChatAutoRefresh() {
     }
 });
 
-chatSender.addEventListener('change', () => {
-    renderCurrentMessagesAgain();
-});
 
 function renderCurrentMessagesAgain() {
     latestMessageSignature = '';
@@ -808,6 +995,11 @@ function renderCurrentMessagesAgain() {
             confirmBtn.textContent = 'Igen, kész!';
         }
     });
+
+    if (currentProfile) {
+    currentProfileName.textContent = currentProfile;
+    profileScreen.classList.add('hidden');
+}
 
     // Kezdeti betöltés
     fetchTodos();
