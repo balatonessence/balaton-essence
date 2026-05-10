@@ -626,6 +626,75 @@ function getRecommendedApartments(question) {
     return answer;
 }
 
+function levenshtein(a, b) {
+    const matrix = [];
+
+    for (let i = 0; i <= b.length; i++) {
+        matrix[i] = [i];
+    }
+
+    for (let j = 0; j <= a.length; j++) {
+        matrix[0][j] = j;
+    }
+
+    for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+            if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                matrix[i][j] = matrix[i - 1][j - 1];
+            } else {
+                matrix[i][j] = Math.min(
+                    matrix[i - 1][j - 1] + 1,
+                    matrix[i][j - 1] + 1,
+                    matrix[i - 1][j] + 1
+                );
+            }
+        }
+    }
+
+    return matrix[b.length][a.length];
+}
+
+function isSimilarWord(word, target, maxDistance = 1) {
+    return levenshtein(normalize(word), normalize(target)) <= maxDistance;
+}
+
+function extractGuestCount(question) {
+    const q = normalize(question);
+
+    // 4en, 4 fő, 4 főre, 4 fős, 4-en
+    const numericMatch = q.match(/(\d{1,2})\s*[- ]?(fo|fos|fore|en)\b/);
+
+    if (numericMatch) {
+        return Number(numericMatch[1]);
+    }
+
+    const words = q.split(/\s+/);
+
+    const numberWords = {
+        egy: 1,
+        ketto: 2,
+        ketten: 2,
+        harom: 3,
+        harman: 3,
+        negy: 4,
+        negyen: 4,
+        ot: 5,
+        oten: 5,
+        hat: 6,
+        hatan: 6
+    };
+
+    for (const word of words) {
+        for (const [target, value] of Object.entries(numberWords)) {
+            if (isSimilarWord(word, target, 1)) {
+                return value;
+            }
+        }
+    }
+
+    return null;
+}
+
 function findApartmentAnswer(question) {
     const q = normalize(question);
 
@@ -652,20 +721,17 @@ function findApartmentAnswer(question) {
         }
     }
 
-    if (
-        q.includes('4 fos') ||
-        q.includes('4 fő') ||
-        q.includes('negy fos') ||
-        q.includes('negy fős')
-    ) {
-        const fourGuestApartments = liveApartments
-            .filter(apt => getMaxGuests(apt) >= 4)
-            .map(apt => apt.name);
+    const guestCount = extractGuestCount(question);
 
-        if (fourGuestApartments.length > 0) {
-            return `4 fő fogadására alkalmas apartmanjaink: ${fourGuestApartments.join(', ')}.`;
+        if (guestCount) {
+            const matchingApartments = liveApartments
+                .filter(apt => getMaxGuests(apt) >= guestCount)
+                .map(apt => apt.name);
+
+            if (matchingApartments.length > 0) {
+                return `${guestCount} fő fogadására alkalmas apartmanjaink: ${matchingApartments.join(', ')}.`;
+            }
         }
-    }
 
     if (
         q.includes('legolcsobb') &&
