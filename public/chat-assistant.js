@@ -153,6 +153,35 @@
     const lang = getLang();
     const t = assistantData[lang];
 
+    let liveApartments = [];
+let liveBookings = [];
+
+async function loadLiveData() {
+    try {
+        const res = await fetch('/api/get-db-content?t=' + Date.now());
+
+        if (!res.ok) {
+            throw new Error('Nem sikerült betölteni az adatokat.');
+        }
+
+        const db = await res.json();
+
+        liveApartments = Array.isArray(db.apartments)
+            ? db.apartments
+            : [];
+
+        liveBookings = Array.isArray(db.bookings)
+            ? db.bookings
+            : [];
+    } catch (err) {
+        console.error('Asszisztens adatbetöltési hiba:', err);
+        liveApartments = [];
+        liveBookings = [];
+    }
+}
+
+loadLiveData();
+
     const style = document.createElement('style');
     style.textContent = `
         .be-chat-button {
@@ -345,17 +374,351 @@
             .replace(/[\u0300-\u036f]/g, '');
     }
 
-    function findAnswer(question) {
-        const q = normalize(question);
+    function formatPrice(value) {
+    return Number(value || 0).toLocaleString('hu-HU') + ' Ft';
+}
 
-        for (const item of t.answers) {
-            if (item.keywords.some(keyword => q.includes(normalize(keyword)))) {
-                return item.answer;
-            }
+function getApartmentByQuestion(question) {
+    const q = normalize(question);
+
+    return liveApartments.find(apt => {
+        const fullName = normalize(apt.name || '');
+
+        if (q.includes(fullName)) {
+            return true;
         }
 
-        return t.fallback;
+        const shortenedName = fullName
+            .replace(' apartman', '')
+            .replace(' residence', '');
+
+        return shortenedName.length >= 4 && q.includes(shortenedName);
+    });
+}
+
+function getSeasonPriceText(apt) {
+    const seasons = Array.isArray(apt.seasons) ? apt.seasons : [];
+
+    if (seasons.length === 0) {
+        return 'Ehhez az apartmanhoz jelenleg nincs megadott ár.';
     }
+
+    return seasons.map(season => {
+        let text = `${season.name}: ${formatPrice(season.price)} / éj`;
+
+        if (Number(season.price3 || 0) > 0) {
+            text += `, 3 főre ${formatPrice(season.price3)}`;
+        }
+
+        if (Number(season.price4 || 0) > 0) {
+            text += `, 4 főre ${formatPrice(season.price4)}`;
+        }
+
+        text += `, minimum ${season.minNights} éj`;
+
+        return text;
+    }).join(' | ');
+}
+
+function getMaxGuests(apt) {
+    const seasons = Array.isArray(apt.seasons) ? apt.seasons : [];
+
+    return Math.max(
+        ...seasons.map(season => Number(season.maxGuests || 0)),
+        0
+    );
+}
+
+function findCheapestSummerApartment() {
+    const summerApartments = liveApartments
+        .map(apt => {
+            const summerSeason = (apt.seasons || []).find(season =>
+                normalize(season.name).includes('nyari')
+            );
+
+            return summerSeason
+                ? { apt, price: Number(summerSeason.price || 0) }
+                : null;
+        })
+        .filter(Boolean)
+        .filter(item => item.price > 0)
+        .sort((a, b) => a.price - b.price);
+
+    return summerApartments[0] || null;
+}
+
+function getRequestedGuests(question) {
+    const q = normalize(question);
+
+    if (
+        q.includes('4 fo') ||
+        q.includes('4 fő') ||
+        q.includes('negy fo') ||
+        q.includes('negy fő') ||
+        q.includes('negyfos') ||
+        q.includes('negyfős')
+    ) {
+        return 4;
+    }
+
+    if (
+        q.includes('3 fo') ||
+        q.includes('3 fő') ||
+        q.includes('harom fo') ||
+        q.includes('három fő')
+    ) {
+        return 3;
+    }
+
+    if (
+        q.includes('2 fo') ||
+        q.includes('2 fő') ||
+        q.includes('ket fo') ||
+        q.includes('két fő') ||
+        q.includes('parnak') ||
+        q.includes('párnak')
+    ) {
+        return 2;
+    }
+
+    return null;
+}
+
+function getRequestedMonth(question) {
+    const q = normalize(question);
+
+    const months = [
+        { names: ['aprilis', 'április'], number: 4, label: 'április' },
+        { names: ['majus', 'május'], number: 5, label: 'május' },
+        { names: ['junius', 'június'], number: 6, label: 'június' },
+        { names: ['julius', 'július'], number: 7, label: 'július' },
+        { names: ['augusztus'], number: 8, label: 'augusztus' },
+        { names: ['szeptember'], number: 9, label: 'szeptember' },
+        { names: ['oktober', 'október'], number: 10, label: 'október' },
+        { names: ['november'], number: 11, label: 'november' },
+        { names: ['december'], number: 12, label: 'december' }
+    ];
+
+    return months.find(month =>
+        month.names.some(name => q.includes(normalize(name)))
+    ) || null;
+}
+
+function getSeasonForMonth(apt, monthNumber) {
+    const seasons = Array.isArray(apt.seasons) ? apt.seasons : [];
+
+    return seasons.find(season => {
+        if (!season.start || !season.end) return false;
+
+        const startMonth = Number(String(season.start).slice(5, 7));
+        const endMonth = Number(String(season.end).slice(5, 7));
+
+        return monthNumber >= startMonth && monthNumber <= endMonth;
+    }) || null;
+}
+
+function getPriceForGuests(season, guests) {
+    if (!season) return 0;
+
+    if (guests >= 4 && Number(season.price4 || 0) > 0) {
+        return Number(season.price4);
+    }
+
+    if (guests === 3 && Number(season.price3 || 0) > 0) {
+        return Number(season.price3);
+    }
+
+    return Number(season.price || 0);
+}
+
+function getRecommendedApartments(question) {
+    const q = normalize(question);
+    const guests = getRequestedGuests(question);
+    const month = getRequestedMonth(question);
+
+    const isRecommendationQuestion =
+        q.includes('ajanl') ||
+        q.includes('ajánl') ||
+        q.includes('melyik lenne jo') ||
+        q.includes('melyik lenne jó') ||
+        q.includes('mit valasszak') ||
+        q.includes('mit válasszak') ||
+        q.includes('legjobb');
+
+    if (!isRecommendationQuestion) {
+        return null;
+    }
+
+    let candidates = liveApartments.map(apt => {
+        const maxGuests = getMaxGuests(apt);
+
+        if (guests && maxGuests < guests) {
+            return null;
+        }
+
+        let season = null;
+        let price = 0;
+
+        if (month) {
+            season = getSeasonForMonth(apt, month.number);
+
+            if (!season) {
+                return null;
+            }
+
+            price = getPriceForGuests(season, guests || 2);
+        } else {
+            const firstSeason = Array.isArray(apt.seasons) ? apt.seasons[0] : null;
+            season = firstSeason;
+            price = getPriceForGuests(firstSeason, guests || 2);
+        }
+
+        return {
+            apt,
+            season,
+            price,
+            maxGuests
+        };
+    })
+    .filter(Boolean)
+    .filter(item => item.price > 0)
+    .sort((a, b) => a.price - b.price);
+
+    if (q.includes('balatonszemes')) {
+        candidates = candidates.filter(item =>
+            normalize(item.apt.location).includes('balatonszemes')
+        );
+    }
+
+    if (q.includes('fonyod') || q.includes('fonyód')) {
+        candidates = candidates.filter(item =>
+            normalize(item.apt.location).includes('fonyod')
+        );
+    }
+
+    if (candidates.length === 0) {
+        return 'Erre a kérésre most nem találtam megfelelő apartmant a megadott adatok alapján.';
+    }
+
+    const best = candidates[0];
+    const alternatives = candidates.slice(1, 3);
+
+    let answer = '';
+
+    if (month && guests) {
+        answer = `${month.label} hónapra ${guests} főnek ár alapján ezt ajánlanám elsőként: ${best.apt.name}, ${formatPrice(best.price)} / éj ártól.`;
+    } else if (month) {
+        answer = `${month.label} hónapra ár alapján ezt ajánlanám elsőként: ${best.apt.name}, ${formatPrice(best.price)} / éj ártól.`;
+    } else if (guests) {
+        answer = `${guests} főre ár alapján ezt ajánlanám elsőként: ${best.apt.name}, ${formatPrice(best.price)} / éj ártól.`;
+    } else {
+        answer = `Ár alapján ezt ajánlanám elsőként: ${best.apt.name}, ${formatPrice(best.price)} / éj ártól.`;
+    }
+
+    if (alternatives.length > 0) {
+        answer += ` További jó lehetőség: ${alternatives
+            .map(item => `${item.apt.name} (${formatPrice(item.price)} / éj)`)
+            .join(', ')}.`;
+    }
+
+    answer += ' A tényleges elérhetőséget mindig a foglalási naptár mutatja meg.';
+
+    return answer;
+}
+
+function findApartmentAnswer(question) {
+    const q = normalize(question);
+
+    if (!liveApartments.length) {
+        return null;
+    }
+
+    const recommendation = getRecommendedApartments(question);
+
+    if (recommendation) {
+        return recommendation;
+    }
+
+    if (
+        q.includes('balatonszemes') ||
+        q.includes('melyik apartman van balatonszemesen')
+    ) {
+        const szemesApartments = liveApartments
+            .filter(apt => normalize(apt.location).includes('balatonszemes'))
+            .map(apt => apt.name);
+
+        if (szemesApartments.length > 0) {
+            return `Balatonszemesen jelenleg ez az apartman érhető el: ${szemesApartments.join(', ')}.`;
+        }
+    }
+
+    if (
+        q.includes('4 fos') ||
+        q.includes('4 fő') ||
+        q.includes('negy fos') ||
+        q.includes('negy fős')
+    ) {
+        const fourGuestApartments = liveApartments
+            .filter(apt => getMaxGuests(apt) >= 4)
+            .map(apt => apt.name);
+
+        if (fourGuestApartments.length > 0) {
+            return `4 fő fogadására alkalmas apartmanjaink: ${fourGuestApartments.join(', ')}.`;
+        }
+    }
+
+    if (
+        q.includes('legolcsobb') &&
+        (q.includes('nyar') || q.includes('nyari'))
+    ) {
+        const cheapest = findCheapestSummerApartment();
+
+        if (cheapest) {
+            return `Nyáron jelenleg a legkedvezőbb árú apartman: ${cheapest.apt.name}, ${formatPrice(cheapest.price)} / éj ártól.`;
+        }
+    }
+
+    const apt = getApartmentByQuestion(question);
+
+    if (!apt) {
+        return null;
+    }
+
+    if (
+        q.includes('hol') ||
+        q.includes('cim') ||
+        q.includes('cím') ||
+        q.includes('talalhato') ||
+        q.includes('található')
+    ) {
+        return `${apt.name} címe: ${apt.address}.`;
+    }
+
+    if (
+        q.includes('hany fo') ||
+        q.includes('hány fő') ||
+        q.includes('fer el') ||
+        q.includes('fér el') ||
+        q.includes('kapacitas') ||
+        q.includes('kapacitás')
+    ) {
+        const maxGuests = getMaxGuests(apt);
+
+        return `${apt.name} legfeljebb ${maxGuests} fő fogadására alkalmas.`;
+    }
+
+    if (
+        q.includes('mennyibe') ||
+        q.includes('ar') ||
+        q.includes('ár') ||
+        q.includes('mennyiert') ||
+        q.includes('mennyiért')
+    ) {
+        return `${apt.name} árai: ${getSeasonPriceText(apt)}.`;
+    }
+
+    return `${apt.name} ${apt.location} településen található. Címe: ${apt.address}. ${getSeasonPriceText(apt)}.`;
+}
 
     function sendMessage(text) {
         if (!text.trim()) return;
