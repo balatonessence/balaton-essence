@@ -22,8 +22,8 @@
                     answer: 'Igen, fonyódi apartmanjainkhoz reggeli tál is rendelhető. A rendelést a foglaláshoz kapcsolódó linken keresztül lehet leadni.'
                 },
                 {
-                    keywords: ['szolgáltatás', 'szolgáltatások', 'sup', 'napágy', 'napernyő', 'hajó'],
-                    answer: 'Elérhető többek között SUP, napágy, napernyő, hajóbérlés, valamint reggeli és különleges tálrendelés is.'
+                    keywords: ['szolgáltatás', 'szolgáltatások', 'sup', 'napozószék', 'napernyő', 'hajó'],
+                    answer: 'Elérhető többek között SUP, napozószék, napernyő, hajóbérlés, valamint reggeli és különleges tálrendelés is.'
                 },
                 {
                     keywords: ['hol', 'cím', 'apartmanok', 'fonyód', 'helyszín'],
@@ -724,80 +724,114 @@ function extractGuestCount(question) {
     return null;
 }
 
-function findServiceAnswer(question) {
-    const q = normalize(question);
-
-    const allServices = [
+function getAllServices() {
+    return [
         ...(liveServices.sun || []),
         ...(liveServices.moments || [])
     ].filter(service => service.active !== false);
+}
 
-    if (allServices.length === 0) {
+function getServiceAliases(service) {
+    const aliases = [
+        service.id,
+        service.name_hu,
+        service.name_en,
+        service.name_de
+    ]
+        .filter(Boolean)
+        .map(value => normalize(value));
+
+    if (service.id === 'sup') {
+        aliases.push('sup');
+    }
+
+    if (service.id === 'sunbed') {
+        aliases.push('napozoszek', 'napozó szék');
+    }
+
+    if (service.id === 'umbrella') {
+        aliases.push('napernyo', 'napernyő', 'ernyo', 'ernyő');
+    }
+
+    if (service.id === 'boat') {
+        aliases.push('hajo', 'hajó');
+    }
+
+    return [...new Set(aliases)];
+}
+
+function findMentionedServices(question) {
+    const q = normalize(question);
+    const services = getAllServices();
+
+    return services.filter(service =>
+        getServiceAliases(service).some(alias => q.includes(alias))
+    );
+}
+
+function getServiceUnit(service) {
+    return service.unit_hu || 'db';
+}
+
+function findServiceAnswer(question) {
+    const q = normalize(question);
+
+    if (!getAllServices().length) {
         return null;
     }
 
-    const asksCheapest =
-        q.includes('legolcsobb') ||
-        q.includes('legkedvezobb') ||
-        q.includes('legkisebb ar') ||
-        q.includes('legolcsob szolgaltatas');
+    const mentionedServices = findMentionedServices(question);
 
-    if (asksCheapest) {
-        const cheapest = allServices
+    // Ha konkrétan több szolgáltatást is kérdez egyszerre
+    if (
+        mentionedServices.length > 1 &&
+        (
+            q.includes('mennyibe') ||
+            q.includes('mennyi') ||
+            q.includes('ar') ||
+            q.includes('ár')
+        )
+    ) {
+        return mentionedServices
+            .map(service =>
+                `${service.name_hu} ára: ${formatPrice(service.price)} / ${getServiceUnit(service)}`
+            )
+            .join(' · ') + '.';
+    }
+
+    // Ha egy konkrét szolgáltatásról kérdez
+    if (
+        mentionedServices.length === 1 &&
+        (
+            q.includes('mennyibe') ||
+            q.includes('mennyi') ||
+            q.includes('ar') ||
+            q.includes('ár')
+        )
+    ) {
+        const service = mentionedServices[0];
+
+        return `${service.name_hu} ára: ${formatPrice(service.price)} / ${getServiceUnit(service)}.`;
+    }
+
+    // Legolcsóbb szolgáltatás
+    if (
+        q.includes('legolcsobb') &&
+        (
+            q.includes('szolgaltatas') ||
+            q.includes('szolgáltatás')
+        )
+    ) {
+        const cheapestService = getAllServices()
             .filter(service => Number(service.price || 0) > 0)
             .sort((a, b) => Number(a.price) - Number(b.price))[0];
 
-        if (cheapest) {
-            const unit = cheapest.unit_hu ? ` / ${cheapest.unit_hu}` : '';
-            return `A legolcsóbb szolgáltatás jelenleg: ${cheapest.name_hu}, ${formatPrice(cheapest.price)}${unit}.`;
+        if (cheapestService) {
+            return `A legkedvezőbb árú szolgáltatás jelenleg: ${cheapestService.name_hu}, ${formatPrice(cheapestService.price)} / ${getServiceUnit(cheapestService)}.`;
         }
     }
 
-    const asksMostExpensive =
-        q.includes('legdragabb') ||
-        q.includes('legmagasabb ar');
-
-    if (asksMostExpensive) {
-        const mostExpensive = allServices
-            .filter(service => Number(service.price || 0) > 0)
-            .sort((a, b) => Number(b.price) - Number(a.price))[0];
-
-        if (mostExpensive) {
-            const unit = mostExpensive.unit_hu ? ` / ${mostExpensive.unit_hu}` : '';
-            return `A legdrágább szolgáltatás jelenleg: ${mostExpensive.name_hu}, ${formatPrice(mostExpensive.price)}${unit}.`;
-        }
-    }
-
-    const service = allServices.find(item => {
-        const names = [
-            item.name_hu,
-            item.name_en,
-            item.name_de,
-            item.id
-        ]
-            .filter(Boolean)
-            .map(name => normalize(name));
-
-        return names.some(name => q.includes(name));
-    });
-
-    if (!service) {
-        return null;
-    }
-
-    const asksPrice =
-        q.includes('mennyibe') ||
-        q.includes('mennyi') ||
-        q.includes('ar') ||
-        q.includes('kerul');
-
-    if (asksPrice) {
-        const unit = service.unit_hu ? ` / ${service.unit_hu}` : '';
-        return `${service.name_hu} ára: ${formatPrice(service.price)}${unit}.`;
-    }
-
-    return service.description_hu ||
-        `${service.name_hu} elérhető szolgáltatásunk, ára ${formatPrice(service.price)}${service.unit_hu ? ` / ${service.unit_hu}` : ''}.`;
+    return null;
 }
 
 function findApartmentAnswer(question) {
