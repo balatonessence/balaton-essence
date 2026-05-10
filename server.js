@@ -2390,119 +2390,158 @@ app.get('/api/ical/:aptId.ics', async (req, res) => {
     }
 });
 
-app.post('/api/sync', requireAdmin, async (req, res) => {
-    try {
-        let hasChange = false;
-        let finalCount = 0;
+async function syncAllCalendars() {
+    let hasChange = false;
+    let finalCount = 0;
 
-        await updateDbContent(async db => {
-            for (const apt of db.apartments) {
-                const sources = [
-                    { url: apt.icalBooking, name: 'booking' },
-                    { url: apt.icalSzallas, name: 'szallas' }
-                ];
+    await updateDbContent(async db => {
+        for (const apt of db.apartments) {
+            const sources = [
+                { url: apt.icalBooking, name: 'booking' },
+                { url: apt.icalSzallas, name: 'szallas' }
+            ];
 
-                for (const sourceDef of sources) {
-                    const url = sourceDef.url;
-                    if (!url || !String(url).startsWith('http')) continue;
+            for (const sourceDef of sources) {
+                const url = sourceDef.url;
+                if (!url || !String(url).startsWith('http')) continue;
 
-                    try {
-                        const response = await axios.get(url, { timeout: 10000 });
-                        const parsed = ical.parseICS(response.data);
-                        const incomingEvents = [];
+                try {
+                    const response = await axios.get(url, {
+                        timeout: 10000,
+                        headers: {
+                            'User-Agent': 'Mozilla/5.0 (Balaton Essence iCal Sync)',
+                            'Accept': 'text/calendar,text/plain,*/*'
+                        }
+                    });
 
-                        for (const key in parsed) {
-                            const event = parsed[key];
-                            if (!event || event.type !== 'VEVENT') continue;
+                    const parsed = ical.parseICS(response.data);
+                    const incomingEvents = [];
 
-                            const start = normalizeIcalDate(event.start);
-                            const end = normalizeIcalDate(event.end);
+                    for (const key in parsed) {
+                        const event = parsed[key];
+                        if (!event || event.type !== 'VEVENT') continue;
 
-                            if (!start || !end) continue;
+                        const start = normalizeIcalDate(event.start);
+                        const end = normalizeIcalDate(event.end);
 
-                            const rawSummary = String(event.summary || '').trim();
-                            const rawSummaryLower = rawSummary.toLowerCase();
+                        if (!start || !end) continue;
 
-                            let bookingType = 'reservation';
-                            let displayName = 'Külső foglalás';
+                        const rawSummary = String(event.summary || '').trim();
+                        const rawSummaryLower = rawSummary.toLowerCase();
 
-                            if (rawSummaryLower.includes('not available')) {
-                                bookingType = 'blocked';
-                                displayName = 'Zárolt időszak';
-                            } else if (rawSummaryLower.includes('reserved')) {
-                                bookingType = 'reservation';
-                                displayName = 'Külső foglalás';
-                            } else if (rawSummary) {
-                                displayName = rawSummary;
-                            }
+                        let bookingType = 'reservation';
+                        let displayName = 'Külső foglalás';
 
-                            const stableExternalId = event.uid
-                                ? `${apt.id}__${sourceDef.name}__${event.uid}`
-                                : `${apt.id}__${sourceDef.name}__${start}__${end}__${rawSummary}`;
-
-                            incomingEvents.push({
-                                icalId: stableExternalId,
-                                aptId: apt.id,
-                                aptName: apt.name,
-                                guestName: displayName,
-                                type: bookingType,
-                                rawSummary,
-                                checkIn: start,
-                                checkOut: end,
-                                source: sourceDef.name,
-                                status: 'confirmed',
-                                importedFrom: sourceDef.name,
-                                syncedAt: new Date().toISOString()
-                            });
+                        if (
+                            rawSummaryLower.includes('not available') ||
+                            rawSummaryLower.includes('unavailable') ||
+                            rawSummaryLower.includes('blocked')
+                        ) {
+                            bookingType = 'blocked';
+                            displayName = 'Zárolt időszak';
+                        } else if (
+                            rawSummaryLower.includes('reserved') ||
+                            rawSummaryLower.includes('reservation')
+                        ) {
+                            bookingType = 'reservation';
+                            displayName = 'Külső foglalás';
+                        } else if (rawSummary) {
+                            displayName = rawSummary;
                         }
 
-                        
+                        const stableExternalId = event.uid
+                            ? `${apt.id}__${sourceDef.name}__${event.uid}`
+                            : `${apt.id}__${sourceDef.name}__${start}__${end}__${rawSummary}`;
 
-                        for (const incoming of incomingEvents) {
-                            const existingIndex = db.bookings.findIndex(
-                                b => b.icalId === incoming.icalId
-                            );
+                        incomingEvents.push({
+                            icalId: stableExternalId,
+                            aptId: apt.id,
+                            aptName: apt.name,
+                            guestName: displayName,
+                            type: bookingType,
+                            rawSummary,
+                            checkIn: start,
+                            checkOut: end,
+                            source: sourceDef.name,
+                            status: 'confirmed',
+                            importedFrom: sourceDef.name,
+                            syncedAt: new Date().toISOString()
+                        });
+                    }
 
-                            if (existingIndex === -1) {
-                                db.bookings.push({
-                                    id: generateId('ical'),
-                                    ...incoming
-                                });
+                    const incomingIds = new Set(incomingEvents.map(ev => ev.icalId));
+                    const beforeCount = db.bookings.length;
+
+                    db.bookings = db.bookings.filter(b => {
+                        const isMatchingImportedBooking =
+                            String(b.aptId) === String(apt.id) &&
+                            b.source === sourceDef.name &&
+                            !!b.icalId;
+
+                        if (!isMatchingImportedBooking) return true;
+                        return incomingIds.has(b.icalId);
+                    });
+
+                    if (db.bookings.length !== beforeCount) {
+                        hasChange = true;
+                    }
+
+                    for (const incoming of incomingEvents) {
+                        const existingIndex = db.bookings.findIndex(
+                            b => b.icalId === incoming.icalId
+                        );
+
+                        if (existingIndex === -1) {
+                            db.bookings.push({
+                                id: generateId('ical'),
+                                ...incoming
+                            });
+                            hasChange = true;
+                        } else {
+                            const existing = db.bookings[existingIndex];
+
+                            const changed =
+                                existing.guestName !== incoming.guestName ||
+                                existing.checkIn !== incoming.checkIn ||
+                                existing.checkOut !== incoming.checkOut ||
+                                existing.aptName !== incoming.aptName ||
+                                existing.status !== incoming.status ||
+                                existing.rawSummary !== incoming.rawSummary ||
+                                existing.type !== incoming.type;
+
+                            if (changed) {
+                                db.bookings[existingIndex] = {
+                                    ...existing,
+                                    ...incoming,
+                                    id: existing.id
+                                };
                                 hasChange = true;
                             } else {
-                                const existing = db.bookings[existingIndex];
-
-                                const changed =
-                                    existing.guestName !== incoming.guestName ||
-                                    existing.checkIn !== incoming.checkIn ||
-                                    existing.checkOut !== incoming.checkOut ||
-                                    existing.aptName !== incoming.aptName ||
-                                    existing.status !== incoming.status ||
-                                    existing.rawSummary !== incoming.rawSummary;
-
-                                if (changed) {
-                                    db.bookings[existingIndex] = {
-                                        ...existing,
-                                        ...incoming,
-                                        id: existing.id
-                                    };
-                                    hasChange = true;
-                                } else {
-                                    db.bookings[existingIndex].syncedAt = new Date().toISOString();
-                                }
+                                db.bookings[existingIndex].syncedAt = new Date().toISOString();
                             }
                         }
-                    } catch (err) {
-                        console.error(`Sync hiba [${sourceDef.name}] ${apt.name}:`, err.message);
                     }
+                } catch (err) {
+                    console.error(`Sync hiba [${sourceDef.name}] ${apt.name}:`, err.message);
                 }
             }
+        }
 
-            finalCount = db.bookings.length;
-            return db;
-        });
+        finalCount = db.bookings.length;
+        return db;
+    });
 
-        res.json({ success: true, changed: hasChange, bookingsCount: finalCount });
+    return {
+        success: true,
+        changed: hasChange,
+        bookingsCount: finalCount
+    };
+}
+
+app.post('/api/sync', requireAdmin, async (req, res) => {
+    try {
+        const result = await syncAllCalendars();
+        res.json(result);
     } catch (e) {
         console.error('Általános sync hiba:', e);
         res.status(500).json({ error: e.message });
@@ -2878,6 +2917,25 @@ function startScheduledGuestEmails() {
 }
 
 startScheduledGuestEmails();
+
+function startAutomaticCalendarSync() {
+    const run = () => {
+        syncAllCalendars()
+            .then(result => {
+                console.log(
+                    `Automatikus iCal sync lefutott | változás: ${result.changed ? 'igen' : 'nem'} | foglalások: ${result.bookingsCount}`
+                );
+            })
+            .catch(err => {
+                console.error('Automatikus iCal sync hiba:', err);
+            });
+    };
+
+    setTimeout(run, 60 * 1000); // szerverindulás után 1 perccel első sync
+    setInterval(run, 30 * 60 * 1000); // utána 30 percenként
+}
+
+startAutomaticCalendarSync();
 
 // -----------------------------------------------------------------------------
 // START
