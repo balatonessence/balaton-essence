@@ -657,20 +657,23 @@
     let chatRefreshTimer = null;
 
     function chooseProfile(profile) {
-        if (!['Kristóf', 'Balaton Essence'].includes(profile)) return;
+    if (!['Kristóf', 'Balaton Essence'].includes(profile)) return;
 
-        currentProfile = profile;
-        localStorage.setItem('todoCurrentProfile', profile);
+    currentProfile = profile;
+    localStorage.setItem('todoCurrentProfile', profile);
 
-        currentProfileName.textContent = profile;
-        profileScreen.classList.add('hidden');
-    }
+    currentProfileName.textContent = profile;
+    profileScreen.classList.add('hidden');
+
+    latestMessageSignature = '';
+    fetchMessages(true);
+}
 
     function changeProfile() {
-        currentProfile = '';
-        localStorage.removeItem('todoCurrentProfile');
-        profileScreen.classList.remove('hidden');
-    }
+    currentProfile = '';
+    localStorage.removeItem('todoCurrentProfile');
+    profileScreen.classList.remove('hidden');
+}
     
     function getAdminToken() {
     let token = sessionStorage.getItem('ADMIN_TOKEN');
