@@ -1336,6 +1336,34 @@
                 </div>
             </section>
 
+            <section class="section section-booking">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">⛔</div>
+                        <div>
+                            <h2>Zárolt időszakok</h2>
+                            <div class="section-subtitle">Külső naptárból érkező blokkolások, nem tényleges foglalások.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="section-body">
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Ingatlan</th>
+                                    <th>Megnevezés</th>
+                                    <th>Dátum</th>
+                                    <th>Forrás</th>
+                                    <th>Művelet</th>
+                                </tr>
+                            </thead>
+                            <tbody id="blocked-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
             <section class="section section-breakfast">
                 <div class="section-header">
                     <div class="section-title-wrap">
@@ -2450,6 +2478,7 @@ function initGallerySorting() {
 
         renderStats();
         renderBookings();
+        renderBlockedBookings();
         renderBreakfasts();
         renderExtras();
         renderServices();
@@ -2506,44 +2535,58 @@ function initGallerySorting() {
         `;
     }
 
-    function renderBookings() {
-        const body = document.getElementById('booking-table-body');
-        if (!body) return;
+    function isBlockedBooking(b) {
+    const guest = String(b.guestName || '').toLowerCase();
+    const type = String(b.type || '').toLowerCase();
+    const status = String(b.status || '').toLowerCase();
 
-        const bookings = db.bookings || [];
+    return (
+        guest === 'zárolt időszak' ||
+        guest === 'zarolt idoszak' ||
+        type === 'blocked' ||
+        type === 'manual-block' ||
+        status === 'blocked'
+    );
+}
 
-        if (bookings.length === 0) {
-            body.innerHTML = `<tr><td colspan="5"><div class="empty-state">Még nincs apartman foglalás.</div></td></tr>`;
-            return;
-        }
+function renderBookings() {
+    const body = document.getElementById('booking-table-body');
+    if (!body) return;
 
-        body.innerHTML = bookings.map(b => {
-            const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
-            const isIcalBooking = !!b.icalId;
-            const price = Number(b.totalPrice || b.total || 0);
+    const bookings = (db.bookings || []).filter(b => !isBlockedBooking(b));
 
-            const priceHtml = isIcalBooking
-                ? `<div class="muted" style="font-size:0.75rem; font-weight:800;">Külső foglalás</div>`
-                : `<div class="price-text">${price.toLocaleString('hu-HU')} Ft</div>`;
-
-            const source = (b.source || 'web').toLowerCase();
-
-            return `
-                <tr>
-                    <td><strong>${escapeHtml(apt ? apt.name : 'Ismeretlen')}</strong></td>
-                    <td>
-                        <div style="font-weight:700;">${escapeHtml(b.guestName || 'Vendég')}</div>
-                        ${priceHtml}
-                    </td>
-                    <td>
-                        <div>${escapeHtml(b.checkIn || '')} &rarr; ${escapeHtml(b.checkOut || b.end || '')}</div>
-                    </td>
-                    <td><span class="badge badge-${escapeHtml(source)}">${escapeHtml(source.toUpperCase())}</span></td>
-                    <td><button class="btn btn-danger btn-mini" onclick="deleteItem('bookings', '${escapeHtml(b.id)}')">Törlés</button></td>
-                </tr>
-            `;
-        }).join('');
+    if (bookings.length === 0) {
+        body.innerHTML = `<tr><td colspan="5"><div class="empty-state">Még nincs valódi apartman foglalás.</div></td></tr>`;
+        return;
     }
+
+    body.innerHTML = bookings.map(b => {
+        const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
+        const isIcalBooking = !!b.icalId;
+        const price = Number(b.totalPrice || b.total || 0);
+
+        const priceHtml = isIcalBooking
+            ? `<div class="muted" style="font-size:0.75rem; font-weight:800;">Külső foglalás</div>`
+            : `<div class="price-text">${price.toLocaleString('hu-HU')} Ft</div>`;
+
+        const source = (b.source || 'web').toLowerCase();
+
+        return `
+            <tr>
+                <td><strong>${escapeHtml(apt ? apt.name : 'Ismeretlen')}</strong></td>
+                <td>
+                    <div style="font-weight:700;">${escapeHtml(b.guestName || 'Vendég')}</div>
+                    ${priceHtml}
+                </td>
+                <td>
+                    <div>${escapeHtml(b.checkIn || '')} &rarr; ${escapeHtml(b.checkOut || b.end || '')}</div>
+                </td>
+                <td><span class="badge badge-${escapeHtml(source)}">${escapeHtml(source.toUpperCase())}</span></td>
+                <td><button class="btn btn-danger btn-mini" onclick="deleteItem('bookings', '${escapeHtml(b.id)}')">Törlés</button></td>
+            </tr>
+        `;
+    }).join('');
+}
 
     function renderBreakfasts() {
         const body = document.getElementById('breakfast-table-body');
