@@ -542,32 +542,25 @@
         }
 
          html {
-            background: #101711;
             scrollbar-width: thin;
-            scrollbar-color: rgba(200, 164, 107, 0.85) #101711;
+            scrollbar-color: #C8A46B transparent;
         }
 
-        body {
-            background: #101711;
+        ::-webkit-scrollbar {
+            width: 8px;
         }
 
-        /* Chrome, Edge, Opera */
-        html::-webkit-scrollbar {
-            width: 10px;
+        ::-webkit-scrollbar-track {
+            background: transparent;
         }
 
-        html::-webkit-scrollbar-track {
-            background: #101711;
-        }
-
-        html::-webkit-scrollbar-thumb {
-            background: rgba(200, 164, 107, 0.8);
+        ::-webkit-scrollbar-thumb {
+            background: #C8A46B;
             border-radius: 999px;
-            border: 2px solid #101711;
         }
 
-        html::-webkit-scrollbar-thumb:hover {
-            background: rgba(200, 164, 107, 1);
+        ::-webkit-scrollbar-thumb:hover {
+            background: #b28b52;
         }
 
         @media (max-width: 820px) {
