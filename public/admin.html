@@ -2588,6 +2588,37 @@ function renderBookings() {
     }).join('');
 }
 
+function renderBlockedBookings() {
+    const body = document.getElementById('blocked-table-body');
+    if (!body) return;
+
+    const blockedBookings = (db.bookings || []).filter(b => isBlockedBooking(b));
+
+    if (blockedBookings.length === 0) {
+        body.innerHTML = `<tr><td colspan="5"><div class="empty-state">Nincs zárolt időszak.</div></td></tr>`;
+        return;
+    }
+
+    body.innerHTML = blockedBookings.map(b => {
+        const apt = db.apartments.find(a => String(a.id) === String(b.aptId));
+        const source = (b.source || 'web').toLowerCase();
+
+        return `
+            <tr>
+                <td><strong>${escapeHtml(apt ? apt.name : 'Ismeretlen')}</strong></td>
+                <td>
+                    <div style="font-weight:700;">${escapeHtml(b.guestName || 'Zárolt időszak')}</div>
+                </td>
+                <td>
+                    <div>${escapeHtml(b.checkIn || '')} &rarr; ${escapeHtml(b.checkOut || b.end || '')}</div>
+                </td>
+                <td><span class="badge badge-${escapeHtml(source)}">${escapeHtml(source.toUpperCase())}</span></td>
+                <td><button class="btn btn-danger btn-mini" onclick="deleteItem('bookings', '${escapeHtml(b.id)}')">Törlés</button></td>
+            </tr>
+        `;
+    }).join('');
+}
+
     function renderBreakfasts() {
         const body = document.getElementById('breakfast-table-body');
         if (!body) return;
