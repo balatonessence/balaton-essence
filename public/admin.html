@@ -2896,12 +2896,24 @@ function renderBookings() {
                     <div style="font-weight:700;">${escapeHtml(b.guestName || 'Vendég')}</div>
                     ${priceHtml}
                 </td>
-                <td>
-                    <div>${escapeHtml(b.checkIn || '')} &rarr; ${escapeHtml(b.checkOut || b.end || '')}</div>
-                </td>
-                <td><span class="badge badge-${escapeHtml(source)}">${escapeHtml(source.toUpperCase())}</span></td>
-                <td>
-                    <div class="row-actions">
+            <td>
+                <div>${escapeHtml(b.checkIn || '')} &rarr; ${escapeHtml(b.checkOut || b.end || '')}</div>
+            </td>
+
+            <td>
+                ${
+                    b.createdAt
+                        ? new Date(b.createdAt).toLocaleDateString('hu-HU')
+                        : b.syncedAt
+                            ? `Szinkron: ${new Date(b.syncedAt).toLocaleDateString('hu-HU')}`
+                            : '—'
+                }
+            </td>
+
+            <td><span class="badge badge-${escapeHtml(source)}">${escapeHtml(source.toUpperCase())}</span></td>
+
+            <td>
+                <div class="row-actions">
                         ${isIcalBooking ? `
                             <button
                                 class="btn btn-outline btn-mini"
