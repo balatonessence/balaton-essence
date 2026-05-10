@@ -155,9 +155,9 @@
 
     let liveApartments = [];
     let liveServices = {
-    sun: [],
-    moments: []
-};
+        sun: [],
+        moments: []
+    };
 let liveBookings = [];
 
 async function loadLiveData() {
@@ -165,7 +165,7 @@ async function loadLiveData() {
         const res = await fetch('/api/get-db-content?t=' + Date.now());
 
         if (!res.ok) {
-            throw new Error('Nem sikerült betölteni az adatokat.');
+            throw new Error('Nem sikerült betölteni az élő adatokat.');
         }
 
         const db = await res.json();
@@ -174,18 +174,18 @@ async function loadLiveData() {
             ? db.apartments
             : [];
 
-        liveServices = db.services || {
+        liveServices = {
+            sun: Array.isArray(db.services?.sun) ? db.services.sun : [],
+            moments: Array.isArray(db.services?.moments) ? db.services.moments : []
+        };
+    } catch (err) {
+        console.error('Élő adatok betöltési hiba:', err);
+
+        liveApartments = [];
+        liveServices = {
             sun: [],
             moments: []
         };
-
-        liveBookings = Array.isArray(db.bookings)
-            ? db.bookings
-            : [];
-    } catch (err) {
-        console.error('Asszisztens adatbetöltési hiba:', err);
-        liveApartments = [];
-        liveBookings = [];
     }
 }
 
@@ -890,7 +890,6 @@ function findApartmentAnswer(question) {
 
     return `${apt.name} ${apt.location} településen található. Címe: ${apt.address}. ${getSeasonPriceText(apt)}.`;
 }
-
 function findAnswer(question) {
     const serviceAnswer = findServiceAnswer(question);
 
