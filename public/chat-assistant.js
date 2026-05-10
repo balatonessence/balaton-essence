@@ -730,7 +730,43 @@ function findServiceAnswer(question) {
     const allServices = [
         ...(liveServices.sun || []),
         ...(liveServices.moments || [])
-    ];
+    ].filter(service => service.active !== false);
+
+    if (allServices.length === 0) {
+        return null;
+    }
+
+    const asksCheapest =
+        q.includes('legolcsobb') ||
+        q.includes('legkedvezobb') ||
+        q.includes('legkisebb ar') ||
+        q.includes('legolcsob szolgaltatas');
+
+    if (asksCheapest) {
+        const cheapest = allServices
+            .filter(service => Number(service.price || 0) > 0)
+            .sort((a, b) => Number(a.price) - Number(b.price))[0];
+
+        if (cheapest) {
+            const unit = cheapest.unit_hu ? ` / ${cheapest.unit_hu}` : '';
+            return `A legolcsóbb szolgáltatás jelenleg: ${cheapest.name_hu}, ${formatPrice(cheapest.price)}${unit}.`;
+        }
+    }
+
+    const asksMostExpensive =
+        q.includes('legdragabb') ||
+        q.includes('legmagasabb ar');
+
+    if (asksMostExpensive) {
+        const mostExpensive = allServices
+            .filter(service => Number(service.price || 0) > 0)
+            .sort((a, b) => Number(b.price) - Number(a.price))[0];
+
+        if (mostExpensive) {
+            const unit = mostExpensive.unit_hu ? ` / ${mostExpensive.unit_hu}` : '';
+            return `A legdrágább szolgáltatás jelenleg: ${mostExpensive.name_hu}, ${formatPrice(mostExpensive.price)}${unit}.`;
+        }
+    }
 
     const service = allServices.find(item => {
         const names = [
@@ -753,9 +789,7 @@ function findServiceAnswer(question) {
         q.includes('mennyibe') ||
         q.includes('mennyi') ||
         q.includes('ar') ||
-        q.includes('ár') ||
-        q.includes('kerul') ||
-        q.includes('kerül');
+        q.includes('kerul');
 
     if (asksPrice) {
         const unit = service.unit_hu ? ` / ${service.unit_hu}` : '';
