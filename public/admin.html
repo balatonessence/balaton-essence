@@ -1979,6 +1979,20 @@
         return new Date(parts[0], parts[1] - 1, parts[2]);
     }
 
+    function getGeneratedIdDate(id) {
+    const parts = String(id || '').split('_');
+
+    if (parts.length < 3) return null;
+
+    const timestamp = Number(parts[1]);
+
+    if (!Number.isFinite(timestamp)) return null;
+
+    const date = new Date(timestamp);
+
+    return Number.isNaN(date.getTime()) ? null : date;
+}
+
     async function saveDb() {
         try {
             const res = await fetch('/api/save', {
@@ -2906,7 +2920,9 @@ function renderBookings() {
                         ? new Date(b.createdAt).toLocaleDateString('hu-HU')
                         : b.firstSeenAt
                             ? new Date(b.firstSeenAt).toLocaleDateString('hu-HU')
-                            : '—'
+                            : getGeneratedIdDate(b.id)
+                                ? getGeneratedIdDate(b.id).toLocaleDateString('hu-HU')
+                                : '—'
                 }
             </td>
 
