@@ -789,3 +789,12 @@
             url('img/rolunk.png') center / cover no-repeat !important;
     }
 }
+
+
+@media (max-width: 560px) {
+    .footer-credit {
+        display: block;
+        margin-left: 0;
+        margin-top: 0.35rem;
+    }
+}
