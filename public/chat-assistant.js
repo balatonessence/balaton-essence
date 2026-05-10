@@ -22,8 +22,8 @@
                     answer: 'Igen, fonyódi apartmanjainkhoz reggeli tál is rendelhető. A rendelést a foglaláshoz kapcsolódó linken keresztül lehet leadni.'
                 },
                 {
-                    keywords: ['szolgáltatás', 'szolgáltatások', 'sup', 'napozószék', 'napernyő', 'hajó'],
-                    answer: 'Elérhető többek között SUP, napozószék, napernyő, hajóbérlés, valamint reggeli és különleges tálrendelés is.'
+                    keywords: ['szolgáltatás', 'szolgáltatások', 'sup', 'napágy', 'napernyő', 'hajó'],
+                    answer: 'Elérhető többek között SUP, napágy, napernyő, hajóbérlés, valamint reggeli és különleges tálrendelés is.'
                 },
                 {
                     keywords: ['hol', 'cím', 'apartmanok', 'fonyód', 'helyszín'],
