@@ -389,34 +389,7 @@
             align-items: center;
         }
 
-        .heritage-gallery {
-            min-height: 520px;
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            grid-template-rows: repeat(2, minmax(0, 1fr));
-            gap: 1rem;
-        }
-
-        .heritage-gallery-item {
-            min-height: 250px;
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            border: 1px solid var(--border);
-            box-shadow: 0 18px 45px rgba(44, 51, 37, 0.12);
-            background-color: #ddd;
-        }
-
-        .heritage-gallery.is-single {
-            display: block;
-        }
-
-        .heritage-gallery.is-single .heritage-gallery-item {
-            min-height: 520px;
-        }
-
-        .heritage-gallery-placeholder {
-            grid-column: 1 / -1;
+        .heritage-feature-image {
             min-height: 520px;
             background:
                 linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
@@ -424,6 +397,88 @@
             border: 1px solid var(--border);
             box-shadow: 0 30px 80px rgba(44, 51, 37, 0.12);
             background-color: #ddd;
+            cursor: zoom-in;
+            position: relative;
+        }
+
+        .heritage-feature-image::after {
+            content: 'Képek megtekintése';
+            position: absolute;
+            left: 1.2rem;
+            bottom: 1.2rem;
+            padding: 0.75rem 1rem;
+            background: rgba(23,35,24,0.84);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .heritage-lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(10, 15, 12, 0.92);
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .heritage-lightbox.is-open {
+            display: flex;
+        }
+
+        .heritage-lightbox img {
+            max-width: min(1100px, 88vw);
+            max-height: 86vh;
+            object-fit: contain;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+        }
+
+        .heritage-lightbox-close,
+        .heritage-lightbox-prev,
+        .heritage-lightbox-next {
+            position: absolute;
+            border: none;
+            background: rgba(255,255,255,0.14);
+            color: white;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .heritage-lightbox-close:hover,
+        .heritage-lightbox-prev:hover,
+        .heritage-lightbox-next:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .heritage-lightbox-close {
+            top: 1.4rem;
+            right: 1.4rem;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .heritage-lightbox-prev,
+        .heritage-lightbox-next {
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 72px;
+            font-size: 2.6rem;
+        }
+
+        .heritage-lightbox-prev {
+            left: 1.4rem;
+        }
+
+        .heritage-lightbox-next {
+            right: 1.4rem;
         }
 
         .heritage-content {
@@ -726,18 +781,32 @@
                 padding: 5rem 5vw;
             }
 
-            .heritage-gallery {
-                min-height: 0;
-                gap: 0.8rem;
-            }
-
-            .heritage-gallery-item {
-                min-height: 165px;
-            }
-
-            .heritage-gallery.is-single .heritage-gallery-item,
-            .heritage-gallery-placeholder {
+            .heritage-feature-image {
                 min-height: 320px;
+            }
+
+            .heritage-lightbox {
+                padding: 1rem;
+            }
+
+            .heritage-lightbox img {
+                max-width: 94vw;
+                max-height: 78vh;
+            }
+
+            .heritage-lightbox-prev,
+            .heritage-lightbox-next {
+                width: 42px;
+                height: 58px;
+                font-size: 2rem;
+            }
+
+            .heritage-lightbox-prev {
+                left: 0.5rem;
+            }
+
+            .heritage-lightbox-next {
+                right: 0.5rem;
             }
 
             .footer-grid {
@@ -850,8 +919,15 @@
 
 <section class="heritage-section">
     <div class="heritage-grid">
-        <div id="heritage-gallery" class="heritage-gallery" aria-label="Bor Mámor Ederics Vendégház képei">
-            <div class="heritage-gallery-placeholder"></div>
+        <div id="heritage-gallery" class="heritage-feature-image" aria-label="Bor Mámor Ederics Vendégház képei"></div>
+
+        <div id="heritage-lightbox" class="heritage-lightbox" aria-hidden="true">
+            <button class="heritage-lightbox-close" type="button" onclick="closeHeritageLightbox()">×</button>
+            <button class="heritage-lightbox-prev" type="button" onclick="changeHeritageImage(-1)">‹</button>
+
+            <img id="heritage-lightbox-image" src="" alt="Bor Mámor Ederics Vendégház kép">
+
+            <button class="heritage-lightbox-next" type="button" onclick="changeHeritageImage(1)">›</button>
         </div>
 
         <div class="heritage-content">
@@ -992,9 +1068,13 @@
 </footer>
 
 <script>
+    let heritageImages = [];
+    let currentHeritageImageIndex = 0;
+
     document.addEventListener('DOMContentLoaded', () => {
         initHeaderScroll();
         initAboutGallery();
+        initHeritageLightboxEvents();
     });
 
     function initHeaderScroll() {
@@ -1015,9 +1095,9 @@
     }
 
     async function initAboutGallery() {
-        const gallery = document.getElementById('heritage-gallery');
+        const featureImage = document.getElementById('heritage-gallery');
 
-        if (!gallery) return;
+        if (!featureImage) return;
 
         try {
             const res = await fetch('/api/get-db-content?t=' + Date.now());
@@ -1028,50 +1108,88 @@
 
             const db = await res.json();
 
-            const images = Array.isArray(db?.siteContent?.aboutGalleryImages)
-                ? db.siteContent.aboutGalleryImages
+            heritageImages = Array.isArray(db.aboutHeritageImages)
+                ? db.aboutHeritageImages
                     .map(img => safeImageUrl(img))
                     .filter(Boolean)
                     .slice(0, 4)
                 : [];
 
-            renderAboutGallery(images);
+            if (heritageImages.length === 0) {
+                heritageImages = ['img/bor-mamor-ederics.jpg'];
+            }
+
+            renderHeritageFeatureImage();
         } catch (error) {
             console.error('Rólunk galéria betöltési hiba:', error);
-            renderAboutGallery([]);
+            heritageImages = ['img/bor-mamor-ederics.jpg'];
+            renderHeritageFeatureImage();
         }
     }
 
-    function renderAboutGallery(images) {
-        const gallery = document.getElementById('heritage-gallery');
+    function renderHeritageFeatureImage() {
+        const featureImage = document.getElementById('heritage-gallery');
 
-        if (!gallery) return;
+        if (!featureImage || heritageImages.length === 0) return;
 
-        if (!Array.isArray(images) || images.length === 0) {
-            gallery.classList.add('is-single');
-            gallery.innerHTML = `
-                <div
-                    class="heritage-gallery-item"
-                    style="background-image:
-                        linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
-                        url('img/bor-mamor-ederics.jpg');"
-                    aria-label="Bor Mámor Ederics Vendégház"
-                ></div>
-            `;
-            return;
-        }
+        featureImage.style.backgroundImage = `
+            linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
+            url('${heritageImages[0]}')
+        `;
 
-        gallery.classList.toggle('is-single', images.length === 1);
+        featureImage.onclick = openHeritageLightbox;
+    }
 
-        gallery.innerHTML = images.map((image, index) => `
-            <div
-                class="heritage-gallery-item"
-                style="background-image:
-                    linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
-                    url('${image}');"
-                aria-label="Bor Mámor Ederics Vendégház kép ${index + 1}"
-            ></div>
-        `).join('');
+    function openHeritageLightbox() {
+        if (heritageImages.length === 0) return;
+
+        currentHeritageImageIndex = 0;
+
+        const lightbox = document.getElementById('heritage-lightbox');
+        const image = document.getElementById('heritage-lightbox-image');
+
+        image.src = heritageImages[currentHeritageImageIndex];
+        lightbox.classList.add('is-open');
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeHeritageLightbox() {
+        const lightbox = document.getElementById('heritage-lightbox');
+
+        lightbox.classList.remove('is-open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    function changeHeritageImage(direction) {
+        if (heritageImages.length === 0) return;
+
+        currentHeritageImageIndex =
+            (currentHeritageImageIndex + direction + heritageImages.length) % heritageImages.length;
+
+        document.getElementById('heritage-lightbox-image').src =
+            heritageImages[currentHeritageImageIndex];
+    }
+
+    function initHeritageLightboxEvents() {
+        const lightbox = document.getElementById('heritage-lightbox');
+
+        if (!lightbox) return;
+
+        lightbox.addEventListener('click', event => {
+            if (event.target.id === 'heritage-lightbox') {
+                closeHeritageLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', event => {
+            if (!lightbox.classList.contains('is-open')) return;
+
+            if (event.key === 'Escape') closeHeritageLightbox();
+            if (event.key === 'ArrowLeft') changeHeritageImage(-1);
+            if (event.key === 'ArrowRight') changeHeritageImage(1);
+        });
     }
 
     function safeImageUrl(value) {

@@ -389,39 +389,97 @@
             align-items: center;
         }
 
-        .heritage-gallery {
+        .heritage-feature-image {
             min-height: 520px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 1rem;
-        }
-
-        .heritage-gallery-item {
-            min-height: 252px;
-            border: 1px solid var(--border);
-            box-shadow: 0 20px 50px rgba(44, 51, 37, 0.12);
-            background-color: #ddd;
-            background-position: center;
-            background-size: cover;
-            background-repeat: no-repeat;
-        }
-
-        .heritage-gallery.is-single {
-            grid-template-columns: 1fr;
-        }
-
-        .heritage-gallery.is-single .heritage-gallery-item {
-            min-height: 520px;
-        }
-
-        .heritage-gallery-placeholder {
-            min-height: 520px;
-            border: 1px solid var(--border);
-            box-shadow: 0 30px 80px rgba(44, 51, 37, 0.12);
             background:
                 linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
                 url('../img/bor-mamor-ederics.jpg') center/cover no-repeat;
+            border: 1px solid var(--border);
+            box-shadow: 0 30px 80px rgba(44, 51, 37, 0.12);
+            background-color: #ddd;
+            cursor: zoom-in;
+            position: relative;
         }
+
+        .heritage-feature-image::after {
+            content: 'View images';
+            position: absolute;
+            left: 1.2rem;
+            bottom: 1.2rem;
+            padding: 0.75rem 1rem;
+            background: rgba(23,35,24,0.84);
+            color: white;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .heritage-lightbox {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(10, 15, 12, 0.92);
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .heritage-lightbox.is-open {
+            display: flex;
+        }
+
+        .heritage-lightbox img {
+            max-width: min(1100px, 88vw);
+            max-height: 86vh;
+            object-fit: contain;
+            box-shadow: 0 24px 80px rgba(0,0,0,0.45);
+        }
+
+        .heritage-lightbox-close,
+        .heritage-lightbox-prev,
+        .heritage-lightbox-next {
+            position: absolute;
+            border: none;
+            background: rgba(255,255,255,0.14);
+            color: white;
+            cursor: pointer;
+            transition: 0.2s ease;
+        }
+
+        .heritage-lightbox-close:hover,
+        .heritage-lightbox-prev:hover,
+        .heritage-lightbox-next:hover {
+            background: rgba(255,255,255,0.25);
+        }
+
+        .heritage-lightbox-close {
+            top: 1.4rem;
+            right: 1.4rem;
+            width: 46px;
+            height: 46px;
+            border-radius: 50%;
+            font-size: 2rem;
+            line-height: 1;
+        }
+
+        .heritage-lightbox-prev,
+        .heritage-lightbox-next {
+            top: 50%;
+            transform: translateY(-50%);
+            width: 52px;
+            height: 72px;
+            font-size: 2.6rem;
+        }
+
+        .heritage-lightbox-prev {
+            left: 1.4rem;
+        }
+
+        .heritage-lightbox-next {
+            right: 1.4rem;
+}
 
         .heritage-content {
             background: white;
@@ -723,18 +781,32 @@
                 padding: 5rem 5vw;
             }
 
-            .heritage-gallery {
-                min-height: 0;
-                gap: 0.8rem;
-            }
-
-            .heritage-gallery-item {
-                min-height: 165px;
-            }
-
-            .heritage-gallery.is-single .heritage-gallery-item,
-            .heritage-gallery-placeholder {
+            .heritage-feature-image {
                 min-height: 320px;
+            }
+
+            .heritage-lightbox {
+                padding: 1rem;
+            }
+
+            .heritage-lightbox img {
+                max-width: 94vw;
+                max-height: 78vh;
+            }
+
+            .heritage-lightbox-prev,
+            .heritage-lightbox-next {
+                width: 42px;
+                height: 58px;
+                font-size: 2rem;
+            }
+
+            .heritage-lightbox-prev {
+                left: 0.5rem;
+            }
+
+            .heritage-lightbox-next {
+                right: 0.5rem;
             }
 
             .footer-grid {
@@ -847,7 +919,16 @@
 
 <section class="heritage-section">
     <div class="heritage-grid">
-        <div id="heritage-gallery" class="heritage-gallery" aria-label="Bor Mámor Ederics Guesthouse gallery"></div>
+        <div id="heritage-gallery" class="heritage-feature-image" aria-label="Bor Mámor Ederics Guesthouse gallery"></div>
+
+        <div id="heritage-lightbox" class="heritage-lightbox" aria-hidden="true">
+            <button class="heritage-lightbox-close" type="button" onclick="closeHeritageLightbox()">×</button>
+            <button class="heritage-lightbox-prev" type="button" onclick="changeHeritageImage(-1)">‹</button>
+
+            <img id="heritage-lightbox-image" src="" alt="Bor Mámor Ederics Guesthouse image">
+
+            <button class="heritage-lightbox-next" type="button" onclick="changeHeritageImage(1)">›</button>
+        </div>
 
         <div class="heritage-content">
             <div class="section-kicker">Where it all began</div>
@@ -988,9 +1069,13 @@
 </footer>
 
 <script>
+    let heritageImages = [];
+    let currentHeritageImageIndex = 0;
+
     document.addEventListener('DOMContentLoaded', () => {
         initHeaderScroll();
-        loadHeritageGallery();
+        initAboutGallery();
+        initHeritageLightboxEvents();
     });
 
     function initHeaderScroll() {
@@ -1010,37 +1095,114 @@
         window.addEventListener('scroll', update);
     }
 
-    async function loadHeritageGallery() {
-        const gallery = document.getElementById('heritage-gallery');
+    async function initAboutGallery() {
+        const featureImage = document.getElementById('heritage-gallery');
 
-        if (!gallery) return;
+        if (!featureImage) return;
 
         try {
             const res = await fetch('/api/get-db-content?t=' + Date.now());
-            const db = await res.json();
 
-            const images = Array.isArray(db.aboutHeritageImages)
-                ? db.aboutHeritageImages.filter(Boolean)
-                : [];
-
-            if (images.length === 0) {
-                gallery.className = 'heritage-gallery-placeholder';
-                return;
+            if (!res.ok) {
+                throw new Error('Could not load gallery images.');
             }
 
-            gallery.className = `heritage-gallery ${images.length === 1 ? 'is-single' : ''}`;
-            gallery.innerHTML = images.slice(0, 4).map(img => `
-                <div
-                    class="heritage-gallery-item"
-                    style="background-image:
-                        linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
-                        url('${img}')"
-                ></div>
-            `).join('');
-        } catch (err) {
-            console.error('Heritage gallery load error:', err);
-            gallery.className = 'heritage-gallery-placeholder';
+            const db = await res.json();
+
+            heritageImages = Array.isArray(db.aboutHeritageImages)
+                ? db.aboutHeritageImages
+                    .map(img => safeImageUrl(img))
+                    .filter(Boolean)
+                    .slice(0, 4)
+                : [];
+
+            if (heritageImages.length === 0) {
+                heritageImages = ['../img/bor-mamor-ederics.jpg'];
+            }
+
+            renderHeritageFeatureImage();
+        } catch (error) {
+            console.error('About gallery load error:', error);
+            heritageImages = ['../img/bor-mamor-ederics.jpg'];
+            renderHeritageFeatureImage();
         }
+    }
+
+    function renderHeritageFeatureImage() {
+        const featureImage = document.getElementById('heritage-gallery');
+
+        if (!featureImage || heritageImages.length === 0) return;
+
+        featureImage.style.backgroundImage = `
+            linear-gradient(rgba(10,15,12,0.08), rgba(10,15,12,0.08)),
+            url('${heritageImages[0]}')
+        `;
+
+        featureImage.onclick = openHeritageLightbox;
+    }
+
+    function openHeritageLightbox() {
+        if (heritageImages.length === 0) return;
+
+        currentHeritageImageIndex = 0;
+
+        const lightbox = document.getElementById('heritage-lightbox');
+        const image = document.getElementById('heritage-lightbox-image');
+
+        image.src = heritageImages[currentHeritageImageIndex];
+        lightbox.classList.add('is-open');
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeHeritageLightbox() {
+        const lightbox = document.getElementById('heritage-lightbox');
+
+        lightbox.classList.remove('is-open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+    }
+
+    function changeHeritageImage(direction) {
+        if (heritageImages.length === 0) return;
+
+        currentHeritageImageIndex =
+            (currentHeritageImageIndex + direction + heritageImages.length) % heritageImages.length;
+
+        document.getElementById('heritage-lightbox-image').src =
+            heritageImages[currentHeritageImageIndex];
+    }
+
+    function initHeritageLightboxEvents() {
+        const lightbox = document.getElementById('heritage-lightbox');
+
+        if (!lightbox) return;
+
+        lightbox.addEventListener('click', event => {
+            if (event.target.id === 'heritage-lightbox') {
+                closeHeritageLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', event => {
+            if (!lightbox.classList.contains('is-open')) return;
+
+            if (event.key === 'Escape') closeHeritageLightbox();
+            if (event.key === 'ArrowLeft') changeHeritageImage(-1);
+            if (event.key === 'ArrowRight') changeHeritageImage(1);
+        });
+    }
+
+    function safeImageUrl(value) {
+        const url = String(value || '').trim();
+
+        if (!url) return '';
+        if (url.startsWith('data:image/')) return url;
+        if (url.startsWith('../img/')) return url;
+        if (url.startsWith('/img/')) return url;
+        if (url.startsWith('https://')) return url;
+
+        return '';
     }
 </script>
 <link rel="stylesheet" href="../mobile.css?v=107">
