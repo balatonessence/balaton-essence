@@ -875,41 +875,63 @@
         }
 
         #weather-widget {
-            display: none;
-        }
+    display: none;
+}
 
-        .nav-weather-pill {
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.18);
-            border-radius: 999px;
-            padding: 0.45rem 0.9rem;
-            color: white;
-            font-size: 0.78rem;
-        }
+.nav-weather-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0.46rem 0.88rem;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.11);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    color: white;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
 
-        .weather-pill-content {
-            display: flex;
-            align-items: center;
-            gap: 0.45rem;
-        }
+.weather-pill-content {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
 
-        .weather-pill-content.hidden {
-            display: none !important;
-        }
+.weather-pill-content.hidden {
+    display: none !important;
+}
 
-        .air-temp {
-            font-weight: 800;
-            color: white;
-        }
+.weather-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.28rem;
+}
 
-        .water-temp {
-            font-weight: 800;
-            color: #a9d7ff;
-        }
+.weather-icon {
+    font-size: 0.82rem;
+    line-height: 1;
+}
 
-        .weather-divider {
-            color: rgba(255,255,255,0.35);
-        }
+.air-temp {
+    font-weight: 800;
+    color: white;
+}
+
+.water-temp {
+    font-weight: 800;
+    color: #b8ddff;
+}
+
+.weather-divider {
+    width: 1px;
+    height: 14px;
+    background: rgba(255,255,255,0.28);
+}
 
         html {
             background: #101711;
@@ -1129,9 +1151,20 @@
         <a href="#contact">Kapcsolat</a>
         <a href="rolunk.html">Rólunk</a>
 
-        <div class="nav-weather-pill">
-            <span>☀️ 22°C</span>
-            <span>🌊 16°C</span>
+        <div class="nav-weather-pill" id="weather-widget">
+            <div class="weather-pill-content hidden" id="weather-content">
+                <span class="weather-item">
+                    <span class="weather-icon">☀️</span>
+                    <span class="air-temp" id="weather-temp">--°C</span>
+                </span>
+
+                <span class="weather-divider"></span>
+
+                <span class="weather-item">
+                    <span class="weather-icon">🌊</span>
+                    <span class="water-temp" id="water-temp-val">--°C</span>
+                </span>
+            </div>
         </div>
 
         <div class="lang-dropdown">
