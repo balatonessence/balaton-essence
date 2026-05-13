@@ -762,6 +762,7 @@ function ensureDbShape(db) {
     if (!Array.isArray(db.todoMessages)) db.todoMessages = [];
     if (!Array.isArray(db.pendingBookings)) db.pendingBookings = [];
     if (!Array.isArray(db.aboutHeritageImages)) db.aboutHeritageImages = [];
+    if (typeof db.aboutTeamImage !== 'string') db.aboutTeamImage = '';
 
     if (!db.services || typeof db.services !== 'object') db.services = {};
 

@@ -1025,7 +1025,12 @@
 <section class="section section-alt">
     <div class="team-wrap">
         <div class="team-card">
-            <img src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=900&auto=format&fit=crop" alt="Zsuzsa Szabó and Tamás Szabó" class="member-img">
+            <img
+                id="about-team-image"
+                src="../img/rolunk-team-placeholder.jpg"
+                alt="Balaton Essence team"
+                class="member-img"
+            >
             <h3>Zsuzsa Szabó<br>-<br>Tamás Szabó</h3>
             <p>
                 Together, we shape the details, the atmosphere and the guest experience behind Balaton Essence.
@@ -1224,16 +1229,16 @@
     }
 
     function safeImageUrl(value) {
-        const url = String(value || '').trim();
+    const url = String(value || '').trim();
 
-        if (!url) return '';
-        if (url.startsWith('data:image/')) return url;
-        if (url.startsWith('../img/')) return url;
-        if (url.startsWith('/img/')) return url;
-        if (url.startsWith('https://')) return url;
+    if (!url) return '';
+    if (url.startsWith('data:image/')) return url;
+    if (url.startsWith('img/')) return '../' + url;
+    if (url.startsWith('/img/')) return '..' + url;
+    if (url.startsWith('https://')) return url;
 
-        return '';
-    }
+    return '';
+}
 </script>
 <link rel="stylesheet" href="../mobile.css?v=107">
 <script src="../site-mobile.js?v=107"></script>

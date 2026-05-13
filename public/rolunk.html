@@ -1024,7 +1024,12 @@
 <section class="section section-alt">
     <div class="team-wrap">
         <div class="team-card">
-            <img src="https://images.unsplash.com/photo-1567532939604-b6b5b0db2604?q=80&w=900&auto=format&fit=crop" alt="Szabó Zsuzsa és Szabó Tamás" class="member-img">
+            <img
+                id="about-team-image"
+                src="img/rolunk-team-placeholder.jpg"
+                alt="Szabó Zsuzsa és Szabó Tamás"
+                class="member-img"
+            >
             <h3>Szabó Zsuzsa<br>-<br>Szabó Tamás</h3>
             <p>
                 Közösen formáljuk a Balaton Essence mögött álló részleteket, hangulatot és vendégélményt.
@@ -1137,6 +1142,16 @@
             }
 
             const db = await res.json();
+
+            const teamImage = safeImageUrl(db.aboutTeamImage);
+
+            if (teamImage) {
+                const teamImgEl = document.getElementById('about-team-image');
+
+                if (teamImgEl) {
+                    teamImgEl.src = teamImage;
+                }
+            }
 
             heritageImages = Array.isArray(db.aboutHeritageImages)
                 ? db.aboutHeritageImages

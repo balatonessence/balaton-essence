@@ -1616,6 +1616,23 @@
 
                         <div id="about-heritage-preview" class="about-gallery-admin"></div>
                     </div>
+
+                    <div class="form-group" style="margin-top:2rem; padding-top:2rem; border-top:1px solid var(--border);">
+                        <label>Csapatkép feltöltése</label>
+                        <input
+                            type="file"
+                            id="about-team-image"
+                            accept="image/*"
+                            onchange="handleAboutTeamImageUpload(event)"
+                        >
+
+                        <div class="about-gallery-note">
+                            Ez a kép jelenik meg a Rólunk oldalon a „Mi állunk mögötte” résznél, a jelenlegi Unsplash kép helyett.
+                        </div>
+
+                        <div id="about-team-preview" class="about-gallery-admin"></div>
+                    </div>
+
                 </div>
             </section>
 
@@ -2092,6 +2109,7 @@
     let syncStatusRefreshTimer = null;
     let syncCountdownTimer = null;
     let currentRecommendationImage = '';
+    let currentAboutTeamImage = '';
 
     function getAdminToken() {
         let token = sessionStorage.getItem('ADMIN_TOKEN');
@@ -2307,6 +2325,35 @@ function renderRecommendationImagePreview() {
     ` : '';
 }
 
+async function handleAboutTeamImageUpload(event) {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    currentAboutTeamImage = await compressImage(file);
+    renderAboutTeamPreview();
+
+    event.target.value = '';
+}
+
+function removeAboutTeamImage() {
+    currentAboutTeamImage = '';
+    renderAboutTeamPreview();
+}
+
+function renderAboutTeamPreview() {
+    const container = document.getElementById('about-team-preview');
+
+    if (!container) return;
+
+    container.innerHTML = currentAboutTeamImage ? `
+        <div class="image-preview-item">
+            <img src="${currentAboutTeamImage}" style="width:150px; height:110px; object-fit:cover;">
+            <div onclick="removeAboutTeamImage()" class="remove-image-btn">X</div>
+        </div>
+    ` : '';
+}
+
     async function handleAboutHeritageUpload(event) {
         const files = Array.from(event.target.files || []);
 
@@ -2373,9 +2420,10 @@ function renderRecommendationImagePreview() {
     }
 
     async function saveAboutHeritageImages() {
-        db.aboutHeritageImages = currentAboutHeritageImages.slice(0, 4);
-        await saveDb();
-    }
+    db.aboutHeritageImages = currentAboutHeritageImages.slice(0, 4);
+    db.aboutTeamImage = currentAboutTeamImage || '';
+    await saveDb();
+}
 
     function removeCoverImage() {
         currentCoverImage = null;
@@ -3023,6 +3071,7 @@ function initSyncCountdown() {
         if (!Array.isArray(db.reviews)) db.reviews = [];
         if (!Array.isArray(db.recommendations)) db.recommendations = [];
         if (!Array.isArray(db.aboutHeritageImages)) db.aboutHeritageImages = [];
+        if (typeof db.aboutTeamImage !== 'string') db.aboutTeamImage = '';
 
         if (!db.services || typeof db.services !== 'object') db.services = {};
         if (!Array.isArray(db.services.sun)) db.services.sun = [];
@@ -3031,6 +3080,8 @@ function initSyncCountdown() {
         ensureDefaultSunServices();
         currentAboutHeritageImages = [...db.aboutHeritageImages];
         renderAboutHeritagePreviews();
+        currentAboutTeamImage = db.aboutTeamImage || '';
+        renderAboutTeamPreview();
 
         renderStats();
         renderBookings();
