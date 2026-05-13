@@ -1024,8 +1024,8 @@ function getOrderTranslations(data, lang) {
             subtitle: 'Köszönjük rendelését!',
             dear: 'Kedves',
             body: data.type === 'BREAKFAST'
-                ? 'Reggeli rendelését rögzítettük. A reggelit minden nap 08:30-ig szállítjuk az apartman ajtajához.'
-                : 'Sikeresen rögzítettük strandfelszerelés foglalását. Az eszközöket a megadott időpontban veheti át.',
+                ? 'Moments rendelését rögzítettük. A kiválasztott tálat a megadott napon, a választott kiszállítási időpontban szállítjuk ki az apartmanhoz.'
+                : 'Sikeresen rögzítettük strandfelszerelés foglalását. Az eszközöket az előre egyeztetett időpontban veheti át.',
             details: 'Rendelés részletei:',
             items: 'Tételek:',
             period: 'Időszak:',
@@ -1044,8 +1044,8 @@ function getOrderTranslations(data, lang) {
             subtitle: 'Thank you for your order!',
             dear: 'Dear',
             body: data.type === 'BREAKFAST'
-                ? 'Your breakfast order has been recorded. Breakfast is delivered to your apartment door by 08:30 each morning.'
-                : 'Your beach equipment booking has been successfully recorded. You can pick up the items at the specified time.',
+                ? 'Your Moments order has been recorded. The selected platter will be delivered to your apartment on the chosen day at the selected delivery time.'
+                : 'Your beach equipment booking has been successfully recorded. You can pick up the items at the prearranged time.',
             details: 'Order Details:',
             items: 'Items:',
             period: 'Period:',
@@ -1064,8 +1064,8 @@ function getOrderTranslations(data, lang) {
             subtitle: 'Vielen Dank für Ihre Bestellung!',
             dear: 'Sehr geehrte(r)',
             body: data.type === 'BREAKFAST'
-                ? 'Ihre Frühstücksbestellung wurde registriert. Das Frühstück wird jeden Morgen bis 08:30 Uhr an Ihre Zimmertür geliefert.'
-                : 'Ihre Buchung der Strandausrüstung wurde erfolgreich registriert. Sie können die Ausrüstung zum angegebenen Zeitpunkt abholen.',
+                ? 'Ihre Moments-Bestellung wurde registriert. Die ausgewählte Platte wird am gewählten Tag zur ausgewählten Lieferzeit zu Ihrem Apartment geliefert.'
+                : 'Ihre Buchung der Strandausrüstung wurde erfolgreich registriert. Sie können die Geräte zum vereinbarten Termin abholen.',
             details: 'Bestelldetails:',
             items: 'Artikel:',
             period: 'Zeitraum:',
@@ -1253,8 +1253,188 @@ async function sendGuestBookingEmail(req, newB) {
     }
 }
 
+function parseBreakfastOrderItems(itemsText = '') {
+    const text = String(itemsText || '');
+
+    const plate = text.split('|')[0]?.trim() || '';
+    const datesMatch = text.match(/Napok:\s*([^|]+)/i);
+    const deliveryMatch = text.match(/Kiszállítás:\s*([^|]+)/i);
+    const qtyMatch = text.match(/Darab:\s*([^|]+)/i);
+    const noteMatch = text.match(/Megjegyzés:\s*([^|]+)/i);
+
+    return {
+        plate,
+        dates: datesMatch ? datesMatch[1].trim() : '',
+        deliveryTime: deliveryMatch ? deliveryMatch[1].trim() : '',
+        quantity: qtyMatch ? qtyMatch[1].trim() : '',
+        note: noteMatch ? noteMatch[1].trim() : ''
+    };
+}
+
+function formatBreakfastEmailDetails(data, t) {
+    const parsed = parseBreakfastOrderItems(data.items);
+
+    const labels = {
+        hu: {
+            plate: 'Tál:',
+            dates: 'Nap:',
+            delivery: 'Kiszállítás:',
+            quantity: 'Darab:',
+            apartment: 'Apartman:',
+            note: 'Megjegyzés:'
+        },
+        en: {
+            plate: 'Platter:',
+            dates: 'Day:',
+            delivery: 'Delivery:',
+            quantity: 'Quantity:',
+            apartment: 'Apartment:',
+            note: 'Note:'
+        },
+        de: {
+            plate: 'Platte:',
+            dates: 'Tag:',
+            delivery: 'Lieferzeit:',
+            quantity: 'Anzahl:',
+            apartment: 'Apartment:',
+            note: 'Bemerkung:'
+        }
+    };
+
+    const lang = normalizeLang(data.lang || 'hu');
+    const l = labels[lang] || labels.hu;
+
+    return `
+        ${parsed.plate ? `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.plate)}</strong> ${escapeHtml(parsed.plate)}
+            </p>
+        ` : ''}
+
+        ${parsed.dates ? `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.dates)}</strong> ${escapeHtml(parsed.dates)}
+            </p>
+        ` : ''}
+
+        ${parsed.deliveryTime ? `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.delivery)}</strong> ${escapeHtml(parsed.deliveryTime)}
+            </p>
+        ` : ''}
+
+        ${parsed.quantity ? `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.quantity)}</strong> ${escapeHtml(parsed.quantity)}
+            </p>
+        ` : ''}
+
+        <p style="margin: 10px 0; font-size: 15px;">
+            <strong>${escapeHtml(l.apartment)}</strong> ${escapeHtml(data.apartment || data.aptName || '')}
+        </p>
+
+        ${parsed.note ? `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.note)}</strong> ${escapeHtml(parsed.note)}
+            </p>
+        ` : ''}
+    `;
+}
+
+function parseBreakfastOrderItems(itemsText = '') {
+    const text = String(itemsText || '');
+
+    const plate = text.split('|')[0]?.trim() || '';
+    const datesMatch = text.match(/Napok:\s*([^|]+)/i);
+    const deliveryMatch = text.match(/Kiszállítás:\s*([^|]+)/i);
+    const qtyMatch = text.match(/Darab:\s*([^|]+)/i);
+    const noteMatch = text.match(/Megjegyzés:\s*([^|]+)/i);
+
+    return {
+        plate,
+        dates: datesMatch ? datesMatch[1].trim() : '',
+        deliveryTime: deliveryMatch ? deliveryMatch[1].trim() : '',
+        quantity: qtyMatch ? qtyMatch[1].trim() : '',
+        note: noteMatch ? noteMatch[1].trim() : ''
+    };
+}
+
+function formatBreakfastEmailDetails(data, lang) {
+    const parsed = parseBreakfastOrderItems(data.items);
+
+    const labels = {
+        hu: {
+            plate: 'Tál:',
+            dates: 'Nap:',
+            delivery: 'Kiszállítás:',
+            quantity: 'Darab:',
+            apartment: 'Apartman:',
+            note: 'Megjegyzés:'
+        },
+        en: {
+            plate: 'Platter:',
+            dates: 'Day:',
+            delivery: 'Delivery:',
+            quantity: 'Quantity:',
+            apartment: 'Apartment:',
+            note: 'Note:'
+        },
+        de: {
+            plate: 'Platte:',
+            dates: 'Tag:',
+            delivery: 'Lieferzeit:',
+            quantity: 'Anzahl:',
+            apartment: 'Apartment:',
+            note: 'Bemerkung:'
+        }
+    };
+
+    const l = labels[normalizeLang(lang || data.lang || 'hu')] || labels.hu;
+
+    return `
+        ${parsed.plate ? `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.plate)}</strong> ${escapeHtml(parsed.plate)}
+            </p>
+        ` : ''}
+
+        ${parsed.dates ? `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.dates)}</strong> ${escapeHtml(parsed.dates)}
+            </p>
+        ` : `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.dates)}</strong> ${escapeHtml(data.start || '')}
+            </p>
+        `}
+
+        ${(data.deliveryTime || parsed.deliveryTime) ? `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.delivery)}</strong> ${escapeHtml(data.deliveryTime || parsed.deliveryTime)}
+            </p>
+        ` : ''}
+
+        ${parsed.quantity ? `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.quantity)}</strong> ${escapeHtml(parsed.quantity)}
+            </p>
+        ` : ''}
+
+        <p style="margin: 10px 0; font-size: 15px;">
+            <strong>${escapeHtml(l.apartment)}</strong> ${escapeHtml(data.apartment || data.aptName || '')}
+        </p>
+
+        ${parsed.note ? `
+            <p style="margin: 10px 0; font-size: 15px;">
+                <strong>${escapeHtml(l.note)}</strong> ${escapeHtml(parsed.note)}
+            </p>
+        ` : ''}
+    `;
+}
+
 async function sendGuestOrderEmail(data, lang, method) {
-    const t = getOrderTranslations(data, lang);
+    const safeLang = normalizeLang(lang || data.lang || 'hu');
+    const t = getOrderTranslations(data, safeLang);
 
     try {
         await resend.emails.send({
@@ -1267,26 +1447,39 @@ async function sendGuestOrderEmail(data, lang, method) {
                         <h1 style="margin: 0; font-size: 26px; font-weight: 400; letter-spacing: 1px;">${escapeHtml(t.title)}</h1>
                         <p style="margin: 10px 0 0; opacity: 0.9; font-size: 16px;">${escapeHtml(t.subtitle)}</p>
                     </div>
+
                     <div style="padding: 40px 30px; color: #2c3325; line-height: 1.6;">
                         <p style="font-size: 17px;">${escapeHtml(t.dear)} <strong>${escapeHtml(data.guestName)}</strong>!</p>
                         <p style="color: #555;">${escapeHtml(t.body)}</p>
 
                         <div style="background: #f9fbf8; border: 1px solid #e2e8df; padding: 25px; border-radius: 8px; margin: 30px 0;">
                             <h3 style="margin-top: 0; color: #5c7a4d; border-bottom: 1px solid #e2e8df; padding-bottom: 10px;">${escapeHtml(t.details)}</h3>
-                            <p style="margin: 10px 0; font-size: 15px;"><strong>${escapeHtml(t.items)}</strong> ${escapeHtml(data.items)}</p>
 
-                            ${data.deliveryTime ? `
+                            ${data.type === 'BREAKFAST' ? `
+                                ${formatBreakfastEmailDetails(data, safeLang)}
+                            ` : `
                                 <p style="margin: 10px 0; font-size: 15px;">
-                                    <strong>${lang === 'hu' ? 'Kiszállítási idő:' : lang === 'de' ? 'Lieferzeit:' : 'Delivery time:'}</strong>
-                                    ${escapeHtml(data.deliveryTime)}
+                                    <strong>${escapeHtml(t.items)}</strong> ${escapeHtml(data.items)}
                                 </p>
-                            ` : ''}
 
-                            <p style="margin: 10px 0; font-size: 15px;"><strong>${escapeHtml(t.period)}</strong> ${escapeHtml(data.start)} — ${escapeHtml(data.end)} (${escapeHtml(data.days)} ${escapeHtml(t.days)})</p>
-                            <p style="margin: 10px 0; font-size: 15px;"><strong>${escapeHtml(t.pickup)}</strong> ${escapeHtml(data.apartment)}</p>
+                                <p style="margin: 10px 0; font-size: 15px;">
+                                    <strong>${escapeHtml(t.period)}</strong> ${escapeHtml(data.start)} — ${escapeHtml(data.end)} (${escapeHtml(data.days)} ${escapeHtml(t.days)})
+                                </p>
+
+                                <p style="margin: 10px 0; font-size: 15px;">
+                                    <strong>${escapeHtml(t.pickup)}</strong> ${escapeHtml(data.apartment)}
+                                </p>
+                            `}
+
                             <hr style="border: none; border-top: 1px dashed #ccc; margin: 15px 0;">
-                            <p style="margin: 5px 0; font-size: 20px; color: #5c7a4d;"><strong>${escapeHtml(t.total)} ${formatMoney(data.amount)} Ft</strong></p>
-                            <p style="margin: 0; font-size: 13px; color: #6a7063;">${escapeHtml(method === 'card' ? t.methodCard : t.methodCash)}</p>
+
+                            <p style="margin: 5px 0; font-size: 20px; color: #5c7a4d;">
+                                <strong>${escapeHtml(t.total)} ${formatMoney(data.amount)} Ft</strong>
+                            </p>
+
+                            <p style="margin: 0; font-size: 13px; color: #6a7063;">
+                                ${escapeHtml(method === 'card' ? t.methodCard : t.methodCash)}
+                            </p>
                         </div>
 
                         <p style="font-size: 14px; color: #888; font-style: italic;">${escapeHtml(t.footer)}</p>

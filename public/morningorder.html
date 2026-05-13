@@ -828,8 +828,10 @@ function updateDeliveryTimeOptions() {
                 start: formatDate(selectedDates[0]),
                 end: formatDate(selectedDates[selectedDates.length - 1]),
                 days: daysCount,
-                items: `${selectedPlate.name_hu} | Napok: ${dateList} | Darab: ${plateCount}${orderNote ? ` | Megjegyzés: ${orderNote}` : ''}`,
+                items: `${selectedPlate.name_hu} | Napok: ${dateList} | Kiszállítás: ${deliveryTime} | Darab: ${plateCount}${orderNote ? ` | Megjegyzés: ${orderNote}` : ''}`,
                 deliveryTime,
+                quantity: plateCount,
+                plateName: selectedPlate.name_hu,
                 method: paymentMethod,
                 amount: totalAmount
             };
