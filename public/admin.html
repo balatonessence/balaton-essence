@@ -3991,6 +3991,90 @@ async function deleteRecommendation(id) {
         document.getElementById('review-modal').style.display = 'none';
     }
 
+function ensureExternalGuestModal() {
+    let modal = document.getElementById('external-guest-modal-fixed');
+
+    if (modal) return modal;
+
+    modal = document.createElement('div');
+    modal.id = 'external-guest-modal-fixed';
+
+    modal.style.cssText = `
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: rgba(10, 15, 12, 0.72);
+        backdrop-filter: blur(10px);
+        padding: 24px;
+    `;
+
+    modal.innerHTML = `
+        <div style="
+            background: white;
+            width: min(520px, 94vw);
+            max-height: 88vh;
+            overflow-y: auto;
+            border-radius: 22px;
+            padding: 28px;
+            box-shadow: 0 30px 90px rgba(0,0,0,0.32);
+            position: relative;
+        ">
+            <h2 style="
+                font-family: 'Playfair Display', serif;
+                font-size: 1.8rem;
+                margin: 0 0 20px;
+                color: #172318;
+            ">
+                Külső foglalás vendégadatai
+            </h2>
+
+            <input type="hidden" id="external-booking-id">
+
+            <div class="form-group">
+                <label>Vendég neve</label>
+                <input type="text" id="external-guest-name" placeholder="Pl. Kovács Anna">
+            </div>
+
+            <div class="form-group">
+                <label>Email cím</label>
+                <input type="email" id="external-guest-email" placeholder="pelda@email.hu">
+            </div>
+
+            <div class="form-group">
+                <label>Telefonszám</label>
+                <input type="text" id="external-guest-phone" placeholder="+36 ...">
+            </div>
+
+            <div class="form-group">
+                <label>Nyelv</label>
+                <select id="external-guest-lang">
+                    <option value="hu">Magyar</option>
+                    <option value="en">English</option>
+                    <option value="de">Deutsch</option>
+                </select>
+            </div>
+
+            <div style="display:flex; gap:10px; margin-top:18px;">
+                <button class="btn btn-primary" style="flex:2;" onclick="saveExternalGuestData()">Mentés</button>
+                <button class="btn btn-outline" style="flex:1;" onclick="closeExternalGuestModal()">Mégse</button>
+            </div>
+        </div>
+    `;
+
+    modal.addEventListener('click', function (event) {
+        if (event.target === modal) {
+            closeExternalGuestModal();
+        }
+    });
+
+    document.body.appendChild(modal);
+
+    return modal;
+}
+
 function openExternalGuestModal(bookingId) {
     const id = String(bookingId || '').trim();
 
@@ -4004,44 +4088,38 @@ function openExternalGuestModal(bookingId) {
         return;
     }
 
-    const modal = document.getElementById('external-guest-modal');
-
-    if (!modal) {
-        console.error('Hiányzik az external-guest-modal elem.');
-        alert('A vendégadat modal nem található az oldalon.');
-        return;
-    }
+    const modal = ensureExternalGuestModal();
 
     document.getElementById('external-booking-id').value = booking.id || '';
 
     document.getElementById('external-guest-name').value =
         booking.manualGuestData === true
             ? (booking.guestName || '')
-            : '';
+            : (
+                String(booking.guestName || '').toLowerCase().includes('külső') ||
+                String(booking.guestName || '').toLowerCase().includes('zárolt')
+                    ? ''
+                    : booking.guestName || ''
+            );
 
     document.getElementById('external-guest-email').value = booking.email || '';
     document.getElementById('external-guest-phone').value = booking.phone || '';
     document.getElementById('external-guest-lang').value = booking.lang || 'hu';
 
     modal.style.display = 'flex';
-    modal.style.opacity = '1';
-    modal.style.visibility = 'visible';
-    modal.style.zIndex = '99999';
-    modal.classList.add('is-open');
-
     document.body.style.overflow = 'hidden';
+
+    setTimeout(() => {
+        document.getElementById('external-guest-name')?.focus();
+    }, 50);
 }
 
 function closeExternalGuestModal() {
-    const modal = document.getElementById('external-guest-modal');
+    const modal = document.getElementById('external-guest-modal-fixed');
 
-    if (!modal) return;
-
-    modal.classList.remove('is-open');
-    modal.style.display = 'none';
-    modal.style.opacity = '';
-    modal.style.visibility = '';
-    modal.style.zIndex = '';
+    if (modal) {
+        modal.style.display = 'none';
+    }
 
     document.body.style.overflow = '';
 }
@@ -4079,10 +4157,10 @@ async function saveExternalGuestData() {
     // az iCal szinkron később se írja felül.
     booking.manualGuestData = true;
 
-    await saveDb();
-    closeExternalGuestModal();
-    renderBookings();
-    renderBlockedBookings();
+await saveDb();
+closeExternalGuestModal();
+renderBookings();
+renderBlockedBookings();
 }
 
     async function saveReview() {
