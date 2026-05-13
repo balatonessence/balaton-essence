@@ -1253,6 +1253,14 @@ async function sendGuestOrderEmail(data, lang, method) {
                         <div style="background: #f9fbf8; border: 1px solid #e2e8df; padding: 25px; border-radius: 8px; margin: 30px 0;">
                             <h3 style="margin-top: 0; color: #5c7a4d; border-bottom: 1px solid #e2e8df; padding-bottom: 10px;">${escapeHtml(t.details)}</h3>
                             <p style="margin: 10px 0; font-size: 15px;"><strong>${escapeHtml(t.items)}</strong> ${escapeHtml(data.items)}</p>
+
+                            ${data.deliveryTime ? `
+                                <p style="margin: 10px 0; font-size: 15px;">
+                                    <strong>${lang === 'hu' ? 'Kiszállítási idő:' : lang === 'de' ? 'Lieferzeit:' : 'Delivery time:'}</strong>
+                                    ${escapeHtml(data.deliveryTime)}
+                                </p>
+                            ` : ''}
+
                             <p style="margin: 10px 0; font-size: 15px;"><strong>${escapeHtml(t.period)}</strong> ${escapeHtml(data.start)} — ${escapeHtml(data.end)} (${escapeHtml(data.days)} ${escapeHtml(t.days)})</p>
                             <p style="margin: 10px 0; font-size: 15px;"><strong>${escapeHtml(t.pickup)}</strong> ${escapeHtml(data.apartment)}</p>
                             <hr style="border: none; border-top: 1px dashed #ccc; margin: 15px 0;">
@@ -2262,6 +2270,7 @@ app.post('/api/order', async (req, res) => {
                     <p><strong>Telefon:</strong> ${escapeHtml(data.phone || data.tel || data.telefon || '-')}</p>
                     <p><strong>Apartman:</strong> ${escapeHtml(data.apartment || data.aptName || '')}</p>
                     <p><strong>Tételek:</strong> ${escapeHtml(data.items || data.details || '')}</p>
+                    ${order.deliveryTime ? `<p><strong>Kiszállítási idő:</strong> ${escapeHtml(order.deliveryTime)}</p>` : ''}
                     <p><strong>Idő:</strong> ${escapeHtml(order.start || '')} — ${escapeHtml(order.end || '')} (${escapeHtml(order.days || '')} nap)</p>
                     <p><strong>Összeg:</strong> ${formatMoney(amount)} Ft</p>
                     <p><strong>Fizetés:</strong> ${order.method === 'cash' ? 'Helyszíni KP' : 'Online kártya'}</p>
