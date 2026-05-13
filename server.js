@@ -93,8 +93,7 @@ function parseDateOnly(value) {
 }
 
 function todayDateOnly() {
-    const now = new Date();
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return parseDateOnly(getDateStringHu());
 }
 
 function diffDays(fromDate, toDate) {
@@ -380,55 +379,138 @@ function buildPreArrivalEmailHtml(db, booking) {
     `;
 }
 
-function buildReviewEmailHtml(db, booking) {
+function buildArrivalDayEmailHtml(db, booking) {
     const lang = getBookingLang(booking);
     const aptName = getBookingApartmentName(db, booking);
-    const reviewUrl = process.env.REVIEW_URL
-    || `${getPublicBaseUrl()}/review.html?bookingId=${encodeURIComponent(booking.id)}&lang=${lang}`;
+    const aptAddress = getBookingApartmentAddress(db, booking);
+    const baseUrl = getPublicBaseUrl();
+
+    const apartment = (db.apartments || []).find(a =>
+        String(a.id) === String(booking.aptId)
+    );
+
+    const breakfastAvailable = isFonyodApartment(apartment);
+
+    const arrivalContactPhone = apartment?.arrivalContactPhone || '+36 20 499 5484';
+
+    const morningUrl = `${baseUrl}/morningorder.html?id=${encodeURIComponent(booking.id)}&lang=${lang}`;
+
+    const sunPath = lang === 'en'
+        ? '/en/sun.html'
+        : lang === 'de'
+            ? '/de/sun.html'
+            : '/sun.html';
+
+    const sunUrl = `${baseUrl}${sunPath}?id=${encodeURIComponent(booking.id)}&lang=${lang}`;
 
     const t = {
         hu: {
-            title: 'Köszönjük, hogy nálunk pihent!',
+            title: 'Jó utat kívánunk a Balatonhoz!',
             hello: `Kedves ${booking.guestName || 'Vendégünk'}!`,
-            intro: `Reméljük, kellemesen telt a pihenés a(z) ${aptName} apartmanban.`,
-            text: 'Nagyon sokat jelentene számunkra, ha megosztaná velünk a tapasztalatait egy rövid értékelés formájában.',
-            btn: 'Értékelés írása',
-            footer: 'Köszönjük, hogy a Balaton Essence-t választotta!'
+            intro: 'Ma várjuk Önöket a Balaton Essence apartmanjaiban.',
+            apt: 'Apartman',
+            address: 'Cím',
+            checkIn: 'Check-in',
+            contact: 'Kapcsolat',
+            contactNote: 'Kérjük, hogy érkezés előtt körülbelül 30 perccel jelezzenek telefonon vagy üzenetben.',
+            extrasTitle: 'Még kényelmesebbé tenné a pihenést?',
+            breakfast: 'Moments / tálrendelés',
+            breakfastText: 'A tartózkodás további napjaira reggeli vagy különleges tál rendelését is leadhatják.',
+            breakfastBtn: 'Tál rendelése',
+            sun: 'SUP & SUN',
+            sunText: 'SUP, napozószék, napernyő vagy hajó foglalása a balatoni napokhoz.',
+            sunBtn: 'Strandfelszerelés foglalása',
+            footer: 'Szeretettel várjuk Önöket!',
+            signature: 'Balaton Essence',
+            slogan: '„Ahol az élmények emlékké válnak.”'
         },
         en: {
-            title: 'Thank you for staying with us!',
+            title: 'Have a safe trip to Lake Balaton!',
             hello: `Dear ${booking.guestName || 'Guest'},`,
-            intro: `We hope you had a pleasant stay at ${aptName}.`,
-            text: 'It would mean a lot to us if you shared your experience in a short review.',
-            btn: 'Leave a review',
-            footer: 'Thank you for choosing Balaton Essence!'
+            intro: 'We are looking forward to welcoming you today at Balaton Essence apartments.',
+            apt: 'Apartment',
+            address: 'Address',
+            checkIn: 'Check-in',
+            contact: 'Contact',
+            contactNote: 'Please contact us by phone or message approximately 30 minutes before your arrival.',
+            extrasTitle: 'Would you like to make your stay even more comfortable?',
+            breakfast: 'Moments / platter order',
+            breakfastText: 'You can still order breakfast or a special platter for the following days of your stay.',
+            breakfastBtn: 'Order a platter',
+            sun: 'SUP & SUN',
+            sunText: 'Book SUP, sunbeds, parasols or a boat for your days at Lake Balaton.',
+            sunBtn: 'Book beach equipment',
+            footer: 'We look forward to welcoming you!',
+            signature: 'Balaton Essence',
+            slogan: '“Where experiences become memories.”'
         },
         de: {
-            title: 'Vielen Dank für Ihren Aufenthalt!',
+            title: 'Wir wünschen Ihnen eine gute Reise zum Balaton!',
             hello: `Liebe/r ${booking.guestName || 'Gast'},`,
-            intro: `Wir hoffen, Sie hatten einen angenehmen Aufenthalt im Apartment ${aptName}.`,
-            text: 'Es würde uns sehr freuen, wenn Sie Ihre Erfahrung in einer kurzen Bewertung teilen würden.',
-            btn: 'Bewertung schreiben',
-            footer: 'Vielen Dank, dass Sie Balaton Essence gewählt haben!'
+            intro: 'Wir erwarten Sie heute in den Balaton Essence Apartments.',
+            apt: 'Apartment',
+            address: 'Adresse',
+            checkIn: 'Check-in',
+            contact: 'Kontakt',
+            contactNote: 'Bitte kontaktieren Sie uns etwa 30 Minuten vor Ihrer Ankunft telefonisch oder per Nachricht.',
+            extrasTitle: 'Möchten Sie Ihren Aufenthalt noch komfortabler gestalten?',
+            breakfast: 'Moments / Plattenbestellung',
+            breakfastText: 'Für die weiteren Tage Ihres Aufenthalts können Sie weiterhin Frühstück oder eine besondere Platte bestellen.',
+            breakfastBtn: 'Platte bestellen',
+            sun: 'SUP & SUN',
+            sunText: 'Buchen Sie SUP, Sonnenliegen, Sonnenschirme oder ein Boot für Ihre Tage am Plattensee.',
+            sunBtn: 'Strandausrüstung buchen',
+            footer: 'Wir freuen uns auf Sie!',
+            signature: 'Balaton Essence',
+            slogan: '„Wo Erlebnisse zu Erinnerungen werden.”'
         }
     }[lang];
 
     return `
         <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #2C3325; line-height: 1.6;">
-            <h1 style="color:#5c7a4d;">${escapeHtml(t.title)}</h1>
+            <h1 style="color:#5c7a4d; margin-bottom: 20px;">${escapeHtml(t.title)}</h1>
 
             <p>${escapeHtml(t.hello)}</p>
             <p>${escapeHtml(t.intro)}</p>
-            <p>${escapeHtml(t.text)}</p>
 
-            <div style="margin:30px 0;">
-                <a href="${reviewUrl}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:12px 24px; border-radius:24px; font-weight:bold;">
-                    ${escapeHtml(t.btn)}
-                </a>
+            <div style="background:#f9fbf8; border:1px solid #e2e8df; border-radius:10px; padding:22px; margin:25px 0;">
+                <p><strong>${escapeHtml(t.apt)}:</strong> ${escapeHtml(aptName)}</p>
+                ${aptAddress ? `<p><strong>${escapeHtml(t.address)}:</strong> ${escapeHtml(aptAddress)}</p>` : ''}
+                <p><strong>${escapeHtml(t.checkIn)}:</strong> ${escapeHtml(booking.checkIn || booking.start || '')}</p>
+                <p><strong>${escapeHtml(t.contact)}:</strong> ${escapeHtml(arrivalContactPhone)}</p>
+            </div>
+
+            <div style="background:#ffffff; border:1px solid #e2e8df; border-radius:10px; padding:20px; margin-bottom:25px;">
+                <p style="margin:0;">${escapeHtml(t.contactNote)}</p>
+            </div>
+
+            <div style="background:#f9fbf8; border:1px solid #e2e8df; border-radius:10px; padding:22px; margin:25px 0;">
+                <h3 style="margin-top:0; color:#5c7a4d;">${escapeHtml(t.extrasTitle)}</h3>
+
+                ${breakfastAvailable ? `
+                    <div style="padding:15px 0; border-bottom:1px solid #e2e8df;">
+                        <p style="margin:0 0 6px 0; font-weight:bold;">${escapeHtml(t.breakfast)}</p>
+                        <p style="margin:0 0 14px 0; color:#666; font-size:14px;">${escapeHtml(t.breakfastText)}</p>
+                        <a href="${morningUrl}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:10px 22px; border-radius:20px; font-weight:bold; font-size:13px;">
+                            ${escapeHtml(t.breakfastBtn)}
+                        </a>
+                    </div>
+                ` : ''}
+
+                <div style="padding:15px 0 0 0;">
+                    <p style="margin:0 0 6px 0; font-weight:bold;">${escapeHtml(t.sun)}</p>
+                    <p style="margin:0 0 14px 0; color:#666; font-size:14px;">${escapeHtml(t.sunText)}</p>
+                    <a href="${sunUrl}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:10px 22px; border-radius:20px; font-weight:bold; font-size:13px;">
+                        ${escapeHtml(t.sunBtn)}
+                    </a>
+                </div>
             </div>
 
             <p>${escapeHtml(t.footer)}</p>
-            <p style="font-size:12px; color:#999;">Balaton Essence</p>
+            <p style="margin-bottom: 4px;"><strong>${escapeHtml(t.signature)}</strong></p>
+            <p style="font-style: italic; color:#6a7063; margin-top: 0;">${escapeHtml(t.slogan)}</p>
+
+            <p style="font-size:12px; color:#999; margin-top: 30px;">Balaton Essence</p>
         </div>
     `;
 }
@@ -476,6 +558,33 @@ async function processScheduledGuestEmails() {
                     console.log(`7 napos érkezési email elküldve: ${booking.id}`);
                 } catch (err) {
                     console.error(`7 napos érkezési email hiba: ${booking.id}`, err);
+                }
+            }
+
+            if (daysUntilArrival === 0 && !booking.arrivalDayEmailSentAt) {
+                const lang = getBookingLang(booking);
+
+                const subject = {
+                    hu: 'Jó utat kívánunk a Balatonhoz! | Balaton Essence',
+                    en: 'Have a safe trip to Lake Balaton! | Balaton Essence',
+                    de: 'Gute Reise zum Balaton! | Balaton Essence'
+                }[lang];
+
+                try {
+                    await sendEmailHtml({
+                        to: booking.email,
+                        subject,
+                        html: buildArrivalDayEmailHtml(db, booking)
+                    });
+
+                    sentUpdates.push({
+                        bookingId: booking.id,
+                        field: 'arrivalDayEmailSentAt'
+                    });
+
+                    console.log(`Érkezés napi email elküldve: ${booking.id}`);
+                } catch (err) {
+                    console.error(`Érkezés napi email hiba: ${booking.id}`, err);
                 }
             }
 
@@ -3138,15 +3247,50 @@ app.use((req, res) => {
     return res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+function getBudapestTimeParts() {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Europe/Budapest',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    }).formatToParts(new Date());
+
+    const map = {};
+
+    parts.forEach(part => {
+        map[part.type] = part.value;
+    });
+
+    return {
+        date: `${map.year}-${map.month}-${map.day}`,
+        hour: Number(map.hour),
+        minute: Number(map.minute)
+    };
+}
+
 function startScheduledGuestEmails() {
-    const run = () => {
-        processScheduledGuestEmails().catch(err => {
-            console.error('Scheduled guest email fatal error:', err);
-        });
+    let lastRunDate = null;
+
+    const checkAndRun = () => {
+        const now = getBudapestTimeParts();
+
+        if (now.hour === 8 && now.minute === 0 && lastRunDate !== now.date) {
+            lastRunDate = now.date;
+
+            processScheduledGuestEmails().catch(err => {
+                console.error('Scheduled guest email fatal error:', err);
+            });
+        }
     };
 
-    setTimeout(run, 30 * 1000);
-    setInterval(run, 6 * 60 * 60 * 1000);
+    // Percenként ellenőrzi, hogy eljött-e a reggel 8:00.
+    setInterval(checkAndRun, 60 * 1000);
+
+    // Indulás után is ellenőriz egyszer, ha pont 8:00-kor indult újra a szerver.
+    setTimeout(checkAndRun, 10 * 1000);
 }
 
 startScheduledGuestEmails();
