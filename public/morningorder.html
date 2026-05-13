@@ -379,6 +379,13 @@
             </div>
 
             <div class="form-floating">
+                <select id="deliveryTime" required>
+                    <option value="" disabled selected></option>
+                </select>
+                <label for="deliveryTime" data-i18n="deliveryTimeLabel">Kiszállítási idő</label>
+            </div>
+
+            <div class="form-floating">
                 <textarea id="orderNote" rows="3" placeholder=" "></textarea>
                 <label for="orderNote" data-i18n="noteLabel">Megjegyzés, esetleges allergia</label>
             </div>
@@ -438,6 +445,62 @@
             }
         }
 
+        function generateTimeOptions(startHour, startMinute, endHour, endMinute, stepMinutes) {
+    const options = [];
+    const start = new Date(2000, 0, 1, startHour, startMinute, 0);
+    const end = new Date(2000, 0, 1, endHour, endMinute, 0);
+
+    const current = new Date(start);
+
+    while (current <= end) {
+        const hour = String(current.getHours()).padStart(2, '0');
+        const minute = String(current.getMinutes()).padStart(2, '0');
+        options.push(`${hour}:${minute}`);
+        current.setMinutes(current.getMinutes() + stepMinutes);
+    }
+
+    return options;
+}
+
+function isBreakfastPlate(plate) {
+    const id = normalizeText(plate?.id || '');
+    const name = normalizeText(plate?.name_hu || plate?.name_en || plate?.name_de || '');
+
+    return (
+        id.includes('breakfast') ||
+        id.includes('reggeli') ||
+        name.includes('reggeli') ||
+        name.includes('breakfast') ||
+        name.includes('fruhstuck')
+    );
+}
+
+function updateDeliveryTimeOptions() {
+    const plateId = document.getElementById('selectedPlate').value;
+    const deliverySelect = document.getElementById('deliveryTime');
+
+    if (!deliverySelect) return;
+
+    const selectedPlate = availablePlates.find(item => String(item.id) === String(plateId));
+
+    deliverySelect.innerHTML = `<option value="" disabled selected></option>`;
+
+    if (!selectedPlate) {
+        return;
+    }
+
+    const times = isBreakfastPlate(selectedPlate)
+        ? generateTimeOptions(8, 0, 10, 0, 15)
+        : generateTimeOptions(8, 0, 20, 0, 30);
+
+    times.forEach(time => {
+        const option = document.createElement('option');
+        option.value = time;
+        option.textContent = time;
+        deliverySelect.appendChild(option);
+    });
+}
+
         function normalizeText(value) {
             return String(value || '')
                 .toLowerCase()
@@ -474,6 +537,8 @@
                 guestsLabel: "Tálak száma",
                 dateLabel: "Napok kiválasztása",
                 plateLabel: "Választott tál",
+                deliveryTimeLabel: "Kiszállítási idő",
+                selectDeliveryTime: "Kérjük, válasszon kiszállítási időt.",
                 noteLabel: "Megjegyzés, esetleges allergia",
                 paymentLabel: "Fizetési mód",
                 payCash: "Helyszíni készpénz",
@@ -501,6 +566,8 @@
                 guestsLabel: "Number of plates",
                 dateLabel: "Select days",
                 plateLabel: "Selected platter",
+                deliveryTimeLabel: "Delivery time",
+                selectDeliveryTime: "Please select a delivery time.",
                 noteLabel: "Note or possible allergy",
                 paymentLabel: "Payment method",
                 payCash: "Cash on site",
@@ -528,6 +595,8 @@
                 guestsLabel: "Anzahl der Platten",
                 dateLabel: "Tage auswählen",
                 plateLabel: "Ausgewählte Platte",
+                deliveryTimeLabel: "Lieferzeit",
+                selectDeliveryTime: "Bitte wählen Sie eine Lieferzeit aus.",
                 noteLabel: "Bemerkung oder mögliche Allergie",
                 paymentLabel: "Zahlungsart",
                 payCash: "Barzahlung vor Ort",
@@ -669,6 +738,8 @@
             });
         });
 
+        document.getElementById('selectedPlate').addEventListener('change', updateDeliveryTimeOptions);
+
         document.addEventListener('DOMContentLoaded', async () => {
             await loadPlateOptions();
             await loadBookingData();
@@ -730,6 +801,13 @@
                 return;
             }
 
+            const deliveryTime = document.getElementById('deliveryTime').value;
+
+            if (!deliveryTime) {
+                showMessage(translations[currentLang].selectDeliveryTime);
+                return;
+            }
+
             const paymentMethod = document.getElementById('paymentMethod').value;
             const daysCount = selectedDates.length;
             const totalAmount = daysCount * plateCount * Number(selectedPlate.price || 0);
@@ -750,7 +828,8 @@
                 start: formatDate(selectedDates[0]),
                 end: formatDate(selectedDates[selectedDates.length - 1]),
                 days: daysCount,
-                items: `${selectedPlate.name_hu} | Napok: ${dateList} | Darab: ${plateCount}${orderNote ? ` | Megjegyzés: ${orderNote}` : ''}`,
+                items: `${selectedPlate.name_hu} | Napok: ${dateList} | Kiszállítás: ${deliveryTime} | Darab: ${plateCount}${orderNote ? ` | Megjegyzés: ${orderNote}` : ''}`,
+                deliveryTime,
                 method: paymentMethod,
                 amount: totalAmount
             };
@@ -791,6 +870,8 @@
 
                 form.reset();
                 fpInstance.clear();
+                document.getElementById('deliveryTime').innerHTML = `<option value="" disabled selected></option>`;
+
 
                 await loadBookingData();
             } catch (err) {

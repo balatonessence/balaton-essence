@@ -3060,6 +3060,7 @@ function renderBlockedBookings() {
                     </td>
                     <td>${escapeHtml(b.start || b.date || '')}</td>
                     <td>
+                        ${b.deliveryTime ? `<div style="font-weight:900; color:#5c7a4d;">Kiszállítás: ${escapeHtml(b.deliveryTime)}</div>` : ''}
                         <div>${escapeHtml(b.items || b.note || '')}</div>
                         <div class="price-text" style="color:#C47F14;">${amount.toLocaleString('hu-HU')} Ft</div>
                     </td>
