@@ -3208,8 +3208,9 @@ function renderBookings() {
                 <div class="row-actions">
                         ${isIcalBooking ? `
                             <button
-                                class="btn btn-outline btn-mini"
-                                onclick="openExternalGuestModal('${escapeHtml(b.id)}')"
+                                type="button"
+                                class="btn btn-outline btn-mini js-external-guest-btn"
+                                data-booking-id="${escapeHtml(b.id)}"
                             >
                                 Vendégadatok
                             </button>
@@ -3256,15 +3257,16 @@ function renderBlockedBookings() {
                 <td>
                     <div class="row-actions">
                         <button
-                            class="btn btn-outline btn-mini"
-                            onclick='openExternalGuestModal(${JSON.stringify(String(b.id))})'
+                            type="button"
+                            class="btn btn-outline btn-mini js-external-guest-btn"
+                            data-booking-id="${escapeHtml(b.id)}"
                         >
                             Vendégadatok
                         </button>
 
                         <button
                             class="btn btn-danger btn-mini"
-                            onclick='deleteItem("bookings", ${JSON.stringify(String(b.id))})'
+                            onclick="deleteItem('bookings', '${escapeHtml(b.id)}')"
                         >
                             Törlés
                         </button>
@@ -3980,10 +3982,12 @@ async function deleteRecommendation(id) {
 function openExternalGuestModal(bookingId) {
     const id = String(bookingId || '').trim();
 
+    console.log('Modal nyitás ID:', id);
+
     const booking = (db.bookings || []).find(b => String(b.id) === id);
 
     if (!booking) {
-        console.error('Foglalás nem található ehhez az ID-hoz:', id);
+        console.error('Foglalás nem található ehhez az ID-hoz:', id, db.bookings);
         alert('A foglalás nem található.');
         return;
     }
@@ -4139,6 +4143,20 @@ async function saveExternalGuestData() {
         db.owners = db.owners.filter(o => String(o.id || o._id) !== String(id));
         await saveDb();
     }
+
+    document.addEventListener('click', function (event) {
+    const btn = event.target.closest('.js-external-guest-btn');
+
+    if (!btn) return;
+
+    event.preventDefault();
+
+    const bookingId = btn.dataset.bookingId;
+
+    console.log('Vendégadatok gomb kattintva:', bookingId);
+
+    openExternalGuestModal(bookingId);
+});
 
     window.onload = () => {
         initDatabase(renderAll);
