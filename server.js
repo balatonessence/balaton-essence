@@ -234,87 +234,148 @@ function buildPreArrivalEmailHtml(db, booking) {
 
     const sunUrl = `${baseUrl}${sunPath}?id=${encodeURIComponent(booking.id)}&lang=${lang}`;
 
+    const keyHandover = apartment?.keyHandover || 'Érkezés előtt telefonon vagy üzenetben egyeztetve.';
+    const parkingInfo = apartment?.parkingInfo || 'A parkolási információkról érkezés előtt adunk pontos tájékoztatást.';
+    const arrivalContactPhone = apartment?.arrivalContactPhone || '+36 20 499 5484';
+    const googleMapsUrl = apartment?.googleMapsUrl ||
+        `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(aptAddress || aptName)}`;
+
     const t = {
         hu: {
-            title: 'Hasznos információk érkezés előtt',
+            title: 'Információk az érkezéshez',
             hello: `Kedves ${booking.guestName || 'Vendégünk'}!`,
-            intro: 'Már csak 7 nap van hátra az érkezésig. Összegyűjtöttünk néhány hasznos információt a foglalásához.',
+            intro: 'Szeretettel várjuk Önöket a Balaton Essence apartmanjaiban.',
+            infoIntro: 'Az érkezésükkel kapcsolatos legfontosabb információkat az alábbiakban találják:',
             apt: 'Apartman',
             address: 'Cím',
-            dates: 'Időszak',
-            breakfast: 'Reggeli rendelés',
-            breakfastText: 'Ha szeretne reggelit rendelni a tartózkodás idejére, itt tudja leadni.',
-            breakfastBtn: 'Reggeli rendelése',
-            sun: 'SUP és strandfelszerelés',
-            sunText: 'SUP, napozószék és napernyő foglalása a balatoni napokhoz.',
+            checkIn: 'Check-in',
+            checkOut: 'Check-out',
+            keyHandover: 'Kulcsátadás',
+            parking: 'Parkolás',
+            contact: 'Kapcsolat',
+            contactNote: 'Kérjük, hogy érkezés előtt körülbelül 30 perccel vegyék fel velünk a kapcsolatot telefonon vagy üzenetben.',
+            maps: 'Google Maps',
+            mapsBtn: 'Megnyitás Google Maps-ben',
+            extrasTitle: 'Tegye még kényelmesebbé a pihenést',
+            breakfast: 'Moments / tálrendelés',
+            breakfastText: 'Ha szeretne reggelit vagy különleges tálat rendelni a tartózkodás idejére, itt tudja leadni.',
+            breakfastBtn: 'Tál rendelése',
+            sun: 'SUP & SUN',
+            sunText: 'SUP, napozószék, napernyő vagy hajó foglalása a balatoni napokhoz.',
             sunBtn: 'Strandfelszerelés foglalása',
-            footer: 'Várjuk szeretettel!'
+            footer: 'Szeretettel várjuk Önöket!',
+            signature: 'Balaton Essence',
+            slogan: '„Ahol az élmények emlékké válnak.”'
         },
         en: {
-            title: 'Useful information before your arrival',
+            title: 'Arrival information',
             hello: `Dear ${booking.guestName || 'Guest'},`,
-            intro: 'There are only 7 days left until your arrival. Here are a few useful details for your stay.',
+            intro: 'We look forward to welcoming you to Balaton Essence apartments.',
+            infoIntro: 'Please find the most important arrival information below:',
             apt: 'Apartment',
             address: 'Address',
-            dates: 'Period',
-            breakfast: 'Breakfast order',
-            breakfastText: 'If you would like to order breakfast for your stay, you can do it here.',
-            breakfastBtn: 'Order breakfast',
-            sun: 'SUP and beach equipment',
-            sunText: 'Book SUP, sunbeds and parasols for your days at Lake Balaton.',
+            checkIn: 'Check-in',
+            checkOut: 'Check-out',
+            keyHandover: 'Key handover',
+            parking: 'Parking',
+            contact: 'Contact',
+            contactNote: 'Please contact us by phone or message approximately 30 minutes before your arrival.',
+            maps: 'Google Maps',
+            mapsBtn: 'Open in Google Maps',
+            extrasTitle: 'Make your stay even more comfortable',
+            breakfast: 'Moments / platter order',
+            breakfastText: 'If you would like to order breakfast or a special platter for your stay, you can do it here.',
+            breakfastBtn: 'Order a platter',
+            sun: 'SUP & SUN',
+            sunText: 'Book SUP, sunbeds, parasols or a boat for your days at Lake Balaton.',
             sunBtn: 'Book beach equipment',
-            footer: 'We look forward to welcoming you!'
+            footer: 'We look forward to welcoming you!',
+            signature: 'Balaton Essence',
+            slogan: '“Where experiences become memories.”'
         },
         de: {
-            title: 'Nützliche Informationen vor Ihrer Anreise',
+            title: 'Informationen zur Anreise',
             hello: `Liebe/r ${booking.guestName || 'Gast'},`,
-            intro: 'Es sind nur noch 7 Tage bis zu Ihrer Anreise. Hier finden Sie einige nützliche Informationen zu Ihrem Aufenthalt.',
+            intro: 'Wir freuen uns, Sie in den Balaton Essence Apartments begrüßen zu dürfen.',
+            infoIntro: 'Die wichtigsten Informationen zu Ihrer Anreise finden Sie unten:',
             apt: 'Apartment',
             address: 'Adresse',
-            dates: 'Zeitraum',
-            breakfast: 'Frühstücksbestellung',
-            breakfastText: 'Wenn Sie Frühstück für Ihren Aufenthalt bestellen möchten, können Sie dies hier tun.',
-            breakfastBtn: 'Frühstück bestellen',
-            sun: 'SUP und Strandausrüstung',
-            sunText: 'Buchen Sie SUP, Sonnenliegen und Sonnenschirme für Ihre Tage am Plattensee.',
+            checkIn: 'Check-in',
+            checkOut: 'Check-out',
+            keyHandover: 'Schlüsselübergabe',
+            parking: 'Parken',
+            contact: 'Kontakt',
+            contactNote: 'Bitte kontaktieren Sie uns etwa 30 Minuten vor Ihrer Ankunft telefonisch oder per Nachricht.',
+            maps: 'Google Maps',
+            mapsBtn: 'In Google Maps öffnen',
+            extrasTitle: 'Machen Sie Ihren Aufenthalt noch komfortabler',
+            breakfast: 'Moments / Plattenbestellung',
+            breakfastText: 'Wenn Sie Frühstück oder eine besondere Platte für Ihren Aufenthalt bestellen möchten, können Sie dies hier tun.',
+            breakfastBtn: 'Platte bestellen',
+            sun: 'SUP & SUN',
+            sunText: 'Buchen Sie SUP, Sonnenliegen, Sonnenschirme oder ein Boot für Ihre Tage am Plattensee.',
             sunBtn: 'Strandausrüstung buchen',
-            footer: 'Wir freuen uns auf Sie!'
+            footer: 'Wir freuen uns auf Sie!',
+            signature: 'Balaton Essence',
+            slogan: '„Wo Erlebnisse zu Erinnerungen werden.”'
         }
     }[lang];
 
     return `
         <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; color: #2C3325; line-height: 1.6;">
-            <h1 style="color:#5c7a4d;">${escapeHtml(t.title)}</h1>
+            <h1 style="color:#5c7a4d; margin-bottom: 20px;">${escapeHtml(t.title)}</h1>
 
             <p>${escapeHtml(t.hello)}</p>
             <p>${escapeHtml(t.intro)}</p>
+            <p>${escapeHtml(t.infoIntro)}</p>
 
-            <div style="background:#f9fbf8; border:1px solid #e2e8df; border-radius:10px; padding:20px; margin:25px 0;">
+            <div style="background:#f9fbf8; border:1px solid #e2e8df; border-radius:10px; padding:22px; margin:25px 0;">
                 <p><strong>${escapeHtml(t.apt)}:</strong> ${escapeHtml(aptName)}</p>
                 ${aptAddress ? `<p><strong>${escapeHtml(t.address)}:</strong> ${escapeHtml(aptAddress)}</p>` : ''}
-                <p><strong>${escapeHtml(t.dates)}:</strong> ${escapeHtml(booking.checkIn || booking.start || '')} – ${escapeHtml(booking.checkOut || booking.end || '')}</p>
+                <p><strong>${escapeHtml(t.checkIn)}:</strong> ${escapeHtml(booking.checkIn || booking.start || '')}</p>
+                <p><strong>${escapeHtml(t.checkOut)}:</strong> ${escapeHtml(booking.checkOut || booking.end || '')}</p>
+                <p><strong>${escapeHtml(t.keyHandover)}:</strong> ${escapeHtml(keyHandover)}</p>
+                <p><strong>${escapeHtml(t.parking)}:</strong> ${escapeHtml(parkingInfo)}</p>
+                <p><strong>${escapeHtml(t.contact)}:</strong> ${escapeHtml(arrivalContactPhone)}</p>
             </div>
-
-            ${breakfastAvailable ? `
-            <div style="background:#ffffff; border:1px solid #e2e8df; border-radius:10px; padding:20px; margin-bottom:18px;">
-                <h3 style="margin-top:0; color:#5c7a4d;">${escapeHtml(t.breakfast)}</h3>
-                <p>${escapeHtml(t.breakfastText)}</p>
-                <a href="${morningUrl}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:12px 22px; border-radius:24px; font-weight:bold;">
-                    ${escapeHtml(t.breakfastBtn)}
-                </a>
-            </div>
-        ` : ''}
 
             <div style="background:#ffffff; border:1px solid #e2e8df; border-radius:10px; padding:20px; margin-bottom:25px;">
-                <h3 style="margin-top:0; color:#5c7a4d;">${escapeHtml(t.sun)}</h3>
-                <p>${escapeHtml(t.sunText)}</p>
-                <a href="${sunUrl}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:12px 22px; border-radius:24px; font-weight:bold;">
-                    ${escapeHtml(t.sunBtn)}
+                <p style="margin-top:0;">${escapeHtml(t.contactNote)}</p>
+
+                <p style="margin-bottom: 14px;"><strong>${escapeHtml(t.maps)}:</strong></p>
+
+                <a href="${escapeHtml(googleMapsUrl)}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:12px 22px; border-radius:24px; font-weight:bold;">
+                    ${escapeHtml(t.mapsBtn)}
                 </a>
+            </div>
+
+            <div style="background:#f9fbf8; border:1px solid #e2e8df; border-radius:10px; padding:22px; margin:25px 0;">
+                <h3 style="margin-top:0; color:#5c7a4d;">${escapeHtml(t.extrasTitle)}</h3>
+
+                ${breakfastAvailable ? `
+                    <div style="padding:15px 0; border-bottom:1px solid #e2e8df;">
+                        <p style="margin:0 0 6px 0; font-weight:bold;">${escapeHtml(t.breakfast)}</p>
+                        <p style="margin:0 0 14px 0; color:#666; font-size:14px;">${escapeHtml(t.breakfastText)}</p>
+                        <a href="${morningUrl}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:10px 22px; border-radius:20px; font-weight:bold; font-size:13px;">
+                            ${escapeHtml(t.breakfastBtn)}
+                        </a>
+                    </div>
+                ` : ''}
+
+                <div style="padding:15px 0 0 0;">
+                    <p style="margin:0 0 6px 0; font-weight:bold;">${escapeHtml(t.sun)}</p>
+                    <p style="margin:0 0 14px 0; color:#666; font-size:14px;">${escapeHtml(t.sunText)}</p>
+                    <a href="${sunUrl}" style="display:inline-block; background:#5c7a4d; color:white; text-decoration:none; padding:10px 22px; border-radius:20px; font-weight:bold; font-size:13px;">
+                        ${escapeHtml(t.sunBtn)}
+                    </a>
+                </div>
             </div>
 
             <p>${escapeHtml(t.footer)}</p>
-            <p style="font-size:12px; color:#999;">Balaton Essence</p>
+            <p style="margin-bottom: 4px;"><strong>${escapeHtml(t.signature)}</strong></p>
+            <p style="font-style: italic; color:#6a7063; margin-top: 0;">${escapeHtml(t.slogan)}</p>
+
+            <p style="font-size:12px; color:#999; margin-top: 30px;">Balaton Essence</p>
         </div>
     `;
 }
@@ -395,9 +456,9 @@ async function processScheduledGuestEmails() {
                 const lang = getBookingLang(booking);
 
                 const subject = {
-                    hu: 'Hasznos információk az érkezés előtt | Balaton Essence',
-                    en: 'Useful information before your arrival | Balaton Essence',
-                    de: 'Nützliche Informationen vor Ihrer Anreise | Balaton Essence'
+                    hu: 'Információk az érkezéshez | Balaton Essence',
+                    en: 'Arrival information | Balaton Essence',
+                    de: 'Informationen zur Anreise | Balaton Essence'
                 }[lang];
 
                 try {

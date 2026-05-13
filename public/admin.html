@@ -1741,7 +1741,28 @@
                     <label>Tulajdonos</label>
                     <select id="a-owner-select"></select>
                 </div>
-            </div>
+
+                <div class="form-group">
+                    <label>Kulcsátadás</label>
+                    <textarea id="aptKeyHandover" placeholder="Pl. Érkezés előtt telefonos egyeztetés alapján."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Parkolás</label>
+                    <textarea id="aptParkingInfo" placeholder="Pl. Az apartmanhoz saját parkoló tartozik az épület előtt."></textarea>
+                </div>
+
+                <div class="grid-2">
+                    <div class="form-group">
+                        <label>Érkezési telefonszám</label>
+                        <input id="aptArrivalContactPhone" type="text" placeholder="+36 ...">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Google Maps link</label>
+                        <input id="aptGoogleMapsUrl" type="text" placeholder="https://maps.google.com/...">
+                    </div>
+                </div>
 
             <div class="modal-card">
                 <div class="modal-card-title">Szezonális árak és szabályok</div>
@@ -2354,6 +2375,10 @@ function initGallerySorting() {
             location: document.getElementById('a-loc').value.trim(),
             address: document.getElementById('a-address').value.trim(),
             ownerId: document.getElementById('a-owner-select').value,
+            keyHandover: document.getElementById('aptKeyHandover')?.value.trim() || '',
+            parkingInfo: document.getElementById('aptParkingInfo')?.value.trim() || '',
+            arrivalContactPhone: document.getElementById('aptArrivalContactPhone')?.value.trim() || '',
+            googleMapsUrl: document.getElementById('aptGoogleMapsUrl')?.value.trim() || '',
 
             seasons: seasonsData,
 
@@ -2420,6 +2445,10 @@ function initGallerySorting() {
                     'a-name',
                     'a-loc',
                     'a-address',
+                    'aptKeyHandover',
+                    'aptParkingInfo',
+                    'aptArrivalContactPhone',
+                    'aptGoogleMapsUrl',
                     'a-desc',
                     'a-desc-en',
                     'a-desc-de',
@@ -2469,6 +2498,10 @@ function initGallerySorting() {
             setVal('a-name', a.name);
             setVal('a-loc', a.location);
             setVal('a-address', a.address);
+            setVal('aptKeyHandover', a.keyHandover || '');
+            setVal('aptParkingInfo', a.parkingInfo || '');
+            setVal('aptArrivalContactPhone', a.arrivalContactPhone || '');
+            setVal('aptGoogleMapsUrl', a.googleMapsUrl || '');
             setVal('a-owner-select', a.ownerId);
             setVal('a-desc', a.description);
             setVal('a-desc-en', a.description_en || a.descriptionEn || '');
