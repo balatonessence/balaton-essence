@@ -786,7 +786,7 @@ const bookingEmailTranslations = {
         paid: 'Fizetett előleg:',
         balance: 'Hátralék (helyszínen):',
         policyTitle: 'Lemondási feltételek',
-        policyText: 'Érkezés előtt 14 nappal a foglalás ingyenesen lemondható, a befizetett előleg 100%-ban visszajár. 14 napon belüli lemondás esetén a befizetett előleg 50%-a jár vissza.',
+        policyText: 'Érkezés előtt legalább 14 nappal a foglalás díjmentesen lemondható, ebben az esetben a befizetett előleg visszajár. Érkezést megelőző 14 napon belüli lemondás esetén a befizetett előleg nem visszatéríthető.',
         cancelBtn: 'Foglalás lemondása'
     },
     en: {
@@ -802,7 +802,7 @@ const bookingEmailTranslations = {
         paid: 'Paid Deposit:',
         balance: 'Balance (at property):',
         policyTitle: 'Cancellation Policy',
-        policyText: 'Cancellations made 14 days or more before arrival are fully refundable. If canceled within 14 days of arrival, 50% of the paid deposit is refunded.',
+        policyText: 'The booking can be cancelled free of charge at least 14 days before arrival. In this case, the paid deposit will be refunded. In case of cancellation within 14 days before arrival, the paid deposit is non-refundable.',
         cancelBtn: 'Cancel Booking'
     },
     de: {
@@ -818,7 +818,7 @@ const bookingEmailTranslations = {
         paid: 'Geleistete Anzahlung:',
         balance: 'Restbetrag (vor Ort):',
         policyTitle: 'Stornierungsbedingungen',
-        policyText: 'Bis 14 Tage vor Anreise können Sie kostenlos stornieren (100% Erstattung der Anzahlung). Bei einer Stornierung innerhalb von 14 Tagen vor Anreise werden 50% der geleisteten Anzahlung erstattet.',
+        policyText: 'Die Buchung kann bis spätestens 14 Tage vor Anreise kostenfrei storniert werden. In diesem Fall wird die geleistete Anzahlung zurückerstattet. Bei einer Stornierung innerhalb von 14 Tagen vor Anreise ist die geleistete Anzahlung nicht erstattungsfähig.',
         cancelBtn: 'Buchung stornieren'
     }
 };
@@ -1811,8 +1811,8 @@ app.get('/api/cancel-booking/:id', async (req, res) => {
                 refundAmount = deposit;
                 refundPolicy = '14 napon kívüli lemondás (100% előleg visszatérítés)';
             } else {
-                refundAmount = deposit / 2;
-                refundPolicy = '14 napon belüli lemondás (50% előleg visszatérítés)';
+                refundAmount = 0;
+                refundPolicy = '14 napon belüli lemondás (az előleg nem visszatéríthető)';
             }
 
             db.bookings.splice(bookingIndex, 1);
@@ -1839,7 +1839,9 @@ app.get('/api/cancel-booking/:id', async (req, res) => {
             await resend.emails.send({
                 from: 'Rendszer <info@balatonessence.com>',
                 to: 'balatonessence@gmail.com',
-                subject: `❌ LEMONDÁS ÉS VISSZAUTALÁS: ${escapeHtml(booking.guestName)}`,
+                subject: refundAmount > 0
+                    ? `❌ LEMONDÁS ÉS VISSZAUTALÁS: ${escapeHtml(booking.guestName)}`
+                    : `❌ LEMONDÁS - NINCS VISSZATÉRÍTÉS: ${escapeHtml(booking.guestName)}`,
                 html: `
                     <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 2px solid #8b0000; border-radius: 10px; overflow: hidden;">
                         <div style="background-color: #8b0000; color: white; padding: 20px; text-align: center;">
@@ -1852,7 +1854,7 @@ app.get('/api/cancel-booking/:id', async (req, res) => {
                                 <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Apartman:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(booking.aptName)}</td></tr>
                                 <tr><td style="padding: 8px; border-bottom: 1px solid #eee;"><strong>Időpont:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee;">${escapeHtml(booking.checkIn)} — ${escapeHtml(booking.checkOut)}</td></tr>
                                 <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color:#8b0000;"><strong>Szabály:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee; color:#8b0000;">${escapeHtml(refundPolicy)}</td></tr>
-                                <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color:#8b0000;"><strong>Visszautalva:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight:bold; color:#8b0000;">${formatMoney(refundAmount)} Ft</td></tr>
+                                <tr><td style="padding: 8px; border-bottom: 1px solid #eee; color:#8b0000;"><strong>Visszatérítés:</strong></td><td style="padding: 8px; border-bottom: 1px solid #eee; font-weight:bold; color:#8b0000;">${formatMoney(refundAmount)} Ft</td></tr>
                             </table>
                         </div>
                     </div>`
@@ -1866,17 +1868,23 @@ app.get('/api/cancel-booking/:id', async (req, res) => {
             hu: {
                 sub: 'Foglalás lemondása - Balaton Essence',
                 title: 'A foglalását töröltük',
-                msg: `Sikeresen feldolgoztuk a lemondást. A szabályzat értelmében <b>${formatMoney(refundAmount)} Ft</b> összeget automatikusan visszautaltunk a bankkártyájára. Ez az összeg a bankjától függően 5-10 munkanapon belül jelenik meg a számláján.`
+                msg: refundAmount > 0
+                    ? `Sikeresen feldolgoztuk a lemondást. A szabályzat értelmében <b>${formatMoney(refundAmount)} Ft</b> összeget automatikusan visszautaltunk a bankkártyájára. Ez az összeg a bankjától függően 5-10 munkanapon belül jelenik meg a számláján.`
+                    : `Sikeresen feldolgoztuk a lemondást. A lemondás az érkezést megelőző 14 napon belül történt, ezért a befizetett előleg nem visszatéríthető.`
             },
             en: {
                 sub: 'Booking Cancelled - Balaton Essence',
                 title: 'Your booking has been cancelled',
-                msg: `We have processed your cancellation. According to our policy, <b>${formatMoney(refundAmount)} HUF</b> has been automatically refunded to your credit card. Please allow 5-10 business days for the funds to appear.`
+                msg: refundAmount > 0
+    ? `We have processed your cancellation. According to our policy, <b>${formatMoney(refundAmount)} HUF</b> has been automatically refunded to your credit card. Please allow 5-10 business days for the funds to appear.`
+    : `We have processed your cancellation. As the cancellation was made within 14 days before arrival, the paid deposit is non-refundable.`
             },
             de: {
                 sub: 'Buchung storniert - Balaton Essence',
                 title: 'Ihre Buchung wurde storniert',
-                msg: `Ihre Stornierung wurde bearbeitet. Gemäß unseren Richtlinien wurden <b>${formatMoney(refundAmount)} HUF</b> automatisch auf Ihre Kreditkarte zurückerstattet. Es kann 5-10 Werktage dauern, bis der Betrag sichtbar ist.`
+                msg: refundAmount > 0
+    ? `Ihre Stornierung wurde bearbeitet. Gemäß unseren Richtlinien wurden <b>${formatMoney(refundAmount)} HUF</b> automatisch auf Ihre Kreditkarte zurückerstattet. Es kann 5-10 Werktage dauern, bis der Betrag sichtbar ist.`
+    : `Ihre Stornierung wurde bearbeitet. Da die Stornierung innerhalb von 14 Tagen vor der Anreise erfolgt ist, ist die geleistete Anzahlung nicht erstattungsfähig.`
             }
         };
 
