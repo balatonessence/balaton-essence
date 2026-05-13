@@ -1707,7 +1707,7 @@
 
         <div class="form-group">
             <label>Név</label>
-            <input type="text" id="recommendation-title" placeholder="Pl. Bor Mámor Ederics">
+            <input type="text" id="recommendation-title" placeholder="Pl. Kamilla">
         </div>
 
         <div class="grid-2">
@@ -1750,8 +1750,10 @@
         </div>
 
         <div class="form-group">
-            <label>Kép link / útvonal</label>
-            <input type="text" id="recommendation-image" placeholder="img/ajanlasok/bor-mamor.jpg">
+            <label>Kép feltöltése</label>
+            <input type="file" id="recommendation-image-file" accept="image/*" onchange="handleRecommendationImageUpload(event)">
+            <input type="hidden" id="recommendation-image">
+            <div id="recommendation-image-preview" class="gallery-preview" style="margin-top:10px;"></div>
         </div>
 
         <div class="form-group">
@@ -2089,6 +2091,7 @@
     let nextSyncAt = null;
     let syncStatusRefreshTimer = null;
     let syncCountdownTimer = null;
+    let currentRecommendationImage = '';
 
     function getAdminToken() {
         let token = sessionStorage.getItem('ADMIN_TOKEN');
@@ -2266,6 +2269,43 @@
         renderImagePreviews();
         event.target.value = '';
     }
+
+    async function handleRecommendationImageUpload(event) {
+    const file = event.target.files[0];
+
+    if (!file) return;
+
+    currentRecommendationImage = await compressImage(file);
+
+    const input = document.getElementById('recommendation-image');
+    if (input) input.value = currentRecommendationImage;
+
+    renderRecommendationImagePreview();
+
+    event.target.value = '';
+}
+
+function removeRecommendationImage() {
+    currentRecommendationImage = '';
+
+    const input = document.getElementById('recommendation-image');
+    if (input) input.value = '';
+
+    renderRecommendationImagePreview();
+}
+
+function renderRecommendationImagePreview() {
+    const container = document.getElementById('recommendation-image-preview');
+
+    if (!container) return;
+
+    container.innerHTML = currentRecommendationImage ? `
+        <div class="image-preview-item">
+            <img src="${currentRecommendationImage}" style="width:130px; height:88px; object-fit:cover;">
+            <div onclick="removeRecommendationImage()" class="remove-image-btn">X</div>
+        </div>
+    ` : '';
+}
 
     async function handleAboutHeritageUpload(event) {
         const files = Array.from(event.target.files || []);
@@ -3421,7 +3461,9 @@ function openRecommendationModal(id = null) {
         document.getElementById('recommendation-desc-hu').value = '';
         document.getElementById('recommendation-desc-en').value = '';
         document.getElementById('recommendation-desc-de').value = '';
+        currentRecommendationImage = '';
         document.getElementById('recommendation-image').value = '';
+        renderRecommendationImagePreview();
         document.getElementById('recommendation-maps').value = '';
         document.getElementById('recommendation-website').value = '';
         document.getElementById('recommendation-active').checked = true;
@@ -3438,7 +3480,9 @@ function openRecommendationModal(id = null) {
         document.getElementById('recommendation-desc-hu').value = item.description_hu || '';
         document.getElementById('recommendation-desc-en').value = item.description_en || '';
         document.getElementById('recommendation-desc-de').value = item.description_de || '';
-        document.getElementById('recommendation-image').value = item.image || '';
+        currentRecommendationImage = item.image || '';
+        document.getElementById('recommendation-image').value = currentRecommendationImage;
+        renderRecommendationImagePreview();
         document.getElementById('recommendation-maps').value = item.mapsUrl || '';
         document.getElementById('recommendation-website').value = item.websiteUrl || '';
         document.getElementById('recommendation-active').checked = item.active !== false;
@@ -3468,7 +3512,7 @@ async function saveRecommendation() {
         description_hu: document.getElementById('recommendation-desc-hu').value.trim(),
         description_en: document.getElementById('recommendation-desc-en').value.trim(),
         description_de: document.getElementById('recommendation-desc-de').value.trim(),
-        image: document.getElementById('recommendation-image').value.trim(),
+        image: currentRecommendationImage || document.getElementById('recommendation-image').value.trim(),
         mapsUrl: document.getElementById('recommendation-maps').value.trim(),
         websiteUrl: document.getElementById('recommendation-website').value.trim(),
         active: document.getElementById('recommendation-active').checked,
