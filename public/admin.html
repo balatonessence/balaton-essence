@@ -949,6 +949,18 @@
         margin-bottom: 1rem;
     }
 
+    .modal.is-open {
+    display: flex !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    z-index: 99999 !important;
+}
+
+#external-guest-modal {
+    align-items: center;
+    justify-content: center;
+}
+
     .grid-2 {
         display: grid;
         grid-template-columns: 1fr 1fr;
@@ -4012,10 +4024,26 @@ function openExternalGuestModal(bookingId) {
     document.getElementById('external-guest-lang').value = booking.lang || 'hu';
 
     modal.style.display = 'flex';
+    modal.style.opacity = '1';
+    modal.style.visibility = 'visible';
+    modal.style.zIndex = '99999';
+    modal.classList.add('is-open');
+
+    document.body.style.overflow = 'hidden';
 }
 
 function closeExternalGuestModal() {
-    document.getElementById('external-guest-modal').style.display = 'none';
+    const modal = document.getElementById('external-guest-modal');
+
+    if (!modal) return;
+
+    modal.classList.remove('is-open');
+    modal.style.display = 'none';
+    modal.style.opacity = '';
+    modal.style.visibility = '';
+    modal.style.zIndex = '';
+
+    document.body.style.overflow = '';
 }
 
 async function saveExternalGuestData() {
@@ -4054,6 +4082,7 @@ async function saveExternalGuestData() {
     await saveDb();
     closeExternalGuestModal();
     renderBookings();
+    renderBlockedBookings();
 }
 
     async function saveReview() {
