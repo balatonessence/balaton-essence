@@ -773,54 +773,73 @@ function ensureDbShape(db) {
     }
 
     if (!Array.isArray(db.services.sun)) {
-        db.services.sun = [
-            {
-                id: 'sup',
-                name_hu: 'SUP',
-                name_en: 'SUP',
-                name_de: 'SUP',
-                price: 5900,
-                unit_hu: 'nap',
-                unit_en: 'day',
-                unit_de: 'Tag',
-                description_hu: '',
-                description_en: '',
-                description_de: '',
-                image: 'img/sup.png',
-                active: true
-            },
-            {
-                id: 'sunbed',
-                name_hu: 'Napozószék',
-                name_en: 'Sunbed',
-                name_de: 'Sonnenliege',
-                price: 1500,
-                unit_hu: 'nap',
-                unit_en: 'day',
-                unit_de: 'Tag',
-                description_hu: '',
-                description_en: '',
-                description_de: '',
-                image: 'img/napozoszek.png',
-                active: true
-            },
-            {
-                id: 'umbrella',
-                name_hu: 'Napernyő',
-                name_en: 'Parasol',
-                name_de: 'Sonnenschirm',
-                price: 1000,
-                unit_hu: 'nap',
-                unit_en: 'day',
-                unit_de: 'Tag',
-                description_hu: '',
-                description_en: '',
-                description_de: '',
-                image: 'img/napernyo.png',
-                active: true
-            }
-        ];
-    }
+    db.services.sun = [
+        {
+            id: 'sup',
+            name_hu: 'SUP',
+            name_en: 'SUP',
+            name_de: 'SUP',
+            price: 5900,
+            unit_hu: 'nap',
+            unit_en: 'day',
+            unit_de: 'Tag',
+            description_hu: '',
+            description_en: '',
+            description_de: '',
+            image: 'img/sup.png',
+            maxStock: 4,
+            active: true
+        },
+        {
+            id: 'sunbed',
+            name_hu: 'Napozószék',
+            name_en: 'Sunbed',
+            name_de: 'Sonnenliege',
+            price: 1500,
+            unit_hu: 'nap',
+            unit_en: 'day',
+            unit_de: 'Tag',
+            description_hu: '',
+            description_en: '',
+            description_de: '',
+            image: 'img/napozoszek.png',
+            maxStock: 8,
+            active: true
+        },
+        {
+            id: 'umbrella',
+            name_hu: 'Napernyő',
+            name_en: 'Parasol',
+            name_de: 'Sonnenschirm',
+            price: 1000,
+            unit_hu: 'nap',
+            unit_en: 'day',
+            unit_de: 'Tag',
+            description_hu: '',
+            description_en: '',
+            description_de: '',
+            image: 'img/napernyo.png',
+            maxStock: 8,
+            active: true
+        },
+        {
+            id: 'boat',
+            name_hu: 'Hajó',
+            name_en: 'Boat',
+            name_de: 'Boot',
+            price: 35000,
+            unit_hu: 'nap',
+            unit_en: 'day',
+            unit_de: 'Tag',
+            description_hu: '',
+            description_en: '',
+            description_de: '',
+            image: 'img/hajo.png',
+            maxStock: 1,
+            active: true
+        }
+    ];
+}
 
     if (!Array.isArray(db.services.moments)) {
         db.services.moments = [
@@ -1310,6 +1329,7 @@ function sanitizeServiceItem(item) {
         description_en: String(item.description_en || '').trim(),
         description_de: String(item.description_de || '').trim(),
         image: String(item.image || '').trim(),
+        maxStock: Math.max(0, Math.round(Number(item.maxStock || 0))),
         active: item.active !== false
     };
 }

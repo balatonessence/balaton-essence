@@ -2701,6 +2701,7 @@ function initGallerySorting() {
                 description_en: '',
                 description_de: '',
                 image: 'img/sup.png',
+                maxStock: 4,
                 active: true
             },
             {
@@ -2716,6 +2717,7 @@ function initGallerySorting() {
                 description_en: '',
                 description_de: '',
                 image: 'img/napozoszek.png',
+                maxStock: 4,
                 active: true
             },
             {
@@ -2731,6 +2733,7 @@ function initGallerySorting() {
                 description_en: '',
                 description_de: '',
                 image: 'img/napernyo.png',
+                maxStock: 4,
                 active: true
             },
             {
@@ -2746,6 +2749,7 @@ function initGallerySorting() {
                 description_en: '',
                 description_de: '',
                 image: 'img/hajo.png',
+                maxStock: 4,
                 active: true
             }
         ];
@@ -3336,6 +3340,13 @@ function renderBlockedBookings() {
 
                         ${isSun ? `
                             <div class="form-group">
+                                <label>Max készlet</label>
+                                <input type="number" class="svc-max-stock" min="0" value="${escapeHtml(item.maxStock || 0)}" placeholder="0 = nincs limit">
+                            </div>
+                        ` : ''}
+
+                        ${isSun ? `
+                            <div class="form-group">
                                 <label>Egység HU / EN / DE</label>
                                 <div class="unit-grid">
                                     <input type="text" class="svc-unit-hu" value="${escapeHtml(item.unit_hu || '')}" placeholder="nap">
@@ -3396,6 +3407,7 @@ function renderBlockedBookings() {
                 description_en: card.querySelector('.svc-desc-en')?.value.trim() || '',
                 description_de: card.querySelector('.svc-desc-de')?.value.trim() || '',
                 image: card.querySelector('.svc-image')?.value.trim() || '',
+                maxStock: Number(card.querySelector('.svc-max-stock')?.value || 0),
                 active: card.querySelector('.svc-active')?.checked === true
             };
         });
