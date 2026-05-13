@@ -2184,6 +2184,51 @@ app.get('/api/verify-booking/:id', async (req, res) => {
 // API - EXTRA / BREAKFAST ORDERS
 // -----------------------------------------------------------------------------
 
+function dateRangeInclusive(startValue, endValue) {
+    const start = parseDateOnly(startValue);
+    const end = parseDateOnly(endValue);
+
+    if (!start || !end || end < start) return [];
+
+    const dates = [];
+    const current = new Date(start);
+
+    while (current <= end) {
+        dates.push(`${current.getFullYear()}-${pad2(current.getMonth() + 1)}-${pad2(current.getDate())}`);
+        current.setDate(current.getDate() + 1);
+    }
+
+    return dates;
+}
+
+function getOrderDateSet(order) {
+    return new Set(dateRangeInclusive(order.start, order.end));
+}
+
+function getExtraOrderQtyForService(order, service) {
+    if (!order || order.type !== 'EXTRA') return 0;
+
+    if (Array.isArray(order.itemsDetailed)) {
+        const found = order.itemsDetailed.find(item =>
+            String(item.id) === String(service.id)
+        );
+
+        return found ? Number(found.qty || 0) : 0;
+    }
+
+    const text = normalizeText(order.items || order.details || '');
+    const serviceName = normalizeText(service.name_hu || service.name_en || service.name_de || service.id);
+
+    const regex = new RegExp('(\\d+)\\s*x\\s*' + serviceName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+    const match = text.match(regex);
+
+    if (match) {
+        return Number(match[1] || 0);
+    }
+
+    return 0;
+}
+
 app.get('/api/sun-availability', async (req, res) => {
     try {
         const { start, end } = req.query;
