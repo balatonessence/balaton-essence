@@ -1189,16 +1189,38 @@
 
     .simple-modal-card {
         background: white;
-        padding: 1.8rem;
+        padding: 1.5rem;
         border-radius: 22px;
-        width: min(520px, 94vw);
+        width: min(620px, 94vw);
+        max-height: 88vh;
+        overflow-y: auto;
         box-shadow: 0 30px 90px rgba(0,0,0,0.28);
+    }
+
+    .simple-modal-card .form-group {
+        margin-bottom: 0.75rem;
+    }
+
+    .simple-modal-card input,
+    .simple-modal-card select,
+    .simple-modal-card textarea {
+        padding: 0.7rem 0.78rem;
+        font-size: 0.82rem;
+        border-radius: 10px;
+    }
+
+    .simple-modal-card textarea {
+        min-height: 74px;
+    }
+
+    .simple-modal-card h2 {
+        margin-bottom: 1rem;
     }
 
     .simple-modal-card h2 {
         font-family: 'Playfair Display', serif;
-        font-size: 1.8rem;
-        margin-bottom: 1.4rem;
+        font-size: 1.65rem;
+        margin-bottom: 1rem;
     }
 
     .sortable-ghost {
