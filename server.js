@@ -2258,8 +2258,11 @@ app.get('/api/sun-availability', async (req, res) => {
         });
     } catch (err) {
         console.error('SUN availability hiba:', err);
+
         res.status(500).json({
-            error: 'Nem sikerült lekérni az elérhető készletet.'
+            error: 'Nem sikerült lekérni az elérhető készletet.',
+            detail: err.message,
+            stack: err.stack
         });
     }
 });
