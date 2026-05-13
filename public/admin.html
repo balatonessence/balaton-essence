@@ -3257,14 +3257,14 @@ function renderBlockedBookings() {
                     <div class="row-actions">
                         <button
                             class="btn btn-outline btn-mini"
-                            onclick="openExternalGuestModal('${escapeHtml(b.id)}')"
+                            onclick='openExternalGuestModal(${JSON.stringify(String(b.id))})'
                         >
                             Vendégadatok
                         </button>
 
                         <button
                             class="btn btn-danger btn-mini"
-                            onclick="deleteItem('bookings', '${escapeHtml(b.id)}')"
+                            onclick='deleteItem("bookings", ${JSON.stringify(String(b.id))})'
                         >
                             Törlés
                         </button>
@@ -3977,23 +3977,37 @@ async function deleteRecommendation(id) {
         document.getElementById('review-modal').style.display = 'none';
     }
 
-    function openExternalGuestModal(bookingId) {
-    const booking = (db.bookings || []).find(b => String(b.id) === String(bookingId));
+function openExternalGuestModal(bookingId) {
+    const id = String(bookingId || '').trim();
+
+    const booking = (db.bookings || []).find(b => String(b.id) === id);
 
     if (!booking) {
+        console.error('Foglalás nem található ehhez az ID-hoz:', id);
         alert('A foglalás nem található.');
         return;
     }
 
-    document.getElementById('external-booking-id').value = booking.id;
+    const modal = document.getElementById('external-guest-modal');
+
+    if (!modal) {
+        console.error('Hiányzik az external-guest-modal elem.');
+        alert('A vendégadat modal nem található az oldalon.');
+        return;
+    }
+
+    document.getElementById('external-booking-id').value = booking.id || '';
+
     document.getElementById('external-guest-name').value =
-        booking.manualGuestData === true ? (booking.guestName || '') : '';
+        booking.manualGuestData === true
+            ? (booking.guestName || '')
+            : '';
 
     document.getElementById('external-guest-email').value = booking.email || '';
     document.getElementById('external-guest-phone').value = booking.phone || '';
     document.getElementById('external-guest-lang').value = booking.lang || 'hu';
 
-    document.getElementById('external-guest-modal').style.display = 'flex';
+    modal.style.display = 'flex';
 }
 
 function closeExternalGuestModal() {
