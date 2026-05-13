@@ -2184,6 +2184,86 @@ app.get('/api/verify-booking/:id', async (req, res) => {
 // API - EXTRA / BREAKFAST ORDERS
 // -----------------------------------------------------------------------------
 
+app.get('/api/sun-availability', async (req, res) => {
+    try {
+        const { start, end } = req.query;
+
+        const dates = dateRangeInclusive(start, end);
+
+        if (dates.length === 0) {
+            return res.status(400).json({
+                error: 'Hibás időszak.'
+            });
+        }
+
+        const db = await getDbContent();
+        const services = db.services?.sun || [];
+
+        const availability = {};
+
+        services.forEach(service => {
+            const maxStock = Number(service.maxStock || 0);
+
+            availability[service.id] = {
+                id: service.id,
+                name: service.name_hu || service.id,
+                maxStock,
+                booked: 0,
+                available: maxStock
+            };
+
+            if (maxStock <= 0) {
+                availability[service.id].available = null;
+            }
+        });
+
+        dates.forEach(date => {
+            services.forEach(service => {
+                const maxStock = Number(service.maxStock || 0);
+
+                if (maxStock <= 0) return;
+
+                let bookedOnThisDate = 0;
+
+                (db.extras || []).forEach(order => {
+                    if (order.type !== 'EXTRA') return;
+                    if (order.paymentStatus === 'cancelled') return;
+
+                    const existingDates = getOrderDateSet(order);
+                    if (!existingDates.has(date)) return;
+
+                    bookedOnThisDate += getExtraOrderQtyForService(order, service);
+                });
+
+                const availableOnThisDate = Math.max(0, maxStock - bookedOnThisDate);
+
+                availability[service.id].booked = Math.max(
+                    availability[service.id].booked,
+                    bookedOnThisDate
+                );
+
+                availability[service.id].available = Math.min(
+                    availability[service.id].available,
+                    availableOnThisDate
+                );
+            });
+        });
+
+        res.json({
+            success: true,
+            start,
+            end,
+            dates,
+            availability
+        });
+    } catch (err) {
+        console.error('SUN availability hiba:', err);
+        res.status(500).json({
+            error: 'Nem sikerült lekérni az elérhető készletet.'
+        });
+    }
+});
+
 app.post('/api/order', async (req, res) => {
     try {
         const data = req.body || {};

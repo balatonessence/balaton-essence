@@ -1409,6 +1409,8 @@
         }
     };
 
+    let currentAvailability = {};
+
     document.addEventListener('DOMContentLoaded', async function() {
         initHeaderScroll();
         await loadSunServices();
@@ -1449,13 +1451,14 @@
                 if (!service.id || !itemMap[service.id]) return;
 
                 itemMap[service.id] = {
-                    ...itemMap[service.id],
-                    label: service.name_hu || itemMap[service.id].label,
-                    price: Number(service.price || itemMap[service.id].price),
-                    unit: service.unit_hu || itemMap[service.id].unit || 'nap',
-                    image: service.image || itemMap[service.id].image,
-                    active: service.active !== false
-                };
+                ...itemMap[service.id],
+                label: service.name_hu || itemMap[service.id].label,
+                price: Number(service.price || itemMap[service.id].price),
+                unit: service.unit_hu || itemMap[service.id].unit || 'nap',
+                image: service.image || itemMap[service.id].image,
+                maxStock: Number(service.maxStock || itemMap[service.id].maxStock || 0),
+                active: service.active !== false
+            };
             });
 
             renderSunServiceTexts();
@@ -1464,6 +1467,88 @@
             renderSunServiceTexts();
         }
     }
+
+    async function loadSunAvailability() {
+    const start = document.getElementById('r-start').value;
+    const end = document.getElementById('r-end').value;
+
+    currentAvailability = {};
+
+    if (!start || !end) {
+        updateQtyLimits();
+        return;
+    }
+
+    try {
+        const res = await fetch(`/api/sun-availability?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&t=${Date.now()}`);
+        const data = await res.json().catch(() => null);
+
+        if (!res.ok || !data?.success) {
+            updateQtyLimits();
+            return;
+        }
+
+        currentAvailability = data.availability || {};
+        updateQtyLimits();
+    } catch (err) {
+        console.error('SUN elérhetőség hiba:', err);
+        updateQtyLimits();
+    }
+}
+
+function getAvailableQty(itemId) {
+    const availability = currentAvailability[itemId];
+
+    if (!availability) {
+        return Number(itemMap[itemId]?.maxStock || 99) || 99;
+    }
+
+    if (availability.available === null) {
+        return 99;
+    }
+
+    return Math.max(0, Number(availability.available || 0));
+}
+
+function updateQtyLimits() {
+    Object.entries(itemMap).forEach(([id, item]) => {
+        const available = getAvailableQty(id);
+        const checkbox = document.getElementById(item.checkboxId);
+        const qtyEl = document.getElementById(item.qtyId);
+        const plusBtn = qtyEl?.parentElement?.querySelectorAll('.qty-btn')?.[1];
+
+        if (!qtyEl) return;
+
+        let currentQty = Number(qtyEl.innerText || 1);
+
+        if (available <= 0) {
+            currentQty = 1;
+            qtyEl.innerText = '1';
+
+            if (checkbox) {
+                checkbox.checked = false;
+                checkbox.disabled = true;
+            }
+
+            if (plusBtn) plusBtn.disabled = true;
+            return;
+        }
+
+        if (checkbox) {
+            checkbox.disabled = false;
+        }
+
+        if (currentQty > available) {
+            qtyEl.innerText = String(available);
+        }
+
+        if (plusBtn) {
+            plusBtn.disabled = Number(qtyEl.innerText || 1) >= available;
+        }
+    });
+
+    updateLiveTotal();
+}
 
     function renderSunServiceTexts() {
         Object.entries(itemMap).forEach(([key, item]) => {
@@ -1537,7 +1622,10 @@
             altInput: true,
             altFormat: 'Y. m. d.',
             minDate: 'today',
-            onChange: updateLiveTotal
+            onChange: async function() {
+                await loadSunAvailability();
+                updateLiveTotal();
+            }
         };
 
         flatpickr('#r-start', config);
@@ -1545,15 +1633,21 @@
     }
 
     function changeQty(id, delta) {
-        const el = document.getElementById(id);
-        if (!el) return;
+    const el = document.getElementById(id);
+    if (!el) return;
 
-        let val = parseInt(el.innerText, 10) || 1;
-        val = Math.max(1, val + delta);
-        el.innerText = val;
+    const itemId = Object.keys(itemMap).find(key => itemMap[key].qtyId === id);
+    const available = itemId ? getAvailableQty(itemId) : 99;
 
-        updateLiveTotal();
-    }
+    let val = parseInt(el.innerText, 10) || 1;
+    val = Math.max(1, val + delta);
+    val = Math.min(val, available);
+
+    el.innerText = val;
+
+    updateQtyLimits();
+    updateLiveTotal();
+}
 
     function getRentalDays() {
         const start = document.getElementById('r-start').value;
