@@ -436,6 +436,11 @@
         flex: 0 0 auto;
     }
 
+    .section-recommendations .section-icon {
+        background: rgba(92,122,77,0.12);
+        color: var(--essence);
+    }
+
     .section h2 {
         font-family: 'Playfair Display', serif;
         font-size: 1.65rem;
@@ -1407,6 +1412,7 @@
                 <div class="topbar-actions" style="justify-content:flex-start;">
                     <button class="btn btn-outline" onclick="openAptModal(null)">+ Apartman</button>
                     <button class="btn btn-outline" onclick="openReviewModal()">+ Vélemény</button>
+                    <button class="btn btn-outline" onclick="openRecommendationModal()">+ Ajánlás</button>
                     <button class="btn btn-outline" onclick="openOwnerModal()">+ Partner</button>
                 </div>
             </div>
@@ -1607,6 +1613,23 @@
                 </div>
             </section>
 
+            <section class="section section-recommendations">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">📍</div>
+                        <div>
+                            <h2>Ajánlások</h2>
+                            <div class="section-subtitle">Éttermek, programok, borászatok és balatoni helyek kezelése.</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="openRecommendationModal()">+ Új ajánlás</button>
+                </div>
+
+                <div class="section-body">
+                    <div id="recommendations-list-container" class="review-list"></div>
+                </div>
+            </section>
+
             <section class="section section-reviews">
                 <div class="section-header">
                     <div class="section-title-wrap">
@@ -1652,6 +1675,85 @@
             </section>
         </div>
     </main>
+</div>
+
+<div id="recommendation-modal" class="modal">
+    <div class="simple-modal-card">
+        <h2>Ajánlás szerkesztése</h2>
+
+        <input type="hidden" id="recommendation-id">
+
+        <div class="form-group">
+            <label>Név</label>
+            <input type="text" id="recommendation-title" placeholder="Pl. Bor Mámor Ederics">
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Kategória HU</label>
+                <input type="text" id="recommendation-category-hu" placeholder="Pl. Borászat / Étterem / Program">
+            </div>
+
+            <div class="form-group">
+                <label>Helyszín</label>
+                <input type="text" id="recommendation-location" placeholder="Pl. Fonyód">
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <div class="form-group">
+                <label>Kategória EN</label>
+                <input type="text" id="recommendation-category-en" placeholder="Pl. Winery / Restaurant / Program">
+            </div>
+
+            <div class="form-group">
+                <label>Kategória DE</label>
+                <input type="text" id="recommendation-category-de" placeholder="Pl. Weingut / Restaurant / Programm">
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Magyar leírás</label>
+            <textarea id="recommendation-desc-hu" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Angol leírás</label>
+            <textarea id="recommendation-desc-en" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Német leírás</label>
+            <textarea id="recommendation-desc-de" rows="4"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Kép link / útvonal</label>
+            <input type="text" id="recommendation-image" placeholder="img/ajanlasok/bor-mamor.jpg">
+        </div>
+
+        <div class="form-group">
+            <label>Google Maps link</label>
+            <input type="text" id="recommendation-maps" placeholder="https://maps.google.com/...">
+        </div>
+
+        <div class="form-group">
+            <label>Weboldal link</label>
+            <input type="text" id="recommendation-website" placeholder="https://...">
+        </div>
+
+        <div class="form-group">
+            <label style="display:flex; align-items:center; gap:10px;">
+                <input type="checkbox" id="recommendation-active" checked style="width:auto; accent-color:var(--accent);">
+                Látható a publikus oldalon
+            </label>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary" style="flex:2;" onclick="saveRecommendation()">Mentés</button>
+            <button class="btn btn-outline" style="flex:1;" onclick="closeRecommendationModal()">Mégse</button>
+        </div>
+    </div>
 </div>
 
 <div id="review-modal" class="modal">
@@ -2857,6 +2959,7 @@ function initSyncCountdown() {
         if (!Array.isArray(db.extras)) db.extras = [];
         if (!Array.isArray(db.breakfasts)) db.breakfasts = [];
         if (!Array.isArray(db.reviews)) db.reviews = [];
+        if (!Array.isArray(db.recommendations)) db.recommendations = [];
         if (!Array.isArray(db.aboutHeritageImages)) db.aboutHeritageImages = [];
 
         if (!db.services || typeof db.services !== 'object') db.services = {};
@@ -2875,6 +2978,7 @@ function initSyncCountdown() {
         renderServices();
         renderApartments();
         renderOwners();
+        renderRecommendations();
         renderReviews();
     }
 
@@ -3230,6 +3334,181 @@ function renderBlockedBookings() {
             `;
         }).join('');
     }
+
+function renderRecommendations() {
+    const container = document.getElementById('recommendations-list-container');
+    if (!container) return;
+
+    const recommendations = db.recommendations || [];
+
+    if (recommendations.length === 0) {
+        container.innerHTML = `<div class="empty-state">Még nincs ajánlás feltöltve.</div>`;
+        return;
+    }
+
+    container.innerHTML = recommendations.map(item => {
+        const preview = item.description_hu || item.description_en || item.description_de || '';
+        const imageHtml = item.image
+            ? `<img src="${escapeHtml(item.image)}" style="width:76px;height:56px;object-fit:cover;border-radius:12px;border:1px solid var(--border);">`
+            : `<div class="apt-thumb-placeholder" style="width:76px;height:56px;border-radius:12px;">?</div>`;
+
+        return `
+            <div class="review-row">
+                <div style="display:flex; align-items:center; gap:12px;">
+                    ${imageHtml}
+                    <div>
+                        <strong>${escapeHtml(item.title || 'Névtelen')}</strong>
+                        <div class="muted" style="font-size:0.76rem;">${escapeHtml(item.category_hu || item.category || '')} • ${escapeHtml(item.location || '')}</div>
+                    </div>
+                </div>
+
+                <div>
+                    <span class="lang-pill ${item.active !== false ? 'ok' : ''}">
+                        ${item.active === false ? 'Rejtett' : 'Aktív'}
+                    </span>
+                </div>
+
+                <div class="muted" style="font-size:0.84rem; line-height:1.55;">
+                    ${escapeHtml(preview.slice(0, 180))}${preview.length > 180 ? '...' : ''}
+                    <div class="lang-status">
+                        <span class="lang-pill ${item.description_hu ? 'ok' : ''}">HU ${item.description_hu ? '✓' : '—'}</span>
+                        <span class="lang-pill ${item.description_en ? 'ok' : ''}">EN ${item.description_en ? '✓' : '—'}</span>
+                        <span class="lang-pill ${item.description_de ? 'ok' : ''}">DE ${item.description_de ? '✓' : '—'}</span>
+                    </div>
+                </div>
+
+                <div class="row-actions">
+                    <button class="btn btn-outline btn-mini" onclick="openRecommendationModal('${escapeHtml(item.id)}')">Szerkesztés</button>
+                    <button class="btn btn-danger btn-mini" onclick="deleteRecommendation('${escapeHtml(item.id)}')">Törlés</button>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+function openRecommendationModal(id = null) {
+    const modal = document.getElementById('recommendation-modal');
+
+    if (!id) {
+        document.getElementById('recommendation-id').value = '';
+        document.getElementById('recommendation-title').value = '';
+        document.getElementById('recommendation-category-hu').value = '';
+        document.getElementById('recommendation-category-en').value = '';
+        document.getElementById('recommendation-category-de').value = '';
+        document.getElementById('recommendation-location').value = '';
+        document.getElementById('recommendation-desc-hu').value = '';
+        document.getElementById('recommendation-desc-en').value = '';
+        document.getElementById('recommendation-desc-de').value = '';
+        document.getElementById('recommendation-image').value = '';
+        document.getElementById('recommendation-maps').value = '';
+        document.getElementById('recommendation-website').value = '';
+        document.getElementById('recommendation-active').checked = true;
+    } else {
+        const item = (db.recommendations || []).find(rec => String(rec.id) === String(id));
+        if (!item) return;
+
+        document.getElementById('recommendation-id').value = item.id;
+        document.getElementById('recommendation-title').value = item.title || '';
+        document.getElementById('recommendation-category-hu').value = item.category_hu || item.category || '';
+        document.getElementById('recommendation-category-en').value = item.category_en || '';
+        document.getElementById('recommendation-category-de').value = item.category_de || '';
+        document.getElementById('recommendation-location').value = item.location || '';
+        document.getElementById('recommendation-desc-hu').value = item.description_hu || '';
+        document.getElementById('recommendation-desc-en').value = item.description_en || '';
+        document.getElementById('recommendation-desc-de').value = item.description_de || '';
+        document.getElementById('recommendation-image').value = item.image || '';
+        document.getElementById('recommendation-maps').value = item.mapsUrl || '';
+        document.getElementById('recommendation-website').value = item.websiteUrl || '';
+        document.getElementById('recommendation-active').checked = item.active !== false;
+    }
+
+    modal.style.display = 'flex';
+}
+
+function closeRecommendationModal() {
+    document.getElementById('recommendation-modal').style.display = 'none';
+}
+
+async function saveRecommendation() {
+    const existingId = document.getElementById('recommendation-id').value || null;
+    const existingItem = existingId
+        ? (db.recommendations || []).find(item => String(item.id) === String(existingId))
+        : null;
+
+    const recommendation = {
+        ...(existingItem || {}),
+        id: existingId,
+        title: document.getElementById('recommendation-title').value.trim(),
+        category_hu: document.getElementById('recommendation-category-hu').value.trim(),
+        category_en: document.getElementById('recommendation-category-en').value.trim(),
+        category_de: document.getElementById('recommendation-category-de').value.trim(),
+        location: document.getElementById('recommendation-location').value.trim(),
+        description_hu: document.getElementById('recommendation-desc-hu').value.trim(),
+        description_en: document.getElementById('recommendation-desc-en').value.trim(),
+        description_de: document.getElementById('recommendation-desc-de').value.trim(),
+        image: document.getElementById('recommendation-image').value.trim(),
+        mapsUrl: document.getElementById('recommendation-maps').value.trim(),
+        websiteUrl: document.getElementById('recommendation-website').value.trim(),
+        active: document.getElementById('recommendation-active').checked,
+        order: existingItem?.order || (db.recommendations || []).length
+    };
+
+    if (!recommendation.title) {
+        alert('Az ajánlás neve kötelező.');
+        return;
+    }
+
+    const res = await fetch('/api/save-recommendation', {
+        method: 'POST',
+        headers: getAdminHeaders(),
+        body: JSON.stringify(recommendation)
+    });
+
+    const result = await res.json().catch(() => ({}));
+
+    if (!res.ok || result.success !== true) {
+        alert(result.error || 'Nem sikerült menteni az ajánlást.');
+        return;
+    }
+
+    if (!db.recommendations) db.recommendations = [];
+
+    const idx = db.recommendations.findIndex(item =>
+        String(item.id) === String(result.recommendation.id)
+    );
+
+    if (idx === -1) {
+        db.recommendations.push(result.recommendation);
+    } else {
+        db.recommendations[idx] = result.recommendation;
+    }
+
+    closeRecommendationModal();
+    renderRecommendations();
+    showSaveToast();
+}
+
+async function deleteRecommendation(id) {
+    if (!confirm('Biztosan törlöd ezt az ajánlást?')) return;
+
+    const res = await fetch(`/api/recommendations/${id}`, {
+        method: 'DELETE',
+        headers: getAdminHeaders()
+    });
+
+    if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        alert(err.error || 'Nem sikerült törölni.');
+        return;
+    }
+
+    db.recommendations = (db.recommendations || []).filter(item =>
+        String(item.id) !== String(id)
+    );
+
+    renderRecommendations();
+    showSaveToast();
+}
 
     function renderReviews() {
         const container = document.getElementById('reviews-list-container');

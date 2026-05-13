@@ -757,6 +757,7 @@ function ensureDbShape(db) {
     if (!Array.isArray(db.extras)) db.extras = [];
     if (!Array.isArray(db.breakfasts)) db.breakfasts = [];
     if (!Array.isArray(db.reviews)) db.reviews = [];
+    if (!Array.isArray(db.recommendations)) db.recommendations = [];
     if (!Array.isArray(db.todos)) db.todos = [];
     if (!Array.isArray(db.todoMessages)) db.todoMessages = [];
     if (!Array.isArray(db.pendingBookings)) db.pendingBookings = [];
@@ -2303,11 +2304,8 @@ app.get('/api/sun-availability', async (req, res) => {
         });
     } catch (err) {
         console.error('SUN availability hiba:', err);
-
         res.status(500).json({
-            error: 'Nem sikerült lekérni az elérhető készletet.',
-            detail: err.message,
-            stack: err.stack
+            error: 'Nem sikerült lekérni az elérhető készletet.'
         });
     }
 });
@@ -3221,6 +3219,123 @@ app.post('/api/delete-todo-message', requireAdmin, async (req, res) => {
     } catch (e) {
         console.error('Todo chat törlési hiba:', e);
         res.status(500).json({ error: 'Szerver hiba' });
+    }
+});
+
+
+// -----------------------------------------------------------------------------
+// API - RECOMMENDATIONS
+// -----------------------------------------------------------------------------
+
+app.get('/api/recommendations', async (req, res) => {
+    try {
+        const db = await getDbContent();
+
+        const recommendations = (db.recommendations || [])
+            .filter(item => item.active !== false)
+            .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+
+        res.json(recommendations);
+    } catch (err) {
+        console.error('Ajánlások lekérési hiba:', err);
+        res.status(500).json({ error: 'Nem sikerült lekérni az ajánlásokat.' });
+    }
+});
+
+app.get('/api/admin/recommendations', requireAdmin, async (req, res) => {
+    try {
+        const db = await getDbContent();
+
+        const recommendations = (db.recommendations || [])
+            .sort((a, b) => Number(a.order || 0) - Number(b.order || 0));
+
+        res.json(recommendations);
+    } catch (err) {
+        console.error('Admin ajánlások lekérési hiba:', err);
+        res.status(500).json({ error: 'Nem sikerült lekérni az ajánlásokat.' });
+    }
+});
+
+app.post('/api/save-recommendation', requireAdmin, async (req, res) => {
+    try {
+        const data = req.body || {};
+        let savedRecommendation = null;
+
+        await updateDbContent(async db => {
+            if (!Array.isArray(db.recommendations)) db.recommendations = [];
+
+            const existing = data.id
+                ? db.recommendations.find(item => String(item.id) === String(data.id))
+                : null;
+
+            const recommendation = {
+                ...(existing || {}),
+                id: data.id || generateId('rec'),
+                title: String(data.title || '').trim(),
+                category_hu: String(data.category_hu || data.category || '').trim(),
+                category_en: String(data.category_en || '').trim(),
+                category_de: String(data.category_de || '').trim(),
+                location: String(data.location || '').trim(),
+                description_hu: String(data.description_hu || '').trim(),
+                description_en: String(data.description_en || '').trim(),
+                description_de: String(data.description_de || '').trim(),
+                image: String(data.image || '').trim(),
+                mapsUrl: String(data.mapsUrl || '').trim(),
+                websiteUrl: String(data.websiteUrl || '').trim(),
+                active: data.active !== false,
+                order: Number(data.order || existing?.order || db.recommendations.length),
+                createdAt: existing?.createdAt || new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+
+            if (!recommendation.title) {
+                const err = new Error('Az ajánlás neve kötelező.');
+                err.statusCode = 400;
+                throw err;
+            }
+
+            const index = db.recommendations.findIndex(item =>
+                String(item.id) === String(recommendation.id)
+            );
+
+            if (index === -1) {
+                db.recommendations.push(recommendation);
+            } else {
+                db.recommendations[index] = recommendation;
+            }
+
+            savedRecommendation = recommendation;
+            return db;
+        });
+
+        res.json({
+            success: true,
+            recommendation: savedRecommendation
+        });
+    } catch (err) {
+        console.error('Ajánlás mentési hiba:', err);
+        res.status(err.statusCode || 500).json({
+            error: err.message || 'Nem sikerült menteni az ajánlást.'
+        });
+    }
+});
+
+app.delete('/api/recommendations/:id', requireAdmin, async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        await updateDbContent(async db => {
+            db.recommendations = (db.recommendations || []).filter(item =>
+                String(item.id) !== String(id)
+            );
+
+            return db;
+        });
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error('Ajánlás törlési hiba:', err);
+        res.status(500).json({ error: 'Nem sikerült törölni az ajánlást.' });
     }
 });
 

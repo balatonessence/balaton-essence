@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Empfehlungen | Balaton Essence</title>
+
+    <meta name="description" content="Ausgewählte Empfehlungen am Balaton, Restaurants, Weingüter, Programme und Erlebnisse für Gäste von Balaton Essence.">
+    <link rel="canonical" href="https://balatonessence.com/de/ajanlasok.html">
+
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #FCFBF9;
+            --bg-alt: #F4F2EC;
+            --text: #2C3325;
+            --text-light: #6A7063;
+            --accent: #5C7A4D;
+            --accent-hover: #48613A;
+            --gold: #C8A46B;
+            --border: #E3E0D8;
+            --dark: #172318;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        .site-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 2000;
+            padding: 1.6rem 6vw;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: linear-gradient(to bottom, rgba(10, 16, 12, 0.72), rgba(10, 16, 12, 0.12));
+            transition: 0.3s ease;
+        }
+
+        .site-header.scrolled {
+            background: rgba(23, 35, 24, 0.95);
+            backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        .logo-container {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+            text-decoration: none;
+            color: white;
+        }
+
+        .logo-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            letter-spacing: 7px;
+            color: white;
+        }
+
+        .logo-subtitle {
+            font-size: 0.64rem;
+            font-weight: 400;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.78);
+            margin-top: 0.35rem;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2.2rem;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255,255,255,0.92);
+            font-size: 0.76rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: 0.25s ease;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--gold);
+        }
+
+        .lang-dropdown {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            margin-left: 0.4rem;
+            padding: 10px 0;
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: rgba(255,255,255,0.9);
+            cursor: pointer;
+            padding: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            text-transform: uppercase;
+        }
+
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid rgba(255,255,255,0.85);
+            transition: 0.25s;
+        }
+
+        .lang-content {
+            display: none;
+            position: absolute;
+            top: calc(100% - 2px);
+            right: 0;
+            min-width: 130px;
+            background: rgba(20, 27, 18, 0.94);
+            border: 1px solid rgba(255,255,255,0.22);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.28);
+            backdrop-filter: blur(12px);
+            z-index: 9999;
+            border-radius: 6px;
+            overflow: hidden;
+            padding: 6px 0;
+        }
+
+        .lang-content a {
+            display: block;
+            padding: 12px 16px;
+            color: rgba(255,255,255,0.92) !important;
+            text-decoration: none;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: none;
+            letter-spacing: 0;
+            background: transparent !important;
+            text-shadow: none !important;
+        }
+
+        .lang-content a:hover {
+            background: rgba(255,255,255,0.12) !important;
+            color: #D7B889 !important;
+        }
+
+        .lang-dropdown:hover .lang-content,
+        .lang-dropdown:focus-within .lang-content {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        .lang-dropdown:hover .arrow,
+        .lang-dropdown:focus-within .arrow {
+            transform: rotate(180deg);
+        }
+
+        .hero {
+            min-height: 62vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 9rem 6vw 5rem;
+            text-align: center;
+            color: white;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(rgba(10, 15, 12, 0.72), rgba(10, 15, 12, 0.72)),
+                url('../img/sunkartya.png') center/cover no-repeat;
+            transform: scale(1.02);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 880px;
+        }
+
+        .hero-kicker {
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 1rem;
+        }
+
+        .hero-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(3rem, 6vw, 5.4rem);
+            font-weight: 400;
+            line-height: 1.05;
+            margin-bottom: 1.3rem;
+        }
+
+        .hero-text {
+            color: rgba(255,255,255,0.84);
+            line-height: 1.8;
+            font-size: 1.02rem;
+            max-width: 680px;
+            margin: 0 auto;
+        }
+
+        .section {
+            padding: 6rem 6vw;
+            background: var(--bg-alt);
+        }
+
+        .filters {
+            max-width: 1320px;
+            margin: 0 auto 2.4rem;
+            display: flex;
+            gap: 0.7rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .filter-btn {
+            border: 1px solid var(--border);
+            background: white;
+            color: var(--text);
+            padding: 0.75rem 1.2rem;
+            border-radius: 999px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            transition: 0.25s ease;
+        }
+
+        .filter-btn:hover,
+        .filter-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        .recommendations-grid {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.6rem;
+        }
+
+        .recommendation-card {
+            background: white;
+            border: 1px solid var(--border);
+            box-shadow: 0 24px 70px rgba(44, 51, 37, 0.07);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            transition: 0.3s ease;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 30px 85px rgba(44, 51, 37, 0.12);
+        }
+
+        .recommendation-image {
+            height: 250px;
+            background: #e8e3d8 center/cover no-repeat;
+        }
+
+        .recommendation-body {
+            padding: 1.7rem;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+
+        .recommendation-meta {
+            color: var(--gold);
+            font-size: 0.68rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            margin-bottom: 0.75rem;
+        }
+
+        .recommendation-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.75rem;
+            font-weight: 400;
+            line-height: 1.15;
+            margin-bottom: 0.85rem;
+        }
+
+        .recommendation-location {
+            color: var(--accent);
+            font-size: 0.82rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+        }
+
+        .recommendation-text {
+            color: var(--text-light);
+            line-height: 1.75;
+            font-size: 0.9rem;
+            flex: 1;
+        }
+
+        .recommendation-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin-top: 1.4rem;
+        }
+
+        .rec-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 4px;
+            font-size: 0.68rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            transition: 0.25s ease;
+        }
+
+        .rec-btn.primary {
+            background: var(--accent);
+            color: white;
+            border: 1px solid var(--accent);
+        }
+
+        .rec-btn.primary:hover {
+            background: var(--accent-hover);
+            border-color: var(--accent-hover);
+        }
+
+        .rec-btn.secondary {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid rgba(92,122,77,0.45);
+        }
+
+        .rec-btn.secondary:hover {
+            background: rgba(92,122,77,0.08);
+        }
+
+        .empty-state {
+            max-width: 760px;
+            margin: 0 auto;
+            background: white;
+            border: 1px dashed var(--border);
+            padding: 3rem;
+            text-align: center;
+            color: var(--text-light);
+            line-height: 1.7;
+        }
+
+        .footer {
+            background: #111a12;
+            color: white;
+            padding: 4rem 6vw 2rem;
+        }
+
+        .footer-grid {
+            max-width: 1320px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 1fr;
+            gap: 4rem;
+            align-items: start;
+        }
+
+        .footer p,
+        .footer a,
+        .footer li {
+            color: rgba(255,255,255,0.68);
+            font-size: 0.82rem;
+            line-height: 1.9;
+            text-decoration: none;
+        }
+
+        .footer h4 {
+            color: white;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.15rem;
+            margin-bottom: 1rem;
+        }
+
+        .footer ul {
+            list-style: none;
+        }
+
+        .footer a:hover {
+            color: var(--gold);
+        }
+
+        .footer-bottom {
+            max-width: 1320px;
+            margin: 3rem auto 0;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            color: rgba(255,255,255,0.45);
+            font-size: 0.75rem;
+        }
+
+        html {
+            background: #101711;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(200, 164, 107, 0.85) #101711;
+        }
+
+        body {
+            background: #101711;
+        }
+
+        html::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        html::-webkit-scrollbar-track {
+            background: #101711;
+        }
+
+        html::-webkit-scrollbar-thumb {
+            background: rgba(200, 164, 107, 0.8);
+            border-radius: 999px;
+            border: 2px solid #101711;
+        }
+
+        @media (max-width: 1050px) {
+            .recommendations-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        @media (max-width: 760px) {
+            .site-header {
+                padding: 1rem 5vw;
+                background: rgba(23,35,24,0.94);
+                align-items: flex-start;
+            }
+
+            .logo-title {
+                font-size: 1.35rem;
+                letter-spacing: 4px;
+            }
+
+            .logo-subtitle {
+                font-size: 0.55rem;
+                letter-spacing: 3px;
+            }
+
+            .nav-links {
+                justify-content: flex-end;
+                flex-wrap: wrap;
+                gap: 0.75rem;
+            }
+
+            .nav-links a {
+                font-size: 0.62rem;
+            }
+
+            .hero {
+                min-height: 58vh;
+                padding: 8rem 5vw 4rem;
+            }
+
+            .section {
+                padding: 4.5rem 5vw;
+            }
+
+            .recommendations-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+
+    <link rel="stylesheet" href="../mobile.css?v=106">
+</head>
+
+<body>
+
+<header class="site-header" id="site-header">
+    <a href="index.html" class="logo-container" aria-label="Balaton Essence Startseite">
+        <span class="logo-title">BALATON</span>
+        <span class="logo-subtitle">Essence</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Hauptnavigation">
+        <a href="index.html#apartments">Unterkünfte</a>
+        <a href="index.html#services">Leistungen</a>
+        <a href="ajanlasok.html" class="active">Empfehlungen</a>
+        <a href="rolunk.html">Über uns</a>
+        <a href="#contact">Kontakt</a>
+
+        <div class="lang-dropdown">
+            <button class="lang-btn" type="button">DE <span class="arrow"></span></button>
+            <div class="lang-content">
+                <a href="../ajanlasok.html">Magyar</a>
+                <a href="../en/ajanlasok.html">English</a>
+                <a href="ajanlasok.html">Deutsch</a>
+            </div>
+        </div>
+    </nav>
+</header>
+
+<section class="hero">
+    <div class="hero-content">
+        <div class="hero-kicker">Empfehlungen am Balaton</div>
+        <h1 class="hero-title">Orte und Erlebnisse, die wir von Herzen empfehlen.</h1>
+        <p class="hero-text">
+            Ausgewählte Restaurants, Weingüter, Programme und Orte am Balaton, damit Ihr Aufenthalt nicht nur schön, sondern unvergesslich wird.
+        </p>
+    </div>
+</section>
+
+<section class="section">
+    <div class="filters" id="filters"></div>
+    <div id="recommendations-grid" class="recommendations-grid"></div>
+</section>
+
+<footer class="footer" id="contact">
+    <div class="footer-grid">
+        <div>
+            <a href="index.html" class="logo-container">
+                <span class="logo-title">BALATON</span>
+                <span class="logo-subtitle">Essence</span>
+            </a>
+            <p style="margin-top: 1.3rem;">
+                Premium-Unterkünfte und Erlebnisse am Balaton.
+            </p>
+        </div>
+
+        <div>
+            <h4>Navigation</h4>
+            <ul>
+                <li><a href="index.html#apartments">Unterkünfte</a></li>
+                <li><a href="index.html#services">Leistungen</a></li>
+                <li><a href="ajanlasok.html">Empfehlungen</a></li>
+                <li><a href="rolunk.html">Über uns</a></li>
+            </ul>
+        </div>
+
+        <div>
+            <h4>Kontakt</h4>
+            <ul>
+                <li><a href="tel:+36204995484">+36 20 499 5484</a></li>
+                <li><a href="tel:+36208598201">SUP & SUN: +36 20 859 8201</a></li>
+                <li><a href="mailto:info@balatonessence.com">info@balatonessence.com</a></li>
+                <li>8640 Fonyód</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer-bottom">
+        © 2026 Balaton Essence. Alle Rechte vorbehalten.
+    </div>
+</footer>
+
+<script>
+    let allRecommendations = [];
+    let activeCategory = 'all';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+        initHeaderScroll();
+        await loadRecommendations();
+    });
+
+    function initHeaderScroll() {
+        const header = document.getElementById('site-header');
+        if (!header) return;
+
+        const update = () => {
+            if (window.scrollY > 20) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        };
+
+        update();
+        window.addEventListener('scroll', update);
+    }
+
+    async function loadRecommendations() {
+        const grid = document.getElementById('recommendations-grid');
+
+        try {
+            const res = await fetch('/api/recommendations?t=' + Date.now());
+
+            if (!res.ok) {
+                throw new Error('Empfehlungen konnten nicht geladen werden.');
+            }
+
+            allRecommendations = await res.json();
+
+            renderFilters();
+            renderRecommendations();
+        } catch (err) {
+            console.error('Empfehlungen Ladefehler:', err);
+            grid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    Empfehlungen sind derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.
+                </div>
+            `;
+        }
+    }
+
+    function renderFilters() {
+        const filters = document.getElementById('filters');
+        const categories = [...new Set(allRecommendations.map(item => item.category_de || item.category_hu || item.category).filter(Boolean))];
+
+        filters.innerHTML = `
+            <button class="filter-btn ${activeCategory === 'all' ? 'active' : ''}" onclick="setCategory('all')">Alle</button>
+            ${categories.map(category => `
+                <button class="filter-btn ${activeCategory === category ? 'active' : ''}" onclick="setCategory('${escapeAttr(category)}')">
+                    ${escapeHtml(category)}
+                </button>
+            `).join('')}
+        `;
+    }
+
+    function setCategory(category) {
+        activeCategory = category;
+        renderFilters();
+        renderRecommendations();
+    }
+
+    function renderRecommendations() {
+        const grid = document.getElementById('recommendations-grid');
+
+        const items = activeCategory === 'all'
+            ? allRecommendations
+            : allRecommendations.filter(item => (item.category_de || item.category_hu || item.category) === activeCategory);
+
+        if (items.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    In dieser Kategorie gibt es derzeit noch keine Empfehlungen.
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = items.map(item => {
+            const image = safeImageUrl(item.image) || '../img/sunkartya.png';
+            const description = item.description_de || item.description_hu || '';
+
+            return `
+                <article class="recommendation-card">
+                    <div class="recommendation-image" style="background-image:url('${escapeAttr(image)}');"></div>
+
+                    <div class="recommendation-body">
+                        <div class="recommendation-meta">${escapeHtml(item.category_de || item.category_hu || item.category || 'Empfehlung')}</div>
+                        <h2 class="recommendation-title">${escapeHtml(item.title || '')}</h2>
+
+                        ${item.location ? `
+                            <div class="recommendation-location">📍 ${escapeHtml(item.location)}</div>
+                        ` : ''}
+
+                        <p class="recommendation-text">${escapeHtml(description)}</p>
+
+                        <div class="recommendation-actions">
+                            ${item.mapsUrl ? `
+                                <a class="rec-btn primary" href="${escapeAttr(item.mapsUrl)}" target="_blank" rel="noopener">
+                                    Google Maps
+                                </a>
+                            ` : ''}
+
+                            ${item.websiteUrl ? `
+                                <a class="rec-btn secondary" href="${escapeAttr(item.websiteUrl)}" target="_blank" rel="noopener">
+                                    Webseite
+                                </a>
+                            ` : ''}
+                        </div>
+                    </div>
+                </article>
+            `;
+        }).join('');
+    }
+
+    function safeImageUrl(value) {
+        const url = String(value || '').trim();
+
+        if (!url) return '';
+        if (url.startsWith('data:image/')) return url;
+        if (url.startsWith('img/')) return '../' + url;
+        if (url.startsWith('/img/')) return '..' + url;
+        if (url.startsWith('https://')) return url;
+
+        return '';
+    }
+
+    function escapeHtml(value) {
+        return String(value ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    function escapeAttr(value) {
+        return escapeHtml(value).replace(/`/g, '&#096;');
+    }
+</script>
+
+<script src="../site-mobile.js?v=106"></script>
+<script src="../chat-assistant.js"></script>
+</body>
+</html>
