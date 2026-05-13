@@ -3253,7 +3253,23 @@ function renderBlockedBookings() {
                     <div>${escapeHtml(b.checkIn || '')} &rarr; ${escapeHtml(b.checkOut || b.end || '')}</div>
                 </td>
                 <td><span class="badge badge-${escapeHtml(source)}">${escapeHtml(source.toUpperCase())}</span></td>
-                <td><button class="btn btn-danger btn-mini" onclick="deleteItem('bookings', '${escapeHtml(b.id)}')">Törlés</button></td>
+                <td>
+                    <div class="row-actions">
+                        <button
+                            class="btn btn-outline btn-mini"
+                            onclick="openExternalGuestModal('${escapeHtml(b.id)}')"
+                        >
+                            Vendégadatok
+                        </button>
+
+                        <button
+                            class="btn btn-danger btn-mini"
+                            onclick="deleteItem('bookings', '${escapeHtml(b.id)}')"
+                        >
+                            Törlés
+                        </button>
+                    </div>
+                </td>
             </tr>
         `;
     }).join('');

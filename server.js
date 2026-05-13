@@ -526,6 +526,7 @@ async function processScheduledGuestEmails() {
         for (const booking of bookings) {
             if (!booking || !booking.email) continue;
             if (booking.status === 'cancelled') continue;
+            if (isBlockedBooking(booking) && booking.manualGuestData !== true) continue;
 
             const checkIn = parseDateOnly(booking.checkIn || booking.start);
             const checkOut = parseDateOnly(booking.checkOut || booking.end);
@@ -644,6 +645,20 @@ async function processScheduledGuestEmails() {
     } catch (err) {
         console.error('Automata vendég email feldolgozási hiba:', err);
     }
+}
+
+function isBlockedBooking(booking) {
+    const guest = normalizeText(booking.guestName || '');
+    const type = normalizeText(booking.type || '');
+    const status = normalizeText(booking.status || '');
+
+    return (
+        guest === 'zarolt idoszak' ||
+        guest === 'zárolt időszak' ||
+        type === 'blocked' ||
+        type === 'manual-block' ||
+        status === 'blocked'
+    );
 }
 
 function isBookingOverlapping(bookings, newBooking, ignoreStripeId = null, ignoreBookingId = null) {
