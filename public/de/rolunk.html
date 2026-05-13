@@ -1026,11 +1026,12 @@
     <div class="team-wrap">
         <div class="team-card">
             <img
-                id="about-team-image"
-                src="../img/rolunk-team-placeholder.jpg"
-                alt="Balaton Essence team"
-                class="member-img"
-            >
+    id="about-team-image"
+    src=""
+    alt="Balaton Essence team"
+    class="member-img"
+    style="display:none;"
+>
             <h3>Zsuzsa Szabó<br>-<br>Tamás Szabó</h3>
             <p>
                 Gemeinsam gestalten wir die Details, die Atmosphäre und das Gästeerlebnis hinter Balaton Essence.
@@ -1143,6 +1144,14 @@
             }
 
             const db = await res.json();
+
+            const teamImgEl = document.getElementById('about-team-image');
+            const teamImage = safeImageUrl(db.aboutTeamImage);
+
+            if (teamImgEl && teamImage) {
+                teamImgEl.src = teamImage;
+                teamImgEl.style.display = '';
+            }
 
             heritageImages = Array.isArray(db.aboutHeritageImages)
                 ? db.aboutHeritageImages
