@@ -908,6 +908,61 @@
         return new Date(parts[0], parts[1] - 1, parts[2]);
     }
 
+    function getAptStatusAndPrice(apt, date, guests = 2) {
+    if (!apt) {
+        return {
+            status: 'CLOSED',
+            price: 0,
+            label: '',
+            minNights: 1,
+            maxGuests: 2
+        };
+    }
+
+    const dateStr = getLocalDateString(date);
+    const guestCount = Number(guests || 2);
+
+    const season = Array.isArray(apt.seasons)
+        ? apt.seasons.find(s => dateStr >= s.start && dateStr <= s.end)
+        : null;
+
+    if (!season) {
+        return {
+            status: 'CLOSED',
+            price: 0,
+            label: '',
+            minNights: 1,
+            maxGuests: Number(apt.maxGuests || 2)
+        };
+    }
+
+    let price = Number(season.price || apt.price || 0);
+
+    if (guestCount === 3 && Number(season.price3 || 0) > 0) {
+        price = Number(season.price3);
+    }
+
+    if (guestCount === 4 && Number(season.price4 || 0) > 0) {
+        price = Number(season.price4);
+    }
+
+    if (guestCount === 5 && Number(season.price5 || 0) > 0) {
+        price = Number(season.price5);
+    }
+
+    if (guestCount >= 6 && Number(season.price6 || 0) > 0) {
+        price = Number(season.price6);
+    }
+
+    return {
+        status: 'OPEN',
+        price,
+        label: season.name || '',
+        minNights: Number(season.minNights || 1),
+        maxGuests: Number(season.maxGuests || apt.maxGuests || 2)
+    };
+}
+
     function formatDisplayDate(dateStr) {
         if (!dateStr) return '-';
 
