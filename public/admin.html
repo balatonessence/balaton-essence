@@ -14,7 +14,12 @@
 
         async function initDatabase(callback) {
             try {
-                const res = await fetch('/api/get-db-content?t=' + Date.now());
+                const res = await fetch('/api/get-db-content?t=' + Date.now(), {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-admin-token': getAdminToken()
+                    }
+                });
 
                 if (!res.ok) {
                     throw new Error('Nem sikerült betölteni az adatbázist.');
@@ -1403,11 +1408,156 @@
             padding: 1.2rem;
         }
     }
+
+    .admin-login-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+        radial-gradient(circle at 18% 18%, rgba(200, 164, 107, 0.18), transparent 30%),
+        radial-gradient(circle at 82% 82%, rgba(92, 122, 77, 0.18), transparent 30%),
+        linear-gradient(135deg, #101711 0%, #172318 100%);
+}
+
+.admin-login-overlay.is-visible {
+    display: flex;
+}
+
+.admin-login-card {
+    width: min(440px, 94vw);
+    background: rgba(252, 251, 249, 0.97);
+    border: 1px solid rgba(227, 224, 216, 0.9);
+    border-radius: 24px;
+    padding: 38px 32px;
+    box-shadow: 0 32px 90px rgba(0,0,0,0.34);
+    text-align: center;
+}
+
+.admin-login-logo {
+    margin-bottom: 26px;
+    color: #172318;
+}
+
+.admin-login-logo span {
+    display: block;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 7px;
+}
+
+.admin-login-logo small {
+    display: block;
+    margin-top: 7px;
+    color: #6A7063;
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+}
+
+.admin-login-card h1 {
+    margin: 0 0 10px;
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 600;
+    color: #2C3325;
+}
+
+.admin-login-card p {
+    margin: 0 0 22px;
+    color: #6A7063;
+    font-size: 0.9rem;
+    line-height: 1.6;
+}
+
+#admin-token-input {
+    width: 100%;
+    padding: 15px 16px;
+    border: 1px solid #E3E0D8;
+    border-radius: 12px;
+    background: white;
+    color: #2C3325;
+    font-family: inherit;
+    font-size: 0.95rem;
+    outline: none;
+    transition: 0.2s ease;
+}
+
+#admin-token-input:focus {
+    border-color: #5C7A4D;
+    box-shadow: 0 0 0 4px rgba(92, 122, 77, 0.12);
+}
+
+.admin-login-error {
+    min-height: 20px;
+    margin: 12px 0;
+    color: #B0413E;
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.admin-login-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: #5C7A4D;
+    color: white;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1.6px;
+    transition: 0.25s ease;
+}
+
+.admin-login-btn:hover {
+    background: #48613A;
+    transform: translateY(-1px);
+}
+
+.admin-login-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
 </style>
 
     <meta name="robots" content="noindex, nofollow"></head>
 
 <body>
+
+<div id="admin-login-overlay" class="admin-login-overlay">
+    <div class="admin-login-card">
+        <div class="admin-login-logo">
+            <span>BALATON</span>
+            <small>Essence Admin</small>
+        </div>
+
+        <h1>Admin belépés</h1>
+        <p>Add meg az admin tokent a vezérlőpult használatához.</p>
+
+        <input
+            type="password"
+            id="admin-token-input"
+            placeholder="Admin token"
+            autocomplete="current-password"
+        >
+
+        <div id="admin-login-error" class="admin-login-error"></div>
+
+        <button type="button" id="admin-login-btn" class="admin-login-btn">
+            Belépés
+        </button>
+    </div>
+</div>
+
 <div class="admin-shell">
     <header class="topbar">
         <div class="topbar-inner">
@@ -2127,32 +2277,104 @@
     let currentRecommendationImage = '';
     let currentAboutTeamImage = '';
 
-    function getAdminToken() {
-        let token = sessionStorage.getItem('ADMIN_TOKEN');
+let ADMIN_TOKEN = sessionStorage.getItem('ADMIN_TOKEN') || '';
 
-        if (!token) {
-            token = prompt('Admin token:');
+function getAdminToken() {
+    return ADMIN_TOKEN || sessionStorage.getItem('ADMIN_TOKEN') || '';
+}
 
-            if (token) {
-                sessionStorage.setItem('ADMIN_TOKEN', token);
-            }
+function setAdminToken(token) {
+    ADMIN_TOKEN = String(token || '').trim();
+
+    if (ADMIN_TOKEN) {
+        sessionStorage.setItem('ADMIN_TOKEN', ADMIN_TOKEN);
+    }
+}
+
+function getAdminHeaders(extra = {}) {
+    return {
+        'Content-Type': 'application/json',
+        'x-admin-token': getAdminToken(),
+        ...extra
+    };
+}
+
+function showAdminLogin(message = '') {
+    const overlay = document.getElementById('admin-login-overlay');
+    const input = document.getElementById('admin-token-input');
+    const error = document.getElementById('admin-login-error');
+
+    if (error) error.textContent = message || '';
+    if (input) input.value = '';
+
+    overlay?.classList.add('is-visible');
+
+    setTimeout(() => {
+        input?.focus();
+    }, 80);
+}
+
+function hideAdminLogin() {
+    document.getElementById('admin-login-overlay')?.classList.remove('is-visible');
+}
+
+async function testAdminToken(token) {
+    const res = await fetch('/api/sync-status?t=' + Date.now(), {
+        headers: {
+            'Content-Type': 'application/json',
+            'x-admin-token': token
+        }
+    });
+
+    return res.ok;
+}
+
+async function handleAdminLogin() {
+    const input = document.getElementById('admin-token-input');
+    const error = document.getElementById('admin-login-error');
+    const btn = document.getElementById('admin-login-btn');
+
+    const token = input?.value.trim();
+
+    if (!token) {
+        if (error) error.textContent = 'Add meg az admin tokent.';
+        return;
+    }
+
+    if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Ellenőrzés...';
+    }
+
+    try {
+        const ok = await testAdminToken(token);
+
+        if (!ok) {
+            if (error) error.textContent = 'Hibás admin token.';
+            return;
         }
 
-        return token || '';
-    }
+        setAdminToken(token);
+        hideAdminLogin();
 
-    function resetAdminToken() {
-        sessionStorage.removeItem('ADMIN_TOKEN');
-        getAdminToken();
+        await initDatabase(renderAll);
+        initSyncCountdown();
+    } catch (err) {
+        console.error('Admin belépési hiba:', err);
+        if (error) error.textContent = 'Nem sikerült ellenőrizni a tokent.';
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.textContent = 'Belépés';
+        }
     }
+}
 
-    function getAdminHeaders(extra = {}) {
-        return {
-            'Content-Type': 'application/json',
-            'x-admin-token': getAdminToken(),
-            ...extra
-        };
-    }
+function resetAdminToken() {
+    sessionStorage.removeItem('ADMIN_TOKEN');
+    ADMIN_TOKEN = '';
+    showAdminLogin('Add meg az új admin tokent.');
+}
 
     function escapeHtml(value) {
         return String(value ?? '')
@@ -4340,10 +4562,36 @@ renderBlockedBookings();
     openExternalGuestModal(bookingId);
 });
 
-    window.onload = () => {
-        initDatabase(renderAll);
-        initSyncCountdown();
-    };
+async function bootstrapAdmin() {
+    document.getElementById('admin-login-btn')?.addEventListener('click', handleAdminLogin);
+
+    document.getElementById('admin-token-input')?.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            handleAdminLogin();
+        }
+    });
+
+    const storedToken = getAdminToken();
+
+    if (!storedToken) {
+        showAdminLogin();
+        return;
+    }
+
+    const ok = await testAdminToken(storedToken);
+
+    if (!ok) {
+        sessionStorage.removeItem('ADMIN_TOKEN');
+        ADMIN_TOKEN = '';
+        showAdminLogin('A korábbi token már nem érvényes.');
+        return;
+    }
+
+    await initDatabase(renderAll);
+    initSyncCountdown();
+}
+
+window.onload = bootstrapAdmin;
 </script>
 </body>
 </html>
