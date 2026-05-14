@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+Disallow: /todo.html
+Disallow: /tulaj.html
+Disallow: /success.html
+Disallow: /success-extra.html
+Disallow: /cancel.html
+Disallow: /morningorder.html
+Disallow: /review.html
+Disallow: /data.json
+
+Sitemap: https://balatonessence.com/sitemap.xml

@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apartman Részletek | Balaton Essence</title>
+    <meta name="description" content="Balaton Essence apartman részletek: prémium balatoni szállás, aktuális árak, foglalható időszakok és képgaléria.">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="img/bebetolto.png">
@@ -1963,7 +1964,45 @@
         }
     }
 
+
+    function updateSeoCanonicalAndHreflang(apartmentId) {
+        const id = encodeURIComponent(String(apartmentId || ''));
+        const alternates = {
+            hu: `https://balatonessence.com/apartman.html?id=${id}`,
+            en: `https://balatonessence.com/en/apartman.html?id=${id}`,
+            de: `https://balatonessence.com/de/apartman.html?id=${id}`
+        };
+
+        const currentLang = getCurrentLang ? getCurrentLang() : 'hu';
+        const canonicalHref = alternates[currentLang] || alternates.hu;
+
+        let canonical = document.querySelector('link[rel="canonical"]');
+        if (!canonical) {
+            canonical = document.createElement('link');
+            canonical.setAttribute('rel', 'canonical');
+            document.head.appendChild(canonical);
+        }
+        canonical.setAttribute('href', canonicalHref);
+
+        document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
+
+        Object.entries(alternates).forEach(([lang, href]) => {
+            const link = document.createElement('link');
+            link.setAttribute('rel', 'alternate');
+            link.setAttribute('hreflang', lang);
+            link.setAttribute('href', href);
+            document.head.appendChild(link);
+        });
+
+        const xDefault = document.createElement('link');
+        xDefault.setAttribute('rel', 'alternate');
+        xDefault.setAttribute('hreflang', 'x-default');
+        xDefault.setAttribute('href', alternates.hu);
+        document.head.appendChild(xDefault);
+    }
+
     function updateSEO(apartmanNeve, varos) {
+        updateSeoCanonicalAndHreflang(currentApt?.id);
         document.title = `${apartmanNeve} - Luxus Apartman ${varos} | Balaton Essence`;
 
         let metaDesc = document.querySelector('meta[name="description"]');
