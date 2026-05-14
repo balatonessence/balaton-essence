@@ -1527,6 +1527,36 @@
     cursor: not-allowed;
     transform: none;
 }
+
+.admin-token-field {
+    position: relative;
+    width: 100%;
+}
+
+.admin-token-field #admin-token-input {
+    padding-right: 52px;
+}
+
+.admin-token-toggle {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    width: 38px;
+    height: 38px;
+    transform: translateY(-50%);
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: #6A7063;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: 0.2s ease;
+}
+
+.admin-token-toggle:hover {
+    background: rgba(92, 122, 77, 0.08);
+    color: #5C7A4D;
+}
 </style>
 
     <meta name="robots" content="noindex, nofollow"></head>
@@ -1543,12 +1573,23 @@
         <h1>Admin belépés</h1>
         <p>Add meg az admin tokent a vezérlőpult használatához.</p>
 
-        <input
-            type="password"
-            id="admin-token-input"
-            placeholder="Admin token"
-            autocomplete="current-password"
-        >
+        <div class="admin-token-field">
+            <input
+                type="password"
+                id="admin-token-input"
+                placeholder="Admin token"
+                autocomplete="current-password"
+            >
+
+            <button
+                type="button"
+                id="admin-token-toggle"
+                class="admin-token-toggle"
+                aria-label="Token megjelenítése"
+            >
+                👁
+            </button>
+        </div>
 
         <div id="admin-login-error" class="admin-login-error"></div>
 
@@ -4570,6 +4611,24 @@ async function bootstrapAdmin() {
             handleAdminLogin();
         }
     });
+
+    document.getElementById('admin-token-toggle')?.addEventListener('click', () => {
+    const input = document.getElementById('admin-token-input');
+    const toggle = document.getElementById('admin-token-toggle');
+
+    if (!input || !toggle) return;
+
+    const isPassword = input.type === 'password';
+
+    input.type = isPassword ? 'text' : 'password';
+    toggle.textContent = isPassword ? '🙈' : '👁';
+    toggle.setAttribute(
+        'aria-label',
+        isPassword ? 'Token elrejtése' : 'Token megjelenítése'
+    );
+
+    input.focus();
+});
 
     const storedToken = getAdminToken();
 
