@@ -1642,8 +1642,16 @@ function getApartmentNightInfo(apt, date, guests = 2) {
         price = Number(season.price3);
     }
 
-    if (guestCount >= 4 && Number(season.price4 || 0) > 0) {
+    if (guestCount === 4 && Number(season.price4 || 0) > 0) {
         price = Number(season.price4);
+    }
+
+    if (guestCount === 5 && Number(season.price5 || 0) > 0) {
+        price = Number(season.price5);
+    }
+
+    if (guestCount >= 6 && Number(season.price6 || 0) > 0) {
+        price = Number(season.price6);
     }
 
     return {

@@ -981,7 +981,7 @@
 
     .season-row {
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 14px;
         align-items: end;
         background: var(--surface-soft);
@@ -2513,7 +2513,7 @@ function initGallerySorting() {
     });
 }
 
-    function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2', maxGuests = '4', price3 = '', price4 = '') {
+    function addSeasonRow(name = '', start = '', end = '', price = '', minNights = '2', maxGuests = '4', price3 = '', price4 = '', price5 = '', price6 = '') {
     const container = document.getElementById('seasons-container');
     if (!container) return;
 
@@ -2561,6 +2561,16 @@ function initGallerySorting() {
                 <input type="number" class="s-price4" value="${escapeHtml(price4)}" placeholder="Opc.">
             </div>
 
+            <div class="form-cell">
+                <label>Ár (5 fő)</label>
+                <input type="number" class="s-price5" value="${escapeHtml(price5)}" placeholder="Opc.">
+            </div>
+
+            <div class="form-cell">
+                <label>Ár (6 fő)</label>
+                <input type="number" class="s-price6" value="${escapeHtml(price6)}" placeholder="Opc.">
+            </div>
+
             <button
                 type="button"
                 class="season-delete-btn"
@@ -2584,7 +2594,9 @@ function initGallerySorting() {
             minNights: Number(row.querySelector('.s-min').value || 1),
             maxGuests: Number(row.querySelector('.s-max').value || 2),
             price3: Number(row.querySelector('.s-price3')?.value || 0),
-            price4: Number(row.querySelector('.s-price4')?.value || 0)
+            price4: Number(row.querySelector('.s-price4')?.value || 0),
+            price5: Number(row.querySelector('.s-price5')?.value || 0),
+            price6: Number(row.querySelector('.s-price6')?.value || 0)
         }));
 
         const existingApt = activeId
@@ -2756,7 +2768,7 @@ function initGallerySorting() {
 
                 if (Array.isArray(a.seasons)) {
                     a.seasons.forEach(s => {
-                        addSeasonRow(s.name, s.start, s.end, s.price, s.minNights, s.maxGuests, s.price3, s.price4);
+                        addSeasonRow(s.name, s.start, s.end, s.price, s.minNights, s.maxGuests, s.price3, s.price4, s.price5, s.price6);
                     });
                 }
             }
