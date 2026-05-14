@@ -6,8 +6,7 @@ Disallow: /tulaj.html
 Disallow: /success.html
 Disallow: /success-extra.html
 Disallow: /cancel.html
-Disallow: /morningorder.html
 Disallow: /review.html
-Disallow: /data.json
+Disallow: /morningorder.html
 
 Sitemap: https://balatonessence.com/sitemap.xml

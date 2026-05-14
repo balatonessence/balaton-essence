@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Apartman Részletek | Balaton Essence</title>
-    <meta name="description" content="Balaton Essence apartman részletek: prémium balatoni szállás, aktuális árak, foglalható időszakok és képgaléria.">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="img/bebetolto.png">
@@ -655,7 +654,73 @@
     </style>
 
     <link rel="stylesheet" href="mobile.css?v=3">
-</head>
+
+    <meta name="description" content="Balaton Essence apartman részletek, foglalható időszakok, árak, képek és online foglalás.">
+    <!-- SEO-DYNAMIC-CANONICAL-HREFLANG -->
+    <script>
+(function () {
+        var base = 'https://balatonessence.com';
+        var params = new URLSearchParams(window.location.search);
+        var id = params.get('id');
+        var path = window.location.pathname.toLowerCase();
+        var langPrefix = path.indexOf('/en/') !== -1 ? '/en' : (path.indexOf('/de/') !== -1 ? '/de' : '');
+        var canonicalHref = base + langPrefix + '/apartman.html' + (id ? ('?id=' + encodeURIComponent(id)) : '');
+
+        function upsertLink(rel, attrs) {
+            var selector = 'link[rel="' + rel + '"]';
+            if (attrs.hreflang) selector += '[hreflang="' + attrs.hreflang + '"]';
+            var el = document.querySelector(selector) || document.createElement('link');
+            el.setAttribute('rel', rel);
+            Object.keys(attrs).forEach(function (key) { el.setAttribute(key, attrs[key]); });
+            if (!el.parentNode) document.head.appendChild(el);
+        }
+
+        upsertLink('canonical', { href: canonicalHref });
+        if (id) {
+            upsertLink('alternate', { hreflang: 'hu', href: base + '/apartman.html?id=' + encodeURIComponent(id) });
+            upsertLink('alternate', { hreflang: 'en', href: base + '/en/apartman.html?id=' + encodeURIComponent(id) });
+            upsertLink('alternate', { hreflang: 'de', href: base + '/de/apartman.html?id=' + encodeURIComponent(id) });
+            upsertLink('alternate', { hreflang: 'x-default', href: base + '/apartman.html?id=' + encodeURIComponent(id) });
+        }
+    }());
+    </script>
+    <!-- SEO-DYNAMIC-APARTMENT-SCHEMA -->
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(function () {
+            try {
+                if (!window.currentApt) return;
+                var apt = window.currentApt;
+                var schema = {
+                    '@context': 'https://schema.org',
+                    '@type': 'LodgingBusiness',
+                    'name': apt.name || 'Balaton Essence apartman',
+                    'url': window.location.href,
+                    'image': [apt.coverImage].concat(Array.isArray(apt.galleryImages) ? apt.galleryImages : []).filter(Boolean),
+                    'description': apt.description || apt.description_en || apt.description_de || 'Balaton Essence apartman a Balatonnál.',
+                    'address': {
+                        '@type': 'PostalAddress',
+                        'streetAddress': apt.address || '',
+                        'addressLocality': apt.location || 'Balaton',
+                        'addressCountry': 'HU'
+                    },
+                    'telephone': '+36 20 499 5484',
+                    'parentOrganization': {
+                        '@type': 'Organization',
+                        'name': 'Balaton Essence',
+                        'url': 'https://balatonessence.com/'
+                    }
+                };
+                var script = document.createElement('script');
+                script.type = 'application/ld+json';
+                script.text = JSON.stringify(schema);
+                document.head.appendChild(script);
+            } catch (err) {
+                console.warn('Apartment schema could not be generated', err);
+            }
+        }, 800);
+    });
+    </script></head>
 
 <body>
 
@@ -1964,45 +2029,7 @@
         }
     }
 
-
-    function updateSeoCanonicalAndHreflang(apartmentId) {
-        const id = encodeURIComponent(String(apartmentId || ''));
-        const alternates = {
-            hu: `https://balatonessence.com/apartman.html?id=${id}`,
-            en: `https://balatonessence.com/en/apartman.html?id=${id}`,
-            de: `https://balatonessence.com/de/apartman.html?id=${id}`
-        };
-
-        const currentLang = getCurrentLang ? getCurrentLang() : 'hu';
-        const canonicalHref = alternates[currentLang] || alternates.hu;
-
-        let canonical = document.querySelector('link[rel="canonical"]');
-        if (!canonical) {
-            canonical = document.createElement('link');
-            canonical.setAttribute('rel', 'canonical');
-            document.head.appendChild(canonical);
-        }
-        canonical.setAttribute('href', canonicalHref);
-
-        document.querySelectorAll('link[rel="alternate"][hreflang]').forEach(el => el.remove());
-
-        Object.entries(alternates).forEach(([lang, href]) => {
-            const link = document.createElement('link');
-            link.setAttribute('rel', 'alternate');
-            link.setAttribute('hreflang', lang);
-            link.setAttribute('href', href);
-            document.head.appendChild(link);
-        });
-
-        const xDefault = document.createElement('link');
-        xDefault.setAttribute('rel', 'alternate');
-        xDefault.setAttribute('hreflang', 'x-default');
-        xDefault.setAttribute('href', alternates.hu);
-        document.head.appendChild(xDefault);
-    }
-
     function updateSEO(apartmanNeve, varos) {
-        updateSeoCanonicalAndHreflang(currentApt?.id);
         document.title = `${apartmanNeve} - Luxus Apartman ${varos} | Balaton Essence`;
 
         let metaDesc = document.querySelector('meta[name="description"]');
