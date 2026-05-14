@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empfehlungen | Balaton Essence</title>
+    <title>Journal | Balaton Essence</title>
 
-    <meta name="description" content="Ausgewählte Empfehlungen am Balaton, Restaurants, Weingüter, Programme und Erlebnisse für Gäste von Balaton Essence.">
+    <meta name="description" content="Balaton Essence Journal: ausgewählte Orte, Genussmomente, Spaziergänge, lokale Erlebnisse und Stimmungen rund um den Balaton.">
     <link rel="canonical" href="https://balatonessence.com/de/ajanlasok.html">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
@@ -550,7 +550,7 @@
     <nav class="nav-links" aria-label="Hauptnavigation">
         <a href="index.html#apartments">Unterkünfte</a>
         <a href="index.html#services">Leistungen</a>
-        <a href="ajanlasok.html" class="active">Empfehlungen</a>
+        <a href="ajanlasok.html" class="active">Journal</a>
         <a href="rolunk.html">Über uns</a>
         <a href="#contact">Kontakt</a>
 
@@ -567,11 +567,11 @@
 
 <section class="hero">
     <div class="hero-content">
-        <div class="hero-kicker">Empfehlungen am Balaton</div>
-        <h1 class="hero-title">Orte und Erlebnisse, die wir von Herzen empfehlen.</h1>
-        <p class="hero-text">
-            Ausgewählte Restaurants, Weingüter, Programme und Orte am Balaton, damit Ihr Aufenthalt nicht nur schön, sondern unvergesslich wird.
-        </p>
+        <div class="hero-kicker">Balaton Essence Journal</div>
+            <h1 class="hero-title">Orte, Genuss und Stimmungen rund um den Balaton.</h1>
+            <p class="hero-text">
+                Ausgewählte lokale Stopps, Genussmomente, Spaziergänge und Erlebnisse, die wir unseren Gästen von Herzen empfehlen.
+            </p>
     </div>
 </section>
 
@@ -597,7 +597,7 @@
             <ul>
                 <li><a href="index.html#apartments">Unterkünfte</a></li>
                 <li><a href="index.html#services">Leistungen</a></li>
-                <li><a href="ajanlasok.html">Empfehlungen</a></li>
+                <li><a href="ajanlasok.html">Journal</a></li>
                 <li><a href="rolunk.html">Über uns</a></li>
             </ul>
         </div>
@@ -650,7 +650,7 @@
             const res = await fetch('/api/recommendations?t=' + Date.now());
 
             if (!res.ok) {
-                throw new Error('Empfehlungen konnten nicht geladen werden.');
+                throw new Error('Journal-Einträge konnten nicht geladen werden.');
             }
 
             allRecommendations = await res.json();
@@ -661,7 +661,7 @@
             console.error('Empfehlungen Ladefehler:', err);
             grid.innerHTML = `
                 <div class="empty-state" style="grid-column: 1 / -1;">
-                    Empfehlungen sind derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.
+                    Journal-Einträge sind derzeit nicht verfügbar. Bitte versuchen Sie es später erneut.
                 </div>
             `;
         }
@@ -697,7 +697,7 @@
         if (items.length === 0) {
             grid.innerHTML = `
                 <div class="empty-state" style="grid-column: 1 / -1;">
-                    In dieser Kategorie gibt es derzeit noch keine Empfehlungen.
+                    In dieser Stimmung gibt es derzeit noch keine Journal-Einträge.
                 </div>
             `;
             return;
@@ -712,7 +712,7 @@
                     <div class="recommendation-image" style="background-image:url('${escapeAttr(image)}');"></div>
 
                     <div class="recommendation-body">
-                        <div class="recommendation-meta">${escapeHtml(item.category_de || item.category_hu || item.category || 'Empfehlung')}</div>
+                        <div class="recommendation-meta">${escapeHtml(item.category_de || item.category_hu || item.category || 'Journal')}</div>
                         <h2 class="recommendation-title">${escapeHtml(item.title || '')}</h2>
 
                         ${item.location ? `

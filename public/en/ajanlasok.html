@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Recommendations | Balaton Essence</title>
+    <title>Journal | Balaton Essence</title>
 
-    <meta name="description" content="Curated Lake Balaton recommendations, restaurants, wineries, programs and experiences for Balaton Essence guests.">
+    <meta name="description" content="Balaton Essence Journal: curated Lake Balaton places, flavours, walks, local moments and experiences for our guests.">
     <link rel="canonical" href="https://balatonessence.com/en/ajanlasok.html">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
@@ -550,7 +550,7 @@
     <nav class="nav-links" aria-label="Main navigation">
         <a href="index.html#apartments">Apartments</a>
         <a href="index.html#services">Services</a>
-        <a href="ajanlasok.html" class="active">Recommendations</a>
+        <a href="ajanlasok.html" class="active">Journal</a>
         <a href="rolunk.html">About us</a>
         <a href="#contact">Contact</a>
 
@@ -567,11 +567,11 @@
 
 <section class="hero">
     <div class="hero-content">
-        <div class="hero-kicker">Lake Balaton recommendations</div>
-        <h1 class="hero-title">Places and experiences we warmly recommend.</h1>
-        <p class="hero-text">
-            Curated restaurants, wineries, programs and Lake Balaton spots to make your stay not only beautiful, but truly memorable.
-        </p>
+        <div class="hero-kicker">Balaton Essence Journal</div>
+            <h1 class="hero-title">Places, flavours and moods around Lake Balaton.</h1>
+            <p class="hero-text">
+                Curated local stops, flavours, walks and experiences we warmly recommend to our guests.
+            </p>
     </div>
 </section>
 
@@ -597,7 +597,7 @@
             <ul>
                 <li><a href="index.html#apartments">Apartments</a></li>
                 <li><a href="index.html#services">Services</a></li>
-                <li><a href="ajanlasok.html">Recommendations</a></li>
+                <li><a href="ajanlasok.html">Journal</a></li>
                 <li><a href="rolunk.html">About us</a></li>
             </ul>
         </div>
@@ -650,7 +650,7 @@
             const res = await fetch('/api/recommendations?t=' + Date.now());
 
             if (!res.ok) {
-                throw new Error('Could not load recommendations.');
+                throw new Error('Could not load Journal entries.');
             }
 
             allRecommendations = await res.json();
@@ -661,7 +661,7 @@
             console.error('Recommendations loading error:', err);
             grid.innerHTML = `
                 <div class="empty-state" style="grid-column: 1 / -1;">
-                    Recommendations are currently unavailable. Please check back later.
+                    Journal entries are currently unavailable. Please check back later.
                 </div>
             `;
         }
@@ -697,7 +697,7 @@
         if (items.length === 0) {
             grid.innerHTML = `
                 <div class="empty-state" style="grid-column: 1 / -1;">
-                    There are no recommendations in this category yet.
+                    There are no Journal entries in this mood yet.
                 </div>
             `;
             return;
@@ -712,7 +712,7 @@
                     <div class="recommendation-image" style="background-image:url('${escapeAttr(image)}');"></div>
 
                     <div class="recommendation-body">
-                        <div class="recommendation-meta">${escapeHtml(item.category_en || item.category_hu || item.category || 'Recommendation')}</div>
+                        <div class="recommendation-meta">${escapeHtml(item.category_en || item.category_hu || item.category || 'Journal')}</div>
                         <h2 class="recommendation-title">${escapeHtml(item.title || '')}</h2>
 
                         ${item.location ? `

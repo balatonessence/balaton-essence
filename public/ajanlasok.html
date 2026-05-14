@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ajánlások | Balaton Essence</title>
-
-    <meta name="description" content="Válogatott balatoni ajánlások, éttermek, borászatok, programok és élmények a Balaton Essence vendégeinek.">
+    <title>Journal | Balaton Essence</title>
+    <meta name="description" content="Balaton Essence Journal: válogatott balatoni helyek, ízek, séták, programok és hangulatok vendégeinknek.">
     <link rel="canonical" href="https://balatonessence.com/ajanlasok.html">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
@@ -460,7 +459,7 @@
     <nav class="nav-links" aria-label="Fő navigáció">
         <a href="index.html#apartments">Szállások</a>
         <a href="index.html#services">Szolgáltatások</a>
-        <a href="ajanlasok.html" class="active">Ajánlások</a>
+        <a href="ajanlasok.html" class="active">Journal</a>
         <a href="rolunk.html">Rólunk</a>
         <a href="#contact">Kapcsolat</a>
     </nav>
@@ -468,11 +467,11 @@
 
 <section class="hero">
     <div class="hero-content">
-        <div class="hero-kicker">Balatoni ajánlások</div>
-        <h1 class="hero-title">Helyek és élmények, amelyeket jó szívvel ajánlunk.</h1>
-        <p class="hero-text">
-            Válogatott éttermek, borászatok, programok és balatoni helyek, hogy a pihenés ne csak szép, hanem emlékezetes is legyen.
-        </p>
+        <div class="hero-kicker">Balaton Essence Journal</div>
+            <h1 class="hero-title">Helyek, ízek és hangulatok a Balaton körül.</h1>
+            <p class="hero-text">
+                Válogatott balatoni megállók, ízek, séták és élmények, amelyeket jó szívvel ajánlunk vendégeinknek.
+            </p>
     </div>
 </section>
 
@@ -498,7 +497,7 @@
             <ul>
                 <li><a href="index.html#apartments">Szállások</a></li>
                 <li><a href="index.html#services">Szolgáltatások</a></li>
-                <li><a href="ajanlasok.html">Ajánlások</a></li>
+                <li><a href="ajanlasok.html">Journal</a></li>
                 <li><a href="rolunk.html">Rólunk</a></li>
             </ul>
         </div>
@@ -562,7 +561,7 @@
             console.error('Ajánlások betöltési hiba:', err);
             grid.innerHTML = `
                 <div class="empty-state" style="grid-column: 1 / -1;">
-                    Az ajánlások jelenleg nem elérhetők. Kérjük, nézzen vissza később.
+                    A Journal bejegyzések jelenleg nem elérhetők. Kérjük, nézzen vissza később.
                 </div>
             `;
         }
@@ -598,7 +597,7 @@
         if (items.length === 0) {
             grid.innerHTML = `
                 <div class="empty-state" style="grid-column: 1 / -1;">
-                    Ebben a kategóriában még nincs feltöltött ajánlás.
+                    Ebben a hangulatban még nincs feltöltött bejegyzés.
                 </div>
             `;
             return;
@@ -613,7 +612,7 @@
                     <div class="recommendation-image" style="background-image:url('${escapeAttr(image)}');"></div>
 
                     <div class="recommendation-body">
-                        <div class="recommendation-meta">${escapeHtml(item.category_hu || item.category || 'Ajánlás')}</div>
+                        <div class="recommendation-meta">${escapeHtml(item.category_hu || item.category || 'Journal')}</div>
                         <h2 class="recommendation-title">${escapeHtml(item.title || '')}</h2>
 
                         ${item.location ? `
