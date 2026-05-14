@@ -2120,6 +2120,8 @@
     let nextSyncAt = null;
     let syncStatusRefreshTimer = null;
     let syncCountdownTimer = null;
+    let adminAutoSyncInProgress = false;
+    let lastAutoSyncTriggerKey = null;
     let currentRecommendationImage = '';
     let currentAboutTeamImage = '';
 
@@ -3048,6 +3050,64 @@ async function loadSyncStatus() {
     }
 }
 
+async function runAdminAutoSync() {
+    if (adminAutoSyncInProgress) return;
+
+    const triggerKey = nextSyncAt || 'manual-auto-sync';
+
+    if (lastAutoSyncTriggerKey === triggerKey) {
+        return;
+    }
+
+    adminAutoSyncInProgress = true;
+    lastAutoSyncTriggerKey = triggerKey;
+
+    const wrapper = document.getElementById('sync-status');
+    const text = document.getElementById('sync-status-text');
+
+    if (wrapper) {
+        wrapper.classList.add('is-running');
+        wrapper.classList.remove('is-error');
+    }
+
+    if (text) {
+        text.innerText = 'Automatikus szinkronizálás folyamatban...';
+    }
+
+    try {
+        const res = await fetch('/api/sync', {
+            method: 'POST',
+            headers: getAdminHeaders()
+        });
+
+        const result = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+            throw new Error(result.error || 'Nem sikerült az automatikus szinkron.');
+        }
+
+        nextSyncAt = result.nextSyncAt || null;
+
+        await initDatabase(renderAll);
+        await loadSyncStatus();
+
+        showSaveToast();
+    } catch (err) {
+        console.error('Admin automata sync hiba:', err);
+
+        if (wrapper) {
+            wrapper.classList.remove('is-running');
+            wrapper.classList.add('is-error');
+        }
+
+        if (text) {
+            text.innerText = 'Automata szinkron hiba';
+        }
+    } finally {
+        adminAutoSyncInProgress = false;
+    }
+}
+
 function updateSyncCountdown() {
     const wrapper = document.getElementById('sync-status');
     const text = document.getElementById('sync-status-text');
@@ -3062,7 +3122,8 @@ function updateSyncCountdown() {
     const diff = new Date(nextSyncAt).getTime() - Date.now();
 
     if (diff <= 0) {
-        text.innerText = 'Következő szinkron: hamarosan';
+        text.innerText = 'Következő szinkron: indul...';
+        runAdminAutoSync();
         return;
     }
 
