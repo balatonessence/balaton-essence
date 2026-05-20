@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SUP-Verleih, Sonnenliegen und Sonnenschirme | Balaton Essence</title>
 
-    <meta name="description" content="SUP-Verleih, Sonnenliegen und Sonnenschirme in Fonyód für Gäste von Balaton Essence und externe Besucher.">
+    <meta name="description" content="Premium SUP-Verleih am Balaton, Sonnenliegen- und Sonnenschirmverleih in Fonyód. Buchen Sie Strandausrüstung und genießen Sie unbeschwerte Tage am See.">
     <meta name="keywords" content="SUP Verleih Balaton, Sonnenliege mieten, Sonnenschirm Verleih, Strandausrüstung Balaton, Fonyód SUP">
+    <link rel="canonical" href="https://balatonessence.com/de/sun.html">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://balatonessence.com/de/sun.html">
@@ -1052,36 +1053,32 @@
                 transform: translateY(0);
             }
         }
+    
+
+        .sun-item-card.is-coming-soon {
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        .sun-item-card.is-coming-soon:hover {
+            transform: none;
+        }
+
+        .sun-item-card.is-coming-soon .sun-card-action {
+            background: rgba(200, 164, 107, 0.16);
+            color: var(--gold);
+            border-color: rgba(200, 164, 107, 0.34);
+        }
+
+        .equipment-row.is-disabled,
+        .extras-item-label.is-disabled {
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
     </style>
 
     <link rel="stylesheet" href="../mobile.css?v=3">
-
-    <link rel="canonical" href="https://balatonessence.com/de/sun.html">
-    <link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html">
-    <link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html">
-    <link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html">
-    <link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html">
-    <!-- SEO-SCHEMA-BREADCRUMB -->
-    <script type="application/ld+json">
-{
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-            {
-                  "@type": "ListItem",
-                  "position": 1,
-                  "name": "Startseite",
-                  "item": "https://balatonessence.com/"
-            },
-            {
-                  "@type": "ListItem",
-                  "position": 2,
-                  "name": "SUP & SUN",
-                  "item": "https://balatonessence.com/de/sun.html"
-            }
-      ]
-}
-    </script>    <link rel="stylesheet" href="../cookie-consent.css?v=1">
 </head>
 
 <body>
@@ -1095,7 +1092,7 @@
     <nav class="nav-links" aria-label="Hauptnavigation">
         <a href="index.html#apartments">Apartments</a>
         <a href="index.html#services" class="active">Dienstleistungen</a>
-        <a href="uber-uns.html">Über uns</a>
+        <a href="rolunk.html">Unsere Geschichte</a>
         <a href="ajanlasok.html">Journal</a>
         <a href="#contact">Kontakt</a>
 
@@ -1204,12 +1201,12 @@
             </div>
         </div>
 
-        <div class="sun-item-card" id="card-boat" onclick="openRentModal('boat')">
+        <div class="sun-item-card is-coming-soon" id="card-boat" onclick="openRentModal('boat')">
             <div class="sun-card-img" id="card-img-boat" style="background-image: url('../img/hajo.png');"></div>
             <div class="sun-card-content">
                 <h3 class="sun-card-title">Boot</h3>
-                <p class="sun-card-price" id="card-price-boat">35.000 HUF <small>/ Tag</small></p>
-                <span class="sun-card-action">Buchen</span>
+                <p class="sun-card-price" id="card-price-boat">Demnächst</p>
+                <span class="sun-card-action">Demnächst</span>
             </div>
         </div>
     </div>
@@ -1366,7 +1363,7 @@
             <ul>
                 <li><a href="index.html#apartments">Unterkünfte</a></li>
                 <li><a href="index.html#services">Dienstleistungen</a></li>
-                <li><a href="uber-uns.html">Über uns</a></li>
+                <li><a href="rolunk.html">Unsere Geschichte</a></li>
                 <li><a href="agb.html">AGB</a></li>
             </ul>
         </div>
@@ -1430,7 +1427,8 @@
             price: 35000,
             unit: 'Tag',
             image: '../img/hajo.png',
-            active: true
+            active: true,
+            comingSoon: true
         }
     };
 
@@ -1502,8 +1500,18 @@
             const cardTitle = card ? card.querySelector('.sun-card-title') : null;
             const modalLabel = document.querySelector(`#${item.checkboxId}`)?.closest('.extras-item-label')?.querySelector('.item-text-main');
 
+            const isComingSoon = item.comingSoon === true || key === 'boat';
+            const action = card ? card.querySelector('.sun-card-action') : null;
+            const checkbox = document.getElementById(item.checkboxId);
+            const row = checkbox ? checkbox.closest('.equipment-row') || checkbox.closest('div') : null;
+
             if (card) {
-                card.style.display = item.active === false ? 'none' : 'flex';
+                card.style.display = item.active === false && !isComingSoon ? 'none' : 'flex';
+                card.classList.toggle('is-coming-soon', isComingSoon);
+            }
+
+            if (action) {
+                action.innerText = isComingSoon ? 'Demnächst' : action.innerText || 'Buchen';
             }
 
             if (cardTitle) {
@@ -1511,15 +1519,25 @@
             }
 
             if (cardPrice) {
-                cardPrice.innerHTML = `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
+                cardPrice.innerHTML = isComingSoon ? 'Demnächst' : `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
             }
 
             if (modalPrice) {
-                modalPrice.innerText = `(${priceText}/${unitText})`;
+                modalPrice.innerText = isComingSoon ? '(Demnächst)' : `(${priceText}/${unitText})`;
             }
 
             if (modalLabel && modalPrice) {
                 modalLabel.childNodes[0].nodeValue = `${item.label || key} `;
+                modalLabel.classList.toggle('is-disabled', isComingSoon);
+            }
+
+            if (checkbox) {
+                checkbox.checked = false;
+                checkbox.disabled = isComingSoon;
+            }
+
+            if (row) {
+                row.classList.toggle('is-disabled', isComingSoon);
             }
 
             if (cardImg && item.image) {
@@ -1602,7 +1620,7 @@
         const selected = [];
 
         Object.values(itemMap).forEach(item => {
-            if (item.active === false) return;
+            if (item.active === false || item.comingSoon === true) return;
 
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
@@ -1655,6 +1673,10 @@
     }
 
     function openRentModal(preselectedItem = null) {
+        if (preselectedItem && (itemMap[preselectedItem]?.comingSoon === true || preselectedItem === 'boat')) {
+            return;
+        }
+
         resetRentModal();
 
         if (preselectedItem && itemMap[preselectedItem]) {
@@ -1839,6 +1861,5 @@
 <link rel="stylesheet" href="../mobile.css?v=106">
 <script src="../site-mobile.js?v=106"></script>
 <script src="../chat-assistant.js"></script>
-<script src="../cookie-consent.js?v=1"></script>
 </body>
 </html>

@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SUP bérlés, Napágy és Napernyő kölcsönzés | Balaton Essence</title>
 
-    <meta name="description" content="SUP bérlés, napágy és napernyő kölcsönzés Fonyódon a Balaton Essence vendégeinek és külsős érdeklődőknek.">
+    <meta name="description" content="Prémium SUP bérlés a Balatonon, napágy és napernyő kölcsönzés Fonyódon. Foglaljon strandfelszerelést és élvezze a gondtalan balatoni napokat.">
     <meta name="keywords" content="SUP bérlés Balaton, napágy bérlés, napernyő kölcsönzés, strandfelszerelés Balaton, Fonyód SUP">
+    <link rel="canonical" href="https://balatonessence.com/sun.html">
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://balatonessence.com/sun.html">
@@ -1052,36 +1053,32 @@
                 transform: translateY(0);
             }
         }
+    
+
+        .sun-item-card.is-coming-soon {
+            cursor: default;
+            opacity: 0.9;
+        }
+
+        .sun-item-card.is-coming-soon:hover {
+            transform: none;
+        }
+
+        .sun-item-card.is-coming-soon .sun-card-action {
+            background: rgba(200, 164, 107, 0.16);
+            color: var(--gold);
+            border-color: rgba(200, 164, 107, 0.34);
+        }
+
+        .equipment-row.is-disabled,
+        .extras-item-label.is-disabled {
+            opacity: 0.55;
+            pointer-events: none;
+        }
+
     </style>
 
     <link rel="stylesheet" href="mobile.css?v=3">
-
-    <link rel="canonical" href="https://balatonessence.com/sun.html">
-    <link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html">
-    <link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html">
-    <link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html">
-    <link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html">
-    <!-- SEO-SCHEMA-BREADCRUMB -->
-    <script type="application/ld+json">
-{
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-            {
-                  "@type": "ListItem",
-                  "position": 1,
-                  "name": "Főoldal",
-                  "item": "https://balatonessence.com/"
-            },
-            {
-                  "@type": "ListItem",
-                  "position": 2,
-                  "name": "SUP & SUN",
-                  "item": "https://balatonessence.com/sun.html"
-            }
-      ]
-}
-    </script>    <link rel="stylesheet" href="cookie-consent.css?v=1">
 </head>
 
 <body>
@@ -1095,7 +1092,7 @@
     <nav class="nav-links" aria-label="Fő navigáció">
         <a href="index.html#apartments">Szállások</a>
         <a href="index.html#services" class="active">Szolgáltatások</a>
-        <a href="rolunk.html">Rólunk</a>
+        <a href="rolunk.html">Történetünk</a>
          <a href="ajanlasok.html">Journal</a>
         <a href="#contact">Kapcsolat</a>
 
@@ -1206,12 +1203,12 @@
             </div>
         </div>
 
-        <div class="sun-item-card" id="card-boat" onclick="openRentModal('boat')">
+        <div class="sun-item-card is-coming-soon" id="card-boat" onclick="openRentModal('boat')">
             <div class="sun-card-img" id="card-img-boat" style="background-image: url('img/hajo.png');"></div>
             <div class="sun-card-content">
                 <h3 class="sun-card-title">Hajó</h3>
-                <p class="sun-card-price" id="card-price-boat">35 000 Ft <small>/ nap</small></p>
-                <span class="sun-card-action">Foglalás</span>
+                <p class="sun-card-price" id="card-price-boat">Hamarosan</p>
+                <span class="sun-card-action">Hamarosan</span>
             </div>
         </div>
     </div>
@@ -1368,7 +1365,7 @@
             <ul>
                 <li><a href="index.html#apartments">Szállások</a></li>
                 <li><a href="index.html#services">Szolgáltatások</a></li>
-                <li><a href="rolunk.html">Rólunk</a></li>
+                <li><a href="rolunk.html">Történetünk</a></li>
                 <li><a href="aszf.html">ÁSZF</a></li>
             </ul>
         </div>
@@ -1433,7 +1430,8 @@
             price: 35000,
             unit: 'nap',
             image: 'img/hajo.png',
-            active: true
+            active: true,
+            comingSoon: true
         }
     };
 
@@ -1485,7 +1483,8 @@
                 unit: service.unit_hu || itemMap[service.id].unit || 'nap',
                 image: service.image || itemMap[service.id].image,
                 maxStock: Number(service.maxStock || itemMap[service.id].maxStock || 0),
-                active: service.active !== false
+                active: service.id === 'boat' ? true : service.active !== false,
+                comingSoon: itemMap[service.id].comingSoon === true || service.comingSoon === true
             };
             });
 
@@ -1547,6 +1546,18 @@ function updateQtyLimits() {
 
         if (!qtyEl) return;
 
+        if (item.comingSoon === true || id === 'boat') {
+            qtyEl.innerText = '1';
+
+            if (checkbox) {
+                checkbox.checked = false;
+                checkbox.disabled = true;
+            }
+
+            if (plusBtn) plusBtn.disabled = true;
+            return;
+        }
+
         let currentQty = Number(qtyEl.innerText || 1);
 
         if (available <= 0) {
@@ -1590,8 +1601,18 @@ function updateQtyLimits() {
             const cardTitle = card ? card.querySelector('.sun-card-title') : null;
             const modalLabel = document.querySelector(`#${item.checkboxId}`)?.closest('.extras-item-label')?.querySelector('.item-text-main');
 
+            const isComingSoon = item.comingSoon === true || key === 'boat';
+            const action = card ? card.querySelector('.sun-card-action') : null;
+            const checkbox = document.getElementById(item.checkboxId);
+            const row = checkbox ? checkbox.closest('.equipment-row') || checkbox.closest('div') : null;
+
             if (card) {
-                card.style.display = item.active === false ? 'none' : 'flex';
+                card.style.display = item.active === false && !isComingSoon ? 'none' : 'flex';
+                card.classList.toggle('is-coming-soon', isComingSoon);
+            }
+
+            if (action) {
+                action.innerText = isComingSoon ? 'Hamarosan' : action.innerText || 'Foglalás';
             }
 
             if (cardTitle) {
@@ -1599,15 +1620,25 @@ function updateQtyLimits() {
             }
 
             if (cardPrice) {
-                cardPrice.innerHTML = `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
+                cardPrice.innerHTML = isComingSoon ? 'Hamarosan' : `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
             }
 
             if (modalPrice) {
-                modalPrice.innerText = `(${priceText}/${unitText})`;
+                modalPrice.innerText = isComingSoon ? '(Hamarosan)' : `(${priceText}/${unitText})`;
             }
 
             if (modalLabel && modalPrice) {
                 modalLabel.childNodes[0].nodeValue = `${item.label || key} `;
+                modalLabel.classList.toggle('is-disabled', isComingSoon);
+            }
+
+            if (checkbox) {
+                checkbox.checked = false;
+                checkbox.disabled = isComingSoon;
+            }
+
+            if (row) {
+                row.classList.toggle('is-disabled', isComingSoon);
             }
 
             if (cardImg && item.image) {
@@ -1699,7 +1730,7 @@ function updateQtyLimits() {
         const selected = [];
 
         Object.values(itemMap).forEach(item => {
-            if (item.active === false) return;
+            if (item.active === false || item.comingSoon === true) return;
 
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
@@ -1752,6 +1783,10 @@ function updateQtyLimits() {
     }
 
     function openRentModal(preselectedItem = null) {
+        if (preselectedItem && (itemMap[preselectedItem]?.comingSoon === true || preselectedItem === 'boat')) {
+            return;
+        }
+
         resetRentModal();
 
         if (preselectedItem && itemMap[preselectedItem]) {
@@ -1935,6 +1970,5 @@ function updateQtyLimits() {
 <link rel="stylesheet" href="mobile.css?v=106">
 <script src="site-mobile.js?v=106"></script>
 <script src="chat-assistant.js"></script>
-<script src="cookie-consent.js?v=1"></script>
 </body>
 </html>

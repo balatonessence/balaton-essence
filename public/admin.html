@@ -14,12 +14,7 @@
 
         async function initDatabase(callback) {
             try {
-                const res = await fetch('/api/get-db-content?t=' + Date.now(), {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-admin-token': getAdminToken()
-                    }
-                });
+                const res = await fetch('/api/get-db-content?t=' + Date.now());
 
                 if (!res.ok) {
                     throw new Error('Nem sikerült betölteni az adatbázist.');
@@ -1137,6 +1132,52 @@
         border-color: #8F3431;
     }
 
+
+    .admin-cal-day.status-no-checkin {
+        background: rgba(200,164,107,0.18);
+        color: #8A642F;
+        font-weight: 900;
+        border-color: rgba(200,164,107,0.55);
+    }
+
+    .admin-cal-day.status-no-checkout {
+        background: rgba(92,122,77,0.16);
+        color: var(--accent);
+        font-weight: 900;
+        border-color: rgba(92,122,77,0.45);
+    }
+
+    .admin-cal-day.status-no-turnover {
+        background: linear-gradient(135deg, rgba(200,164,107,0.24), rgba(92,122,77,0.22));
+        color: var(--text);
+        font-weight: 900;
+        border-color: rgba(23,35,24,0.22);
+    }
+
+    .admin-calendar-mode {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin: 0 0 1rem;
+        padding: 0.75rem;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+    }
+
+    .admin-calendar-mode .btn.is-active {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
+
+    .admin-calendar-note {
+        margin: -0.35rem 0 1rem;
+        color: var(--text-muted);
+        font-size: 0.76rem;
+        line-height: 1.55;
+    }
+
     .gallery-preview {
         display: flex;
         flex-wrap: wrap;
@@ -1408,197 +1449,10 @@
             padding: 1.2rem;
         }
     }
-
-    .admin-login-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 999999;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    background:
-        radial-gradient(circle at 18% 18%, rgba(200, 164, 107, 0.18), transparent 30%),
-        radial-gradient(circle at 82% 82%, rgba(92, 122, 77, 0.18), transparent 30%),
-        linear-gradient(135deg, #101711 0%, #172318 100%);
-}
-
-.admin-login-overlay.is-visible {
-    display: flex;
-}
-
-.admin-login-card {
-    width: min(440px, 94vw);
-    background: rgba(252, 251, 249, 0.97);
-    border: 1px solid rgba(227, 224, 216, 0.9);
-    border-radius: 24px;
-    padding: 38px 32px;
-    box-shadow: 0 32px 90px rgba(0,0,0,0.34);
-    text-align: center;
-}
-
-.admin-login-logo {
-    margin-bottom: 26px;
-    color: #172318;
-}
-
-.admin-login-logo span {
-    display: block;
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: 7px;
-}
-
-.admin-login-logo small {
-    display: block;
-    margin-top: 7px;
-    color: #6A7063;
-    font-size: 0.7rem;
-    font-weight: 800;
-    letter-spacing: 4px;
-    text-transform: uppercase;
-}
-
-.admin-login-card h1 {
-    margin: 0 0 10px;
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    font-weight: 600;
-    color: #2C3325;
-}
-
-.admin-login-card p {
-    margin: 0 0 22px;
-    color: #6A7063;
-    font-size: 0.9rem;
-    line-height: 1.6;
-}
-
-#admin-token-input {
-    width: 100%;
-    padding: 15px 16px;
-    border: 1px solid #E3E0D8;
-    border-radius: 12px;
-    background: white;
-    color: #2C3325;
-    font-family: inherit;
-    font-size: 0.95rem;
-    outline: none;
-    transition: 0.2s ease;
-}
-
-#admin-token-input:focus {
-    border-color: #5C7A4D;
-    box-shadow: 0 0 0 4px rgba(92, 122, 77, 0.12);
-}
-
-.admin-login-error {
-    min-height: 20px;
-    margin: 12px 0;
-    color: #B0413E;
-    font-size: 0.82rem;
-    font-weight: 800;
-}
-
-.admin-login-btn {
-    width: 100%;
-    padding: 15px;
-    border: none;
-    border-radius: 12px;
-    background: #5C7A4D;
-    color: white;
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 0.85rem;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 1.6px;
-    transition: 0.25s ease;
-}
-
-.admin-login-btn:hover {
-    background: #48613A;
-    transform: translateY(-1px);
-}
-
-.admin-login-btn:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-    transform: none;
-}
-
-.admin-token-field {
-    position: relative;
-    width: 100%;
-}
-
-.admin-token-field #admin-token-input {
-    padding-right: 52px;
-}
-
-.admin-token-toggle {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    width: 38px;
-    height: 38px;
-    transform: translateY(-50%);
-    border: none;
-    border-radius: 10px;
-    background: transparent;
-    color: #6A7063;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: 0.2s ease;
-}
-
-.admin-token-toggle:hover {
-    background: rgba(92, 122, 77, 0.08);
-    color: #5C7A4D;
-}
 </style>
-
-    <meta name="robots" content="noindex, nofollow"></head>
+</head>
 
 <body>
-
-<div id="admin-login-overlay" class="admin-login-overlay">
-    <div class="admin-login-card">
-        <div class="admin-login-logo">
-            <span>BALATON</span>
-            <small>Essence Admin</small>
-        </div>
-
-        <h1>Admin belépés</h1>
-        <p>Add meg az admin tokent a vezérlőpult használatához.</p>
-
-        <div class="admin-token-field">
-            <input
-                type="password"
-                id="admin-token-input"
-                placeholder="Admin token"
-                autocomplete="current-password"
-            >
-
-            <button
-                type="button"
-                id="admin-token-toggle"
-                class="admin-token-toggle"
-                aria-label="Token megjelenítése"
-            >
-                👁
-            </button>
-        </div>
-
-        <div id="admin-login-error" class="admin-login-error"></div>
-
-        <button type="button" id="admin-login-btn" class="admin-login-btn">
-            Belépés
-        </button>
-    </div>
-</div>
-
 <div class="admin-shell">
     <header class="topbar">
         <div class="topbar-inner">
@@ -1797,7 +1651,7 @@
                     <div class="section-title-wrap">
                         <div class="section-icon">🖼️</div>
                         <div>
-                            <h2>Rólunk oldal képei</h2>
+                            <h2>Történetünk oldal képei</h2>
                             <div class="section-subtitle">A Bor Mámor Ederics képgaléria 4 szerkeszthető képe.</div>
                         </div>
                     </div>
@@ -1816,7 +1670,7 @@
                         >
 
                         <div class="about-gallery-note">
-                            Legfeljebb 4 kép használható. A sorrend húzással módosítható, ez lesz a megjelenési sorrend a magyar, angol és német Rólunk oldalon is.
+                            Legfeljebb 4 kép használható. A sorrend húzással módosítható, ez lesz a megjelenési sorrend a magyar, angol és német Történetünk oldalon is.
                         </div>
 
                         <div id="about-heritage-preview" class="about-gallery-admin"></div>
@@ -1832,7 +1686,7 @@
                         >
 
                         <div class="about-gallery-note">
-                            Ez a kép jelenik meg a Rólunk oldalon a „Mi állunk mögötte” résznél, a jelenlegi Unsplash kép helyett.
+                            Ez a kép jelenik meg a Történetünk oldalon a „Mi állunk mögötte” résznél, a jelenlegi Unsplash kép helyett.
                         </div>
 
                         <div id="about-team-preview" class="about-gallery-admin"></div>
@@ -2188,6 +2042,18 @@
                     <span><span class="legend-dot" style="background:#fff;"></span> Szabad</span>
                     <span><span class="legend-dot" style="background:#f39c12; border-color:#f39c12;"></span> Foglalt</span>
                     <span><span class="legend-dot" style="background:#b0413e; border-color:#b0413e;"></span> Letiltott</span>
+                    <span><span class="legend-dot" style="background:rgba(200,164,107,0.35); border-color:rgba(200,164,107,0.65);"></span> Nem érkezési nap</span>
+                    <span><span class="legend-dot" style="background:rgba(92,122,77,0.25); border-color:rgba(92,122,77,0.55);"></span> Nem távozási nap</span>
+                </div>
+
+                <div class="admin-calendar-mode" id="admin-calendar-mode">
+                    <button type="button" class="btn btn-outline btn-mini is-active" data-calendar-mode="blocked" onclick="setAdminCalendarMode('blocked')">Teljes zárolás</button>
+                    <button type="button" class="btn btn-outline btn-mini" data-calendar-mode="noCheckIn" onclick="setAdminCalendarMode('noCheckIn')">Nem érkezési nap</button>
+                    <button type="button" class="btn btn-outline btn-mini" data-calendar-mode="noCheckOut" onclick="setAdminCalendarMode('noCheckOut')">Nem távozási nap</button>
+                </div>
+
+                <div class="admin-calendar-note">
+                    A teljes zárolás teljesen kiveszi a napot a foglalható éjszakákból. A „Nem érkezési nap” csak az érkezést tiltja, a „Nem távozási nap” csak a távozást tiltja, köztes tartózkodási napként továbbra is használható.
                 </div>
 
                 <div class="admin-calendar-controls">
@@ -2244,7 +2110,42 @@
     </div>
 </div>
 
+<div id="external-guest-modal" class="modal">
+    <div class="simple-modal-card">
+        <h2>Külső foglalás vendégadatai</h2>
 
+        <input type="hidden" id="external-booking-id">
+
+        <div class="form-group">
+            <label>Vendég neve</label>
+            <input type="text" id="external-guest-name" placeholder="Pl. Kovács Anna">
+        </div>
+
+        <div class="form-group">
+            <label>Email cím</label>
+            <input type="email" id="external-guest-email" placeholder="pelda@email.hu">
+        </div>
+
+        <div class="form-group">
+            <label>Telefonszám</label>
+            <input type="text" id="external-guest-phone" placeholder="+36 ...">
+        </div>
+
+        <div class="form-group">
+            <label>Nyelv</label>
+            <select id="external-guest-lang">
+                <option value="hu">Magyar</option>
+                <option value="en">English</option>
+                <option value="de">Deutsch</option>
+            </select>
+        </div>
+
+        <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary" style="flex:2;" onclick="saveExternalGuestData()">Mentés</button>
+            <button class="btn btn-outline" style="flex:1;" onclick="closeExternalGuestModal()">Mégse</button>
+        </div>
+    </div>
+</div>
 
 <div id="owner-modal" class="modal">
     <div class="simple-modal-card">
@@ -2282,105 +2183,34 @@
     let lastAutoSyncTriggerKey = null;
     let currentRecommendationImage = '';
     let currentAboutTeamImage = '';
+    let adminCalendarMode = 'blocked';
 
-let ADMIN_TOKEN = sessionStorage.getItem('ADMIN_TOKEN') || '';
+    function getAdminToken() {
+        let token = sessionStorage.getItem('ADMIN_TOKEN');
 
-function getAdminToken() {
-    return ADMIN_TOKEN || sessionStorage.getItem('ADMIN_TOKEN') || '';
-}
+        if (!token) {
+            token = prompt('Admin token:');
 
-function setAdminToken(token) {
-    ADMIN_TOKEN = String(token || '').trim();
+            if (token) {
+                sessionStorage.setItem('ADMIN_TOKEN', token);
+            }
+        }
 
-    if (ADMIN_TOKEN) {
-        sessionStorage.setItem('ADMIN_TOKEN', ADMIN_TOKEN);
+        return token || '';
     }
-}
 
-function getAdminHeaders(extra = {}) {
-    return {
-        'Content-Type': 'application/json',
-        'x-admin-token': getAdminToken(),
-        ...extra
-    };
-}
+    function resetAdminToken() {
+        sessionStorage.removeItem('ADMIN_TOKEN');
+        getAdminToken();
+    }
 
-function showAdminLogin(message = '') {
-    const overlay = document.getElementById('admin-login-overlay');
-    const input = document.getElementById('admin-token-input');
-    const error = document.getElementById('admin-login-error');
-
-    if (error) error.textContent = message || '';
-    if (input) input.value = '';
-
-    overlay?.classList.add('is-visible');
-
-    setTimeout(() => {
-        input?.focus();
-    }, 80);
-}
-
-function hideAdminLogin() {
-    document.getElementById('admin-login-overlay')?.classList.remove('is-visible');
-}
-
-async function testAdminToken(token) {
-    const res = await fetch('/api/sync-status?t=' + Date.now(), {
-        headers: {
+    function getAdminHeaders(extra = {}) {
+        return {
             'Content-Type': 'application/json',
-            'x-admin-token': token
-        }
-    });
-
-    return res.ok;
-}
-
-async function handleAdminLogin() {
-    const input = document.getElementById('admin-token-input');
-    const error = document.getElementById('admin-login-error');
-    const btn = document.getElementById('admin-login-btn');
-
-    const token = input?.value.trim();
-
-    if (!token) {
-        if (error) error.textContent = 'Add meg az admin tokent.';
-        return;
+            'x-admin-token': getAdminToken(),
+            ...extra
+        };
     }
-
-    if (btn) {
-        btn.disabled = true;
-        btn.textContent = 'Ellenőrzés...';
-    }
-
-    try {
-        const ok = await testAdminToken(token);
-
-        if (!ok) {
-            if (error) error.textContent = 'Hibás admin token.';
-            return;
-        }
-
-        setAdminToken(token);
-        hideAdminLogin();
-
-        await initDatabase(renderAll);
-        initSyncCountdown();
-    } catch (err) {
-        console.error('Admin belépési hiba:', err);
-        if (error) error.textContent = 'Nem sikerült ellenőrizni a tokent.';
-    } finally {
-        if (btn) {
-            btn.disabled = false;
-            btn.textContent = 'Belépés';
-        }
-    }
-}
-
-function resetAdminToken() {
-    sessionStorage.removeItem('ADMIN_TOKEN');
-    ADMIN_TOKEN = '';
-    showAdminLogin('Add meg az új admin tokent.');
-}
 
     function escapeHtml(value) {
         return String(value ?? '')
@@ -2870,7 +2700,9 @@ function initGallerySorting() {
             icalSzallas: document.getElementById('a-ical-sz').value.trim(),
 
             bookedDates: existingApt ? (existingApt.bookedDates || []) : [],
-            disabledDates: existingApt ? (existingApt.disabledDates || []) : []
+            disabledDates: existingApt ? (existingApt.disabledDates || []) : [],
+            noCheckInDates: existingApt ? (existingApt.noCheckInDates || []) : [],
+            noCheckOutDates: existingApt ? (existingApt.noCheckOutDates || []) : []
         };
 
         if (!aptData.name) {
@@ -3087,6 +2919,8 @@ function initGallerySorting() {
             });
 
         const blockedDates = new Set(apt.disabledDates || []);
+        const noCheckInDates = new Set(apt.noCheckInDates || []);
+        const noCheckOutDates = new Set(apt.noCheckOutDates || []);
 
         let html = '';
 
@@ -3099,16 +2933,25 @@ function initGallerySorting() {
 
             let className = 'admin-cal-day';
             const isBooked = bookedDates.has(dateStr);
+            const isBlocked = blockedDates.has(dateStr);
+            const isNoCheckIn = noCheckInDates.has(dateStr);
+            const isNoCheckOut = noCheckOutDates.has(dateStr);
 
             if (isBooked) {
                 className += ' status-booked';
-            } else if (blockedDates.has(dateStr)) {
+            } else if (isBlocked) {
                 className += ' status-blocked';
+            } else if (isNoCheckIn && isNoCheckOut) {
+                className += ' status-no-turnover';
+            } else if (isNoCheckIn) {
+                className += ' status-no-checkin';
+            } else if (isNoCheckOut) {
+                className += ' status-no-checkout';
             } else {
                 className += ' status-free';
             }
 
-            html += `<div class="${className}" onclick="toggleAdminBlock('${apt.id}', '${dateStr}', ${isBooked})">${d}</div>`;
+            html += `<div class="${className}" onclick="toggleAdminDateRule('${apt.id}', '${dateStr}', ${isBooked})">${d}</div>`;
         }
 
         container.innerHTML = html;
@@ -3124,7 +2967,37 @@ function initGallerySorting() {
         renderAdminCalendar();
     }
 
-    function toggleAdminBlock(aptId, dateStr, isBooked) {
+    function setAdminCalendarMode(mode) {
+        if (!['blocked', 'noCheckIn', 'noCheckOut'].includes(mode)) return;
+
+        adminCalendarMode = mode;
+
+        document.querySelectorAll('[data-calendar-mode]').forEach(button => {
+            button.classList.toggle('is-active', button.dataset.calendarMode === mode);
+        });
+    }
+
+    function toggleDateInArray(list, dateStr) {
+        const idx = list.indexOf(dateStr);
+
+        if (idx > -1) {
+            list.splice(idx, 1);
+            return false;
+        }
+
+        list.push(dateStr);
+        return true;
+    }
+
+    function removeDateFromArray(list, dateStr) {
+        const idx = list.indexOf(dateStr);
+
+        if (idx > -1) {
+            list.splice(idx, 1);
+        }
+    }
+
+    function toggleAdminDateRule(aptId, dateStr, isBooked) {
         if (isBooked) {
             alert('Ezt a napot már lefoglalták. Ha törölni akarod, előbb a foglalást kell visszavonni.');
             return;
@@ -3133,17 +3006,43 @@ function initGallerySorting() {
         const apt = db.apartments.find(a => String(a.id) === String(aptId));
         if (!apt) return;
 
-        if (!apt.disabledDates) apt.disabledDates = [];
+        if (!Array.isArray(apt.disabledDates)) apt.disabledDates = [];
+        if (!Array.isArray(apt.noCheckInDates)) apt.noCheckInDates = [];
+        if (!Array.isArray(apt.noCheckOutDates)) apt.noCheckOutDates = [];
 
-        const idx = apt.disabledDates.indexOf(dateStr);
+        if (adminCalendarMode === 'blocked') {
+            const isNowBlocked = toggleDateInArray(apt.disabledDates, dateStr);
 
-        if (idx > -1) {
-            apt.disabledDates.splice(idx, 1);
-        } else {
-            apt.disabledDates.push(dateStr);
+            if (isNowBlocked) {
+                removeDateFromArray(apt.noCheckInDates, dateStr);
+                removeDateFromArray(apt.noCheckOutDates, dateStr);
+            }
+        }
+
+        if (adminCalendarMode === 'noCheckIn') {
+            if (apt.disabledDates.includes(dateStr)) {
+                alert('Teljesen zárolt napra nem kell külön nem érkezési szabály. Előbb vedd le a teljes zárolást.');
+                return;
+            }
+
+            toggleDateInArray(apt.noCheckInDates, dateStr);
+        }
+
+        if (adminCalendarMode === 'noCheckOut') {
+            if (apt.disabledDates.includes(dateStr)) {
+                alert('Teljesen zárolt napra nem kell külön nem távozási szabály. Előbb vedd le a teljes zárolást.');
+                return;
+            }
+
+            toggleDateInArray(apt.noCheckOutDates, dateStr);
         }
 
         renderAdminCalendar();
+    }
+
+    function toggleAdminBlock(aptId, dateStr, isBooked) {
+        adminCalendarMode = 'blocked';
+        toggleAdminDateRule(aptId, dateStr, isBooked);
     }
 
     function ensureDefaultSunServices() {
@@ -3213,12 +3112,12 @@ function initGallerySorting() {
                 unit_hu: 'nap',
                 unit_en: 'day',
                 unit_de: 'Tag',
-                description_hu: '',
-                description_en: '',
-                description_de: '',
+                description_hu: 'Hamarosan elérhető.',
+                description_en: 'Coming soon.',
+                description_de: 'Demnächst verfügbar.',
                 image: 'img/hajo.png',
-                maxStock: 4,
-                active: true
+                maxStock: 0,
+                active: false
             }
         ];
 
@@ -4456,6 +4355,8 @@ async function saveExternalGuestData() {
     booking.phone = phone;
     booking.lang = ['hu', 'en', 'de'].includes(lang) ? lang : 'hu';
 
+    // Ez jelzi a szervernek, hogy ezeket az adatokat
+    // az iCal szinkron később se írja felül.
     booking.manualGuestData = true;
 
 await saveDb();
@@ -4566,54 +4467,10 @@ renderBlockedBookings();
     openExternalGuestModal(bookingId);
 });
 
-async function bootstrapAdmin() {
-    document.getElementById('admin-login-btn')?.addEventListener('click', handleAdminLogin);
-
-    document.getElementById('admin-token-input')?.addEventListener('keydown', event => {
-        if (event.key === 'Enter') {
-            handleAdminLogin();
-        }
-    });
-
-    document.getElementById('admin-token-toggle')?.addEventListener('click', () => {
-    const input = document.getElementById('admin-token-input');
-    const toggle = document.getElementById('admin-token-toggle');
-
-    if (!input || !toggle) return;
-
-    const isPassword = input.type === 'password';
-
-    input.type = isPassword ? 'text' : 'password';
-    toggle.textContent = isPassword ? '🙈' : '👁';
-    toggle.setAttribute(
-        'aria-label',
-        isPassword ? 'Token elrejtése' : 'Token megjelenítése'
-    );
-
-    input.focus();
-});
-
-    const storedToken = getAdminToken();
-
-    if (!storedToken) {
-        showAdminLogin();
-        return;
-    }
-
-    const ok = await testAdminToken(storedToken);
-
-    if (!ok) {
-        sessionStorage.removeItem('ADMIN_TOKEN');
-        ADMIN_TOKEN = '';
-        showAdminLogin('A korábbi token már nem érvényes.');
-        return;
-    }
-
-    await initDatabase(renderAll);
-    initSyncCountdown();
-}
-
-window.onload = bootstrapAdmin;
+    window.onload = () => {
+        initDatabase(renderAll);
+        initSyncCountdown();
+    };
 </script>
 </body>
 </html>

@@ -705,6 +705,50 @@ function hasDisabledDateInBookingRange(apartment, booking) {
     return false;
 }
 
+function getBookingDateString(value) {
+    const date = parseDateOnly(value);
+
+    if (!date) return '';
+
+    return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+}
+
+function getArrivalDepartureRestriction(apartment, booking) {
+    const checkIn = getBookingDateString(booking.checkIn || booking.start);
+    const checkOut = getBookingDateString(booking.checkOut || booking.end);
+
+    if (!checkIn || !checkOut) {
+        return {
+            valid: false,
+            error: 'Hibás dátumválasztás.'
+        };
+    }
+
+    const noCheckInDates = new Set(
+        Array.isArray(apartment?.noCheckInDates) ? apartment.noCheckInDates : []
+    );
+
+    const noCheckOutDates = new Set(
+        Array.isArray(apartment?.noCheckOutDates) ? apartment.noCheckOutDates : []
+    );
+
+    if (noCheckInDates.has(checkIn)) {
+        return {
+            valid: false,
+            error: 'A kiválasztott napon nem lehet érkezni. Kérjük, válasszon másik érkezési napot.'
+        };
+    }
+
+    if (noCheckOutDates.has(checkOut)) {
+        return {
+            valid: false,
+            error: 'A kiválasztott napon nem lehet távozni. Kérjük, válasszon másik távozási napot.'
+        };
+    }
+
+    return { valid: true };
+}
+
 function pad2(num) {
     return String(num).padStart(2, '0');
 }
@@ -1940,7 +1984,9 @@ app.post('/api/owner-dashboard', async (req, res) => {
             coverImage: apt.coverImage || '',
             galleryImages: Array.isArray(apt.galleryImages) ? apt.galleryImages.slice(0, 6) : [],
             seasons: Array.isArray(apt.seasons) ? apt.seasons : [],
-            disabledDates: Array.isArray(apt.disabledDates) ? apt.disabledDates : []
+            disabledDates: Array.isArray(apt.disabledDates) ? apt.disabledDates : [],
+            noCheckInDates: Array.isArray(apt.noCheckInDates) ? apt.noCheckInDates : [],
+            noCheckOutDates: Array.isArray(apt.noCheckOutDates) ? apt.noCheckOutDates : []
         }));
 
         const webBookings = bookings.filter(booking =>
@@ -2006,6 +2052,12 @@ app.post('/api/create-checkout-session', async (req, res) => {
 
         if (!apartment) {
             return res.status(400).json({ error: 'Az apartman nem található.' });
+        }
+
+        const arrivalDepartureValidation = getArrivalDepartureRestriction(apartment, newB);
+
+        if (!arrivalDepartureValidation.valid) {
+            return res.status(400).json({ error: arrivalDepartureValidation.error });
         }
 
         if (hasDisabledDateInBookingRange(apartment, newB)) {
@@ -2117,6 +2169,14 @@ app.get('/api/finalize-booking', async (req, res) => {
 
             if (!apartment) {
                 const err = new Error('Az apartman nem található.');
+                err.statusCode = 400;
+                throw err;
+            }
+
+            const arrivalDepartureValidation = getArrivalDepartureRestriction(apartment, rawBooking);
+
+            if (!arrivalDepartureValidation.valid) {
+                const err = new Error(arrivalDepartureValidation.error);
                 err.statusCode = 400;
                 throw err;
             }

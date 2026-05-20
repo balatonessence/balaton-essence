@@ -479,6 +479,21 @@
             color: var(--accent) !important;
         }
 
+
+        .cal-day.no-checkin,
+        .cal-day.no-checkout,
+        .cal-day.no-turnover {
+            background: rgba(200, 164, 107, 0.14);
+            color: #9A753B;
+            border-color: rgba(200, 164, 107, 0.38);
+        }
+
+        .cal-day.no-checkin.past,
+        .cal-day.no-checkout.past,
+        .cal-day.no-turnover.past {
+            opacity: 0.45;
+        }
+
         .selected-start,
         .selected-end {
             background: var(--accent) !important;
@@ -640,73 +655,6 @@
     </style>
 
     <link rel="stylesheet" href="../mobile.css?v=3">
-
-    <meta name="description" content="Balaton Essence apartment details, available dates, prices, photos and online booking.">
-    <!-- SEO-DYNAMIC-CANONICAL-HREFLANG -->
-    <script>
-(function () {
-        var base = 'https://balatonessence.com';
-        var params = new URLSearchParams(window.location.search);
-        var id = params.get('id');
-        var path = window.location.pathname.toLowerCase();
-        var langPrefix = path.indexOf('/en/') !== -1 ? '/en' : (path.indexOf('/de/') !== -1 ? '/de' : '');
-        var canonicalHref = base + langPrefix + '/apartman.html' + (id ? ('?id=' + encodeURIComponent(id)) : '');
-
-        function upsertLink(rel, attrs) {
-            var selector = 'link[rel="' + rel + '"]';
-            if (attrs.hreflang) selector += '[hreflang="' + attrs.hreflang + '"]';
-            var el = document.querySelector(selector) || document.createElement('link');
-            el.setAttribute('rel', rel);
-            Object.keys(attrs).forEach(function (key) { el.setAttribute(key, attrs[key]); });
-            if (!el.parentNode) document.head.appendChild(el);
-        }
-
-        upsertLink('canonical', { href: canonicalHref });
-        if (id) {
-            upsertLink('alternate', { hreflang: 'hu', href: base + '/apartman.html?id=' + encodeURIComponent(id) });
-            upsertLink('alternate', { hreflang: 'en', href: base + '/en/apartman.html?id=' + encodeURIComponent(id) });
-            upsertLink('alternate', { hreflang: 'de', href: base + '/de/apartman.html?id=' + encodeURIComponent(id) });
-            upsertLink('alternate', { hreflang: 'x-default', href: base + '/apartman.html?id=' + encodeURIComponent(id) });
-        }
-    }());
-    </script>
-    <!-- SEO-DYNAMIC-APARTMENT-SCHEMA -->
-    <script>
-document.addEventListener('DOMContentLoaded', function () {
-        setTimeout(function () {
-            try {
-                if (!window.currentApt) return;
-                var apt = window.currentApt;
-                var schema = {
-                    '@context': 'https://schema.org',
-                    '@type': 'LodgingBusiness',
-                    'name': apt.name || 'Balaton Essence apartman',
-                    'url': window.location.href,
-                    'image': [apt.coverImage].concat(Array.isArray(apt.galleryImages) ? apt.galleryImages : []).filter(Boolean),
-                    'description': apt.description || apt.description_en || apt.description_de || 'Balaton Essence apartman a Balatonnál.',
-                    'address': {
-                        '@type': 'PostalAddress',
-                        'streetAddress': apt.address || '',
-                        'addressLocality': apt.location || 'Balaton',
-                        'addressCountry': 'HU'
-                    },
-                    'telephone': '+36 20 499 5484',
-                    'parentOrganization': {
-                        '@type': 'Organization',
-                        'name': 'Balaton Essence',
-                        'url': 'https://balatonessence.com/'
-                    }
-                };
-                var script = document.createElement('script');
-                script.type = 'application/ld+json';
-                script.text = JSON.stringify(schema);
-                document.head.appendChild(script);
-            } catch (err) {
-                console.warn('Apartment schema could not be generated', err);
-            }
-        }, 800);
-    });
-    </script>    <link rel="stylesheet" href="../cookie-consent.css?v=1">
 </head>
 
 <body>
@@ -1566,6 +1514,22 @@ document.addEventListener('DOMContentLoaded', function () {
         return blockedDates;
     }
 
+    function getNoCheckInDatesSet() {
+        return new Set(Array.isArray(currentApt.noCheckInDates) ? currentApt.noCheckInDates : []);
+    }
+
+    function getNoCheckOutDatesSet() {
+        return new Set(Array.isArray(currentApt.noCheckOutDates) ? currentApt.noCheckOutDates : []);
+    }
+
+    function isNoCheckInDate(dateStr) {
+        return getNoCheckInDatesSet().has(dateStr);
+    }
+
+    function isNoCheckOutDate(dateStr) {
+        return getNoCheckOutDatesSet().has(dateStr);
+    }
+
     function hasBlockedDateInRange(startStr, endStr) {
         const blockedDates = getBlockedDatesSet();
 
@@ -1598,7 +1562,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const year = calDate.getFullYear();
         const month = calDate.getMonth();
 
-        const monthName = new Intl.DateTimeFormat('en-US', {
+        const monthName = new Intl.DateTimeFormat(getCurrentLang() === 'hu' ? 'hu-HU' : getCurrentLang() === 'de' ? 'de-DE' : 'en-US', {
             month: 'long'
         }).format(calDate);
 
@@ -1609,6 +1573,8 @@ document.addEventListener('DOMContentLoaded', function () {
         const startOffset = firstDay === 0 ? 6 : firstDay - 1;
 
         const blockedDates = getBlockedDatesSet();
+        const noCheckInDates = getNoCheckInDatesSet();
+        const noCheckOutDates = getNoCheckOutDatesSet();
 
         let htmlContent = '';
 
@@ -1624,6 +1590,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
             const isTooSoon = !isCheckInAllowedByLeadTime(dateStr);
             const isBlocked = blockedDates.has(dateStr);
+            const isNoCheckIn = noCheckInDates.has(dateStr);
+            const isNoCheckOut = noCheckOutDates.has(dateStr);
+
+            if (isNoCheckIn && isNoCheckOut) {
+                className += ' no-turnover';
+            } else if (isNoCheckIn) {
+                className += ' no-checkin';
+            } else if (isNoCheckOut) {
+                className += ' no-checkout';
+            }
 
             let canBeCheckoutDay = false;
 
@@ -1632,13 +1608,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 !selectedEnd &&
                 dateStr > selectedStart &&
                 isCheckInAllowedByLeadTime(selectedStart) &&
-                !hasBlockedDateInRange(selectedStart, dateStr)
+                !hasBlockedDateInRange(selectedStart, dateStr) &&
+                !isNoCheckOut
             ) {
                 canBeCheckoutDay = true;
             }
 
+            const choosingStart = !selectedStart || selectedEnd || dateStr <= selectedStart;
+
             if (isTooSoon) {
                 className += ' past';
+                onClickAttr = '';
+            }
+
+            if (choosingStart && isNoCheckIn && !isTooSoon) {
+                onClickAttr = '';
+            }
+
+            if (selectedStart && !selectedEnd && dateStr > selectedStart && isNoCheckOut && !isBlocked) {
                 onClickAttr = '';
             }
 
@@ -1675,20 +1662,38 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!isCheckInAllowedByLeadTime(dateStr)) {
             showSuccess(
                 'Arrival too soon',
-                'Bookings must be made at least 48 hours before the 14:00 check-in time.',
+                'Bookings can only be made at least 48 hours before arrival, calculated from 14:00.',
                 'error'
             );
             return;
         }
 
         if (!selectedStart || (selectedStart && selectedEnd)) {
+            if (isNoCheckInDate(dateStr)) {
+                showSuccess(
+                    'No check-in day',
+                    'Check-in is not available on this date. Please choose another arrival date.',
+                    'error'
+                );
+                return;
+            }
+
             selectedStart = dateStr;
             selectedEnd = null;
         } else if (dateStr > selectedStart) {
+            if (isNoCheckOutDate(dateStr)) {
+                showSuccess(
+                    'No check-out day',
+                    'Check-out is not available on this date. Please choose another departure date.',
+                    'error'
+                );
+                return;
+            }
+
             if (hasBlockedDateInRange(selectedStart, dateStr)) {
                 showSuccess(
                     'Unavailable period',
-                    'The selected period contains a booked or blocked date.',
+                    'The selected period contains a booked or blocked day.',
                     'error'
                 );
 
@@ -1698,14 +1703,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 selectedEnd = dateStr;
             }
         } else {
+            if (isNoCheckInDate(dateStr)) {
+                showSuccess(
+                    'No check-in day',
+                    'Check-in is not available on this date. Please choose another arrival date.',
+                    'error'
+                );
+                return;
+            }
+
             selectedStart = dateStr;
             selectedEnd = null;
         }
 
         document.getElementById('book-start').value = selectedStart || '';
         document.getElementById('book-end').value = selectedEnd || '';
-        document.getElementById('display-start').innerText = selectedStart ? formatDisplayDate(selectedStart) : '-';
-        document.getElementById('display-end').innerText = selectedEnd ? formatDisplayDate(selectedEnd) : '-';
+        document.getElementById('display-start').innerText = selectedStart ? formatHuDate(selectedStart) : '-';
+        document.getElementById('display-end').innerText = selectedEnd ? formatHuDate(selectedEnd) : '-';
 
         renderCalendar();
         calculateStay();
@@ -1756,6 +1770,27 @@ document.addEventListener('DOMContentLoaded', function () {
             totalBox.dataset.finalTotal = '0';
             totalBox.innerText = '0 Ft';
             btn.innerText = 'Unavailable';
+            btn.style.background = 'var(--warning)';
+            btn.style.color = 'white';
+            return;
+        }
+
+
+        if (isNoCheckInDate(startVal)) {
+            infoText.innerHTML = `<span style="color:var(--warning)">Check-in is not available on the selected arrival date.</span>`;
+            totalBox.innerText = '0 Ft';
+            totalBox.dataset.finalTotal = '0';
+            btn.innerText = 'Not bookable';
+            btn.style.background = 'var(--warning)';
+            btn.style.color = 'white';
+            return;
+        }
+
+        if (isNoCheckOutDate(endVal)) {
+            infoText.innerHTML = `<span style="color:var(--warning)">Check-out is not available on the selected departure date.</span>`;
+            totalBox.innerText = '0 Ft';
+            totalBox.dataset.finalTotal = '0';
+            btn.innerText = 'Not bookable';
             btn.style.background = 'var(--warning)';
             btn.style.color = 'white';
             return;
@@ -1908,6 +1943,25 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
+
+        if (isNoCheckInDate(data.checkIn)) {
+            showSuccess(
+                'No check-in day',
+                'Check-in is not available on this date. Please choose another arrival date.',
+                'error'
+            );
+            return;
+        }
+
+        if (isNoCheckOutDate(data.checkOut)) {
+            showSuccess(
+                'No check-out day',
+                'Check-out is not available on this date. Please choose another departure date.',
+                'error'
+            );
+            return;
+        }
+
         if (data.totalPrice <= 0) {
             showSuccess(
                 'Invalid amount',
@@ -2055,6 +2109,5 @@ document.addEventListener('DOMContentLoaded', function () {
 <link rel="stylesheet" href="../mobile.css?v=106">
 <script src="../site-mobile.js?v=106"></script>
 <script src="../chat-assistant.js"></script>
-<script src="../cookie-consent.js?v=1"></script>
 </body>
 </html>
