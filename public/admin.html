@@ -4863,15 +4863,33 @@ async function saveExternalGuestData() {
         return;
     }
 
-    booking.guestName = guestName;
-    booking.email = email;
-    booking.phone = phone;
-    booking.lang = ['hu', 'en', 'de'].includes(lang) ? lang : 'hu';
+const wasBlocked = isBlockedBooking(booking);
 
-    // Ez jelzi a szervernek, hogy ezeket az adatokat
-    // az iCal szinkron később se írja felül.
-    booking.manualGuestData = true;
+booking.guestName = guestName;
+booking.email = email;
+booking.phone = phone;
+booking.lang = ['hu', 'en', 'de'].includes(lang) ? lang : 'hu';
 
+// Ez jelzi a szervernek, hogy ezeket az adatokat
+// az iCal szinkron később se írja felül.
+booking.manualGuestData = true;
+
+// Ha korábban zárolt időszak volt, de vendégadatot adunk hozzá,
+// akkor innentől valódi külső foglalásként kezeljük.
+if (wasBlocked) {
+    booking.type = 'booking';
+    booking.status = 'confirmed';
+    booking.convertedFromBlocked = true;
+    booking.convertedAt = new Date().toISOString();
+
+    if (!booking.source || booking.source === 'blocked') {
+        booking.source = 'external';
+    }
+
+    if (!booking.totalPrice && !booking.total) {
+        booking.totalPrice = 0;
+    }
+}
 await saveDb();
 closeExternalGuestModal();
 renderBookings();
