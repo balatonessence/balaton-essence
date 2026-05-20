@@ -1178,6 +1178,189 @@
         line-height: 1.55;
     }
 
+
+    .turnover-overview-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 0.9rem 1rem;
+    }
+
+    .turnover-month-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: var(--text);
+        text-align: center;
+    }
+
+    .turnover-calendar {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 8px;
+    }
+
+    .turnover-weekday {
+        text-align: center;
+        font-size: 0.62rem;
+        font-weight: 900;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 0.25rem 0;
+    }
+
+    .turnover-day {
+        min-height: 112px;
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        background: white;
+        padding: 0.75rem;
+        cursor: pointer;
+        transition: 0.18s ease;
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+        position: relative;
+    }
+
+    .turnover-day:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 14px 32px rgba(23,35,24,0.08);
+        border-color: rgba(92,122,77,0.35);
+    }
+
+    .turnover-day.empty {
+        background: transparent;
+        border: none;
+        cursor: default;
+        box-shadow: none;
+        transform: none;
+    }
+
+    .turnover-day-number {
+        font-weight: 900;
+        color: var(--text);
+        font-size: 0.9rem;
+    }
+
+    .turnover-day.has-traffic {
+        border-color: rgba(200,164,107,0.55);
+        background: linear-gradient(180deg, #fff, rgba(252,251,249,0.9));
+    }
+
+    .turnover-pill-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+        margin-top: auto;
+    }
+
+    .turnover-pill {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.35rem;
+        border-radius: 999px;
+        padding: 0.38rem 0.55rem;
+        font-size: 0.64rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        white-space: nowrap;
+    }
+
+    .turnover-pill.arrival {
+        background: rgba(92,122,77,0.12);
+        color: var(--accent);
+    }
+
+    .turnover-pill.departure {
+        background: rgba(200,164,107,0.18);
+        color: #8A642F;
+    }
+
+    .turnover-detail-list {
+        display: grid;
+        gap: 0.6rem;
+        margin: 0.8rem 0 1.2rem;
+    }
+
+    .turnover-detail-item {
+        padding: 0.75rem 0.85rem;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: var(--surface-soft);
+        font-size: 0.82rem;
+        line-height: 1.5;
+    }
+
+    .turnover-detail-item strong {
+        color: var(--text);
+    }
+
+    .turnover-actions-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.7rem;
+        margin-top: 1rem;
+    }
+
+    .turnover-confirm-list {
+        max-height: 220px;
+        overflow-y: auto;
+        display: grid;
+        gap: 0.45rem;
+        margin: 1rem 0;
+        padding-right: 0.25rem;
+    }
+
+    .turnover-confirm-list div {
+        background: var(--surface-soft);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 0.62rem 0.75rem;
+        font-size: 0.82rem;
+        font-weight: 700;
+    }
+
+    .turnover-warning-box {
+        background: rgba(176,65,62,0.08);
+        border: 1px solid rgba(176,65,62,0.22);
+        border-left: 4px solid var(--danger);
+        border-radius: 14px;
+        padding: 0.9rem 1rem;
+        color: var(--text);
+        font-size: 0.84rem;
+        line-height: 1.55;
+        margin: 1rem 0;
+    }
+
+    @media (max-width: 900px) {
+        .turnover-calendar {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .turnover-weekday {
+            display: none;
+        }
+    }
+
+    @media (max-width: 620px) {
+        .turnover-calendar {
+            grid-template-columns: 1fr;
+        }
+
+        .turnover-overview-toolbar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+
     .gallery-preview {
         display: flex;
         flex-wrap: wrap;
@@ -1502,6 +1685,29 @@
         <section class="stats-grid" id="stats-grid"></section>
 
         <div class="dashboard-grid">
+
+            <section class="section section-booking">
+                <div class="section-header">
+                    <div class="section-title-wrap">
+                        <div class="section-icon">📅</div>
+                        <div>
+                            <h2>Érkezés / távozás áttekintő</h2>
+                            <div class="section-subtitle">Havi naptár, napi érkező és távozó vendégszámmal, tömeges nem érkezési / nem távozási beállítással.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="section-body">
+                    <div class="turnover-overview-toolbar">
+                        <button type="button" class="btn btn-outline btn-mini" onclick="changeTurnoverMonth(-1)">‹ Előző hónap</button>
+                        <div id="turnover-month-label" class="turnover-month-title">-</div>
+                        <button type="button" class="btn btn-outline btn-mini" onclick="changeTurnoverMonth(1)">Következő hónap ›</button>
+                    </div>
+
+                    <div id="turnover-calendar" class="turnover-calendar"></div>
+                </div>
+            </section>
+
             <section class="section section-booking">
                 <div class="section-header">
                     <div class="section-title-wrap">
@@ -1773,6 +1979,51 @@
             </section>
         </div>
     </main>
+</div>
+
+
+<div id="turnover-day-modal" class="modal">
+    <div class="simple-modal-card">
+        <h2 id="turnover-day-title">Nap részletei</h2>
+        <div id="turnover-day-summary" class="muted" style="line-height:1.6; margin-bottom:1rem;"></div>
+
+        <div class="grid-2">
+            <div>
+                <div class="modal-card-title">Érkezők</div>
+                <div id="turnover-arrivals-list" class="turnover-detail-list"></div>
+            </div>
+            <div>
+                <div class="modal-card-title">Távozók</div>
+                <div id="turnover-departures-list" class="turnover-detail-list"></div>
+            </div>
+        </div>
+
+        <div class="turnover-warning-box">
+            A gyors műveletek csak a szabad apartmanokra kerülnek rá. Nem módosítanak meglévő foglalást, és nem teljes zárolást állítanak be.
+        </div>
+
+        <div class="turnover-actions-grid">
+            <button type="button" class="btn btn-accent" onclick="prepareBulkTurnoverRule('noCheckIn')">Nem érkezési nap beállítása szabad apartmanokra</button>
+            <button type="button" class="btn btn-outline" onclick="prepareBulkTurnoverRule('noCheckOut')">Nem távozási nap beállítása szabad apartmanokra</button>
+            <button type="button" class="btn btn-danger" onclick="prepareBulkTurnoverRule('clear')">Nem érkezési / nem távozási jelölések törlése erről a napról</button>
+            <button type="button" class="btn btn-outline" onclick="closeTurnoverDayModal()">Bezárás</button>
+        </div>
+    </div>
+</div>
+
+<div id="turnover-confirm-modal" class="modal">
+    <div class="simple-modal-card">
+        <h2 id="turnover-confirm-title">Megerősítés</h2>
+        <div id="turnover-confirm-text" class="muted" style="line-height:1.65;"></div>
+        <div id="turnover-confirm-list" class="turnover-confirm-list"></div>
+        <div class="turnover-warning-box">
+            Ez a művelet mentés után azonnal érvényesül az apartmanok foglalási naptárában. Foglalást nem töröl, teljes napot nem zárol.
+        </div>
+        <div style="display:flex; gap:10px;">
+            <button type="button" class="btn btn-primary" style="flex:2;" onclick="confirmBulkTurnoverRule()">Igen, mentés</button>
+            <button type="button" class="btn btn-outline" style="flex:1;" onclick="closeTurnoverConfirmModal()">Mégse</button>
+        </div>
+    </div>
 </div>
 
 <div id="recommendation-modal" class="modal">
@@ -2183,6 +2434,9 @@
     let lastAutoSyncTriggerKey = null;
     let currentRecommendationImage = '';
     let currentAboutTeamImage = '';
+    let turnoverCalDate = new Date();
+    let selectedTurnoverDate = null;
+    let pendingTurnoverBulkAction = null;
     let adminCalendarMode = 'blocked';
 
     function getAdminToken() {
@@ -3298,6 +3552,7 @@ function initSyncCountdown() {
         renderAboutTeamPreview();
 
         renderStats();
+        renderTurnoverOverview();
         renderBookings();
         renderBlockedBookings();
         renderBreakfasts();
@@ -3307,6 +3562,264 @@ function initSyncCountdown() {
         renderOwners();
         renderRecommendations();
         renderReviews();
+    }
+
+
+    function getBookingStart(booking) {
+        return booking.checkIn || booking.start || '';
+    }
+
+    function getBookingEnd(booking) {
+        return booking.checkOut || booking.end || '';
+    }
+
+    function getBookingsForTurnoverDate(dateStr) {
+        const realBookings = (db.bookings || []).filter(b => !isBlockedBooking(b));
+
+        return {
+            arrivals: realBookings.filter(b => getBookingStart(b) === dateStr),
+            departures: realBookings.filter(b => getBookingEnd(b) === dateStr)
+        };
+    }
+
+    function getAptNameById(aptId) {
+        const apt = (db.apartments || []).find(a => String(a.id) === String(aptId));
+        return apt ? (apt.name || 'Névtelen apartman') : 'Ismeretlen apartman';
+    }
+
+    function isAptBookedOnDate(apt, dateStr) {
+        return (db.bookings || [])
+            .filter(b => !isBlockedBooking(b) && String(b.aptId) === String(apt.id))
+            .some(b => {
+                const start = getBookingStart(b);
+                const end = getBookingEnd(b);
+                return start && end && dateStr >= start && dateStr < end;
+            });
+    }
+
+    function isAptBlockedOnDate(apt, dateStr) {
+        return Array.isArray(apt.disabledDates) && apt.disabledDates.includes(dateStr);
+    }
+
+    function getFreeApartmentsForTurnoverDate(dateStr) {
+        return (db.apartments || []).filter(apt => {
+            if (!apt || !apt.id) return false;
+            if (isAptBookedOnDate(apt, dateStr)) return false;
+            if (isAptBlockedOnDate(apt, dateStr)) return false;
+            return true;
+        });
+    }
+
+    function formatAdminFullDate(dateStr) {
+        const date = parseLocalDate(dateStr);
+
+        if (!date || isNaN(date.getTime())) {
+            return dateStr || '-';
+        }
+
+        return new Intl.DateTimeFormat('hu-HU', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            weekday: 'long'
+        }).format(date);
+    }
+
+    function renderTurnoverOverview() {
+        const container = document.getElementById('turnover-calendar');
+        const label = document.getElementById('turnover-month-label');
+
+        if (!container || !label) return;
+
+        const year = turnoverCalDate.getFullYear();
+        const month = turnoverCalDate.getMonth();
+        const monthName = new Intl.DateTimeFormat('hu-HU', { month: 'long' }).format(turnoverCalDate);
+
+        label.innerText = `${monthName} ${year}`;
+
+        const firstDay = new Date(year, month, 1).getDay();
+        const startOffset = firstDay === 0 ? 6 : firstDay - 1;
+        const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+        let html = `
+            <div class="turnover-weekday">HÉ</div>
+            <div class="turnover-weekday">KE</div>
+            <div class="turnover-weekday">SZE</div>
+            <div class="turnover-weekday">CSÜ</div>
+            <div class="turnover-weekday">PÉ</div>
+            <div class="turnover-weekday">SZO</div>
+            <div class="turnover-weekday">VAS</div>
+        `;
+
+        for (let i = 0; i < startOffset; i++) {
+            html += `<div class="turnover-day empty"></div>`;
+        }
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const { arrivals, departures } = getBookingsForTurnoverDate(dateStr);
+            const hasTraffic = arrivals.length > 0 || departures.length > 0;
+
+            html += `
+                <div class="turnover-day ${hasTraffic ? 'has-traffic' : ''}" onclick="openTurnoverDayModal('${dateStr}')">
+                    <div class="turnover-day-number">${day}</div>
+                    <div class="turnover-pill-row">
+                        <div class="turnover-pill arrival"><span>Érkezők</span><strong>${arrivals.length}</strong></div>
+                        <div class="turnover-pill departure"><span>Távozók</span><strong>${departures.length}</strong></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        container.innerHTML = html;
+    }
+
+    function changeTurnoverMonth(direction) {
+        turnoverCalDate.setMonth(turnoverCalDate.getMonth() + direction);
+        renderTurnoverOverview();
+    }
+
+    function renderTurnoverBookingList(bookings, emptyText) {
+        if (!bookings || bookings.length === 0) {
+            return `<div class="turnover-detail-item muted">${escapeHtml(emptyText)}</div>`;
+        }
+
+        return bookings.map(booking => {
+            const aptName = getAptNameById(booking.aptId);
+            const guest = booking.guestName || 'Vendég / külső foglalás';
+            const source = String(booking.source || 'web').toUpperCase();
+
+            return `
+                <div class="turnover-detail-item">
+                    <strong>${escapeHtml(aptName)}</strong><br>
+                    ${escapeHtml(guest)} <span class="muted">• ${escapeHtml(source)}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function openTurnoverDayModal(dateStr) {
+        selectedTurnoverDate = dateStr;
+
+        const { arrivals, departures } = getBookingsForTurnoverDate(dateStr);
+        const freeApts = getFreeApartmentsForTurnoverDate(dateStr);
+
+        document.getElementById('turnover-day-title').innerText = formatAdminFullDate(dateStr);
+        document.getElementById('turnover-day-summary').innerHTML = `
+            <strong>${arrivals.length}</strong> érkező, <strong>${departures.length}</strong> távozó ezen a napon.<br>
+            Tömeges művelethez jelenleg <strong>${freeApts.length}</strong> szabad apartman érhető el.
+        `;
+        document.getElementById('turnover-arrivals-list').innerHTML = renderTurnoverBookingList(arrivals, 'Nincs érkező ezen a napon.');
+        document.getElementById('turnover-departures-list').innerHTML = renderTurnoverBookingList(departures, 'Nincs távozó ezen a napon.');
+
+        document.getElementById('turnover-day-modal').style.display = 'flex';
+    }
+
+    function closeTurnoverDayModal() {
+        document.getElementById('turnover-day-modal').style.display = 'none';
+    }
+
+    function getAffectedApartmentsForBulkRule(action, dateStr) {
+        const freeApts = getFreeApartmentsForTurnoverDate(dateStr);
+
+        if (action === 'noCheckIn') {
+            return freeApts.filter(apt => !(apt.noCheckInDates || []).includes(dateStr));
+        }
+
+        if (action === 'noCheckOut') {
+            return freeApts.filter(apt => !(apt.noCheckOutDates || []).includes(dateStr));
+        }
+
+        if (action === 'clear') {
+            return (db.apartments || []).filter(apt =>
+                (apt.noCheckInDates || []).includes(dateStr) ||
+                (apt.noCheckOutDates || []).includes(dateStr)
+            );
+        }
+
+        return [];
+    }
+
+    function getBulkActionLabel(action) {
+        if (action === 'noCheckIn') return 'Nem érkezési nap';
+        if (action === 'noCheckOut') return 'Nem távozási nap';
+        if (action === 'clear') return 'Nem érkezési / nem távozási jelölések törlése';
+        return 'Művelet';
+    }
+
+    function prepareBulkTurnoverRule(action) {
+        if (!selectedTurnoverDate) return;
+
+        const affectedApts = getAffectedApartmentsForBulkRule(action, selectedTurnoverDate);
+        const actionLabel = getBulkActionLabel(action);
+
+        pendingTurnoverBulkAction = {
+            action,
+            dateStr: selectedTurnoverDate,
+            apartmentIds: affectedApts.map(apt => apt.id)
+        };
+
+        document.getElementById('turnover-confirm-title').innerText = actionLabel;
+
+        if (affectedApts.length === 0) {
+            document.getElementById('turnover-confirm-text').innerHTML = `
+                <strong>${escapeHtml(formatAdminFullDate(selectedTurnoverDate))}</strong><br>
+                Nincs érintett apartman ehhez a művelethez.
+            `;
+            document.getElementById('turnover-confirm-list').innerHTML = '';
+            document.querySelector('#turnover-confirm-modal .btn-primary').style.display = 'none';
+        } else {
+            document.getElementById('turnover-confirm-text').innerHTML = `
+                Biztosan végrehajtod ezt a műveletet <strong>${escapeHtml(formatAdminFullDate(selectedTurnoverDate))}</strong> napra?<br>
+                Érintett apartmanok száma: <strong>${affectedApts.length}</strong>.
+            `;
+            document.getElementById('turnover-confirm-list').innerHTML = affectedApts
+                .map(apt => `<div>${escapeHtml(apt.name || 'Névtelen apartman')}</div>`)
+                .join('');
+            document.querySelector('#turnover-confirm-modal .btn-primary').style.display = 'inline-flex';
+        }
+
+        document.getElementById('turnover-confirm-modal').style.display = 'flex';
+    }
+
+    function closeTurnoverConfirmModal() {
+        document.getElementById('turnover-confirm-modal').style.display = 'none';
+        pendingTurnoverBulkAction = null;
+    }
+
+    async function confirmBulkTurnoverRule() {
+        if (!pendingTurnoverBulkAction) return;
+
+        const { action, dateStr, apartmentIds } = pendingTurnoverBulkAction;
+
+        (db.apartments || []).forEach(apt => {
+            if (!apartmentIds.some(id => String(id) === String(apt.id))) return;
+
+            if (!Array.isArray(apt.noCheckInDates)) apt.noCheckInDates = [];
+            if (!Array.isArray(apt.noCheckOutDates)) apt.noCheckOutDates = [];
+
+            if (action === 'noCheckIn' && !apt.noCheckInDates.includes(dateStr)) {
+                apt.noCheckInDates.push(dateStr);
+            }
+
+            if (action === 'noCheckOut' && !apt.noCheckOutDates.includes(dateStr)) {
+                apt.noCheckOutDates.push(dateStr);
+            }
+
+            if (action === 'clear') {
+                removeDateFromArray(apt.noCheckInDates, dateStr);
+                removeDateFromArray(apt.noCheckOutDates, dateStr);
+            }
+        });
+
+        await saveDb();
+        closeTurnoverConfirmModal();
+        closeTurnoverDayModal();
+        renderTurnoverOverview();
+
+        if (currentEditingAptId) {
+            renderAdminCalendar();
+        }
     }
 
     function renderStats() {
