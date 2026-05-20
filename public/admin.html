@@ -4456,8 +4456,6 @@ async function saveExternalGuestData() {
     booking.phone = phone;
     booking.lang = ['hu', 'en', 'de'].includes(lang) ? lang : 'hu';
 
-    // Ez jelzi a szervernek, hogy ezeket az adatokat
-    // az iCal szinkron később se írja felül.
     booking.manualGuestData = true;
 
 await saveDb();
