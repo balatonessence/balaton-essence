@@ -997,6 +997,12 @@
         }).format(d);
     }
 
+
+
+    function formatHuDate(dateStr) {
+        return formatDisplayDate(dateStr);
+    }
+
     function getDiscountConfig(apt) {
         const discount = apt?.discount || apt?.nightlyDiscount || null;
 
@@ -1727,7 +1733,7 @@
             if (hasBlockedDateInRange(selectedStart, dateStr)) {
                 showSuccess(
                     'Nem választható időszak',
-                    'The selected period contains a booked or blocked day.',
+                    'A kiválasztott időszak foglalt vagy zárolt napot tartalmaz.',
                     'error'
                 );
 
@@ -1752,8 +1758,8 @@
 
         document.getElementById('book-start').value = selectedStart || '';
         document.getElementById('book-end').value = selectedEnd || '';
-        document.getElementById('display-start').innerText = selectedStart ? formatHuDate(selectedStart) : '-';
-        document.getElementById('display-end').innerText = selectedEnd ? formatHuDate(selectedEnd) : '-';
+        document.getElementById('display-start').innerText = selectedStart ? formatDisplayDate(selectedStart) : '-';
+        document.getElementById('display-end').innerText = selectedEnd ? formatDisplayDate(selectedEnd) : '-';
 
         renderCalendar();
         calculateStay();
