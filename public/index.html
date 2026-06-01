@@ -1678,7 +1678,7 @@
             const desc = getApartmentShortDescription(apt);
 
             const card = document.createElement('a');
-            card.href = `apartman.html?id=${encodeURIComponent(apt.id)}`;
+            card.href = getHuApartmentUrl(apt.id);
             card.className = 'apartment-card';
 
             card.innerHTML = `
