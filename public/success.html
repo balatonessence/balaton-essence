@@ -159,6 +159,7 @@
 <script>
     const urlParams = new URLSearchParams(window.location.search);
     const sessionId = urlParams.get('session_id');
+    const paymentIntentId = urlParams.get('payment_intent');
     const rawLang = urlParams.get('lang') || 'hu';
     const lang = ['hu', 'en', 'de'].includes(rawLang) ? rawLang : 'hu';
 
@@ -216,15 +217,17 @@
     document.getElementById('err-btn').href = t.homeUrl;
 
     async function finalize() {
-        if (!sessionId) {
+        if (!sessionId && !paymentIntentId) {
             showError();
             return;
         }
 
         try {
-            const response = await fetch(
-                `/api/finalize-booking?session_id=${encodeURIComponent(sessionId)}`
-            );
+            const finalizeUrl = paymentIntentId
+                ? `/api/finalize-booking?payment_intent=${encodeURIComponent(paymentIntentId)}`
+                : `/api/finalize-booking?session_id=${encodeURIComponent(sessionId)}`;
+
+            const response = await fetch(finalizeUrl);
 
             const result = await response.json().catch(() => null);
 

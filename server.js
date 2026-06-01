@@ -2026,9 +2026,115 @@ app.post('/api/owner-dashboard', async (req, res) => {
     }
 });
 
+
+// -----------------------------------------------------------------------------
+// API - STRIPE PUBLIC CONFIG
+// -----------------------------------------------------------------------------
+
+app.get('/api/stripe-config', (req, res) => {
+    res.json({
+        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0'
+    });
+});
+
 // -----------------------------------------------------------------------------
 // API - STRIPE BOOKING CHECKOUT
 // -----------------------------------------------------------------------------
+
+
+app.post('/api/create-payment-intent-booking', async (req, res) => {
+    try {
+        const newB = req.body.booking || req.body;
+
+        if (!newB || !newB.aptId || !newB.checkIn || !newB.checkOut || !newB.email || !newB.guestName) {
+            return res.status(400).json({ error: 'Hiányos foglalási adatok.' });
+        }
+
+        const leadTimeValidation = validateMinimumBookingLeadTime(newB.checkIn);
+
+        if (!leadTimeValidation.valid) {
+            return res.status(400).json({ error: leadTimeValidation.error });
+        }
+
+        const db = await getDbContent();
+
+        const apartment = (db.apartments || []).find(apt =>
+            String(apt.id) === String(newB.aptId)
+        );
+
+        if (!apartment) {
+            return res.status(400).json({ error: 'Az apartman nem található.' });
+        }
+
+        const arrivalDepartureValidation = getArrivalDepartureRestriction(apartment, newB);
+
+        if (!arrivalDepartureValidation.valid) {
+            return res.status(400).json({ error: arrivalDepartureValidation.error });
+        }
+
+        if (hasDisabledDateInBookingRange(apartment, newB)) {
+            return res.status(400).json({
+                error: 'A kiválasztott időszak letiltott napot tartalmaz.'
+            });
+        }
+
+        if (isBookingOverlapping(db.bookings, newB)) {
+            return res.status(400).json({ error: 'Sajnos ez az időpont már foglalt!' });
+        }
+
+        const priceCalculation = calculateBookingTotalOnServer(apartment, newB);
+
+        if (!priceCalculation.valid) {
+            return res.status(400).json({ error: priceCalculation.error });
+        }
+
+        const finalTotalPrice = Number(priceCalculation.total || 0);
+
+        if (!Number.isFinite(finalTotalPrice) || finalTotalPrice <= 0) {
+            return res.status(400).json({
+                error: 'A foglalás összege nem számolható.'
+            });
+        }
+
+        const depositAmount = Math.round(finalTotalPrice / 2);
+        const lang = normalizeLang(newB.lang || 'hu');
+
+        const safeBookingData = {
+            ...newB,
+            aptName: apartment.name || newB.aptName || 'Balaton Essence',
+            totalPrice: finalTotalPrice,
+            originalTotalPrice: priceCalculation.originalTotal,
+            discountTotal: priceCalculation.discountTotal,
+            nights: priceCalculation.nights,
+            calculatedByServer: true,
+            serverBookingDate: priceCalculation.bookingDateStr
+        };
+
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: depositAmount * 100,
+            currency: 'huf',
+            automatic_payment_methods: { enabled: true },
+            receipt_email: safeBookingData.email,
+            description: `Előleg (50%): ${safeBookingData.aptName || 'Balaton Essence'}`,
+            metadata: {
+                kind: 'booking',
+                lang,
+                bookingData: JSON.stringify(safeBookingData)
+            }
+        });
+
+        res.json({
+            success: true,
+            clientSecret: paymentIntent.client_secret,
+            paymentIntentId: paymentIntent.id,
+            amount: depositAmount,
+            lang
+        });
+    } catch (e) {
+        console.error('Stripe PaymentIntent indítási hiba:', e);
+        res.status(500).json({ error: e.message });
+    }
+});
 
 app.post('/api/create-checkout-session', async (req, res) => {
     try {
@@ -2130,26 +2236,58 @@ app.post('/api/create-checkout-session', async (req, res) => {
 
 app.get('/api/finalize-booking', async (req, res) => {
     try {
-        const { session_id } = req.query;
-        if (!session_id) return res.status(400).json({ error: 'Hiányzó session_id.' });
+        const { session_id, payment_intent } = req.query;
 
-        const session = await stripe.checkout.sessions.retrieve(session_id);
+        let rawBooking = null;
+        let stripeReferenceId = null;
+        let paymentIntentId = null;
+        let paidDeposit = 0;
+        let paymentStatus = 'paid';
 
-        if (session.payment_status !== 'paid') {
-            return res.status(400).json({ error: 'A fizetés még nem sikeres.' });
+        if (payment_intent) {
+            const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent);
+
+            if (!paymentIntent || paymentIntent.status !== 'succeeded') {
+                return res.status(400).json({ error: 'A fizetés még nem sikeres.' });
+            }
+
+            if (!paymentIntent.metadata?.bookingData) {
+                return res.status(400).json({ error: 'Hiányzó foglalási metadata.' });
+            }
+
+            rawBooking = JSON.parse(paymentIntent.metadata.bookingData);
+            stripeReferenceId = paymentIntent.id;
+            paymentIntentId = paymentIntent.id;
+            paidDeposit = Number(paymentIntent.amount_received || paymentIntent.amount || 0) / 100;
+            paymentStatus = 'paid';
+        } else {
+            if (!session_id) return res.status(400).json({ error: 'Hiányzó session_id vagy payment_intent.' });
+
+            const session = await stripe.checkout.sessions.retrieve(session_id);
+
+            if (session.payment_status !== 'paid') {
+                return res.status(400).json({ error: 'A fizetés még nem sikeres.' });
+            }
+
+            if (!session.metadata?.bookingData) {
+                return res.status(400).json({ error: 'Hiányzó foglalási metadata.' });
+            }
+
+            rawBooking = JSON.parse(session.metadata.bookingData);
+            stripeReferenceId = session_id;
+            paymentIntentId = session.payment_intent || null;
+            paidDeposit = Number(session.amount_total || 0) / 100;
+            paymentStatus = session.payment_status;
         }
-
-        if (!session.metadata?.bookingData) {
-            return res.status(400).json({ error: 'Hiányzó foglalási metadata.' });
-        }
-
-        const rawBooking = JSON.parse(session.metadata.bookingData);
 
         let savedBooking = null;
         let alreadySaved = false;
 
         await updateDbContent(async db => {
-            const existing = db.bookings.find(b => b.stripeId === session_id);
+            const existing = db.bookings.find(b =>
+                b.stripeId === stripeReferenceId ||
+                (paymentIntentId && b.paymentIntentId === paymentIntentId)
+            );
 
             if (existing) {
                 savedBooking = existing;
@@ -2157,7 +2295,7 @@ app.get('/api/finalize-booking', async (req, res) => {
                 return db;
             }
 
-            if (isBookingOverlapping(db.bookings, rawBooking, session_id)) {
+            if (isBookingOverlapping(db.bookings, rawBooking, stripeReferenceId)) {
                 const err = new Error('Időközben ez az időpont foglalttá vált.');
                 err.statusCode = 409;
                 throw err;
@@ -2196,7 +2334,6 @@ app.get('/api/finalize-booking', async (req, res) => {
             }
 
             const expectedDeposit = Math.round(Number(priceCalculation.total || 0) / 2);
-            const paidDeposit = Number(session.amount_total || 0) / 100;
 
             if (Math.round(paidDeposit) !== expectedDeposit) {
                 const err = new Error('A fizetett előleg nem egyezik a szerver által számolt összeggel.');
@@ -2207,8 +2344,8 @@ app.get('/api/finalize-booking', async (req, res) => {
             const newBooking = {
                 ...rawBooking,
                 id: generateId('ord'),
-                stripeId: session_id,
-                paymentIntentId: session.payment_intent || null,
+                stripeId: stripeReferenceId,
+                paymentIntentId,
 
                 aptName: apartment.name || rawBooking.aptName || 'Balaton Essence',
                 totalPrice: Number(priceCalculation.total || 0),
@@ -2217,7 +2354,7 @@ app.get('/api/finalize-booking', async (req, res) => {
                 nights: Number(priceCalculation.nights || 0),
 
                 paidDeposit,
-                paymentStatus: session.payment_status,
+                paymentStatus,
                 status: 'confirmed',
                 lang: normalizeLang(rawBooking.lang || 'hu'),
                 cancelToken: generateToken(),
@@ -2710,35 +2847,41 @@ app.post('/api/order', async (req, res) => {
 
         const t = getOrderTranslations(order, lang);
 
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: [{
-                price_data: {
-                    currency: 'huf',
-                    product_data: {
-                        name: t.subj,
-                        description: `${order.items || order.details || ''} | ${order.apartment || order.aptName || ''}`
-                    },
-                    unit_amount: Math.round(amount) * 100
-                },
-                quantity: 1
-            }],
-            mode: 'payment',
-            success_url: `https://${req.get('host')}/success-extra.html?session_id={CHECKOUT_SESSION_ID}&lang=${lang}`,
-            cancel_url: `https://${req.get('host')}/${order.type === 'BREAKFAST' ? 'morning.html' : 'sun.html'}?lang=${lang}`,
-            customer_email: order.email,
+        const paymentIntent = await stripe.paymentIntents.create({
+            amount: Math.round(amount) * 100,
+            currency: 'huf',
+            automatic_payment_methods: { enabled: true },
+            receipt_email: order.email,
+            description: `${t.subj} | ${order.apartment || order.aptName || ''}`,
             metadata: {
+                kind: 'order',
                 orderId: id,
                 type: order.type,
                 lang
             }
         });
 
+        await updateDbContent(async currentDb => {
+            if (!currentDb.breakfasts) currentDb.breakfasts = [];
+            if (!currentDb.extras) currentDb.extras = [];
+
+            const list = order.type === 'BREAKFAST' ? currentDb.breakfasts : currentDb.extras;
+            const idx = list.findIndex(item => String(item.id) === String(id));
+
+            if (idx !== -1) {
+                list[idx].stripePaymentIntentId = paymentIntent.id;
+            }
+
+            return currentDb;
+        });
+
         return res.json({
             success: true,
             id,
             method: 'card',
-            stripeSessionId: session.id
+            clientSecret: paymentIntent.client_secret,
+            paymentIntentId: paymentIntent.id,
+            amount
         });
     } catch (e) {
         console.error('Rendelési hiba:', e);
@@ -2748,21 +2891,43 @@ app.post('/api/order', async (req, res) => {
 
 app.get('/api/finalize-extra', async (req, res) => {
     try {
-        const { session_id } = req.query;
+        const { session_id, payment_intent } = req.query;
 
-        if (!session_id) {
-            return res.status(400).json({ error: 'Hiányzó session_id.' });
+        let orderId = null;
+        let type = null;
+        let lang = 'hu';
+        let stripeReferenceId = null;
+        let paidAmount = 0;
+
+        if (payment_intent) {
+            const paymentIntent = await stripe.paymentIntents.retrieve(payment_intent);
+
+            if (!paymentIntent || paymentIntent.status !== 'succeeded') {
+                return res.status(400).json({ error: 'A fizetés még nem sikeres.' });
+            }
+
+            orderId = paymentIntent.metadata?.orderId;
+            type = paymentIntent.metadata?.type;
+            lang = normalizeLang(paymentIntent.metadata?.lang || 'hu');
+            stripeReferenceId = paymentIntent.id;
+            paidAmount = Number(paymentIntent.amount_received || paymentIntent.amount || 0) / 100;
+        } else {
+            if (!session_id) {
+                return res.status(400).json({ error: 'Hiányzó session_id vagy payment_intent.' });
+            }
+
+            const session = await stripe.checkout.sessions.retrieve(session_id);
+
+            if (!session || session.payment_status !== 'paid') {
+                return res.status(400).json({ error: 'A fizetés még nem sikeres.' });
+            }
+
+            orderId = session.metadata?.orderId;
+            type = session.metadata?.type;
+            lang = normalizeLang(session.metadata?.lang || 'hu');
+            stripeReferenceId = session_id;
+            paidAmount = Number(session.amount_total || 0) / 100;
         }
-
-        const session = await stripe.checkout.sessions.retrieve(session_id);
-
-        if (!session || session.payment_status !== 'paid') {
-            return res.status(400).json({ error: 'A fizetés még nem sikeres.' });
-        }
-
-        const orderId = session.metadata?.orderId;
-        const type = session.metadata?.type;
-        const lang = normalizeLang(session.metadata?.lang || 'hu');
 
         if (!orderId || !type) {
             return res.status(400).json({ error: 'Hiányzó rendelési metadata.' });
@@ -2787,7 +2952,7 @@ app.get('/api/finalize-extra', async (req, res) => {
                 throw err;
             }
 
-            if (list[idx].paymentStatus === 'paid' && list[idx].stripeId === session_id) {
+            if (list[idx].paymentStatus === 'paid' && (list[idx].stripeId === stripeReferenceId || list[idx].stripePaymentIntentId === stripeReferenceId)) {
                 order = list[idx];
                 return db;
             }
@@ -2795,8 +2960,9 @@ app.get('/api/finalize-extra', async (req, res) => {
             list[idx] = {
                 ...list[idx],
                 paymentStatus: 'paid',
-                stripeId: session_id,
-                paidAmount: Number(session.amount_total || 0) / 100,
+                stripeId: stripeReferenceId,
+                stripePaymentIntentId: payment_intent ? stripeReferenceId : (list[idx].stripePaymentIntentId || ''),
+                paidAmount,
                 paidAt: new Date().toISOString(),
                 lang
             };

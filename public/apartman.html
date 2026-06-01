@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="hu">
+<html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apartman Részletek | Balaton Essence</title>
+    <title>Apartment Details | Balaton Essence</title>
+    <link rel="icon" type="image/png" href="../img/bebetolto.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="img/bebetolto.png">
 
     <style>
         :root {
@@ -281,20 +281,6 @@
             font-weight: 900;
             line-height: 1.2;
             white-space: nowrap;
-        }
-
-        .sale-badge {
-            display: inline-block;
-            background: rgba(176, 65, 62, 0.1);
-            color: var(--warning);
-            border: 1px solid rgba(176, 65, 62, 0.25);
-            border-radius: 999px;
-            padding: 0.45rem 0.8rem;
-            font-size: 0.62rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 0.8rem;
         }
 
         .apt-discount-box {
@@ -668,24 +654,24 @@
         }
     </style>
 
-    <link rel="stylesheet" href="mobile.css?v=3">
-    <link rel="stylesheet" href="cookie-consent.css?v=2">
+    <link rel="stylesheet" href="../mobile.css?v=3">
+    <link rel="stylesheet" href="../cookie-consent.css?v=2">
 </head>
 
 <body>
 
 <header class="site-header" id="site-header">
-    <a href="index.html" class="logo-container" aria-label="Balaton Essence főoldal">
+    <a href="index.html" class="logo-container" aria-label="Balaton Essence Startseite">
         <span class="logo-title">BALATON</span>
         <span class="logo-subtitle">Essence</span>
     </a>
 
-    <nav class="nav-links" aria-label="Fő navigáció">
-        <a href="index.html#apartments">Szállások</a>
-        <a href="index.html#services">Szolgáltatások</a>
-        <a href="index.html#reviews-section">Élmények</a>
+    <nav class="nav-links" aria-label="Hauptnavigation">
+        <a href="index.html#apartments">Unterkünfte</a>
+        <a href="index.html#services">Services</a>
+        <a href="index.html#reviews-section">Erlebnisse</a>
         <a href="ajanlasok.html">Journal</a>
-        <a href="index.html#contact">Kapcsolat</a>
+        <a href="index.html#contact">Kontakt</a>
     </nav>
 </header>
 
@@ -696,7 +682,7 @@
             <h1 id="apt-name" class="apt-title"></h1>
 
             <div id="apt-address-box" class="apt-address-box">
-                <div class="apt-address-label">Pontos cím</div>
+                <div class="apt-address-label">Adresse</div>
                 <div id="apt-address" class="apt-address-value"></div>
             </div>
 
@@ -711,7 +697,7 @@
 
         <div>
             <div class="booking-card">
-                <h3>Foglalás</h3>
+                <h3>Buchung</h3>
 
                 <p id="apt-price" class="price-tag"></p>
 
@@ -728,7 +714,7 @@
 
                 <hr style="border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0;">
 
-                <button class="btn-booking" id="booking-btn" disabled>Foglalás</button>
+                <button class="btn-booking" id="booking-btn" disabled>Buchen</button>
             </div>
         </div>
     </div>
@@ -739,11 +725,11 @@
 
         <span class="lightbox-close" onclick="closeBookingModal()" style="position: absolute; top: 1.5rem; right: 1.5rem; cursor: pointer; font-size: 1.2rem; color: #999;">✕</span>
 
-        <h2 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 0.5rem;">Foglalási adatok</h2>
+        <h2 style="font-family: 'Playfair Display'; font-size: 1.8rem; margin-bottom: 0.5rem;">Buchungsdaten</h2>
         <p id="modal-apt-name" style="color: var(--accent); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; margin-bottom: 2rem;"></p>
 
         <div style="margin-bottom: 1.5rem;">
-            <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 10px; color: var(--text-light);">Időszak kiválasztása</label>
+            <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 10px; color: var(--text-light);">Zeitraum wählen</label>
 
             <div id="custom-calendar" style="border: 1px solid var(--border); padding: 15px; border-radius: 4px; background: #fff;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -753,21 +739,21 @@
                 </div>
 
                 <div style="display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 0.6rem; font-weight: 700; color: #999; margin-bottom: 10px;">
-                    <div>HÉ</div>
-                    <div>KE</div>
-                    <div>SZE</div>
-                    <div>CSÜ</div>
-                    <div>PÉ</div>
-                    <div>SZO</div>
-                    <div>VAS</div>
+                    <div>MO</div>
+                    <div>DI</div>
+                    <div>MI</div>
+                    <div>DO</div>
+                    <div>FR</div>
+                    <div>SA</div>
+                    <div>SO</div>
                 </div>
 
                 <div id="calendar-days" style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;"></div>
             </div>
 
             <div style="display: flex; justify-content: space-between; margin-top: 10px; font-size: 0.8rem; background: var(--bg); padding: 10px; border-radius: 4px;">
-                <span>Érkezés: <strong id="display-start">-</strong></span>
-                <span>Távozás: <strong id="display-end">-</strong></span>
+                <span>Anreise: <strong id="display-start">-</strong></span>
+                <span>Abreise: <strong id="display-end">-</strong></span>
             </div>
         </div>
 
@@ -776,33 +762,33 @@
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 1.5rem; align-items: center;">
             <div class="form-group">
-                <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 5px;">Vendégek</label>
+                <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 5px;">Gäste</label>
                 <select id="book-guests" onchange="calculateStay()" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';"></select>
             </div>
 
             <div id="stay-info" style="font-size: 0.8rem; color: var(--accent); font-weight: 600; padding-top: 15px;">
-                Válassz dátumot!
+                Datum wählen!
             </div>
         </div>
 
         <div style="display: grid; gap: 12px; margin-bottom: 1.5rem;">
-            <input type="text" id="book-name" placeholder="Teljes név" autocomplete="name" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
+            <input type="text" id="book-name" placeholder="Vollständiger Name" autocomplete="name" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                <input type="email" id="book-email" placeholder="E-mail cím" autocomplete="email" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
-                <input type="tel" id="book-phone" placeholder="Telefonszám" autocomplete="tel" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
+                <input type="email" id="book-email" placeholder="E-Mail-Adresse" autocomplete="email" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
+                <input type="tel" id="book-phone" placeholder="Telefonnummer" autocomplete="tel" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
             </div>
 
-            <textarea id="book-msg" placeholder="Megjegyzés (opcionális)" rows="2" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat'; resize: none;"></textarea>
+            <textarea id="book-msg" placeholder="Anmerkung (optional)" rows="2" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat'; resize: none;"></textarea>
         </div>
 
         <div id="total-price-box" style="background: var(--bg); padding: 1.2rem; text-align: right; margin-bottom: 1.5rem; border-radius: 4px; border-left: 4px solid var(--accent);">
-            <span style="font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; display: block;">Várható végösszeg:</span>
+            <span style="font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 1px; display: block;">Gesamtsumme:</span>
             <div id="grand-total" style="font-size: 2rem; font-weight: 700; font-family: 'Playfair Display';">0 Ft</div>
         </div>
 
         <button onclick="sendBookingRequest()" id="submit-booking-btn" class="btn-booking" style="width: 100%; padding: 1.2rem; border-radius: 4px; border: none; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; font-size: 0.8rem; transition: 0.3s; opacity: 0.5;" disabled>
-            Válassz dátumot!
+            Datum wählen!
         </button>
     </div>
 </div>
@@ -810,9 +796,9 @@
 <div id="custom-alert" class="custom-modal" style="display:none;">
     <div class="modal-content">
         <div id="alert-icon-circle" class="success-icon">✓</div>
-        <h2 id="alert-title">Sikeres művelet!</h2>
+        <h2 id="alert-title">Erfolg!</h2>
         <p id="alert-msg">...</p>
-        <button id="alert-btn" class="btn-main" onclick="closeCustomAlert()">Rendben</button>
+        <button id="alert-btn" class="btn-main" onclick="closeCustomAlert()">OK</button>
     </div>
 </div>
 
@@ -823,9 +809,9 @@
     <span class="lightbox-nav nav-next" onclick="event.stopPropagation(); changeImage(1)">›</span>
 </div>
 
-<script src="database.js?v=16.4"></script>
+<script src="../database.js?v=16.5"></script>
 <script src="https://js.stripe.com/v3/"></script>
-<script src="figyelmeztetes.js"></script>
+<script src="../figyelmeztetes.js"></script>
 
 <script>
     let currentApt = null;
@@ -905,7 +891,10 @@
                 }
 
                 renderDetails();
-                updateSEO(currentApt.name || 'Apartman', currentApt.location || 'Balaton');
+                updateSEO(
+                    currentApt.name_de || currentApt.nameDe || currentApt.name || 'Apartment',
+                    currentApt.location_de || currentApt.locationDe || currentApt.location || 'Balaton'
+                );
 
                 const mainContent = document.getElementById('main-content');
                 if (mainContent) {
@@ -992,7 +981,7 @@
     };
 }
 
-    function formatHuDate(dateStr) {
+    function formatDisplayDate(dateStr) {
         if (!dateStr) return '-';
 
         const d = parseLocalDate(dateStr);
@@ -1001,19 +990,10 @@
             return dateStr;
         }
 
-        return new Intl.DateTimeFormat('hu-HU', {
+        return new Intl.DateTimeFormat('de-DE', {
             month: 'short',
             day: 'numeric'
         }).format(d);
-    }
-
-    function getCurrentLang() {
-        const path = window.location.pathname.toLowerCase();
-
-        if (path.includes('/en/')) return 'en';
-        if (path.includes('/de/')) return 'de';
-
-        return 'hu';
     }
 
     function getDiscountConfig(apt) {
@@ -1095,7 +1075,7 @@
         return true;
     }
 
-    function isDiscountValidForStayNight(apt, dateStr) {
+    function isDiscountActiveForNight(apt, nightDateStr) {
         const discount = getDiscountConfig(apt);
 
         if (!discount) {
@@ -1106,19 +1086,19 @@
             return false;
         }
 
-        if (discount.stayStart && dateStr < discount.stayStart) {
+        if (discount.stayStart && nightDateStr < discount.stayStart) {
             return false;
         }
 
-        if (discount.stayEnd && dateStr > discount.stayEnd) {
+        if (discount.stayEnd && nightDateStr > discount.stayEnd) {
             return false;
         }
 
         return true;
     }
 
-    function getDiscountAmountForNight(apt, dateStr) {
-        if (!isDiscountValidForStayNight(apt, dateStr)) {
+    function getDiscountAmountForNight(apt, nightDateStr) {
+        if (!isDiscountActiveForNight(apt, nightDateStr)) {
             return 0;
         }
 
@@ -1135,7 +1115,7 @@
             return dateStr;
         }
 
-        return new Intl.DateTimeFormat('hu-HU', {
+        return new Intl.DateTimeFormat('de-DE', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
@@ -1154,41 +1134,32 @@
 
         const discount = getDiscountConfig(currentApt);
 
-        if (!discount) {
-            box.style.display = 'none';
-            return;
-        }
-
-        const todayStr = getLocalDateString(new Date());
-        const bookingHasStarted = !discount.bookingStart || todayStr >= discount.bookingStart;
-        const bookingHasEnded = discount.bookingEnd && todayStr > discount.bookingEnd;
-
-        if (!bookingHasStarted || bookingHasEnded) {
+        if (!discount || !isDiscountBookingPeriodActive(currentApt)) {
             box.style.display = 'none';
             return;
         }
 
         const amountText = discount.amount.toLocaleString('hu-HU');
 
-        label.innerText = `Akció: -${amountText} Ft / éj`;
+        label.innerText = `Rabatt: -${amountText} Ft / Nacht`;
 
         const bookingEndText = discount.bookingEnd
             ? formatDiscountDate(discount.bookingEnd)
-            : 'visszavonásig';
+            : 'bis auf Widerruf';
 
-        let stayRangeText = 'minden foglalható időszakra';
+        let stayRangeText = 'für alle buchbaren Zeiträume';
 
         if (discount.stayStart && discount.stayEnd) {
             stayRangeText = `${formatDiscountDate(discount.stayStart)} – ${formatDiscountDate(discount.stayEnd)}`;
         } else if (discount.stayStart) {
-            stayRangeText = `${formatDiscountDate(discount.stayStart)} napjától`;
+            stayRangeText = `ab ${formatDiscountDate(discount.stayStart)}`;
         } else if (discount.stayEnd) {
-            stayRangeText = `${formatDiscountDate(discount.stayEnd)} napjáig`;
+            stayRangeText = `bis ${formatDiscountDate(discount.stayEnd)}`;
         }
 
-        main.innerText = `A kedvezmény akkor érvényes, ha legkésőbb ${bookingEndText} napjáig foglalsz.`;
+        main.innerText = `Der Rabatt gilt, wenn Sie spätestens bis zum ${bookingEndText} buchen.`;
 
-        small.innerText = `Érvényes tartózkodási időszak: ${stayRangeText}. A kedvezmény csak ezekre az éjszakákra kerül levonásra.`;
+        small.innerText = `Gültiger Aufenthaltszeitraum: ${stayRangeText}. Der Rabatt wird nur für diese Nächte abgezogen.`;
 
         box.style.display = 'block';
     }
@@ -1246,7 +1217,8 @@
             price: 0,
             label: '',
             minNights: 1,
-            maxGuests: 2
+            maxGuests: 2,
+            dateStr: ''
         };
     }
 
@@ -1260,8 +1232,23 @@
             if (el) el.innerText = text;
         };
 
-        setSafeText('apt-name', currentApt.name || 'Ismeretlen Apartman');
-        setSafeText('apt-loc', currentApt.location || '');
+        setSafeText(
+            'apt-name',
+            currentApt.name_de ||
+            currentApt.nameDe ||
+            currentApt.nameDE ||
+            currentApt.name ||
+            'Unbekanntes Apartment'
+        );
+
+        setSafeText(
+            'apt-loc',
+            currentApt.location_de ||
+            currentApt.locationDe ||
+            currentApt.locationDE ||
+            currentApt.location ||
+            ''
+        );
 
         const addressBox = document.getElementById('apt-address-box');
         const addressEl = document.getElementById('apt-address');
@@ -1274,8 +1261,16 @@
         }
 
         const descEl = document.getElementById('apt-desc');
+
         if (descEl) {
-            descEl.innerText = currentApt.description || 'Nincs megadva leírás.';
+            descEl.innerText =
+                currentApt.description_de ||
+                currentApt.descriptionDe ||
+                currentApt.desc_de ||
+                currentApt.descDe ||
+                currentApt.descriptionDE ||
+                currentApt.description ||
+                'Keine Beschreibung verfügbar.';
         }
 
         const priceTag = document.getElementById('apt-price');
@@ -1286,11 +1281,11 @@
 
         if (!hasPriceConfig) {
             if (priceTag) {
-                priceTag.innerHTML = `<span style="color:var(--warning)">Ár egyeztetés alatt</span>`;
+                priceTag.innerHTML = `<span style="color:var(--warning)">Preis folgt</span>`;
             }
 
             if (bookingBtn) {
-                bookingBtn.innerText = 'Foglalás nem elérhető';
+                bookingBtn.innerText = 'Buchung nicht verfügbar';
                 bookingBtn.disabled = true;
                 bookingBtn.style.opacity = '0.5';
                 bookingBtn.style.cursor = 'not-allowed';
@@ -1298,7 +1293,7 @@
             }
 
             if (statusMsg) {
-                statusMsg.innerText = 'Ehhez az apartmanhoz még nincs megadva foglalási ár, ezért online foglalás jelenleg nem indítható.';
+                statusMsg.innerText = 'Für diese Unterkunft wurde noch kein Buchungspreis hinterlegt, daher ist eine Online-Buchung derzeit nicht möglich.';
             }
         } else if (info.status === 'OPEN') {
             if (priceTag) {
@@ -1308,16 +1303,16 @@
 
                 if (discountAmount > 0) {
                     priceTag.innerHTML = `
-                        <div class="price-old">${originalPrice.toLocaleString('hu-HU')} Ft-tól</div>
-                        <div class="price-sale">${discountedPrice.toLocaleString('hu-HU')} Ft-tól</div>
+                        <div class="price-old">Ab ${originalPrice.toLocaleString('hu-HU')} Ft</div>
+                        <div class="price-sale">Ab ${discountedPrice.toLocaleString('hu-HU')} Ft</div>
                     `;
                 } else {
-                    priceTag.innerHTML = `<span class="price-num">${originalPrice.toLocaleString('hu-HU')} Ft-tól</span>`;
+                    priceTag.innerHTML = `<span class="price-num">Ab ${originalPrice.toLocaleString('hu-HU')} Ft</span>`;
                 }
             }
 
             if (bookingBtn) {
-                bookingBtn.innerText = 'Foglalás';
+                bookingBtn.innerText = 'Buchen';
                 bookingBtn.disabled = false;
                 bookingBtn.style.opacity = '1';
                 bookingBtn.style.cursor = 'pointer';
@@ -1327,26 +1322,26 @@
             if (statusMsg) {
                 statusMsg.innerHTML = `
                     <div style="margin-top: 10px; border-top: 1px solid #eee; padding-top: 10px;">
-                        <p><strong>Aktuális időszak:</strong> ${info.label || '-'}</p>
-                        <p><strong>Kapacitás:</strong> max. ${info.maxGuests || '-'} fő</p>
-                        <p><strong>Minimum tartózkodás:</strong> ${info.minNights || '-'} éjszaka</p>
+                        <p><strong>Aktueller Zeitraum:</strong> ${info.label || '-'}</p>
+                        <p><strong>Kapazität:</strong> max. ${info.maxGuests || '-'} Gäste</p>
+                        <p><strong>Mindestaufenthalt:</strong> ${info.minNights || '-'} Nächte</p>
                     </div>
                 `;
             }
         } else {
             if (priceTag) {
-                priceTag.innerHTML = `<span style="color:var(--warning)">Szezonon kívül</span>`;
+                priceTag.innerHTML = `<span style="color:var(--warning)">Außerhalb der Saison</span>`;
             }
 
             if (bookingBtn) {
-                bookingBtn.innerText = 'Jelenleg zárva';
+                bookingBtn.innerText = 'Derzeit geschlossen';
                 bookingBtn.disabled = true;
                 bookingBtn.style.opacity = '0.5';
                 bookingBtn.onclick = null;
             }
 
             if (statusMsg) {
-                statusMsg.innerText = 'Az apartman április 1. és szeptember 30. között fogad vendégeket.';
+                statusMsg.innerText = 'Das Apartment empfängt Gäste zwischen dem 1. April und dem 30. September.';
             }
         }
 
@@ -1354,7 +1349,7 @@
 
         if (mainImg && currentApt.coverImage) {
             mainImg.src = currentApt.coverImage;
-            mainImg.alt = currentApt.name || 'Balaton Essence apartman';
+            mainImg.alt = currentApt.name || 'Balaton Essence Apartment';
             mainImg.onclick = () => openLightbox(0);
         }
 
@@ -1372,7 +1367,7 @@
                 img.src = imgSrc;
                 img.className = 'gallery-img';
                 img.loading = 'lazy';
-                img.alt = `${currentApt.name || 'Apartman'} galéria ${idx + 1}`;
+                img.alt = `${currentApt.name || 'Apartment'} Galerie ${idx + 1}`;
                 img.onclick = () => openLightbox(idx + 1);
 
                 wrapper.appendChild(img);
@@ -1421,6 +1416,7 @@
         currentIndex = (currentIndex + dir + allImages.length) % allImages.length;
 
         const lbImg = document.getElementById('lightbox-img');
+
         if (lbImg) {
             lbImg.src = allImages[currentIndex];
         }
@@ -1449,7 +1445,11 @@
         const modalAptName = document.getElementById('modal-apt-name');
 
         if (modalAptName) {
-            modalAptName.innerText = currentApt.name || '';
+            modalAptName.innerText =
+                currentApt.name_de ||
+                currentApt.nameDe ||
+                currentApt.name ||
+                '';
         }
 
         selectedStart = null;
@@ -1462,17 +1462,17 @@
 
         const guestSelect = document.getElementById('book-guests');
         const info = getNextBookableInfo(currentApt);
-        const maxAllowed = Number(info.maxGuests || 2);
+        const maxAllowed = Number(info.maxGuests || currentApt.maxGuests || 2);
 
         guestSelect.innerHTML = '';
 
         for (let i = 2; i <= maxAllowed; i++) {
-            const label = i === 2 ? '1-2 fő' : `${i} fő`;
+            const label = i === 2 ? '1-2 Personen' : `${i} Personen`;
             guestSelect.innerHTML += `<option value="${i}">${label}</option>`;
         }
 
         if (!guestSelect.innerHTML) {
-            guestSelect.innerHTML = '<option value="2">1-2 fő</option>';
+            guestSelect.innerHTML = '<option value="2">1-2 Personen</option>';
         }
 
         const nameInput = document.getElementById('book-name');
@@ -1500,6 +1500,7 @@
 
     function closeBookingModal() {
         const modal = document.getElementById('booking-modal');
+
         if (!modal) return;
 
         modal.classList.remove('active');
@@ -1698,8 +1699,8 @@
     function selectDate(dateStr) {
         if (!isCheckInAllowedByLeadTime(dateStr)) {
             showSuccess(
-                'Túl közeli érkezés',
-                'Foglalást legalább 48 órával az érkezés, azaz 14:00 előtt lehet leadni.',
+                'Zu kurzfristige Anreise',
+                'Buchungen sind nur mindestens 48 Stunden vor der Anreise, berechnet ab 14:00 Uhr, möglich.',
                 'error'
             );
             return;
@@ -1708,8 +1709,8 @@
         if (!selectedStart || (selectedStart && selectedEnd)) {
             if (isNoCheckInDate(dateStr)) {
                 showSuccess(
-                    'Nem érkezési nap',
-                    'Ezen a napon nem lehet érkezni. Kérjük, válassz másik érkezési napot.',
+                    'Keine Anreise möglich',
+                    'An diesem Datum ist keine Anreise möglich. Bitte wählen Sie ein anderes Anreisedatum.',
                     'error'
                 );
                 return;
@@ -1720,8 +1721,8 @@
         } else if (dateStr > selectedStart) {
             if (isNoCheckOutDate(dateStr)) {
                 showSuccess(
-                    'Nem távozási nap',
-                    'Ezen a napon nem lehet távozni. Kérjük, válassz másik távozási napot.',
+                    'Keine Abreise möglich',
+                    'An diesem Datum ist keine Abreise möglich. Bitte wählen Sie ein anderes Abreisedatum.',
                     'error'
                 );
                 return;
@@ -1729,8 +1730,8 @@
 
             if (hasBlockedDateInRange(selectedStart, dateStr)) {
                 showSuccess(
-                    'Nem választható időszak',
-                    'A kiválasztott időszak foglalt vagy letiltott napot tartalmaz.',
+                    'Nicht verfügbarer Zeitraum',
+                    'Der ausgewählte Zeitraum enthält einen gebuchten oder gesperrten Tag.',
                     'error'
                 );
 
@@ -1742,8 +1743,8 @@
         } else {
             if (isNoCheckInDate(dateStr)) {
                 showSuccess(
-                    'Nem érkezési nap',
-                    'Ezen a napon nem lehet érkezni. Kérjük, válassz másik érkezési napot.',
+                    'Keine Anreise möglich',
+                    'An diesem Datum ist keine Anreise möglich. Bitte wählen Sie ein anderes Anreisedatum.',
                     'error'
                 );
                 return;
@@ -1784,10 +1785,10 @@
         btn.style.color = '#888';
 
         if (!startVal || !endVal) {
-            infoText.innerText = 'Válassz érkezési és távozási dátumot!';
-            totalBox.innerText = '0 Ft';
+            infoText.innerText = 'Anreise- und Abreisedatum wählen.';
             totalBox.dataset.finalTotal = '0';
-            btn.innerText = 'Válassz dátumot!';
+            totalBox.innerText = '0 Ft';
+            btn.innerText = 'Datum wählen!';
             return;
         }
 
@@ -1795,18 +1796,18 @@
         const end = parseLocalDate(endVal);
 
         if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
-            infoText.innerText = 'Hibás dátumválasztás!';
-            totalBox.innerText = '0 Ft';
+            infoText.innerText = 'Ungültige Datumsauswahl.';
             totalBox.dataset.finalTotal = '0';
-            btn.innerText = 'Hibás dátum';
+            totalBox.innerText = '0 Ft';
+            btn.innerText = 'Ungültige Daten';
             return;
         }
 
         if (hasBlockedDateInRange(startVal, endVal)) {
-            infoText.innerHTML = `<span style="color:var(--warning)">A kiválasztott időszak foglalt vagy letiltott napot tartalmaz!</span>`;
-            totalBox.innerText = '0 Ft';
+            infoText.innerHTML = `<span style="color:var(--warning)">Der ausgewählte Zeitraum enthält ein gebuchtes oder gesperrtes Datum.</span>`;
             totalBox.dataset.finalTotal = '0';
-            btn.innerText = 'Nem foglalható';
+            totalBox.innerText = '0 Ft';
+            btn.innerText = 'Nicht verfügbar';
             btn.style.background = 'var(--warning)';
             btn.style.color = 'white';
             return;
@@ -1814,20 +1815,20 @@
 
 
         if (isNoCheckInDate(startVal)) {
-            infoText.innerHTML = `<span style="color:var(--warning)">A kiválasztott érkezési napon nem lehet érkezni.</span>`;
+            infoText.innerHTML = `<span style="color:var(--warning)">Am ausgewählten Anreisedatum ist keine Anreise möglich.</span>`;
             totalBox.innerText = '0 Ft';
             totalBox.dataset.finalTotal = '0';
-            btn.innerText = 'Nem foglalható';
+            btn.innerText = 'Nicht buchbar';
             btn.style.background = 'var(--warning)';
             btn.style.color = 'white';
             return;
         }
 
         if (isNoCheckOutDate(endVal)) {
-            infoText.innerHTML = `<span style="color:var(--warning)">A kiválasztott távozási napon nem lehet távozni.</span>`;
+            infoText.innerHTML = `<span style="color:var(--warning)">Am ausgewählten Abreisedatum ist keine Abreise möglich.</span>`;
             totalBox.innerText = '0 Ft';
             totalBox.dataset.finalTotal = '0';
-            btn.innerText = 'Nem foglalható';
+            btn.innerText = 'Nicht buchbar';
             btn.style.background = 'var(--warning)';
             btn.style.color = 'white';
             return;
@@ -1851,10 +1852,10 @@
                 const nightlyPrice = Number(info.price || 0);
 
                 if (!Number.isFinite(nightlyPrice) || nightlyPrice <= 0) {
-                    infoText.innerHTML = `<span style="color:var(--warning)">Az ár nincs megadva a választott időszakra!</span>`;
+                    infoText.innerHTML = `<span style="color:var(--warning)">Für den gewählten Zeitraum wurde kein Preis hinterlegt!</span>`;
                     totalBox.innerText = '0 Ft';
                     totalBox.dataset.finalTotal = '0';
-                    btn.innerText = 'Nem foglalható';
+                    btn.innerText = 'Nicht buchbar';
                     btn.style.background = 'var(--warning)';
                     btn.style.color = 'white';
                     return;
@@ -1871,10 +1872,10 @@
                     minNightsRequired = Number(info.minNights || 1);
                 }
             } else {
-                infoText.innerHTML = `<span style="color:var(--warning)">Zárva tartás a választott napokon!</span>`;
-                totalBox.innerText = 'Zárva';
+                infoText.innerHTML = `<span style="color:var(--warning)">Das Apartment ist an den ausgewählten Tagen geschlossen.</span>`;
+                totalBox.innerText = 'Geschlossen';
                 totalBox.dataset.finalTotal = '0';
-                btn.innerText = 'Nem foglalható';
+                btn.innerText = 'Nicht verfügbar';
                 btn.style.background = 'var(--warning)';
                 btn.style.color = 'white';
                 return;
@@ -1892,30 +1893,29 @@
                     ${total.toLocaleString('hu-HU')} Ft
                 </div>
                 <div style="font-size:0.75rem; color:var(--accent); font-family:'Montserrat'; font-weight:700; margin-top:4px;">
-                    Akciós kedvezmény: -${discountTotal.toLocaleString('hu-HU')} Ft
+                    Rabatt: -${discountTotal.toLocaleString('hu-HU')} Ft
                 </div>
             `;
         } else {
-            totalBox.dataset.finalTotal = String(total);
             totalBox.innerText = `${total.toLocaleString('hu-HU')} Ft`;
         }
 
         if (nights < minNightsRequired) {
-            infoText.innerHTML = `<span style="color:var(--warning)">Minimum ${minNightsRequired} éjszaka szükséges ebben az időszakban!</span>`;
+            infoText.innerHTML = `<span style="color:var(--warning)">Der Mindestaufenthalt beträgt in diesem Zeitraum ${minNightsRequired} Nächte.</span>`;
             btn.disabled = true;
             btn.style.opacity = '0.5';
             btn.style.background = 'var(--warning)';
             btn.style.color = 'white';
-            btn.innerText = `Min. ${minNightsRequired} éjszaka kell`;
+            btn.innerText = `Mind. ${minNightsRequired} Nächte`;
             return;
         }
 
-        infoText.innerHTML = `<strong>${nights} éjszaka</strong> kiválasztva.`;
+        infoText.innerHTML = `<strong>${nights} Nächte</strong> ausgewählt.`;
         btn.disabled = false;
         btn.style.opacity = '1';
         btn.style.background = 'var(--accent)';
         btn.style.color = 'white';
-        btn.innerText = 'Foglalás elküldése';
+        btn.innerText = 'Buchung senden';
     }
 
     function isValidEmail(email) {
@@ -1928,11 +1928,13 @@
 
         let cleanNumber = Number(totalElement?.dataset.finalTotal || 0);
 
-        const currentLang = getCurrentLang();
-
         const data = {
             aptId: currentApt.id,
-            aptName: currentApt.name,
+            aptName:
+                currentApt.name_de ||
+                currentApt.nameDe ||
+                currentApt.name ||
+                'Balaton Essence Apartment',
             guestName: document.getElementById('book-name').value.trim(),
             email: document.getElementById('book-email').value.trim(),
             phone: document.getElementById('book-phone').value.trim(),
@@ -1941,14 +1943,14 @@
             guests: document.getElementById('book-guests').value,
             totalPrice: cleanNumber,
             msg: document.getElementById('book-msg').value.trim(),
-            lang: currentLang,
-            source: `Weboldal (${currentLang.toUpperCase()})`
+            lang: 'de',
+            source: 'Website (DE)'
         };
 
         if (!data.guestName || !data.email || !data.phone) {
             showSuccess(
-                'Hiányzó adatok',
-                'Kérjük, add meg a nevedet, e-mail címedet és telefonszámodat.',
+                'Fehlende Angaben',
+                'Bitte geben Sie Ihren Namen, Ihre E-Mail-Adresse und Ihre Telefonnummer ein.',
                 'error'
             );
             return;
@@ -1956,8 +1958,8 @@
 
         if (!isValidEmail(data.email)) {
             showSuccess(
-                'Hibás e-mail cím',
-                'Kérjük, ellenőrizd az e-mail címet.',
+                'Ungültige E-Mail-Adresse',
+                'Bitte überprüfen Sie Ihre E-Mail-Adresse.',
                 'error'
             );
             return;
@@ -1965,8 +1967,8 @@
 
         if (!data.checkIn || !data.checkOut) {
             showSuccess(
-                'Hiányzó dátum',
-                'Kérjük, válassz érkezési és távozási dátumot.',
+                'Fehlende Daten',
+                'Bitte wählen Sie Anreise- und Abreisedatum.',
                 'error'
             );
             return;
@@ -1974,8 +1976,8 @@
 
         if (!isCheckInAllowedByLeadTime(data.checkIn)) {
             showSuccess(
-                'Túl közeli érkezés',
-                'Foglalást legalább 48 órával az érkezés, azaz 14:00 előtt lehet leadni.',
+                'Anreise zu kurzfristig',
+                'Buchungen müssen mindestens 48 Stunden vor der Anreise um 14:00 Uhr erfolgen.',
                 'error'
             );
             return;
@@ -1983,8 +1985,8 @@
 
         if (hasBlockedDateInRange(data.checkIn, data.checkOut)) {
             showSuccess(
-                'Nem választható időszak',
-                'A kiválasztott időszak foglalt vagy letiltott napot tartalmaz.',
+                'Nicht verfügbarer Zeitraum',
+                'Der ausgewählte Zeitraum enthält ein gebuchtes oder gesperrtes Datum.',
                 'error'
             );
             return;
@@ -1993,8 +1995,8 @@
 
         if (isNoCheckInDate(data.checkIn)) {
             showSuccess(
-                'Nem érkezési nap',
-                'Ezen a napon nem lehet érkezni. Kérjük, válassz másik érkezési napot.',
+                'Keine Anreise möglich',
+                'An diesem Datum ist keine Anreise möglich. Bitte wählen Sie ein anderes Anreisedatum.',
                 'error'
             );
             return;
@@ -2002,8 +2004,8 @@
 
         if (isNoCheckOutDate(data.checkOut)) {
             showSuccess(
-                'Nem távozási nap',
-                'Ezen a napon nem lehet távozni. Kérjük, válassz másik távozási napot.',
+                'Keine Abreise möglich',
+                'An diesem Datum ist keine Abreise möglich. Bitte wählen Sie ein anderes Abreisedatum.',
                 'error'
             );
             return;
@@ -2011,8 +2013,8 @@
 
         if (data.totalPrice <= 0) {
             showSuccess(
-                'Hibás összeg',
-                'A foglalás összege nem számolható. Kérjük, válassz másik dátumot vagy frissítsd az oldalt.',
+                'Ungültiger Betrag',
+                'Der Buchungsbetrag konnte nicht berechnet werden. Bitte wählen Sie ein anderes Datum oder aktualisieren Sie die Seite.',
                 'error'
             );
             return;
@@ -2021,11 +2023,11 @@
         if (submitBtn) {
             submitBtn.disabled = true;
             submitBtn.style.opacity = '0.6';
-            submitBtn.innerText = 'Átirányítás a fizetéshez...';
+            submitBtn.innerText = 'Weiterleitung zur Zahlung...';
         }
 
         try {
-            const res = await fetch('/api/create-checkout-session', {
+            const res = await fetch('/api/create-payment-intent-booking', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -2033,72 +2035,57 @@
                 body: JSON.stringify(data)
             });
 
-            const session = await res.json();
+            const payment = await res.json();
 
-            if (!res.ok || session.error) {
+            if (!res.ok || payment.error) {
                 showSuccess(
-                    'Hiba!',
-                    session.error || 'Nem sikerült elindítani a fizetést.',
+                    'Fehler',
+                    payment.error || 'Die Zahlung konnte nicht gestartet werden.',
                     'error'
                 );
 
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.style.opacity = '1';
-                    submitBtn.innerText = 'Foglalás elküldése';
+                    submitBtn.innerText = 'Buchung senden';
                 }
 
                 return;
             }
 
-            if (!session.id) {
+            if (!payment.clientSecret) {
                 showSuccess(
-                    'Hiba!',
-                    'A Stripe munkamenet azonosítója hiányzik.',
+                    'Fehler',
+                    'Die Zahlungs-ID fehlt.',
                     'error'
                 );
 
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.style.opacity = '1';
-                    submitBtn.innerText = 'Foglalás elküldése';
+                    submitBtn.innerText = 'Buchung senden';
                 }
 
                 return;
             }
 
-            const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-
-            const redirectResult = await stripe.redirectToCheckout({
-                sessionId: session.id
-            });
-
-            if (redirectResult.error) {
-                showSuccess(
-                    'Stripe hiba',
-                    redirectResult.error.message || 'Nem sikerült átirányítani a fizetéshez.',
-                    'error'
-                );
-
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.style.opacity = '1';
-                    submitBtn.innerText = 'Foglalás elküldése';
-                }
-            }
+            const amount = Number(payment.amount || 0);
+            const paymentUrl = `/payment.html?kind=booking&lang=de&amount=${encodeURIComponent(amount)}&client_secret=${encodeURIComponent(payment.clientSecret)}`;
+            window.location.href = paymentUrl;
+            return;
         } catch (e) {
             console.error(e);
 
             showSuccess(
-                'Hiba!',
-                'Hálózati hiba történt a fizetés indításakor.',
+                'Fehler',
+                'Beim Starten der Zahlung ist ein Netzwerkfehler aufgetreten.',
                 'error'
             );
 
             if (submitBtn) {
                 submitBtn.disabled = false;
                 submitBtn.style.opacity = '1';
-                submitBtn.innerText = 'Foglalás elküldése';
+                submitBtn.innerText = 'Buchung senden';
             }
         }
     }
@@ -2136,8 +2123,8 @@
         }
     }
 
-    function updateSEO(apartmanNeve, varos) {
-        document.title = `${apartmanNeve} - Luxus Apartman ${varos} | Balaton Essence`;
+    function updateSEO(apartmentName, location) {
+        document.title = `${apartmentName} - Luxus Apartment ${location} | Balaton Essence`;
 
         let metaDesc = document.querySelector('meta[name="description"]');
 
@@ -2149,13 +2136,13 @@
 
         metaDesc.setAttribute(
             'content',
-            `Foglaljon szállást a(z) ${apartmanNeve} apartmanban ${varos} területén. Prémium környezet, SUP bérlés és pihenés a Balatonnál.`
+            `Buchen Sie Ihren Aufenthalt im ${apartmentName} in ${location}. Premium-Unterkunft am Balaton, Strandausrüstung und entspannte Atmosphäre am See.`
         );
     }
 </script>
-<link rel="stylesheet" href="mobile.css?v=106">
-<script src="site-mobile.js?v=106"></script>
-<script src="chat-assistant.js"></script>
-<script src="cookie-consent.js?v=2"></script>
+<link rel="stylesheet" href="../mobile.css?v=106">
+<script src="../site-mobile.js?v=106"></script>
+<script src="../chat-assistant.js"></script>
+<script src="../cookie-consent.js?v=2"></script>
 </body>
 </html>

@@ -1439,6 +1439,12 @@
             if (res.ok) {
                 closeMorningModal();
 
+                if (method === 'card' && result.clientSecret) {
+                    const amount = Number(result.amount || payload.amount || 0);
+                    window.location.href = `/payment.html?kind=order&lang=en&amount=${encodeURIComponent(amount)}&client_secret=${encodeURIComponent(result.clientSecret)}`;
+                    return;
+                }
+
                 if (method === 'card' && result.stripeSessionId) {
                     await stripe.redirectToCheckout({
                         sessionId: result.stripeSessionId

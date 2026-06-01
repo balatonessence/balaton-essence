@@ -856,6 +856,13 @@ function updateDeliveryTimeOptions() {
                     return;
                 }
 
+                if (paymentMethod === 'card' && result.clientSecret) {
+                    submitBtn.textContent = translations[currentLang].redirecting;
+                    const amount = Number(result.amount || payload.amount || 0);
+                    window.location.href = `/payment.html?kind=order&lang=${encodeURIComponent(currentLang || 'hu')}&amount=${encodeURIComponent(amount)}&client_secret=${encodeURIComponent(result.clientSecret)}`;
+                    return;
+                }
+
                 if (paymentMethod === 'card' && result.stripeSessionId) {
                     submitBtn.textContent = translations[currentLang].redirecting;
 

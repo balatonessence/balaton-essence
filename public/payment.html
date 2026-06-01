@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biztonságos fizetés | Balaton Essence</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" type="image/png" href="img/bebetolto.png">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="cookie-consent.css?v=2">
+    <script src="https://js.stripe.com/v3/"></script>
+
+    <style>
+        :root {
+            --bg: #FCFBF9;
+            --bg-alt: #F4F2EC;
+            --text: #2C3325;
+            --text-light: #6A7063;
+            --accent: #5C7A4D;
+            --accent-hover: #48613A;
+            --gold: #C8A46B;
+            --border: #E3E0D8;
+            --dark: #172318;
+            --danger: #B0413E;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            min-height: 100%;
+            background: #101711;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(200, 164, 107, 0.85) #101711;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 18% 14%, rgba(200,164,107,0.20), transparent 28%),
+                radial-gradient(circle at 86% 78%, rgba(92,122,77,0.22), transparent 30%),
+                linear-gradient(135deg, #101711 0%, #172318 58%, #243321 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 28px;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        html::-webkit-scrollbar { width: 10px; }
+        html::-webkit-scrollbar-track { background: #101711; }
+        html::-webkit-scrollbar-thumb {
+            background: rgba(200, 164, 107, 0.8);
+            border-radius: 999px;
+            border: 2px solid #101711;
+        }
+
+        .payment-shell {
+            width: min(1080px, 100%);
+            display: grid;
+            grid-template-columns: 0.9fr 1.1fr;
+            background: rgba(252,251,249,0.98);
+            border: 1px solid rgba(227,224,216,0.7);
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 34px 100px rgba(0,0,0,0.35);
+        }
+
+        .payment-hero {
+            min-height: 640px;
+            color: white;
+            padding: clamp(32px, 5vw, 56px);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background:
+                linear-gradient(180deg, rgba(16,23,17,0.18), rgba(16,23,17,0.78)),
+                url('img/hatter.jpg') center/cover no-repeat;
+            position: relative;
+        }
+
+        .payment-hero::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 18% 16%, rgba(200,164,107,0.24), transparent 34%);
+            pointer-events: none;
+        }
+
+        .brand, .hero-copy { position: relative; z-index: 1; }
+
+        .brand-title {
+            display: block;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: 7px;
+            line-height: 1;
+        }
+
+        .brand-subtitle {
+            display: block;
+            margin-top: 0.45rem;
+            color: rgba(255,255,255,0.76);
+            font-size: 0.64rem;
+            font-weight: 700;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        .kicker {
+            color: var(--gold);
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            margin-bottom: 1rem;
+        }
+
+        .hero-copy h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.6rem, 5vw, 4.4rem);
+            font-weight: 400;
+            line-height: 1.04;
+            margin-bottom: 1.1rem;
+        }
+
+        .hero-copy p {
+            color: rgba(255,255,255,0.82);
+            line-height: 1.8;
+            max-width: 430px;
+            font-size: 0.98rem;
+        }
+
+        .payment-panel {
+            padding: clamp(32px, 5vw, 56px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            background: linear-gradient(180deg, #fff, #FCFBF9);
+        }
+
+        .panel-kicker {
+            color: var(--gold);
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+
+        .payment-panel h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2rem, 3vw, 3rem);
+            font-weight: 400;
+            color: var(--text);
+            margin-bottom: 0.7rem;
+        }
+
+        .payment-lead {
+            color: var(--text-light);
+            line-height: 1.7;
+            margin-bottom: 1.8rem;
+            font-size: 0.95rem;
+        }
+
+        .summary-card {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 1.2rem;
+            margin-bottom: 1.4rem;
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent);
+            border-radius: 16px;
+            background: var(--bg-alt);
+        }
+
+        .summary-label {
+            color: var(--text-light);
+            font-size: 0.68rem;
+            font-weight: 900;
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+            margin-bottom: 0.35rem;
+        }
+
+        .summary-title {
+            font-weight: 800;
+            color: var(--text);
+            line-height: 1.4;
+        }
+
+        .summary-amount {
+            white-space: nowrap;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        #payment-element {
+            padding: 1.1rem;
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            background: white;
+            box-shadow: 0 14px 40px rgba(44,51,37,0.06);
+        }
+
+        .payment-btn {
+            width: 100%;
+            margin-top: 1.4rem;
+            border: none;
+            border-radius: 14px;
+            padding: 1rem 1.2rem;
+            background: var(--accent);
+            color: white;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.78rem;
+            font-weight: 900;
+            letter-spacing: 1.8px;
+            text-transform: uppercase;
+            transition: 0.25s ease;
+        }
+
+        .payment-btn:hover:not(:disabled) {
+            background: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 16px 34px rgba(92,122,77,0.22);
+        }
+
+        .payment-btn:disabled {
+            opacity: 0.62;
+            cursor: not-allowed;
+        }
+
+        .payment-message {
+            min-height: 22px;
+            margin-top: 1rem;
+            color: var(--danger);
+            font-size: 0.84rem;
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        .secure-note {
+            margin-top: 1.3rem;
+            color: var(--text-light);
+            font-size: 0.78rem;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 1.4rem;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.76rem;
+            font-weight: 900;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+        }
+
+        .loader {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            border: 4px solid #ece8de;
+            border-top-color: var(--accent);
+            animation: spin 1s linear infinite;
+            margin: 1rem auto;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 860px) {
+            body { padding: 0; align-items: stretch; }
+            .payment-shell { min-height: 100vh; border-radius: 0; grid-template-columns: 1fr; }
+            .payment-hero { min-height: 320px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="payment-shell">
+        <section class="payment-hero">
+            <div class="brand">
+                <span class="brand-title">BALATON</span>
+                <span class="brand-subtitle">Essence</span>
+            </div>
+
+            <div class="hero-copy">
+                <div class="kicker" id="hero-kicker">Biztonságos fizetés</div>
+                <h1 id="hero-title">Kényelmes, online fizetés.</h1>
+                <p id="hero-text">A fizetés titkosított Stripe kapcsolaton keresztül történik. Kártyaadatait a Balaton Essence nem tárolja.</p>
+            </div>
+        </section>
+
+        <section class="payment-panel">
+            <div class="panel-kicker" id="panel-kicker">Balaton Essence</div>
+            <h2 id="panel-title">Fizetés véglegesítése</h2>
+            <p class="payment-lead" id="panel-lead">Kérjük, adja meg bankkártyaadatait a fizetés befejezéséhez.</p>
+
+            <div class="summary-card">
+                <div>
+                    <div class="summary-label" id="summary-label">Fizetendő összeg</div>
+                    <div class="summary-title" id="summary-title">Biztonságos online fizetés</div>
+                </div>
+                <div class="summary-amount" id="summary-amount">...</div>
+            </div>
+
+            <div id="loading" class="loader"></div>
+            <form id="payment-form" style="display:none;">
+                <div id="payment-element"></div>
+                <button id="submit-payment" class="payment-btn" type="submit">Fizetés</button>
+                <div id="payment-message" class="payment-message"></div>
+            </form>
+
+            <div class="secure-note" id="secure-note">A fizetést a Stripe biztonságos rendszere kezeli.</div>
+            <a href="/" class="back-link" id="back-link">Vissza</a>
+        </section>
+    </main>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const clientSecret = params.get('client_secret');
+        const rawLang = params.get('lang') || 'hu';
+        const lang = ['hu', 'en', 'de'].includes(rawLang) ? rawLang : 'hu';
+        const kind = params.get('kind') === 'booking' ? 'booking' : 'order';
+        const amount = Number(params.get('amount') || 0);
+
+        const copy = {
+            hu: {
+                htmlLang: 'hu', pageTitle: 'Biztonságos fizetés | Balaton Essence', heroKicker: 'Biztonságos fizetés',
+                heroTitle: 'Kényelmes, online fizetés.', heroText: 'A fizetés titkosított Stripe kapcsolaton keresztül történik. Kártyaadatait a Balaton Essence nem tárolja.',
+                panelTitle: 'Fizetés véglegesítése', panelLead: 'Kérjük, adja meg bankkártyaadatait a fizetés befejezéséhez.',
+                amountLabel: 'Fizetendő összeg', bookingTitle: 'Apartmanfoglalás előlege', orderTitle: 'Szolgáltatás rendelés',
+                pay: 'Fizetés', processing: 'Feldolgozás...', secure: 'A fizetést a Stripe biztonságos rendszere kezeli.', back: 'Vissza', missing: 'Hiányzó fizetési adat. Kérjük, indítsa újra a rendelést.'
+            },
+            en: {
+                htmlLang: 'en', pageTitle: 'Secure Payment | Balaton Essence', heroKicker: 'Secure payment',
+                heroTitle: 'Simple online payment.', heroText: 'Payment is processed through an encrypted Stripe connection. Balaton Essence does not store your card details.',
+                panelTitle: 'Complete payment', panelLead: 'Please enter your card details to complete the payment.',
+                amountLabel: 'Amount to pay', bookingTitle: 'Apartment booking deposit', orderTitle: 'Service order',
+                pay: 'Pay now', processing: 'Processing...', secure: 'The payment is handled securely by Stripe.', back: 'Back', missing: 'Missing payment data. Please restart the order.'
+            },
+            de: {
+                htmlLang: 'de', pageTitle: 'Sichere Zahlung | Balaton Essence', heroKicker: 'Sichere Zahlung',
+                heroTitle: 'Bequeme Online-Zahlung.', heroText: 'Die Zahlung erfolgt über eine verschlüsselte Stripe-Verbindung. Balaton Essence speichert keine Kartendaten.',
+                panelTitle: 'Zahlung abschließen', panelLead: 'Bitte geben Sie Ihre Kartendaten ein, um die Zahlung abzuschließen.',
+                amountLabel: 'Zu zahlender Betrag', bookingTitle: 'Anzahlung für die Apartmentbuchung', orderTitle: 'Servicebestellung',
+                pay: 'Jetzt bezahlen', processing: 'Wird verarbeitet...', secure: 'Die Zahlung wird sicher über Stripe abgewickelt.', back: 'Zurück', missing: 'Zahlungsdaten fehlen. Bitte starten Sie die Bestellung erneut.'
+            }
+        };
+
+        const t = copy[lang] || copy.hu;
+        document.documentElement.lang = t.htmlLang;
+        document.title = t.pageTitle;
+        document.getElementById('hero-kicker').innerText = t.heroKicker;
+        document.getElementById('hero-title').innerText = t.heroTitle;
+        document.getElementById('hero-text').innerText = t.heroText;
+        document.getElementById('panel-title').innerText = t.panelTitle;
+        document.getElementById('panel-lead').innerText = t.panelLead;
+        document.getElementById('summary-label').innerText = t.amountLabel;
+        document.getElementById('summary-title').innerText = kind === 'booking' ? t.bookingTitle : t.orderTitle;
+        document.getElementById('summary-amount').innerText = amount > 0 ? `${amount.toLocaleString(lang === 'hu' ? 'hu-HU' : lang === 'de' ? 'de-DE' : 'en-US')} Ft` : '...';
+        document.getElementById('submit-payment').innerText = t.pay;
+        document.getElementById('secure-note').innerText = t.secure;
+        document.getElementById('back-link').innerText = t.back;
+        document.getElementById('back-link').href = lang === 'hu' ? '/' : `/${lang}/`;
+
+        const messageEl = document.getElementById('payment-message');
+        const form = document.getElementById('payment-form');
+        const loading = document.getElementById('loading');
+        const submitBtn = document.getElementById('submit-payment');
+
+        function showMessage(message) {
+            messageEl.innerText = message || '';
+        }
+
+        async function initPayment() {
+            if (!clientSecret) {
+                loading.style.display = 'none';
+                showMessage(t.missing);
+                return;
+            }
+
+            try {
+                const configRes = await fetch('/api/stripe-config?t=' + Date.now());
+                const config = await configRes.json();
+
+                if (!configRes.ok || !config.publishableKey) {
+                    throw new Error('Stripe publishable key missing.');
+                }
+
+                const stripe = Stripe(config.publishableKey);
+                const elements = stripe.elements({ clientSecret, appearance: {
+                    theme: 'stripe',
+                    variables: {
+                        colorPrimary: '#5C7A4D',
+                        colorText: '#2C3325',
+                        colorDanger: '#B0413E',
+                        borderRadius: '12px',
+                        fontFamily: 'Montserrat, sans-serif'
+                    }
+                }});
+
+                const paymentElement = elements.create('payment');
+                paymentElement.mount('#payment-element');
+
+                loading.style.display = 'none';
+                form.style.display = 'block';
+
+                form.addEventListener('submit', async event => {
+                    event.preventDefault();
+                    submitBtn.disabled = true;
+                    submitBtn.innerText = t.processing;
+                    showMessage('');
+
+                    const successPath = kind === 'booking' ? '/success.html' : '/success-extra.html';
+                    const returnUrl = `${window.location.origin}${successPath}?lang=${encodeURIComponent(lang)}`;
+
+                    const { error } = await stripe.confirmPayment({
+                        elements,
+                        confirmParams: { return_url: returnUrl }
+                    });
+
+                    if (error) {
+                        showMessage(error.message || t.missing);
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = t.pay;
+                    }
+                });
+            } catch (err) {
+                console.error('Payment init error:', err);
+                loading.style.display = 'none';
+                showMessage(t.missing);
+            }
+        }
+
+        initPayment();
+    </script>
+
+    <script src="cookie-consent.js?v=2"></script>
+</body>
+</html>

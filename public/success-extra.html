@@ -190,6 +190,7 @@
     const lang = ['hu', 'en', 'de'].includes(rawLang) ? rawLang : 'hu';
 
     const sessionId = params.get('session_id');
+    const paymentIntentId = params.get('payment_intent');
 
     const translations = {
     hu: {
@@ -271,22 +272,25 @@
     document.getElementById('t-redir').innerText = t.redir;
     document.getElementById('t-sec').innerText = t.sec;
 
-    if (sessionId) {
-        orderId.innerText = 'ID: ' + sessionId.substring(0, 15) + '...';
+    if (sessionId || paymentIntentId) {
+        const shownId = sessionId || paymentIntentId;
+        orderId.innerText = 'ID: ' + shownId.substring(0, 15) + '...';
     } else {
         orderId.innerText = 'ID: -';
     }
 
     async function finalizeExtraOrder() {
-    if (!sessionId) {
+    if (!sessionId && !paymentIntentId) {
         showError();
         return;
     }
 
     try {
-        const response = await fetch(
-            `/api/finalize-extra?session_id=${encodeURIComponent(sessionId)}`
-        );
+        const finalizeUrl = paymentIntentId
+            ? `/api/finalize-extra?payment_intent=${encodeURIComponent(paymentIntentId)}`
+            : `/api/finalize-extra?session_id=${encodeURIComponent(sessionId)}`;
+
+        const response = await fetch(finalizeUrl);
 
         const result = await response.json().catch(() => null);
 

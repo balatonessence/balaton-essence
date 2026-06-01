@@ -2027,7 +2027,7 @@
         }
 
         try {
-            const res = await fetch('/api/create-checkout-session', {
+            const res = await fetch('/api/create-payment-intent-booking', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -2035,12 +2035,12 @@
                 body: JSON.stringify(data)
             });
 
-            const session = await res.json();
+            const payment = await res.json();
 
-            if (!res.ok || session.error) {
+            if (!res.ok || payment.error) {
                 showSuccess(
                     'Fehler',
-                    session.error || 'Die Zahlung konnte nicht gestartet werden.',
+                    payment.error || 'Die Zahlung konnte nicht gestartet werden.',
                     'error'
                 );
 
@@ -2053,10 +2053,10 @@
                 return;
             }
 
-            if (!session.id) {
+            if (!payment.clientSecret) {
                 showSuccess(
                     'Fehler',
-                    'Die Stripe-Session-ID fehlt.',
+                    'Die Zahlungs-ID fehlt.',
                     'error'
                 );
 
@@ -2069,25 +2069,10 @@
                 return;
             }
 
-            const stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-
-            const redirectResult = await stripe.redirectToCheckout({
-                sessionId: session.id
-            });
-
-            if (redirectResult.error) {
-                showSuccess(
-                    'Stripe-Fehler',
-                    redirectResult.error.message || 'Die Weiterleitung zur Zahlung war nicht möglich.',
-                    'error'
-                );
-
-                if (submitBtn) {
-                    submitBtn.disabled = false;
-                    submitBtn.style.opacity = '1';
-                    submitBtn.innerText = 'Buchung senden';
-                }
-            }
+            const amount = Number(payment.amount || 0);
+            const paymentUrl = `/payment.html?kind=booking&lang=de&amount=${encodeURIComponent(amount)}&client_secret=${encodeURIComponent(payment.clientSecret)}`;
+            window.location.href = paymentUrl;
+            return;
         } catch (e) {
             console.error(e);
 
