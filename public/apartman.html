@@ -193,7 +193,7 @@
             aspect-ratio: 16 / 10;
         }
 
-        .gallery-grid {
+        .galéria-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 22px;
@@ -208,7 +208,7 @@
             box-shadow: 0 18px 45px rgba(44, 51, 37, 0.08);
         }
 
-        .gallery-img {
+        .galéria-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -217,7 +217,7 @@
             display: block;
         }
 
-        .gallery-img:hover {
+        .galéria-img:hover {
             transform: scale(1.035);
             opacity: 0.92;
         }
@@ -614,7 +614,7 @@
                 font-size: clamp(2.4rem, 11vw, 3.6rem);
             }
 
-            .gallery-grid {
+            .galéria-grid {
                 grid-template-columns: 1fr;
             }
 
@@ -687,10 +687,10 @@
             </div>
 
             <div class="main-image-wrapper">
-                <img id="apt-main-img" src="" class="gallery-img" onclick="openLightbox(0)" alt="">
+                <img id="apt-main-img" src="" class="galéria-img" onclick="openLightbox(0)" alt="">
             </div>
 
-            <div id="apt-gallery" class="gallery-grid"></div>
+            <div id="apt-galéria" class="galéria-grid"></div>
 
             <div id="apt-desc"></div>
         </div>
@@ -763,7 +763,7 @@
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 1.5rem; align-items: center;">
             <div class="form-group">
                 <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 5px;">Vendégek</label>
-                <select id="book-guests" onchange="calculateStay()" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';"></select>
+                <select id="book-fő" onchange="calculateStay()" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';"></select>
             </div>
 
             <div id="stay-info" style="font-size: 0.8rem; color: var(--accent); font-weight: 600; padding-top: 15px;">
@@ -886,8 +886,8 @@
                     allImages.push(currentApt.coverImage);
                 }
 
-                if (Array.isArray(currentApt.galleryImages)) {
-                    allImages.push(...currentApt.galleryImages);
+                if (Array.isArray(currentApt.galériaImages)) {
+                    allImages.push(...currentApt.galériaImages);
                 }
 
                 renderDetails();
@@ -902,6 +902,10 @@
             }
         });
     });
+
+    function getCurrentLang() {
+        return 'hu';
+    }
 
     function getLocalDateString(date) {
         const d = new Date(date);
@@ -923,7 +927,7 @@
         return new Date(parts[0], parts[1] - 1, parts[2]);
     }
 
-    function getAptStatusAndPrice(apt, date, guests = 2) {
+    function getAptStatusAndPrice(apt, date, fő = 2) {
     if (!apt) {
         return {
             status: 'CLOSED',
@@ -935,7 +939,7 @@
     }
 
     const dateStr = getLocalDateString(date);
-    const guestCount = Number(guests || 2);
+    const guestCount = Number(fő || 2);
 
     const season = Array.isArray(apt.seasons)
         ? apt.seasons.find(s => dateStr >= s.start && dateStr <= s.end)
@@ -1335,7 +1339,7 @@
             }
 
             if (statusMsg) {
-                statusMsg.innerText = 'Az apartman április 1. és szeptember 30. között fogad vendégeket.';
+                statusMsg.innerText = 'The apartment welcomes fő between April 1 and September 30.';
             }
         }
 
@@ -1343,12 +1347,12 @@
 
         if (mainImg && currentApt.coverImage) {
             mainImg.src = currentApt.coverImage;
-            mainImg.alt = currentApt.name || 'Balaton Essence apartman';
+            mainImg.alt = currentApt.name || 'Balaton Essence apartment';
             mainImg.onclick = () => openLightbox(0);
         }
 
-        const gal = document.getElementById('apt-gallery');
-        const gImgs = Array.isArray(currentApt.galleryImages) ? currentApt.galleryImages : [];
+        const gal = document.getElementById('apt-galéria');
+        const gImgs = Array.isArray(currentApt.galériaImages) ? currentApt.galériaImages : [];
 
         if (gal) {
             gal.innerHTML = '';
@@ -1359,7 +1363,7 @@
 
                 const img = document.createElement('img');
                 img.src = imgSrc;
-                img.className = 'gallery-img';
+                img.className = 'galéria-img';
                 img.loading = 'lazy';
                 img.alt = `${currentApt.name || 'Apartman'} galéria ${idx + 1}`;
                 img.onclick = () => openLightbox(idx + 1);
@@ -1439,6 +1443,8 @@
 
         if (modalAptName) {
             modalAptName.innerText =
+                currentApt.name_en ||
+                currentApt.nameEn ||
                 currentApt.name ||
                 '';
         }
@@ -1451,7 +1457,7 @@
         document.getElementById('display-start').innerText = '-';
         document.getElementById('display-end').innerText = '-';
 
-        const guestSelect = document.getElementById('book-guests');
+        const guestSelect = document.getElementById('book-fő');
         const info = getNextBookableInfo(currentApt);
         const maxAllowed = Number(info.maxGuests || currentApt.maxGuests || 2);
 
@@ -1721,7 +1727,7 @@
             if (hasBlockedDateInRange(selectedStart, dateStr)) {
                 showSuccess(
                     'Nem választható időszak',
-                    'A kiválasztott időszak foglalt vagy letiltott napot tartalmaz.',
+                    'The selected period contains a booked or blocked day.',
                     'error'
                 );
 
@@ -1762,8 +1768,8 @@
         const startVal = document.getElementById('book-start').value;
         const endVal = document.getElementById('book-end').value;
 
-        const guestSelect = document.getElementById('book-guests');
-        const guests = parseInt(guestSelect.value, 10) || 2;
+        const guestSelect = document.getElementById('book-fő');
+        const fő = parseInt(guestSelect.value, 10) || 2;
 
         const btn = document.getElementById('submit-booking-btn');
         const totalBox = document.getElementById('grand-total');
@@ -1794,7 +1800,7 @@
         }
 
         if (hasBlockedDateInRange(startVal, endVal)) {
-            infoText.innerHTML = `<span style="color:var(--warning)">A kiválasztott időszak foglalt vagy letiltott napot tartalmaz.</span>`;
+            infoText.innerHTML = `<span style="color:var(--warning)">The selected period contains a booked or blocked date.</span>`;
             totalBox.dataset.finalTotal = '0';
             totalBox.innerText = '0 Ft';
             btn.innerText = 'Nem foglalható';
@@ -1805,7 +1811,7 @@
 
 
         if (isNoCheckInDate(startVal)) {
-            infoText.innerHTML = `<span style="color:var(--warning)">Erre a napra nem lehet érkezést választani.</span>`;
+            infoText.innerHTML = `<span style="color:var(--warning)">Check-in is not available on the selected arrival date.</span>`;
             totalBox.innerText = '0 Ft';
             totalBox.dataset.finalTotal = '0';
             btn.innerText = 'Nem foglalható';
@@ -1815,7 +1821,7 @@
         }
 
         if (isNoCheckOutDate(endVal)) {
-            infoText.innerHTML = `<span style="color:var(--warning)">Erre a napra nem lehet távozást választani.</span>`;
+            infoText.innerHTML = `<span style="color:var(--warning)">Check-out is not available on the selected departure date.</span>`;
             totalBox.innerText = '0 Ft';
             totalBox.dataset.finalTotal = '0';
             btn.innerText = 'Nem foglalható';
@@ -1824,25 +1830,25 @@
             return;
         }
 
-        const nights = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+        const éjszaka = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
 
         let total = 0;
         let originalTotal = 0;
         let discountTotal = 0;
         let minNightsRequired = 1;
 
-        for (let i = 0; i < nights; i++) {
+        for (let i = 0; i < éjszaka; i++) {
             const currentDay = new Date(start);
             currentDay.setDate(currentDay.getDate() + i);
 
             const currentDateStr = getLocalDateString(currentDay);
-            const info = getAptStatusAndPrice(currentApt, currentDay, guests);
+            const info = getAptStatusAndPrice(currentApt, currentDay, fő);
 
             if (info.status === 'OPEN') {
                 const nightlyPrice = Number(info.price || 0);
 
                 if (!Number.isFinite(nightlyPrice) || nightlyPrice <= 0) {
-                    infoText.innerHTML = `<span style="color:var(--warning)">A kiválasztott időszakra nincs ár beállítva!</span>`;
+                    infoText.innerHTML = `<span style="color:var(--warning)">No price has been set for the selected period!</span>`;
                     totalBox.innerText = '0 Ft';
                     totalBox.dataset.finalTotal = '0';
                     btn.innerText = 'Nem foglalható';
@@ -1862,7 +1868,7 @@
                     minNightsRequired = Number(info.minNights || 1);
                 }
             } else {
-                infoText.innerHTML = `<span style="color:var(--warning)">Zárva tartás a választott napokon!</span>`;
+                infoText.innerHTML = `<span style="color:var(--warning)">The apartment is closed on the selected dates.</span>`;
                 totalBox.innerText = 'Zárva';
                 totalBox.dataset.finalTotal = '0';
                 btn.innerText = 'Nem foglalható';
@@ -1890,7 +1896,7 @@
             totalBox.innerText = `${total.toLocaleString('hu-HU')} Ft`;
         }
 
-        if (nights < minNightsRequired) {
+        if (éjszaka < minNightsRequired) {
             infoText.innerHTML = `<span style="color:var(--warning)">Minimum ${minNightsRequired} éjszaka szükséges ebben az időszakban.</span>`;
             btn.disabled = true;
             btn.style.opacity = '0.5';
@@ -1900,7 +1906,7 @@
             return;
         }
 
-        infoText.innerHTML = `<strong>${nights} éjszaka</strong> kiválasztva.`;
+        infoText.innerHTML = `<strong>${éjszaka} éjszaka</strong> selected.`;
         btn.disabled = false;
         btn.style.opacity = '1';
         btn.style.background = 'var(--accent)';
@@ -1928,7 +1934,7 @@
             phone: document.getElementById('book-phone').value.trim(),
             checkIn: document.getElementById('book-start').value,
             checkOut: document.getElementById('book-end').value,
-            guests: document.getElementById('book-guests').value,
+            fő: document.getElementById('book-fő').value,
             totalPrice: cleanNumber,
             msg: document.getElementById('book-msg').value.trim(),
             lang: 'hu',
@@ -2112,7 +2118,7 @@
     }
 
     function updateSEO(apartmentName, location) {
-        document.title = `${apartmentName} - Luxus Apartman ${location} | Balaton Essence`;
+        document.title = `${apartmentName} - Luxury Apartman ${location} | Balaton Essence`;
 
         let metaDesc = document.querySelector('meta[name="description"]');
 
