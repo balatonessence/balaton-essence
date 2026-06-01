@@ -3873,9 +3873,9 @@ function initSyncCountdown() {
 function isBlockedBooking(b) {
     if (!b) return false;
 
-    // Ha adminban vendégadatot adtunk hozzá,
-    // akkor innentől valódi foglalásként kezeljük.
-    if (b.manualGuestData === true) {
+    // Ha adminban vendégadatot adtunk hozzá, vagy zárolásból
+    // foglalássá alakítottuk, akkor innentől valódi foglalásként kezeljük.
+    if (b.manualGuestData === true || b.convertedFromBlocked === true) {
         return false;
     }
 
@@ -4088,7 +4088,11 @@ function renderBlockedBookings() {
             const owner = (db.owners || []).find(o => String(o.id || o._id) === String(a.ownerId));
             const aptBookings = (db.bookings || []).filter(b =>
                 String(b.aptId) === String(a.id) &&
-                !isBlockedBooking(b)
+                (
+                    !isBlockedBooking(b) ||
+                    b.manualGuestData === true ||
+                    b.convertedFromBlocked === true
+                )
             );
 
             let web = 0;
@@ -4894,10 +4898,10 @@ if (wasBlocked) {
         booking.totalPrice = 0;
     }
 }
+
 await saveDb();
 closeExternalGuestModal();
-renderBookings();
-renderBlockedBookings();
+renderAll();
 }
 
     async function saveReview() {

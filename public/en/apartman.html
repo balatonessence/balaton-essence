@@ -655,6 +655,7 @@
     </style>
 
     <link rel="stylesheet" href="../mobile.css?v=3">
+    <link rel="stylesheet" href="../cookie-consent.css?v=2">
 </head>
 
 <body>
@@ -1169,6 +1170,28 @@
         box.style.display = 'block';
     }
 
+
+
+    function hasAnyPricedSeason(apt) {
+        if (!apt) return false;
+
+        if (Number(apt.price || 0) > 0) {
+            return true;
+        }
+
+        if (!Array.isArray(apt.seasons)) {
+            return false;
+        }
+
+        return apt.seasons.some(season =>
+            Number(season.price || 0) > 0 ||
+            Number(season.price3 || 0) > 0 ||
+            Number(season.price4 || 0) > 0 ||
+            Number(season.price5 || 0) > 0 ||
+            Number(season.price6 || 0) > 0
+        );
+    }
+
     function getNextBookableInfo(apt) {
         const today = new Date();
 
@@ -1187,7 +1210,7 @@
 
             const info = getAptStatusAndPrice(apt, testDate);
 
-            if (info.status === 'OPEN') {
+            if (info.status === 'OPEN' && Number(info.price || 0) > 0) {
                 return {
                     ...info,
                     dateStr
@@ -1259,7 +1282,25 @@
         const bookingBtn = document.getElementById('booking-btn');
         const statusMsg = document.querySelector('.dev-status span:last-child');
 
-        if (info.status === 'OPEN') {
+        const hasPriceConfig = hasAnyPricedSeason(currentApt);
+
+        if (!hasPriceConfig) {
+            if (priceTag) {
+                priceTag.innerHTML = `<span style="color:var(--warning)">Price pending</span>`;
+            }
+
+            if (bookingBtn) {
+                bookingBtn.innerText = 'Booking unavailable';
+                bookingBtn.disabled = true;
+                bookingBtn.style.opacity = '0.5';
+                bookingBtn.style.cursor = 'not-allowed';
+                bookingBtn.onclick = null;
+            }
+
+            if (statusMsg) {
+                statusMsg.innerText = 'No booking price has been set for this apartment yet, so online booking is currently unavailable.';
+            }
+        } else if (info.status === 'OPEN') {
             if (priceTag) {
                 const originalPrice = Number(info.price || 0);
                 const discountAmount = getDiscountAmountForNight(currentApt, info.dateStr);
@@ -1812,6 +1853,17 @@
 
             if (info.status === 'OPEN') {
                 const nightlyPrice = Number(info.price || 0);
+
+                if (!Number.isFinite(nightlyPrice) || nightlyPrice <= 0) {
+                    infoText.innerHTML = `<span style="color:var(--warning)">No price has been set for the selected period!</span>`;
+                    totalBox.innerText = '0 Ft';
+                    totalBox.dataset.finalTotal = '0';
+                    btn.innerText = 'Unavailable';
+                    btn.style.background = 'var(--warning)';
+                    btn.style.color = 'white';
+                    return;
+                }
+
                 const nightlyDiscount = getDiscountAmountForNight(currentApt, currentDateStr);
                 const finalNightlyPrice = Math.max(0, nightlyPrice - nightlyDiscount);
 
@@ -2109,5 +2161,6 @@
 <link rel="stylesheet" href="../mobile.css?v=106">
 <script src="../site-mobile.js?v=106"></script>
 <script src="../chat-assistant.js"></script>
+<script src="../cookie-consent.js?v=2"></script>
 </body>
 </html>
