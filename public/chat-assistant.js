@@ -1006,3 +1006,38 @@ function findAnswer(question) {
         });
     });
 })();
+
+/* Balaton Essence cookie consent loader
+   Loads the cookie banner globally from the shared chat script, so individual pages
+   do not need separate script/link tags. */
+(function loadBalatonCookieConsent() {
+    try {
+        const path = (window.location.pathname || '').toLowerCase();
+        const skipPages = ['admin.html', 'todo.html'];
+
+        if (skipPages.some(page => path.endsWith(page))) return;
+
+        const hasCss = Array.from(document.querySelectorAll('link[rel="stylesheet"]'))
+            .some(link => String(link.href || '').includes('cookie-consent.css'));
+
+        if (!hasCss) {
+            const css = document.createElement('link');
+            css.rel = 'stylesheet';
+            css.href = '/cookie-consent.css?v=global-1';
+            document.head.appendChild(css);
+        }
+
+        const hasScript = Array.from(document.scripts)
+            .some(script => String(script.src || '').includes('cookie-consent.js'));
+
+        if (!hasScript) {
+            const script = document.createElement('script');
+            script.src = '/cookie-consent.js?v=global-1';
+            script.defer = true;
+            document.head.appendChild(script);
+        }
+    } catch (err) {
+        console.error('Cookie consent loader hiba:', err);
+    }
+})();
+
