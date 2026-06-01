@@ -1719,8 +1719,8 @@
 
         document.getElementById('book-start').value = selectedStart || '';
         document.getElementById('book-end').value = selectedEnd || '';
-        document.getElementById('display-start').innerText = selectedStart ? formatHuDate(selectedStart) : '-';
-        document.getElementById('display-end').innerText = selectedEnd ? formatHuDate(selectedEnd) : '-';
+        document.getElementById('display-start').innerText = selectedStart ? formatDisplayDate(selectedStart) : '-';
+        document.getElementById('display-end').innerText = selectedEnd ? formatDisplayDate(selectedEnd) : '-';
 
         renderCalendar();
         calculateStay();
