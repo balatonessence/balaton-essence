@@ -1503,8 +1503,23 @@
         document.body.style.overflow = 'hidden';
 
         calDate = new Date();
-        renderCalendar();
-        calculateStay();
+        selectedStart = null;
+        selectedEnd = null;
+
+        const startInput = document.getElementById('book-start');
+        const endInput = document.getElementById('book-end');
+        const displayStart = document.getElementById('display-start');
+        const displayEnd = document.getElementById('display-end');
+
+        if (startInput) startInput.value = '';
+        if (endInput) endInput.value = '';
+        if (displayStart) displayStart.innerText = '-';
+        if (displayEnd) displayEnd.innerText = '-';
+
+        setTimeout(() => {
+            renderCalendar();
+            calculateStay();
+        }, 50);
     }
 
     function closeBookingModal() {
@@ -1604,7 +1619,13 @@
         const daysContainer = document.getElementById('calendar-days');
         const monthYearLabel = document.getElementById('calendar-month-year');
 
-        if (!daysContainer || !monthYearLabel) return;
+        if (!daysContainer || !monthYearLabel) {
+            console.error('Naptár elem hiányzik:', {
+                daysContainer,
+                monthYearLabel
+            });
+            return;
+        }
 
         const year = calDate.getFullYear();
         const month = calDate.getMonth();
