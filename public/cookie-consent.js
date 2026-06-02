@@ -65,12 +65,16 @@ window.BE_COOKIE_CONFIG = window.BE_COOKIE_CONFIG || {
     };
 
     function getLang() {
+        const path = window.location.pathname.toLowerCase();
+
+        if (path.startsWith('/en/')) return 'en';
+        if (path.startsWith('/de/')) return 'de';
+
         const lang = (document.documentElement.lang || '').toLowerCase();
+
         if (lang.startsWith('en')) return 'en';
         if (lang.startsWith('de')) return 'de';
-        const path = window.location.pathname.toLowerCase();
-        if (path.includes('/en/')) return 'en';
-        if (path.includes('/de/')) return 'de';
+
         return 'hu';
     }
 
