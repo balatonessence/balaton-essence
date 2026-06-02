@@ -70,11 +70,6 @@ window.BE_COOKIE_CONFIG = window.BE_COOKIE_CONFIG || {
         if (path.startsWith('/en/')) return 'en';
         if (path.startsWith('/de/')) return 'de';
 
-        const lang = (document.documentElement.lang || '').toLowerCase();
-
-        if (lang.startsWith('en')) return 'en';
-        if (lang.startsWith('de')) return 'de';
-
         return 'hu';
     }
 
