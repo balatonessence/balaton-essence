@@ -939,6 +939,13 @@
             background: rgba(200, 164, 107, 1);
         }
 
+        .plain-amp {
+    font-family: Arial, sans-serif;
+    font-style: normal;
+    font-weight: inherit;
+    font-size: 0.9em;
+}
+
         @media (max-width: 1150px) {
             .nav-links {
                 gap: 1.25rem;
@@ -1638,7 +1645,7 @@
                 </div>
 
                 <div class="apt-body">
-                    <h3 class="apt-title">${escapeHtml(aptName)}</h3>
+                    <h3 class="apt-title">${formatApartmentName(aptName)}</h3>
 
                     <div class="apt-location">
                         <span>●</span>
@@ -1683,6 +1690,23 @@
             </div>
         `;
     }
+
+    function decodeHtmlEntities(value) {
+    const textarea = document.createElement('textarea');
+    textarea.innerHTML = String(value ?? '');
+    return textarea.value;
+}
+
+function formatApartmentName(value) {
+    const decoded = decodeHtmlEntities(value || '');
+
+    return decoded
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;')
+        .replace(/&/g, '<span class="plain-amp">&</span>');
+}
 
     function escapeHtml(value) {
         return String(value ?? '')
