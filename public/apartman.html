@@ -926,6 +926,12 @@
         });
     });
 
+    function decodeHtmlEntities(value) {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = String(value ?? '');
+        return textarea.value;
+    }
+
     function getLocalDateString(date) {
         const d = new Date(date);
         const year = d.getFullYear();
@@ -1254,8 +1260,7 @@
 
         setSafeText(
             'apt-name',
-            currentApt.name ||
-            'Ismeretlen apartman'
+            decodeHtmlEntities(currentApt.name || 'Ismeretlen apartman')
         );
 
         setSafeText(
@@ -1361,7 +1366,7 @@
 
         if (mainImg) {
             mainImg.src = allImages[0] || fallbackImage;
-            mainImg.alt = currentApt.name || 'Balaton Essence apartman';
+            mainImg.alt = decodeHtmlEntities(currentApt.name || 'Balaton Essence apartman');
             mainImg.onclick = () => openLightbox(0);
         }
 
@@ -1378,7 +1383,7 @@
                 img.src = imgSrc;
                 img.className = 'gallery-img';
                 img.loading = 'lazy';
-                img.alt = `${currentApt.name || 'Apartman'} galéria ${idx + 2}`;
+                img.alt = `${decodeHtmlEntities(currentApt.name || 'Apartman')} galéria ${idx + 2}`;
                 img.onclick = () => openLightbox(idx + 1);
 
                 wrapper.appendChild(img);
@@ -1457,8 +1462,7 @@
 
         if (modalAptName) {
             modalAptName.innerText =
-                currentApt.name ||
-                '';
+                decodeHtmlEntities(currentApt.name || '');
         }
 
         selectedStart = null;
@@ -1965,8 +1969,7 @@
         const data = {
             aptId: currentApt.id,
             aptName:
-                currentApt.name ||
-                'Balaton Essence apartman',
+                decodeHtmlEntities(currentApt.name || 'Balaton Essence apartman'),
             guestName: document.getElementById('book-name').value.trim(),
             email: document.getElementById('book-email').value.trim(),
             phone: document.getElementById('book-phone').value.trim(),

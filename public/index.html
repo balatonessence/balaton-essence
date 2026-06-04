@@ -1689,7 +1689,7 @@
                 </div>
 
                 <div class="apt-body">
-                    <h3 class="apt-title">${escapeHtml(apt.name || 'Apartman')}</h3>
+                    <h3 class="apt-title">${escapeHtml(decodeHtmlEntities(apt.name || 'Apartman'))}</h3>
 
                     <div class="apt-location">
                         <span>●</span>
@@ -1733,6 +1733,12 @@
                 <div>${escapeHtml(message)}</div>
             </div>
         `;
+    }
+
+    function decodeHtmlEntities(value) {
+        const textarea = document.createElement('textarea');
+        textarea.innerHTML = String(value ?? '');
+        return textarea.value;
     }
 
     function escapeHtml(value) {
