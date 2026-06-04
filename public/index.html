@@ -1743,10 +1743,9 @@
     }
 
     function formatApartmentName(value) {
-        return escapeHtml(decodeHtmlEntities(value || ''))
-            .replace(/&amp;/g, '<span class="plain-amp">&amp;</span>')
-            .replace(/&/g, '<span class="plain-amp">&amp;</span>');
-    }
+    return decodeHtmlEntities(value || '')
+        .replace(/&/g, '<span class="plain-amp">&</span>');
+}
 
     function decodeHtmlEntities(value) {
         const textarea = document.createElement('textarea');
