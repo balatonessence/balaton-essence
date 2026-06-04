@@ -934,6 +934,13 @@
     background: rgba(255,255,255,0.28);
 }
 
+.plain-amp {
+    font-family: Arial, sans-serif;
+    font-style: normal;
+    font-weight: inherit;
+    font-size: 0.9em;
+}
+
         html {
             background: #101711;
             scrollbar-width: thin;
@@ -1689,7 +1696,7 @@
                 </div>
 
                 <div class="apt-body">
-                    <h3 class="apt-title">${escapeHtml(decodeHtmlEntities(apt.name || 'Apartman'))}</h3>
+                    <h3 class="apt-title">${formatApartmentName(apt.name || 'Apartman')}</h3>
 
                     <div class="apt-location">
                         <span>●</span>
@@ -1735,11 +1742,19 @@
         `;
     }
 
+    function formatApartmentName(value) {
+        return escapeHtml(decodeHtmlEntities(value || ''))
+            .replace(/&amp;/g, '<span class="plain-amp">&amp;</span>')
+            .replace(/&/g, '<span class="plain-amp">&amp;</span>');
+    }
+
     function decodeHtmlEntities(value) {
         const textarea = document.createElement('textarea');
         textarea.innerHTML = String(value ?? '');
         return textarea.value;
     }
+
+
 
     function escapeHtml(value) {
         return String(value ?? '')
