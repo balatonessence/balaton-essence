@@ -1391,7 +1391,8 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/hu.js"></script>
 
 <script>
-    const stripe = Stripe('pk_test_51TNXrwDl2yIAVe6MOBaUkGKD4MrGaqmjIIoXoIBn0rv8k5bOvltbv54KG0I5b0CGUvtWSIbn0BrouzkqsgX0XZAn00DoG5W0l0');
+    let currentSunAvailability = {};
+    let hasSelectedRentalDates = false;
 
     let itemMap = {
         sup: {
@@ -1401,7 +1402,8 @@
             price: 5900,
             unit: 'nap',
             image: '../img/sup.png',
-            active: true
+            active: true,
+            maxStock: 0
         },
         sunbed: {
             checkboxId: 'item-sunbed',
@@ -1410,7 +1412,8 @@
             price: 1500,
             unit: 'nap',
             image: '../img/napozoszek.png',
-            active: true
+            active: true,
+            maxStock: 0
         },
         umbrella: {
             checkboxId: 'item-umbrella',
@@ -1419,7 +1422,8 @@
             price: 1000,
             unit: 'nap',
             image: '../img/napernyo.png',
-            active: true
+            active: true,
+            maxStock: 0
         },
         boat: {
             checkboxId: 'item-boat',
@@ -1428,7 +1432,8 @@
             price: 35000,
             unit: 'nap',
             image: '../img/hajo.png',
-            active: true,
+            active: false,
+            maxStock: 0,
             comingSoon: true
         }
     };
@@ -1443,7 +1448,9 @@
 
     function initHeaderScroll() {
         const header = document.getElementById('site-header');
+
         if (!header) return;
+
         const update = () => {
             if (window.scrollY > 20) {
                 header.classList.add('scrolled');
@@ -1451,6 +1458,7 @@
                 header.classList.remove('scrolled');
             }
         };
+
         update();
         window.addEventListener('scroll', update);
     }
@@ -1458,112 +1466,125 @@
     async function loadSunServices() {
         try {
             const res = await fetch('/api/services?t=' + Date.now());
-            if (!res.ok) throw new Error('A szervizárak nem tölthetők be.');
+
+            if (!res.ok) {
+                throw new Error('A szolgáltatások nem tölthetők be.');
+            }
+
             const data = await res.json();
             const services = data.services?.sun || [];
+
             services.forEach(service => {
                 if (!service.id || !itemMap[service.id]) return;
+
                 itemMap[service.id] = {
                     ...itemMap[service.id],
-                    label: service.name_hu || service.name_de || itemMap[service.id].label,
+                    label: service.name_hu || service.name_de || service.name_en || itemMap[service.id].label,
                     price: Number(service.price || itemMap[service.id].price),
-                    unit: service.unit_hu || 'nap',
+                    unit: service.unit_hu || itemMap[service.id].unit || 'nap',
                     image: service.image || itemMap[service.id].image,
                     active: service.active !== false,
-                    stock: getServiceStock(service, itemMap[service.id].stock)
+                    maxStock: Number(service.maxStock || 0)
                 };
             });
+
             renderSunServiceTexts();
         } catch (err) {
-            console.error('SUP & SUN hiba:', err);
+            console.error('SUP & SUN szolgáltatás betöltési hiba:', err);
             renderSunServiceTexts();
         }
     }
-
-    function getServiceStock(service, fallback = null) {
-    const raw =
-        service.stock ??
-        service.quantity ??
-        service.count ??
-        service.maxQty ??
-        service.availableQty ??
-        fallback;
-
-    if (raw === null || raw === undefined || raw === '') {
-        return null;
-    }
-
-    const stock = Number(raw);
-
-    return Number.isFinite(stock) && stock >= 0
-        ? Math.floor(stock)
-        : null;
-}
-
-function getItemByQtyId(qtyId) {
-    return Object.values(itemMap).find(item => item.qtyId === qtyId) || null;
-}
-
-function getItemStockLimit(item) {
-    if (!item) return null;
-
-    const stock = Number(item.stock);
-
-    return Number.isFinite(stock) && stock >= 0
-        ? Math.floor(stock)
-        : null;
-}
 
     function renderSunServiceTexts() {
         Object.entries(itemMap).forEach(([key, item]) => {
             const priceText = `${Number(item.price || 0).toLocaleString('hu-HU')} HUF`;
             const unitText = item.unit || 'nap';
+
             const card = document.getElementById(`card-${key}`);
             const cardPrice = document.getElementById(`card-price-${key}`);
             const modalPrice = document.getElementById(`modal-price-${key}`);
             const cardTitle = card ? card.querySelector('.sun-card-title') : null;
-            const modalLabel = document.querySelector(`#${item.checkboxId}`)?.closest('.extras-item-label')?.querySelector('.item-text-main');
-            const isComingSoon = item.comingSoon === true || key === 'boat';
             const action = card ? card.querySelector('.sun-card-action') : null;
             const checkbox = document.getElementById(item.checkboxId);
-            const row = checkbox ? checkbox.closest('.equipment-row') || checkbox.closest('div') : null;
+            const row = checkbox ? checkbox.closest('.equipment-row') : null;
+            const modalLabel = checkbox?.closest('.extras-item-label')?.querySelector('.item-text-main');
+            const cardImg = document.getElementById(`card-img-${key}`);
+
+            const isComingSoon = item.comingSoon === true || item.active === false;
 
             if (card) {
-                card.style.display = item.active === false && !isComingSoon ? 'none' : 'flex';
+                card.style.display = item.active === false && !item.comingSoon ? 'none' : 'flex';
                 card.classList.toggle('is-coming-soon', isComingSoon);
             }
-            if (action) action.innerText = isComingSoon ? 'Hamarosan' : 'Foglalás';
-            if (cardTitle) cardTitle.innerText = item.label || key;
-            if (cardPrice) cardPrice.innerHTML = isComingSoon ? 'Hamarosan' : `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
-            if (modalPrice) modalPrice.innerText = isComingSoon ? '(Hamarosan)' : `(${priceText}/${unitText})`;
+
+            if (action) {
+                action.innerText = isComingSoon ? 'Hamarosan' : 'Foglalás';
+            }
+
+            if (cardTitle) {
+                cardTitle.innerText = item.label || key;
+            }
+
+            if (cardPrice) {
+                cardPrice.innerHTML = isComingSoon
+                    ? 'Hamarosan'
+                    : `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
+            }
+
+            if (modalPrice) {
+                modalPrice.innerText = isComingSoon
+                    ? '(Hamarosan)'
+                    : `(${priceText}/${unitText})`;
+            }
+
             if (modalLabel && modalPrice) {
                 modalLabel.childNodes[0].nodeValue = `${item.label || key} `;
                 modalLabel.classList.toggle('is-disabled', isComingSoon);
             }
+
             if (checkbox) {
                 checkbox.checked = false;
                 checkbox.disabled = isComingSoon;
             }
-            if (row) row.classList.toggle('is-disabled', isComingSoon);
+
+            if (row) {
+                row.classList.toggle('is-disabled', isComingSoon);
+            }
+
+            if (cardImg && item.image) {
+                cardImg.style.backgroundImage = `url('${escapeHtml(safeImageUrl(item.image))}')`;
+            }
         });
+
+        applyAvailabilityToUi();
     }
 
     async function loadApartments() {
         const aptSelect = document.getElementById('r-apt');
+
         if (!aptSelect) return;
+
         try {
             const res = await fetch('/api/get-db-content?t=' + Date.now());
-            if (!res.ok) throw new Error('Adatbázis hiba');
+
+            if (!res.ok) {
+                throw new Error('Adatbázis hiba.');
+            }
+
             const database = await res.json();
             const apartments = Array.isArray(database.apartments) ? database.apartments : [];
+
             apartments.forEach(apt => {
                 if (!apt || !apt.name) return;
+
                 const opt = document.createElement('option');
                 opt.value = apt.name;
                 opt.textContent = apt.name;
                 aptSelect.appendChild(opt);
             });
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error('Apartmanok betöltési hiba:', err);
+        }
     }
 
     function initDatePickers() {
@@ -1573,108 +1594,298 @@ function getItemStockLimit(item) {
             altInput: true,
             altFormat: 'Y. F j.',
             minDate: 'today',
-            onChange: updateLiveTotal
+            onChange: async function() {
+                await refreshSunAvailability();
+                updateLiveTotal();
+            }
         };
+
         flatpickr('#r-start', config);
         flatpickr('#r-end', config);
     }
 
-    function changeQty(id, delta) {
-    const el = document.getElementById(id);
-    if (!el) return;
+    async function refreshSunAvailability(showAlert = false) {
+        const start = document.getElementById('r-start')?.value || '';
+        const end = document.getElementById('r-end')?.value || '';
 
-    const item = getItemByQtyId(id);
-    const stockLimit = getItemStockLimit(item);
+        hasSelectedRentalDates = Boolean(start && end);
 
-    let val = parseInt(el.innerText, 10) || 1;
-    val = Math.max(1, val + delta);
+        if (!start || !end) {
+            currentSunAvailability = {};
+            applyAvailabilityToUi();
+            updateLiveTotal();
+            return true;
+        }
 
-    if (stockLimit !== null) {
-        val = Math.min(val, stockLimit);
+        const d1 = parseLocalDate(start);
+        const d2 = parseLocalDate(end);
 
-        if (delta > 0 && val >= stockLimit) {
-            alert(`Ebből jelenleg maximum ${stockLimit} db foglalható.`);
+        if (!d1 || !d2 || d2 < d1) {
+            currentSunAvailability = {};
+            applyAvailabilityToUi();
+            updateLiveTotal();
+
+            if (showAlert) {
+                alert('Kérlek válassz érvényes kezdő és befejező dátumot.');
+            }
+
+            return false;
+        }
+
+        try {
+            const url = `/api/sun-availability?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&t=${Date.now()}`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Készlet lekérési hiba.');
+            }
+
+            currentSunAvailability = data.availability || {};
+            applyAvailabilityToUi();
+            updateLiveTotal();
+
+            return true;
+        } catch (err) {
+            console.error('SUP & SUN készlet lekérési hiba:', err);
+
+            if (showAlert) {
+                alert('Nem sikerült lekérni az aktuális készletet. Próbáld újra.');
+            }
+
+            return false;
         }
     }
 
-    el.innerText = val;
-    updateLiveTotal();
-}
+    function applyAvailabilityToUi() {
+        Object.entries(itemMap).forEach(([key, item]) => {
+            const checkbox = document.getElementById(item.checkboxId);
+            const qtyEl = document.getElementById(item.qtyId);
+            const row = checkbox ? checkbox.closest('.equipment-row') : null;
+            const modalPrice = document.getElementById(`modal-price-${key}`);
+
+            if (!checkbox || !qtyEl) return;
+
+            const isComingSoon = item.comingSoon === true || item.active === false;
+            const available = getAvailableStockForItem(key);
+
+            if (isComingSoon) {
+                checkbox.checked = false;
+                checkbox.disabled = true;
+                qtyEl.innerText = '1';
+                row?.classList.add('is-disabled');
+
+                if (modalPrice) {
+                    modalPrice.innerText = '(Hamarosan)';
+                }
+
+                return;
+            }
+
+            if (hasSelectedRentalDates && available <= 0) {
+                checkbox.checked = false;
+                checkbox.disabled = true;
+                qtyEl.innerText = '0';
+                row?.classList.add('is-disabled');
+
+                if (modalPrice) {
+                    modalPrice.innerText = '(Erre az időszakra elfogyott)';
+                }
+
+                return;
+            }
+
+            checkbox.disabled = false;
+            row?.classList.remove('is-disabled');
+
+            if (Number(qtyEl.innerText || 0) < 1) {
+                qtyEl.innerText = '1';
+            }
+
+            if (Number(qtyEl.innerText || 0) > available) {
+                qtyEl.innerText = String(available);
+            }
+
+            if (modalPrice) {
+                const priceText = `${Number(item.price || 0).toLocaleString('hu-HU')} HUF`;
+                modalPrice.innerText = `(${priceText}/${item.unit || 'nap'})`;
+            }
+        });
+    }
+
+    function getAvailableStockForItem(key) {
+        const item = itemMap[key];
+
+        if (!item) return 0;
+
+        const maxStock = Number(item.maxStock || 0);
+
+        if (hasSelectedRentalDates && currentSunAvailability[key]) {
+            const available = Number(currentSunAvailability[key].available);
+
+            if (Number.isFinite(available)) {
+                return Math.max(0, Math.floor(available));
+            }
+        }
+
+        if (Number.isFinite(maxStock)) {
+            return Math.max(0, Math.floor(maxStock));
+        }
+
+        return 0;
+    }
+
+    function getItemKeyByQtyId(qtyId) {
+        return Object.keys(itemMap).find(key => itemMap[key].qtyId === qtyId) || '';
+    }
+
+    function changeQty(id, delta) {
+        const el = document.getElementById(id);
+
+        if (!el) return;
+
+        const key = getItemKeyByQtyId(id);
+        const available = getAvailableStockForItem(key);
+
+        let val = parseInt(el.innerText, 10) || 1;
+        val = Math.max(1, val + delta);
+
+        if (available <= 0) {
+            val = 0;
+            alert('Ebből erre az időszakra jelenleg nincs szabad készlet.');
+        } else if (val > available) {
+            val = available;
+            alert(`Ebből erre az időszakra jelenleg maximum ${available} db foglalható.`);
+        }
+
+        el.innerText = String(val);
+        updateLiveTotal();
+    }
 
     function getRentalDays() {
-        const start = document.getElementById('r-start').value;
-        const end = document.getElementById('r-end').value;
+        const start = document.getElementById('r-start')?.value || '';
+        const end = document.getElementById('r-end')?.value || '';
+
         if (!start || !end) return 0;
-        const d1 = new Date(start);
-        const d2 = new Date(end);
-        if (d2 < d1) return 0;
+
+        const d1 = parseLocalDate(start);
+        const d2 = parseLocalDate(end);
+
+        if (!d1 || !d2 || d2 < d1) return 0;
+
         return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
     }
 
     function getSelectedItems() {
         const selected = [];
-        Object.values(itemMap).forEach(item => {
+
+        Object.entries(itemMap).forEach(([key, item]) => {
             if (item.active === false || item.comingSoon === true) return;
+
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
-            if (!checkbox || !qtyEl || !checkbox.checked) return;
+
+            if (!checkbox || !qtyEl || checkbox.disabled || !checkbox.checked) return;
+
+            const available = getAvailableStockForItem(key);
             let qty = parseInt(qtyEl.innerText, 10) || 1;
-                const stockLimit = getItemStockLimit(item);
 
-                if (stockLimit !== null && qty > stockLimit) {
-                    qty = stockLimit;
-                    qtyEl.innerText = String(stockLimit);
-                }
+            if (available <= 0) {
+                qty = 0;
+                checkbox.checked = false;
+                qtyEl.innerText = '0';
+                return;
+            }
 
-                selected.push({
-                    id: Object.keys(itemMap).find(key => itemMap[key] === item) || '',
-                    label: item.label,
-                    qty,
-                    stock: stockLimit,
-                    price: Number(item.price || 0),
-                    dailyTotal: qty * Number(item.price || 0)
-                });
+            if (qty > available) {
+                qty = available;
+                qtyEl.innerText = String(available);
+            }
+
+            selected.push({
+                id: key,
+                label: item.label,
+                qty,
+                available,
+                maxStock: Number(item.maxStock || 0),
+                price: Number(item.price || 0),
+                dailyTotal: qty * Number(item.price || 0)
+            });
         });
+
         return selected;
     }
 
     function updateLiveTotal() {
         const days = getRentalDays();
         const selectedItems = getSelectedItems();
+
         const dailyTotal = selectedItems.reduce((sum, item) => sum + item.dailyTotal, 0);
         const total = dailyTotal * days;
+
         const totalEl = document.getElementById('modal-total-amount');
-        if (totalEl) totalEl.innerText = total.toLocaleString('hu-HU') + ' HUF';
-        return { total, days, selectedItems };
+
+        if (totalEl) {
+            totalEl.innerText = total.toLocaleString('hu-HU') + ' HUF';
+        }
+
+        return {
+            total,
+            days,
+            selectedItems
+        };
     }
 
     function resetRentModal() {
         Object.values(itemMap).forEach(item => {
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
-            if (checkbox) checkbox.checked = false;
-            if (qtyEl) qtyEl.innerText = '1';
+
+            if (checkbox && !checkbox.disabled) {
+                checkbox.checked = false;
+            }
+
+            if (qtyEl) {
+                qtyEl.innerText = checkbox?.disabled ? qtyEl.innerText : '1';
+            }
         });
+
         updateLiveTotal();
     }
 
-    function openRentModal(preselectedItem = null) {
-        if (preselectedItem && (itemMap[preselectedItem]?.comingSoon === true || preselectedItem === 'boat')) return;
+    async function openRentModal(preselectedItem = null) {
+        if (preselectedItem && (itemMap[preselectedItem]?.comingSoon === true || itemMap[preselectedItem]?.active === false)) {
+            return;
+        }
+
         resetRentModal();
+
         if (preselectedItem && itemMap[preselectedItem]) {
             const checkbox = document.getElementById(itemMap[preselectedItem].checkboxId);
-            if (checkbox) checkbox.checked = true;
+
+            if (checkbox && !checkbox.disabled) {
+                checkbox.checked = true;
+            }
         }
+
         const modal = document.getElementById('rent-modal');
         modal.style.display = 'flex';
-        setTimeout(() => modal.classList.add('active'), 10);
+
+        setTimeout(() => {
+            modal.classList.add('active');
+        }, 10);
+
         document.body.style.overflow = 'hidden';
+
+        await refreshSunAvailability(false);
         updateLiveTotal();
     }
 
     function closeRentModal() {
         const modal = document.getElementById('rent-modal');
+
         modal.classList.remove('active');
+
         setTimeout(() => {
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
@@ -1683,36 +1894,55 @@ function getItemStockLimit(item) {
 
     function showSuccessPopup(orderData) {
         const detailsDiv = document.getElementById('success-details');
+
         detailsDiv.innerHTML = `
             <p>Tételek: <strong>${escapeHtml(orderData.items)}</strong></p>
             <p>Átvétel: <strong>Fonyód, Fürdő utca 40.</strong></p>
             <p>Időtartam: <strong>${escapeHtml(orderData.start)} — ${escapeHtml(orderData.end)}</strong></p>
             <p>Összesen: <strong>${Number(orderData.amount || 0).toLocaleString('hu-HU')} HUF</strong></p>
+            <p>Fizetés: <strong>${orderData.method === 'card' ? 'Online bankkártyás fizetés' : 'Készpénzes fizetés átvételkor'}</strong></p>
         `;
+
         const popup = document.getElementById('success-popup');
         popup.style.display = 'flex';
-        setTimeout(() => popup.classList.add('active'), 10);
+
+        setTimeout(() => {
+            popup.classList.add('active');
+        }, 10);
     }
 
     async function submitRentForm(e) {
         e.preventDefault();
-        const calc = updateLiveTotal();
 
-        if (calc.selectedItems.length === 0) {
+        const availabilityOk = await refreshSunAvailability(true);
+
+        if (!availabilityOk) return;
+
+        const calc = updateLiveTotal();
+        const selectedItems = calc.selectedItems;
+
+        if (selectedItems.length === 0) {
             alert('Válasszon legalább egy eszközt!');
             return;
         }
 
-        const overLimitItem = calc.selectedItems.find(item =>
-            item.stock !== null &&
-            item.stock !== undefined &&
-            Number(item.qty) > Number(item.stock)
-        );
-
-        if (overLimitItem) {
-            alert(`${overLimitItem.label} esetén maximum ${overLimitItem.stock} db foglalható.`);
+        if (calc.days <= 0) {
+            alert('Válasszon érvényes kezdő és befejező dátumot.');
             return;
         }
+
+        const overLimitItem = selectedItems.find(item => item.qty > item.available);
+
+        if (overLimitItem) {
+            alert(`${overLimitItem.label} esetén erre az időszakra maximum ${overLimitItem.available} db foglalható.`);
+            return;
+        }
+
+        if (calc.total <= 0) {
+            alert('A végösszeg nem lehet 0 HUF.');
+            return;
+        }
+
         const start = document.getElementById('r-start').value;
         const end = document.getElementById('r-end').value;
         const guestName = document.getElementById('r-name').value.trim();
@@ -1720,12 +1950,49 @@ function getItemStockLimit(item) {
         const phone = document.getElementById('r-phone').value.trim();
         const apartment = document.getElementById('r-apt').value;
         const method = document.querySelector('input[name="s-payment"]:checked')?.value || 'cash';
-        
-        const itemsText = calc.selectedItems.map(item => `${item.qty}x ${item.label}`).join(', ');
+
+        if (!guestName || !email || !phone || !apartment) {
+            alert('Tölts ki minden kötelező mezőt.');
+            return;
+        }
+
+        const itemsText = selectedItems
+            .map(item => `${item.qty}x ${item.label}`)
+            .join(', ');
+
         const orderData = {
-            items: itemsText, guestName, email, phone, apartment, start, end,
-            amount: calc.total, method, lang: 'hu', details: `Tételek: ${itemsText}`
+            type: 'EXTRA',
+            serviceName: 'Strandfelszerelés bérlés',
+            items: itemsText,
+            itemsDetailed: selectedItems.map(item => ({
+                id: item.id,
+                label: item.label,
+                qty: item.qty,
+                price: item.price
+            })),
+            guestName,
+            email,
+            phone,
+            apartment,
+            start,
+            end,
+            days: calc.days,
+            amount: calc.total,
+            totalPrice: calc.total,
+            method,
+            lang: 'hu',
+            pickupLocation: 'Fonyód, Fürdő utca 40',
+            details: `Átvétel: Fonyód, Fürdő utca 40 | Tételek: ${itemsText} | Időszak: ${start} - ${end}`
         };
+
+        const submitBtn = document.querySelector('.btn-book-extras');
+
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerText = method === 'card'
+                ? 'Továbbítás a fizetéshez...'
+                : 'Foglalás mentése...';
+        }
 
         try {
             const res = await fetch('/api/order', {
@@ -1733,15 +2000,68 @@ function getItemStockLimit(item) {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
             });
+
             const result = await res.json();
-            if (!res.ok) { alert('Hiba: ' + (result.error || 'Sikertelen foglalás')); return; }
+
+            if (!res.ok) {
+                alert('Hiba: ' + (result.error || 'Sikertelen foglalás.'));
+                return;
+            }
+
+            if (method === 'card' && result.clientSecret) {
+                const amount = Number(result.amount || orderData.amount || 0);
+
+                window.location.href =
+                    `/payment.html?kind=order&lang=hu&amount=${encodeURIComponent(amount)}&client_secret=${encodeURIComponent(result.clientSecret)}`;
+
+                return;
+            }
+
             closeRentModal();
             showSuccessPopup(orderData);
-        } catch (err) { alert('Hálózati hiba.'); }
+        } catch (err) {
+            console.error('Foglalási hiba:', err);
+            alert('Hálózati hiba történt.');
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerText = 'Foglalás elküldése';
+            }
+        }
+    }
+
+    function parseLocalDate(dateStr) {
+        if (!dateStr) return null;
+
+        const parts = String(dateStr).split('-').map(Number);
+
+        if (parts.length !== 3 || parts.some(Number.isNaN)) {
+            return null;
+        }
+
+        return new Date(parts[0], parts[1] - 1, parts[2]);
+    }
+
+    function safeImageUrl(value) {
+        const url = String(value || '').trim();
+
+        if (!url) return '';
+        if (url.startsWith('data:image/')) return url;
+        if (url.startsWith('../img/')) return url;
+        if (url.startsWith('img/')) return '../' + url;
+        if (url.startsWith('/img/')) return '..' + url;
+        if (url.startsWith('https://')) return url;
+
+        return '';
     }
 
     function escapeHtml(value) {
-        return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return String(value || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
     }
 </script>
 </body>
