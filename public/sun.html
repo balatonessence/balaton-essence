@@ -7,14 +7,14 @@
 
     <meta name="description" content="Prémium SUP-kölcsönzés a Balatonon, napozóágy- és napernyőkölcsönzés Fonyódon. Foglaljon strandfelszerelést és élvezze a gondtalan napokat a tónál.">
     <meta name="keywords" content="SUP kölcsönzés Balaton, napozóágy bérlés, napernyő kölcsönzés, strandfelszerelés Balaton, Fonyód SUP">
-    <link rel="canonical" href="https://balatonessence.com/de/sun.html">
+    <link rel="canonical" href="https://balatonessence.com/sun.html">
 
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://balatonessence.com/de/sun.html">
+    <meta property="og:url" content="https://balatonessence.com/sun.html">
     <meta property="og:title" content="SUP & Sun | Balaton Essence">
     <meta property="og:description" content="SUP-kölcsönzés, napozóágyak és napernyők a gondtalan balatoni napokért.">
     <meta property="og:image" content="https://balatonessence.com/img/sunkartya.png">
-    <link rel="icon" type="image/png" href="../img/bebetolto.png">
+    <link rel="icon" type="image/png" href="img/bebetolto.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -227,7 +227,7 @@
                     rgba(10, 15, 12, 0.55) 42%,
                     rgba(10, 15, 12, 0.2) 100%
                 ),
-                url('../img/sunkartya.png') center/cover no-repeat;
+                url('img/sunkartya.png') center/cover no-repeat;
             z-index: 0;
             transform: scale(1.02);
         }
@@ -599,6 +599,23 @@
             background: white;
             padding: 1.2rem;
             border: 1px solid var(--border);
+        }
+
+        .rent-notice {
+            display: none;
+            margin-bottom: 1rem;
+            padding: 0.95rem 1rem;
+            border-radius: 6px;
+            background: rgba(176, 65, 62, 0.08);
+            border: 1px solid rgba(176, 65, 62, 0.22);
+            color: var(--warning);
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        .rent-notice.active {
+            display: block;
         }
 
         .equipment-row {
@@ -1078,8 +1095,8 @@
 
     </style>
 
-    <link rel="stylesheet" href="../mobile.css?v=3">
-    <link rel="stylesheet" href="../cookie-consent.css?v=2">
+    <link rel="stylesheet" href="mobile.css?v=3">
+    <link rel="stylesheet" href="cookie-consent.css?v=2">
 </head>
 
 <body>
@@ -1100,8 +1117,8 @@
         <div class="lang-dropdown">
             <button class="lang-btn" type="button">HU <span class="arrow"></span></button>
             <div class="lang-content">
-                <a href="../sun.html">Magyar</a>
-                <a href="../en/sun.html">English</a>
+                <a href="sun.html">Magyar</a>
+                <a href="en/sun.html">English</a>
                 <a href="sun.html">Deutsch</a>
             </div>
         </div>
@@ -1176,7 +1193,7 @@
 
     <div class="sun-cards-grid">
         <div class="sun-item-card" id="card-sup" onclick="openRentModal('sup')">
-            <div class="sun-card-img" id="card-img-sup" style="background-image: url('../img/sup.png');"></div>
+            <div class="sun-card-img" id="card-img-sup" style="background-image: url('img/sup.png');"></div>
             <div class="sun-card-content">
                 <h3 class="sun-card-title">SUP</h3>
                 <p class="sun-card-price" id="card-price-sup">5.900 HUF <small>/ nap</small></p>
@@ -1185,7 +1202,7 @@
         </div>
 
         <div class="sun-item-card" id="card-sunbed" onclick="openRentModal('sunbed')">
-            <div class="sun-card-img" id="card-img-sunbed" style="background-image: url('../img/napozoszek.png');"></div>
+            <div class="sun-card-img" id="card-img-sunbed" style="background-image: url('img/napozoszek.png');"></div>
             <div class="sun-card-content">
                 <h3 class="sun-card-title">Napozóágy</h3>
                 <p class="sun-card-price" id="card-price-sunbed">1.500 HUF <small>/ nap</small></p>
@@ -1194,7 +1211,7 @@
         </div>
 
         <div class="sun-item-card" id="card-umbrella" onclick="openRentModal('umbrella')">
-            <div class="sun-card-img" id="card-img-umbrella" style="background-image: url('../img/napernyo.png');"></div>
+            <div class="sun-card-img" id="card-img-umbrella" style="background-image: url('img/napernyo.png');"></div>
             <div class="sun-card-content">
                 <h3 class="sun-card-title">Napernyő</h3>
                 <p class="sun-card-price" id="card-price-umbrella">1.000 HUF <small>/ nap</small></p>
@@ -1203,7 +1220,7 @@
         </div>
 
         <div class="sun-item-card is-coming-soon" id="card-boat" onclick="openRentModal('boat')">
-            <div class="sun-card-img" id="card-img-boat" style="background-image: url('../img/hajo.png');"></div>
+            <div class="sun-card-img" id="card-img-boat" style="background-image: url('img/hajo.png');"></div>
             <div class="sun-card-content">
                 <h3 class="sun-card-title">Hajó</h3>
                 <p class="sun-card-price" id="card-price-boat">Hamarosan</p>
@@ -1225,6 +1242,8 @@
         </p>
 
         <form id="rent-form" onsubmit="submitRentForm(event)">
+            <div id="rent-notice" class="rent-notice"></div>
+
             <div class="items-box">
                 <div class="equipment-row">
                     <label class="extras-item-label">
@@ -1401,7 +1420,7 @@
             label: 'SUP',
             price: 5900,
             unit: 'nap',
-            image: '../img/sup.png',
+            image: 'img/sup.png',
             active: true,
             maxStock: 0
         },
@@ -1411,7 +1430,7 @@
             label: 'Napozóágy',
             price: 1500,
             unit: 'nap',
-            image: '../img/napozoszek.png',
+            image: 'img/napozoszek.png',
             active: true,
             maxStock: 0
         },
@@ -1421,7 +1440,7 @@
             label: 'Napernyő',
             price: 1000,
             unit: 'nap',
-            image: '../img/napernyo.png',
+            image: 'img/napernyo.png',
             active: true,
             maxStock: 0
         },
@@ -1431,7 +1450,7 @@
             label: 'Hajó',
             price: 35000,
             unit: 'nap',
-            image: '../img/hajo.png',
+            image: 'img/hajo.png',
             active: false,
             maxStock: 0,
             comingSoon: true
@@ -1604,7 +1623,33 @@
         flatpickr('#r-end', config);
     }
 
-    async function refreshSunAvailability(showAlert = false) {
+    function showRentNotice(message) {
+        const notice = document.getElementById('rent-notice');
+
+        if (!notice) return;
+
+        notice.innerText = message;
+        notice.classList.add('active');
+
+        window.clearTimeout(notice._hideTimer);
+
+        notice._hideTimer = window.setTimeout(() => {
+            notice.classList.remove('active');
+            notice.innerText = '';
+        }, 4200);
+    }
+
+    function clearRentNotice() {
+        const notice = document.getElementById('rent-notice');
+
+        if (!notice) return;
+
+        window.clearTimeout(notice._hideTimer);
+        notice.classList.remove('active');
+        notice.innerText = '';
+    }
+
+    async function refreshSunAvailability(showNotice = false) {
         const start = document.getElementById('r-start')?.value || '';
         const end = document.getElementById('r-end')?.value || '';
 
@@ -1625,8 +1670,8 @@
             applyAvailabilityToUi();
             updateLiveTotal();
 
-            if (showAlert) {
-                alert('Kérlek válassz érvényes kezdő és befejező dátumot.');
+            if (showNotice) {
+                showRentNotice('Kérlek válassz érvényes kezdő és befejező dátumot.');
             }
 
             return false;
@@ -1649,8 +1694,8 @@
         } catch (err) {
             console.error('SUP & SUN készlet lekérési hiba:', err);
 
-            if (showAlert) {
-                alert('Nem sikerült lekérni az aktuális készletet. Próbáld újra.');
+            if (showNotice) {
+                showRentNotice('Nem sikerült lekérni az aktuális készletet. Próbáld újra.');
             }
 
             return false;
@@ -1752,10 +1797,10 @@
 
         if (available <= 0) {
             val = 0;
-            alert('Ebből erre az időszakra jelenleg nincs szabad készlet.');
+            showRentNotice('Ebből erre az időszakra jelenleg nincs szabad készlet.');
         } else if (val > available) {
             val = available;
-            alert(`Ebből erre az időszakra jelenleg maximum ${available} db foglalható.`);
+            showRentNotice(`Ebből erre az időszakra jelenleg maximum ${available} db foglalható.`);
         }
 
         el.innerText = String(val);
@@ -1837,6 +1882,8 @@
     }
 
     function resetRentModal() {
+        clearRentNotice();
+
         Object.values(itemMap).forEach(item => {
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
@@ -1889,6 +1936,7 @@
         setTimeout(() => {
             modal.style.display = 'none';
             document.body.style.overflow = 'auto';
+            clearRentNotice();
         }, 350);
     }
 
@@ -1914,6 +1962,8 @@
     async function submitRentForm(e) {
         e.preventDefault();
 
+        clearRentNotice();
+
         const availabilityOk = await refreshSunAvailability(true);
 
         if (!availabilityOk) return;
@@ -1922,24 +1972,24 @@
         const selectedItems = calc.selectedItems;
 
         if (selectedItems.length === 0) {
-            alert('Válasszon legalább egy eszközt!');
+            showRentNotice('Válasszon legalább egy eszközt!');
             return;
         }
 
         if (calc.days <= 0) {
-            alert('Válasszon érvényes kezdő és befejező dátumot.');
+            showRentNotice('Válasszon érvényes kezdő és befejező dátumot.');
             return;
         }
 
         const overLimitItem = selectedItems.find(item => item.qty > item.available);
 
         if (overLimitItem) {
-            alert(`${overLimitItem.label} esetén erre az időszakra maximum ${overLimitItem.available} db foglalható.`);
+            showRentNotice(`${overLimitItem.label} esetén erre az időszakra maximum ${overLimitItem.available} db foglalható.`);
             return;
         }
 
         if (calc.total <= 0) {
-            alert('A végösszeg nem lehet 0 HUF.');
+            showRentNotice('A végösszeg nem lehet 0 HUF.');
             return;
         }
 
@@ -1952,7 +2002,7 @@
         const method = document.querySelector('input[name="s-payment"]:checked')?.value || 'cash';
 
         if (!guestName || !email || !phone || !apartment) {
-            alert('Tölts ki minden kötelező mezőt.');
+            showRentNotice('Tölts ki minden kötelező mezőt.');
             return;
         }
 
@@ -2004,7 +2054,7 @@
             const result = await res.json();
 
             if (!res.ok) {
-                alert('Hiba: ' + (result.error || 'Sikertelen foglalás.'));
+                showRentNotice('Hiba: ' + (result.error || 'Sikertelen foglalás.'));
                 return;
             }
 
@@ -2021,7 +2071,7 @@
             showSuccessPopup(orderData);
         } catch (err) {
             console.error('Foglalási hiba:', err);
-            alert('Hálózati hiba történt.');
+            showRentNotice('Hálózati hiba történt.');
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
@@ -2047,9 +2097,8 @@
 
         if (!url) return '';
         if (url.startsWith('data:image/')) return url;
-        if (url.startsWith('../img/')) return url;
-        if (url.startsWith('img/')) return '../' + url;
-        if (url.startsWith('/img/')) return '..' + url;
+        if (url.startsWith('img/')) return url;
+        if (url.startsWith('/img/')) return url.slice(1);
         if (url.startsWith('https://')) return url;
 
         return '';
