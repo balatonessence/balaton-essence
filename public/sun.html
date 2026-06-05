@@ -1469,7 +1469,8 @@
                     price: Number(service.price || itemMap[service.id].price),
                     unit: service.unit_hu || 'nap',
                     image: service.image || itemMap[service.id].image,
-                    active: service.active !== false
+                    active: service.active !== false,
+                    stock: getServiceStock(service, itemMap[service.id].stock)
                 };
             });
             renderSunServiceTexts();
@@ -1478,6 +1479,40 @@
             renderSunServiceTexts();
         }
     }
+
+    function getServiceStock(service, fallback = null) {
+    const raw =
+        service.stock ??
+        service.quantity ??
+        service.count ??
+        service.maxQty ??
+        service.availableQty ??
+        fallback;
+
+    if (raw === null || raw === undefined || raw === '') {
+        return null;
+    }
+
+    const stock = Number(raw);
+
+    return Number.isFinite(stock) && stock >= 0
+        ? Math.floor(stock)
+        : null;
+}
+
+function getItemByQtyId(qtyId) {
+    return Object.values(itemMap).find(item => item.qtyId === qtyId) || null;
+}
+
+function getItemStockLimit(item) {
+    if (!item) return null;
+
+    const stock = Number(item.stock);
+
+    return Number.isFinite(stock) && stock >= 0
+        ? Math.floor(stock)
+        : null;
+}
 
     function renderSunServiceTexts() {
         Object.entries(itemMap).forEach(([key, item]) => {
@@ -1545,13 +1580,26 @@
     }
 
     function changeQty(id, delta) {
-        const el = document.getElementById(id);
-        if (!el) return;
-        let val = parseInt(el.innerText, 10) || 1;
-        val = Math.max(1, val + delta);
-        el.innerText = val;
-        updateLiveTotal();
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    const item = getItemByQtyId(id);
+    const stockLimit = getItemStockLimit(item);
+
+    let val = parseInt(el.innerText, 10) || 1;
+    val = Math.max(1, val + delta);
+
+    if (stockLimit !== null) {
+        val = Math.min(val, stockLimit);
+
+        if (delta > 0 && val >= stockLimit) {
+            alert(`Ebből jelenleg maximum ${stockLimit} db foglalható.`);
+        }
     }
+
+    el.innerText = val;
+    updateLiveTotal();
+}
 
     function getRentalDays() {
         const start = document.getElementById('r-start').value;
@@ -1570,13 +1618,22 @@
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
             if (!checkbox || !qtyEl || !checkbox.checked) return;
-            const qty = parseInt(qtyEl.innerText, 10) || 1;
-            selected.push({
-                label: item.label,
-                qty,
-                price: Number(item.price || 0),
-                dailyTotal: qty * Number(item.price || 0)
-            });
+            let qty = parseInt(qtyEl.innerText, 10) || 1;
+                const stockLimit = getItemStockLimit(item);
+
+                if (stockLimit !== null && qty > stockLimit) {
+                    qty = stockLimit;
+                    qtyEl.innerText = String(stockLimit);
+                }
+
+                selected.push({
+                    id: Object.keys(itemMap).find(key => itemMap[key] === item) || '',
+                    label: item.label,
+                    qty,
+                    stock: stockLimit,
+                    price: Number(item.price || 0),
+                    dailyTotal: qty * Number(item.price || 0)
+                });
         });
         return selected;
     }
@@ -1640,7 +1697,22 @@
     async function submitRentForm(e) {
         e.preventDefault();
         const calc = updateLiveTotal();
-        if (calc.selectedItems.length === 0) { alert('Válasszon legalább egy eszközt!'); return; }
+
+        if (calc.selectedItems.length === 0) {
+            alert('Válasszon legalább egy eszközt!');
+            return;
+        }
+
+        const overLimitItem = calc.selectedItems.find(item =>
+            item.stock !== null &&
+            item.stock !== undefined &&
+            Number(item.qty) > Number(item.stock)
+        );
+
+        if (overLimitItem) {
+            alert(`${overLimitItem.label} esetén maximum ${overLimitItem.stock} db foglalható.`);
+            return;
+        }
         const start = document.getElementById('r-start').value;
         const end = document.getElementById('r-end').value;
         const guestName = document.getElementById('r-name').value.trim();
