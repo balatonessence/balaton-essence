@@ -601,6 +601,23 @@
             border: 1px solid var(--border);
         }
 
+        .rent-notice {
+            display: none;
+            margin-bottom: 1rem;
+            padding: 0.95rem 1rem;
+            border-radius: 6px;
+            background: rgba(176, 65, 62, 0.08);
+            border: 1px solid rgba(176, 65, 62, 0.22);
+            color: var(--warning);
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        .rent-notice.active {
+            display: block;
+        }
+
         .equipment-row {
             display: flex;
             align-items: center;
@@ -1225,6 +1242,8 @@
         </p>
 
         <form id="rent-form" onsubmit="submitRentForm(event)">
+            <div id="rent-notice" class="rent-notice"></div>
+
             <div class="items-box">
                 <div class="equipment-row">
                     <label class="extras-item-label">
@@ -1321,9 +1340,9 @@
                         Cash
                     </label>
 
-                    <label>
-                        <input type="radio" name="s-payment" value="card">
-                        Online card payment
+                    <label style="opacity: 0.55; cursor: not-allowed;">
+                        <input type="radio" name="s-payment" value="card" disabled>
+                        Online card payment – coming soon
                     </label>
                 </div>
             </div>
@@ -1390,7 +1409,8 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
 <script>
-    const stripe = Stripe('pk_live_51TNXrkD5Y5Qxzjx3bi1hUi6HMEBd4w9M5OLZgBv1FeMpmoToIZADkpSk8mp8FOmfSHPvMxFPNx4poegQiqD744wa008VJaXnxl');
+    let currentSunAvailability = {};
+    let hasSelectedRentalDates = false;
 
     let itemMap = {
         sup: {
@@ -1400,7 +1420,8 @@
             price: 5900,
             unit: 'day',
             image: '../img/sup.png',
-            active: true
+            active: true,
+            maxStock: 0
         },
         sunbed: {
             checkboxId: 'item-sunbed',
@@ -1409,7 +1430,8 @@
             price: 1500,
             unit: 'day',
             image: '../img/napozoszek.png',
-            active: true
+            active: true,
+            maxStock: 0
         },
         umbrella: {
             checkboxId: 'item-umbrella',
@@ -1418,7 +1440,8 @@
             price: 1000,
             unit: 'day',
             image: '../img/napernyo.png',
-            active: true
+            active: true,
+            maxStock: 0
         },
         boat: {
             checkboxId: 'item-boat',
@@ -1427,7 +1450,8 @@
             price: 35000,
             unit: 'day',
             image: '../img/hajo.png',
-            active: true,
+            active: false,
+            maxStock: 0,
             comingSoon: true
         }
     };
@@ -1462,7 +1486,7 @@
             const res = await fetch('/api/services?t=' + Date.now());
 
             if (!res.ok) {
-                throw new Error('Could not load service prices.');
+                throw new Error('Could not load services.');
             }
 
             const data = await res.json();
@@ -1473,17 +1497,18 @@
 
                 itemMap[service.id] = {
                     ...itemMap[service.id],
-                    label: service.name_en || service.name_hu || itemMap[service.id].label,
+                    label: service.name_en || service.name_hu || service.name_de || itemMap[service.id].label,
                     price: Number(service.price || itemMap[service.id].price),
                     unit: service.unit_en || itemMap[service.id].unit || 'day',
                     image: service.image || itemMap[service.id].image,
-                    active: service.active !== false
+                    active: service.active !== false,
+                    maxStock: Number(service.maxStock || 0)
                 };
             });
 
             renderSunServiceTexts();
         } catch (err) {
-            console.error('SUP & SUN price loading error:', err);
+            console.error('SUP & SUN service loading error:', err);
             renderSunServiceTexts();
         }
     }
@@ -1496,22 +1521,22 @@
             const card = document.getElementById(`card-${key}`);
             const cardPrice = document.getElementById(`card-price-${key}`);
             const modalPrice = document.getElementById(`modal-price-${key}`);
-            const cardImg = document.getElementById(`card-img-${key}`);
             const cardTitle = card ? card.querySelector('.sun-card-title') : null;
-            const modalLabel = document.querySelector(`#${item.checkboxId}`)?.closest('.extras-item-label')?.querySelector('.item-text-main');
-
-            const isComingSoon = item.comingSoon === true || key === 'boat';
             const action = card ? card.querySelector('.sun-card-action') : null;
             const checkbox = document.getElementById(item.checkboxId);
             const row = checkbox ? checkbox.closest('.equipment-row') || checkbox.closest('div') : null;
+            const modalLabel = checkbox?.closest('.extras-item-label')?.querySelector('.item-text-main');
+            const cardImg = document.getElementById(`card-img-${key}`);
+
+            const isComingSoon = item.comingSoon === true || item.active === false;
 
             if (card) {
-                card.style.display = item.active === false && !isComingSoon ? 'none' : 'flex';
+                card.style.display = item.active === false && !item.comingSoon ? 'none' : 'flex';
                 card.classList.toggle('is-coming-soon', isComingSoon);
             }
 
             if (action) {
-                action.innerText = isComingSoon ? 'Coming soon' : action.innerText || 'Book now';
+                action.innerText = isComingSoon ? 'Coming soon' : 'Book now';
             }
 
             if (cardTitle) {
@@ -1519,11 +1544,15 @@
             }
 
             if (cardPrice) {
-                cardPrice.innerHTML = isComingSoon ? 'Coming soon' : `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
+                cardPrice.innerHTML = isComingSoon
+                    ? 'Coming soon'
+                    : `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
             }
 
             if (modalPrice) {
-                modalPrice.innerText = isComingSoon ? '(Coming soon)' : `(${priceText}/${unitText})`;
+                modalPrice.innerText = isComingSoon
+                    ? '(Coming soon)'
+                    : `(${priceText}/${unitText})`;
             }
 
             if (modalLabel && modalPrice) {
@@ -1544,10 +1573,13 @@
                 cardImg.style.backgroundImage = `url('${escapeHtml(safeImageUrl(item.image))}')`;
             }
         });
+
+        applyAvailabilityToUi();
     }
 
     async function loadApartments() {
         const aptSelect = document.getElementById('r-apt');
+
         if (!aptSelect) return;
 
         try {
@@ -1569,7 +1601,7 @@
                 aptSelect.appendChild(opt);
             });
         } catch (err) {
-            console.error('Error while loading apartments:', err);
+            console.error('Apartment loading error:', err);
         }
     }
 
@@ -1579,38 +1611,210 @@
             altInput: true,
             altFormat: 'F j, Y',
             minDate: 'today',
-            onChange: updateLiveTotal
+            onChange: async function() {
+                await refreshSunAvailability();
+                updateLiveTotal();
+            }
         };
 
         flatpickr('#r-start', config);
         flatpickr('#r-end', config);
     }
 
-    function changeQty(id, delta) {
-        const el = document.getElementById(id);
-        if (!el) return;
+    async function refreshSunAvailability(showNotice = false) {
+        const start = document.getElementById('r-start')?.value || '';
+        const end = document.getElementById('r-end')?.value || '';
 
-        let val = parseInt(el.innerText, 10) || 1;
-        val = Math.max(1, val + delta);
-        el.innerText = val;
-
-        updateLiveTotal();
-    }
-
-    function getRentalDays() {
-        const start = document.getElementById('r-start').value;
-        const end = document.getElementById('r-end').value;
+        hasSelectedRentalDates = Boolean(start && end);
 
         if (!start || !end) {
-            return 0;
+            currentSunAvailability = {};
+            applyAvailabilityToUi();
+            updateLiveTotal();
+            return true;
         }
 
         const d1 = parseLocalDate(start);
         const d2 = parseLocalDate(end);
 
-        if (!d1 || !d2 || isNaN(d1.getTime()) || isNaN(d2.getTime()) || d2 < d1) {
-            return 0;
+        if (!d1 || !d2 || d2 < d1) {
+            currentSunAvailability = {};
+            applyAvailabilityToUi();
+            updateLiveTotal();
+
+            if (showNotice) {
+                showRentNotice('Please select a valid start and end date.');
+            }
+
+            return false;
         }
+
+        try {
+            const url = `/api/sun-availability?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&t=${Date.now()}`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Availability request failed.');
+            }
+
+            currentSunAvailability = data.availability || {};
+            applyAvailabilityToUi();
+            updateLiveTotal();
+
+            return true;
+        } catch (err) {
+            console.error('SUP & SUN availability loading error:', err);
+
+            if (showNotice) {
+                showRentNotice('Could not check current availability. Please try again.');
+            }
+
+            return false;
+        }
+    }
+
+    function applyAvailabilityToUi() {
+        Object.entries(itemMap).forEach(([key, item]) => {
+            const checkbox = document.getElementById(item.checkboxId);
+            const qtyEl = document.getElementById(item.qtyId);
+            const row = checkbox ? checkbox.closest('.equipment-row') || checkbox.closest('div') : null;
+            const modalPrice = document.getElementById(`modal-price-${key}`);
+
+            if (!checkbox || !qtyEl) return;
+
+            const isComingSoon = item.comingSoon === true || item.active === false;
+            const available = getAvailableStockForItem(key);
+
+            if (isComingSoon) {
+                checkbox.checked = false;
+                checkbox.disabled = true;
+                qtyEl.innerText = '1';
+                row?.classList.add('is-disabled');
+
+                if (modalPrice) {
+                    modalPrice.innerText = '(Coming soon)';
+                }
+
+                return;
+            }
+
+            if (hasSelectedRentalDates && available <= 0) {
+                checkbox.checked = false;
+                checkbox.disabled = true;
+                qtyEl.innerText = '0';
+                row?.classList.add('is-disabled');
+
+                if (modalPrice) {
+                    modalPrice.innerText = '(Sold out for this period)';
+                }
+
+                return;
+            }
+
+            checkbox.disabled = false;
+            row?.classList.remove('is-disabled');
+
+            if (Number(qtyEl.innerText || 0) < 1) {
+                qtyEl.innerText = '1';
+            }
+
+            if (Number(qtyEl.innerText || 0) > available) {
+                qtyEl.innerText = String(available);
+            }
+
+            if (modalPrice) {
+                const priceText = `${Number(item.price || 0).toLocaleString('en-US')} HUF`;
+                modalPrice.innerText = `(${priceText}/${item.unit || 'day'})`;
+            }
+        });
+    }
+
+    function getAvailableStockForItem(key) {
+        const item = itemMap[key];
+
+        if (!item) return 0;
+
+        const maxStock = Number(item.maxStock || 0);
+
+        if (hasSelectedRentalDates && currentSunAvailability[key]) {
+            const available = Number(currentSunAvailability[key].available);
+
+            if (Number.isFinite(available)) {
+                return Math.max(0, Math.floor(available));
+            }
+        }
+
+        if (Number.isFinite(maxStock)) {
+            return Math.max(0, Math.floor(maxStock));
+        }
+
+        return 0;
+    }
+
+    function getItemKeyByQtyId(qtyId) {
+        return Object.keys(itemMap).find(key => itemMap[key].qtyId === qtyId) || '';
+    }
+
+    function showRentNotice(message) {
+        const notice = document.getElementById('rent-notice');
+
+        if (!notice) return;
+
+        notice.innerText = message;
+        notice.classList.add('active');
+
+        window.clearTimeout(notice._hideTimer);
+
+        notice._hideTimer = window.setTimeout(() => {
+            notice.classList.remove('active');
+            notice.innerText = '';
+        }, 4200);
+    }
+
+    function clearRentNotice() {
+        const notice = document.getElementById('rent-notice');
+
+        if (!notice) return;
+
+        window.clearTimeout(notice._hideTimer);
+        notice.classList.remove('active');
+        notice.innerText = '';
+    }
+
+    function changeQty(id, delta) {
+        const el = document.getElementById(id);
+
+        if (!el) return;
+
+        const key = getItemKeyByQtyId(id);
+        const available = getAvailableStockForItem(key);
+
+        let val = parseInt(el.innerText, 10) || 1;
+        val = Math.max(1, val + delta);
+
+        if (available <= 0) {
+            val = 0;
+            showRentNotice('There is no available stock for this period.');
+        } else if (val > available) {
+            val = available;
+            showRentNotice(`For this period, a maximum of ${available} can be booked.`);
+        }
+
+        el.innerText = String(val);
+        updateLiveTotal();
+    }
+
+    function getRentalDays() {
+        const start = document.getElementById('r-start')?.value || '';
+        const end = document.getElementById('r-end')?.value || '';
+
+        if (!start || !end) return 0;
+
+        const d1 = parseLocalDate(start);
+        const d2 = parseLocalDate(end);
+
+        if (!d1 || !d2 || d2 < d1) return 0;
 
         return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
     }
@@ -1618,19 +1822,35 @@
     function getSelectedItems() {
         const selected = [];
 
-        Object.values(itemMap).forEach(item => {
+        Object.entries(itemMap).forEach(([key, item]) => {
             if (item.active === false || item.comingSoon === true) return;
 
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
 
-            if (!checkbox || !qtyEl || !checkbox.checked) return;
+            if (!checkbox || !qtyEl || checkbox.disabled || !checkbox.checked) return;
 
-            const qty = parseInt(qtyEl.innerText, 10) || 1;
+            const available = getAvailableStockForItem(key);
+            let qty = parseInt(qtyEl.innerText, 10) || 1;
+
+            if (available <= 0) {
+                qty = 0;
+                checkbox.checked = false;
+                qtyEl.innerText = '0';
+                return;
+            }
+
+            if (qty > available) {
+                qty = available;
+                qtyEl.innerText = String(available);
+            }
 
             selected.push({
+                id: key,
                 label: item.label,
                 qty,
+                available,
+                maxStock: Number(item.maxStock || 0),
                 price: Number(item.price || 0),
                 dailyTotal: qty * Number(item.price || 0)
             });
@@ -1664,24 +1884,30 @@
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
 
-            if (checkbox) checkbox.checked = false;
-            if (qtyEl) qtyEl.innerText = '1';
+            if (checkbox && !checkbox.disabled) {
+                checkbox.checked = false;
+            }
+
+            if (qtyEl) {
+                qtyEl.innerText = checkbox?.disabled ? qtyEl.innerText : '1';
+            }
         });
 
         updateLiveTotal();
     }
 
-    function openRentModal(preselectedItem = null) {
-        if (preselectedItem && (itemMap[preselectedItem]?.comingSoon === true || preselectedItem === 'boat')) {
+    async function openRentModal(preselectedItem = null) {
+        if (preselectedItem && (itemMap[preselectedItem]?.comingSoon === true || itemMap[preselectedItem]?.active === false)) {
             return;
         }
 
         resetRentModal();
+        clearRentNotice();
 
         if (preselectedItem && itemMap[preselectedItem]) {
             const checkbox = document.getElementById(itemMap[preselectedItem].checkboxId);
 
-            if (checkbox) {
+            if (checkbox && !checkbox.disabled) {
                 checkbox.checked = true;
             }
         }
@@ -1694,6 +1920,8 @@
         }, 10);
 
         document.body.style.overflow = 'hidden';
+
+        await refreshSunAvailability(false);
         updateLiveTotal();
     }
 
@@ -1730,21 +1958,32 @@
     async function submitRentForm(e) {
         e.preventDefault();
 
+        const availabilityOk = await refreshSunAvailability(true);
+
+        if (!availabilityOk) return;
+
         const calc = updateLiveTotal();
         const selectedItems = calc.selectedItems;
 
         if (selectedItems.length === 0) {
-            alert('Please select at least one item.');
+            showRentNotice('Please select at least one item.');
             return;
         }
 
         if (calc.days <= 0) {
-            alert('Please select a valid start and end date.');
+            showRentNotice('Please select a valid start and end date.');
+            return;
+        }
+
+        const overLimitItem = selectedItems.find(item => item.qty > item.available);
+
+        if (overLimitItem) {
+            showRentNotice(`For ${overLimitItem.label}, a maximum of ${overLimitItem.available} can be booked for this period.`);
             return;
         }
 
         if (calc.total <= 0) {
-            alert('The total amount cannot be 0 HUF.');
+            showRentNotice('The total amount cannot be 0 HUF.');
             return;
         }
 
@@ -1757,7 +1996,7 @@
         const method = document.querySelector('input[name="s-payment"]:checked')?.value || 'cash';
 
         if (!guestName || !email || !phone || !apartment) {
-            alert('Please fill in all required fields.');
+            showRentNotice('Please fill in all required fields.');
             return;
         }
 
@@ -1769,6 +2008,12 @@
             type: 'EXTRA',
             serviceName: 'Beach equipment rental',
             items: itemsText,
+            itemsDetailed: selectedItems.map(item => ({
+                id: item.id,
+                label: item.label,
+                qty: item.qty,
+                price: item.price
+            })),
             guestName,
             email,
             phone,
@@ -1788,7 +2033,9 @@
 
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerText = method === 'card' ? 'Redirecting to payment...' : 'Saving booking...';
+            submitBtn.innerText = method === 'card'
+                ? 'Redirecting to payment...'
+                : 'Saving booking...';
         }
 
         try {
@@ -1801,26 +2048,24 @@
             const result = await res.json();
 
             if (!res.ok) {
-                alert('Error: ' + (result.error || 'Booking failed'));
+                showRentNotice('Error: ' + (result.error || 'Booking failed.'));
                 return;
             }
 
             if (method === 'card' && result.clientSecret) {
                 const amount = Number(result.amount || orderData.amount || 0);
-                window.location.href = `/payment.html?kind=order&lang=en&amount=${encodeURIComponent(amount)}&client_secret=${encodeURIComponent(result.clientSecret)}`;
-                return;
-            }
 
-            if (method === 'card' && result.stripeSessionId) {
-                await stripe.redirectToCheckout({ sessionId: result.stripeSessionId });
+                window.location.href =
+                    `/payment.html?kind=order&lang=en&amount=${encodeURIComponent(amount)}&client_secret=${encodeURIComponent(result.clientSecret)}`;
+
                 return;
             }
 
             closeRentModal();
             showSuccessPopup(orderData);
         } catch (err) {
-            console.error('Error:', err);
-            alert('A network error occurred.');
+            console.error('Booking error:', err);
+            showRentNotice('A network error occurred.');
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;

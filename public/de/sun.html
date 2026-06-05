@@ -601,6 +601,23 @@
             border: 1px solid var(--border);
         }
 
+        .rent-notice {
+            display: none;
+            margin-bottom: 1rem;
+            padding: 0.95rem 1rem;
+            border-radius: 6px;
+            background: rgba(176, 65, 62, 0.08);
+            border: 1px solid rgba(176, 65, 62, 0.22);
+            color: var(--warning);
+            font-size: 0.82rem;
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        .rent-notice.active {
+            display: block;
+        }
+
         .equipment-row {
             display: flex;
             align-items: center;
@@ -1225,6 +1242,8 @@
         </p>
 
         <form id="rent-form" onsubmit="submitRentForm(event)">
+            <div id="rent-notice" class="rent-notice"></div>
+
             <div class="items-box">
                 <div class="equipment-row">
                     <label class="extras-item-label">
@@ -1321,9 +1340,9 @@
                         Barzahlung
                     </label>
 
-                    <label>
-                        <input type="radio" name="s-payment" value="card">
-                        Online-Kartenzahlung
+                    <label style="opacity: 0.55; cursor: not-allowed;">
+                        <input type="radio" name="s-payment" value="card" disabled>
+                        Online-Kartenzahlung – demnächst verfügbar
                     </label>
                 </div>
             </div>
@@ -1391,7 +1410,8 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/de.js"></script>
 
 <script>
-    const stripe = Stripe('pk_live_51TNXrkD5Y5Qxzjx3bi1hUi6HMEBd4w9M5OLZgBv1FeMpmoToIZADkpSk8mp8FOmfSHPvMxFPNx4poegQiqD744wa008VJaXnxl');
+    let currentSunAvailability = {};
+    let hasSelectedRentalDates = false;
 
     let itemMap = {
         sup: {
@@ -1401,7 +1421,8 @@
             price: 5900,
             unit: 'Tag',
             image: '../img/sup.png',
-            active: true
+            active: true,
+            maxStock: 0
         },
         sunbed: {
             checkboxId: 'item-sunbed',
@@ -1410,7 +1431,8 @@
             price: 1500,
             unit: 'Tag',
             image: '../img/napozoszek.png',
-            active: true
+            active: true,
+            maxStock: 0
         },
         umbrella: {
             checkboxId: 'item-umbrella',
@@ -1419,7 +1441,8 @@
             price: 1000,
             unit: 'Tag',
             image: '../img/napernyo.png',
-            active: true
+            active: true,
+            maxStock: 0
         },
         boat: {
             checkboxId: 'item-boat',
@@ -1428,7 +1451,8 @@
             price: 35000,
             unit: 'Tag',
             image: '../img/hajo.png',
-            active: true,
+            active: false,
+            maxStock: 0,
             comingSoon: true
         }
     };
@@ -1463,7 +1487,7 @@
             const res = await fetch('/api/services?t=' + Date.now());
 
             if (!res.ok) {
-                throw new Error('Die Servicepreise konnten nicht geladen werden.');
+                throw new Error('Die Dienstleistungen konnten nicht geladen werden.');
             }
 
             const data = await res.json();
@@ -1474,17 +1498,18 @@
 
                 itemMap[service.id] = {
                     ...itemMap[service.id],
-                    label: service.name_de || service.name_hu || itemMap[service.id].label,
+                    label: service.name_de || service.name_hu || service.name_en || itemMap[service.id].label,
                     price: Number(service.price || itemMap[service.id].price),
                     unit: service.unit_de || itemMap[service.id].unit || 'Tag',
                     image: service.image || itemMap[service.id].image,
-                    active: service.active !== false
+                    active: service.active !== false,
+                    maxStock: Number(service.maxStock || 0)
                 };
             });
 
             renderSunServiceTexts();
         } catch (err) {
-            console.error('SUP & SUN Preis-Ladefehler:', err);
+            console.error('SUP & SUN Dienstleistungs-Ladefehler:', err);
             renderSunServiceTexts();
         }
     }
@@ -1497,22 +1522,22 @@
             const card = document.getElementById(`card-${key}`);
             const cardPrice = document.getElementById(`card-price-${key}`);
             const modalPrice = document.getElementById(`modal-price-${key}`);
-            const cardImg = document.getElementById(`card-img-${key}`);
             const cardTitle = card ? card.querySelector('.sun-card-title') : null;
-            const modalLabel = document.querySelector(`#${item.checkboxId}`)?.closest('.extras-item-label')?.querySelector('.item-text-main');
-
-            const isComingSoon = item.comingSoon === true || key === 'boat';
             const action = card ? card.querySelector('.sun-card-action') : null;
             const checkbox = document.getElementById(item.checkboxId);
-            const row = checkbox ? checkbox.closest('.equipment-row') || checkbox.closest('div') : null;
+            const row = checkbox ? checkbox.closest('.equipment-row') : null;
+            const modalLabel = checkbox?.closest('.extras-item-label')?.querySelector('.item-text-main');
+            const cardImg = document.getElementById(`card-img-${key}`);
+
+            const isComingSoon = item.comingSoon === true || item.active === false;
 
             if (card) {
-                card.style.display = item.active === false && !isComingSoon ? 'none' : 'flex';
+                card.style.display = item.active === false && !item.comingSoon ? 'none' : 'flex';
                 card.classList.toggle('is-coming-soon', isComingSoon);
             }
 
             if (action) {
-                action.innerText = isComingSoon ? 'Demnächst' : action.innerText || 'Buchen';
+                action.innerText = isComingSoon ? 'Demnächst' : 'Buchen';
             }
 
             if (cardTitle) {
@@ -1520,11 +1545,15 @@
             }
 
             if (cardPrice) {
-                cardPrice.innerHTML = isComingSoon ? 'Demnächst' : `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
+                cardPrice.innerHTML = isComingSoon
+                    ? 'Demnächst'
+                    : `${priceText} <small>/ ${escapeHtml(unitText)}</small>`;
             }
 
             if (modalPrice) {
-                modalPrice.innerText = isComingSoon ? '(Demnächst)' : `(${priceText}/${unitText})`;
+                modalPrice.innerText = isComingSoon
+                    ? '(Demnächst)'
+                    : `(${priceText}/${unitText})`;
             }
 
             if (modalLabel && modalPrice) {
@@ -1545,10 +1574,13 @@
                 cardImg.style.backgroundImage = `url('${escapeHtml(safeImageUrl(item.image))}')`;
             }
         });
+
+        applyAvailabilityToUi();
     }
 
     async function loadApartments() {
         const aptSelect = document.getElementById('r-apt');
+
         if (!aptSelect) return;
 
         try {
@@ -1581,38 +1613,210 @@
             altInput: true,
             altFormat: 'd. F Y',
             minDate: 'today',
-            onChange: updateLiveTotal
+            onChange: async function() {
+                await refreshSunAvailability();
+                updateLiveTotal();
+            }
         };
 
         flatpickr('#r-start', config);
         flatpickr('#r-end', config);
     }
 
-    function changeQty(id, delta) {
-        const el = document.getElementById(id);
-        if (!el) return;
+    async function refreshSunAvailability(showNotice = false) {
+        const start = document.getElementById('r-start')?.value || '';
+        const end = document.getElementById('r-end')?.value || '';
 
-        let val = parseInt(el.innerText, 10) || 1;
-        val = Math.max(1, val + delta);
-        el.innerText = val;
-
-        updateLiveTotal();
-    }
-
-    function getRentalDays() {
-        const start = document.getElementById('r-start').value;
-        const end = document.getElementById('r-end').value;
+        hasSelectedRentalDates = Boolean(start && end);
 
         if (!start || !end) {
-            return 0;
+            currentSunAvailability = {};
+            applyAvailabilityToUi();
+            updateLiveTotal();
+            return true;
         }
 
         const d1 = parseLocalDate(start);
         const d2 = parseLocalDate(end);
 
-        if (!d1 || !d2 || isNaN(d1.getTime()) || isNaN(d2.getTime()) || d2 < d1) {
-            return 0;
+        if (!d1 || !d2 || d2 < d1) {
+            currentSunAvailability = {};
+            applyAvailabilityToUi();
+            updateLiveTotal();
+
+            if (showNotice) {
+                showRentNotice('Bitte wählen Sie ein gültiges Start- und Enddatum aus.');
+            }
+
+            return false;
         }
+
+        try {
+            const url = `/api/sun-availability?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}&t=${Date.now()}`;
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (!res.ok) {
+                throw new Error(data.error || 'Fehler beim Abrufen der Verfügbarkeit.');
+            }
+
+            currentSunAvailability = data.availability || {};
+            applyAvailabilityToUi();
+            updateLiveTotal();
+
+            return true;
+        } catch (err) {
+            console.error('SUP & SUN Verfügbarkeitsfehler:', err);
+
+            if (showNotice) {
+                showRentNotice('Die aktuelle Verfügbarkeit konnte nicht abgerufen werden. Bitte versuchen Sie es erneut.');
+            }
+
+            return false;
+        }
+    }
+
+    function applyAvailabilityToUi() {
+        Object.entries(itemMap).forEach(([key, item]) => {
+            const checkbox = document.getElementById(item.checkboxId);
+            const qtyEl = document.getElementById(item.qtyId);
+            const row = checkbox ? checkbox.closest('.equipment-row') : null;
+            const modalPrice = document.getElementById(`modal-price-${key}`);
+
+            if (!checkbox || !qtyEl) return;
+
+            const isComingSoon = item.comingSoon === true || item.active === false;
+            const available = getAvailableStockForItem(key);
+
+            if (isComingSoon) {
+                checkbox.checked = false;
+                checkbox.disabled = true;
+                qtyEl.innerText = '1';
+                row?.classList.add('is-disabled');
+
+                if (modalPrice) {
+                    modalPrice.innerText = '(Demnächst)';
+                }
+
+                return;
+            }
+
+            if (hasSelectedRentalDates && available <= 0) {
+                checkbox.checked = false;
+                checkbox.disabled = true;
+                qtyEl.innerText = '0';
+                row?.classList.add('is-disabled');
+
+                if (modalPrice) {
+                    modalPrice.innerText = '(Für diesen Zeitraum ausgebucht)';
+                }
+
+                return;
+            }
+
+            checkbox.disabled = false;
+            row?.classList.remove('is-disabled');
+
+            if (Number(qtyEl.innerText || 0) < 1) {
+                qtyEl.innerText = '1';
+            }
+
+            if (Number(qtyEl.innerText || 0) > available) {
+                qtyEl.innerText = String(available);
+            }
+
+            if (modalPrice) {
+                const priceText = `${Number(item.price || 0).toLocaleString('de-DE')} HUF`;
+                modalPrice.innerText = `(${priceText}/${item.unit || 'Tag'})`;
+            }
+        });
+    }
+
+    function getAvailableStockForItem(key) {
+        const item = itemMap[key];
+
+        if (!item) return 0;
+
+        const maxStock = Number(item.maxStock || 0);
+
+        if (hasSelectedRentalDates && currentSunAvailability[key]) {
+            const available = Number(currentSunAvailability[key].available);
+
+            if (Number.isFinite(available)) {
+                return Math.max(0, Math.floor(available));
+            }
+        }
+
+        if (Number.isFinite(maxStock)) {
+            return Math.max(0, Math.floor(maxStock));
+        }
+
+        return 0;
+    }
+
+    function getItemKeyByQtyId(qtyId) {
+        return Object.keys(itemMap).find(key => itemMap[key].qtyId === qtyId) || '';
+    }
+
+    function showRentNotice(message) {
+        const notice = document.getElementById('rent-notice');
+
+        if (!notice) return;
+
+        notice.innerText = message;
+        notice.classList.add('active');
+
+        window.clearTimeout(notice._hideTimer);
+
+        notice._hideTimer = window.setTimeout(() => {
+            notice.classList.remove('active');
+            notice.innerText = '';
+        }, 4200);
+    }
+
+    function clearRentNotice() {
+        const notice = document.getElementById('rent-notice');
+
+        if (!notice) return;
+
+        window.clearTimeout(notice._hideTimer);
+        notice.classList.remove('active');
+        notice.innerText = '';
+    }
+
+    function changeQty(id, delta) {
+        const el = document.getElementById(id);
+
+        if (!el) return;
+
+        const key = getItemKeyByQtyId(id);
+        const available = getAvailableStockForItem(key);
+
+        let val = parseInt(el.innerText, 10) || 1;
+        val = Math.max(1, val + delta);
+
+        if (available <= 0) {
+            val = 0;
+            showRentNotice('Für diesen Zeitraum ist dieses Produkt derzeit nicht verfügbar.');
+        } else if (val > available) {
+            val = available;
+            showRentNotice(`Für diesen Zeitraum können derzeit maximal ${available} Stück gebucht werden.`);
+        }
+
+        el.innerText = String(val);
+        updateLiveTotal();
+    }
+
+    function getRentalDays() {
+        const start = document.getElementById('r-start')?.value || '';
+        const end = document.getElementById('r-end')?.value || '';
+
+        if (!start || !end) return 0;
+
+        const d1 = parseLocalDate(start);
+        const d2 = parseLocalDate(end);
+
+        if (!d1 || !d2 || d2 < d1) return 0;
 
         return Math.ceil((d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
     }
@@ -1620,19 +1824,35 @@
     function getSelectedItems() {
         const selected = [];
 
-        Object.values(itemMap).forEach(item => {
+        Object.entries(itemMap).forEach(([key, item]) => {
             if (item.active === false || item.comingSoon === true) return;
 
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
 
-            if (!checkbox || !qtyEl || !checkbox.checked) return;
+            if (!checkbox || !qtyEl || checkbox.disabled || !checkbox.checked) return;
 
-            const qty = parseInt(qtyEl.innerText, 10) || 1;
+            const available = getAvailableStockForItem(key);
+            let qty = parseInt(qtyEl.innerText, 10) || 1;
+
+            if (available <= 0) {
+                qty = 0;
+                checkbox.checked = false;
+                qtyEl.innerText = '0';
+                return;
+            }
+
+            if (qty > available) {
+                qty = available;
+                qtyEl.innerText = String(available);
+            }
 
             selected.push({
+                id: key,
                 label: item.label,
                 qty,
+                available,
+                maxStock: Number(item.maxStock || 0),
                 price: Number(item.price || 0),
                 dailyTotal: qty * Number(item.price || 0)
             });
@@ -1666,24 +1886,30 @@
             const checkbox = document.getElementById(item.checkboxId);
             const qtyEl = document.getElementById(item.qtyId);
 
-            if (checkbox) checkbox.checked = false;
-            if (qtyEl) qtyEl.innerText = '1';
+            if (checkbox && !checkbox.disabled) {
+                checkbox.checked = false;
+            }
+
+            if (qtyEl) {
+                qtyEl.innerText = checkbox?.disabled ? qtyEl.innerText : '1';
+            }
         });
 
         updateLiveTotal();
     }
 
-    function openRentModal(preselectedItem = null) {
-        if (preselectedItem && (itemMap[preselectedItem]?.comingSoon === true || preselectedItem === 'boat')) {
+    async function openRentModal(preselectedItem = null) {
+        if (preselectedItem && (itemMap[preselectedItem]?.comingSoon === true || itemMap[preselectedItem]?.active === false)) {
             return;
         }
 
         resetRentModal();
+        clearRentNotice();
 
         if (preselectedItem && itemMap[preselectedItem]) {
             const checkbox = document.getElementById(itemMap[preselectedItem].checkboxId);
 
-            if (checkbox) {
+            if (checkbox && !checkbox.disabled) {
                 checkbox.checked = true;
             }
         }
@@ -1696,6 +1922,8 @@
         }, 10);
 
         document.body.style.overflow = 'hidden';
+
+        await refreshSunAvailability(false);
         updateLiveTotal();
     }
 
@@ -1732,21 +1960,32 @@
     async function submitRentForm(e) {
         e.preventDefault();
 
+        const availabilityOk = await refreshSunAvailability(true);
+
+        if (!availabilityOk) return;
+
         const calc = updateLiveTotal();
         const selectedItems = calc.selectedItems;
 
         if (selectedItems.length === 0) {
-            alert('Bitte wählen Sie mindestens einen Artikel aus.');
+            showRentNotice('Bitte wählen Sie mindestens einen Artikel aus.');
             return;
         }
 
         if (calc.days <= 0) {
-            alert('Bitte wählen Sie ein gültiges Start- und Enddatum aus.');
+            showRentNotice('Bitte wählen Sie ein gültiges Start- und Enddatum aus.');
+            return;
+        }
+
+        const overLimitItem = selectedItems.find(item => item.qty > item.available);
+
+        if (overLimitItem) {
+            showRentNotice(`${overLimitItem.label}: Für diesen Zeitraum können maximal ${overLimitItem.available} Stück gebucht werden.`);
             return;
         }
 
         if (calc.total <= 0) {
-            alert('Der Gesamtbetrag darf nicht 0 HUF sein.');
+            showRentNotice('Der Gesamtbetrag darf nicht 0 HUF sein.');
             return;
         }
 
@@ -1759,7 +1998,7 @@
         const method = document.querySelector('input[name="s-payment"]:checked')?.value || 'cash';
 
         if (!guestName || !email || !phone || !apartment) {
-            alert('Bitte füllen Sie alle Pflichtfelder aus.');
+            showRentNotice('Bitte füllen Sie alle Pflichtfelder aus.');
             return;
         }
 
@@ -1771,6 +2010,12 @@
             type: 'EXTRA',
             serviceName: 'Strandausrüstung Verleih',
             items: itemsText,
+            itemsDetailed: selectedItems.map(item => ({
+                id: item.id,
+                label: item.label,
+                qty: item.qty,
+                price: item.price
+            })),
             guestName,
             email,
             phone,
@@ -1790,7 +2035,9 @@
 
         if (submitBtn) {
             submitBtn.disabled = true;
-            submitBtn.innerText = method === 'card' ? 'Weiterleitung zur Zahlung...' : 'Buchung wird gespeichert...';
+            submitBtn.innerText = method === 'card'
+                ? 'Weiterleitung zur Zahlung...'
+                : 'Buchung wird gespeichert...';
         }
 
         try {
@@ -1803,26 +2050,24 @@
             const result = await res.json();
 
             if (!res.ok) {
-                alert('Fehler: ' + (result.error || 'Buchung fehlgeschlagen'));
+                showRentNotice('Fehler: ' + (result.error || 'Buchung fehlgeschlagen.'));
                 return;
             }
 
             if (method === 'card' && result.clientSecret) {
                 const amount = Number(result.amount || orderData.amount || 0);
-                window.location.href = `/payment.html?kind=order&lang=de&amount=${encodeURIComponent(amount)}&client_secret=${encodeURIComponent(result.clientSecret)}`;
-                return;
-            }
 
-            if (method === 'card' && result.stripeSessionId) {
-                await stripe.redirectToCheckout({ sessionId: result.stripeSessionId });
+                window.location.href =
+                    `/payment.html?kind=order&lang=de&amount=${encodeURIComponent(amount)}&client_secret=${encodeURIComponent(result.clientSecret)}`;
+
                 return;
             }
 
             closeRentModal();
             showSuccessPopup(orderData);
         } catch (err) {
-            console.error('Fehler:', err);
-            alert('Ein Netzwerkfehler ist aufgetreten.');
+            console.error('Buchungsfehler:', err);
+            showRentNotice('Ein Netzwerkfehler ist aufgetreten.');
         } finally {
             if (submitBtn) {
                 submitBtn.disabled = false;
