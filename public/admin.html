@@ -950,12 +950,18 @@
         margin-bottom: 1rem;
     }
 
-    .modal.is-open {
-    display: flex !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    z-index: 99999 !important;
-}
+    .modal.is-open,
+    .modal-overlay.is-open {
+        display: flex !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        z-index: 999999 !important;
+        pointer-events: auto !important;
+    }
+
+    body.modal-open {
+        overflow: hidden;
+    }
 
 #external-guest-modal {
     align-items: center;
@@ -2997,22 +3003,52 @@ function initGallerySorting() {
     function openOwnerModal(id) {
         const modal = document.getElementById('owner-modal');
 
-        if (!id) {
-            document.getElementById('edit-owner-id').value = '';
-            document.getElementById('edit-owner-name').value = '';
-            document.getElementById('edit-owner-code').value = '';
-            modal.querySelector('h2').innerText = 'Új partner hozzáadása';
-        } else {
-            const owner = db.owners.find(o => String(o.id || o._id) === String(id));
-            if (!owner) return;
+        if (!modal) {
+            console.error('Hiányzik az #owner-modal elem.');
+            alert('A partner szerkesztő ablak nem található az oldalon.');
+            return;
+        }
 
-            document.getElementById('edit-owner-id').value = owner.id || owner._id;
-            document.getElementById('edit-owner-name').value = owner.name || '';
-            document.getElementById('edit-owner-code').value = owner.code || '';
-            modal.querySelector('h2').innerText = 'Partner szerkesztése';
+        // Biztonsági lépés: a modal mindig közvetlenül a body alatt legyen,
+        // így nem tudja egy szülő elem overflow/position/z-index hibája elrejteni.
+        if (modal.parentElement !== document.body) {
+            document.body.appendChild(modal);
+        }
+
+        const idInput = document.getElementById('edit-owner-id');
+        const nameInput = document.getElementById('edit-owner-name');
+        const codeInput = document.getElementById('edit-owner-code');
+        const title = modal.querySelector('h2');
+
+        if (!idInput || !nameInput || !codeInput || !title) {
+            console.error('Hiányzik egy owner modal mező:', { idInput, nameInput, codeInput, title });
+            alert('A partner szerkesztő ablak hiányos.');
+            return;
+        }
+
+        if (!id) {
+            idInput.value = '';
+            nameInput.value = '';
+            codeInput.value = '';
+            title.innerText = 'Új partner hozzáadása';
+        } else {
+            const owner = (db.owners || []).find(o => String(o.id || o._id) === String(id));
+            if (!owner) {
+                alert('A kiválasztott partner nem található.');
+                return;
+            }
+
+            idInput.value = owner.id || owner._id;
+            nameInput.value = owner.name || '';
+            codeInput.value = owner.code || '';
+            title.innerText = 'Partner szerkesztése';
         }
 
         modal.style.display = 'flex';
+        modal.classList.add('is-open');
+        document.body.classList.add('modal-open');
+
+        setTimeout(() => nameInput.focus(), 0);
     }
 
     function closeModal() {
@@ -3020,10 +3056,12 @@ function initGallerySorting() {
 
         selectors.forEach(selector => {
             document.querySelectorAll(selector).forEach(modal => {
+                modal.classList.remove('is-open');
                 modal.style.display = 'none';
             });
         });
 
+        document.body.classList.remove('modal-open');
         activeId = null;
         activeOId = null;
     }
