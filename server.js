@@ -3148,12 +3148,23 @@ app.get('/api/ical/:aptId.ics', async (req, res) => {
         }
 
         const ownBookings = (db.bookings || []).filter(booking => {
-            const isSameApartment = String(booking.aptId) === String(aptId);
-            const isOwnWebsiteBooking = !booking.icalId && !booking.source && !booking.importedFrom;
-            const isConfirmed = booking.status !== 'cancelled';
+        const isSameApartment = String(booking.aptId || booking.apartmentId || '') === String(aptId);
+        const status = String(booking.status || '').toLowerCase();
 
-            return isSameApartment && isOwnWebsiteBooking && isConfirmed;
-        });
+        const checkIn = booking.checkIn || booking.start;
+        const checkOut = booking.checkOut || booking.end;
+
+        if (!isSameApartment) return false;
+        if (status === 'cancelled' || status === 'canceled') return false;
+        if (!checkIn || !checkOut) return false;
+
+        // Ezeket nem exportáljuk vissza, mert ezek külső naptárból jöttek be.
+        // Különben Booking/Szállás.hu visszakapná a saját importált blokkjait.
+        if (booking.icalId && booking.manualGuestData !== true) return false;
+        if (booking.importedFrom && booking.manualGuestData !== true) return false;
+
+        return true;
+    });
 
         const nowStamp = new Date()
             .toISOString()
