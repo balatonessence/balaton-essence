@@ -1161,6 +1161,7 @@ async function sendAdminBookingEmail(newB) {
                         <p><strong>Telefon:</strong> ${escapeHtml(newB.phone || newB.tel || newB.telefon || '-')}</p>
                         <p><strong>Apartman:</strong> ${escapeHtml(newB.aptName)}</p>
                         <p><strong>Időpont:</strong> ${escapeHtml(newB.checkIn)} — ${escapeHtml(newB.checkOut)}</p>
+                        <p><strong>Vendégek száma:</strong> ${escapeHtml(newB.guests || '-')} fő</p>
                         <p><strong>Befizetett előleg:</strong> ${formatMoney(newB.paidDeposit)} Ft</p>
                         <p><strong>Teljes összeg:</strong> ${formatMoney(newB.totalPrice)} Ft</p>
                         <div style="background: #fff4e5; padding: 10px; border-left: 4px solid #ffa500;">
