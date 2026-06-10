@@ -3202,6 +3202,39 @@ app.get('/api/ical/:aptId.ics', async (req, res) => {
             );
         });
 
+        const disabledDates = Array.isArray(apartment.disabledDates)
+            ? apartment.disabledDates
+            : [];
+
+        disabledDates.forEach(dateStr => {
+            const start = formatIcalDate(dateStr);
+
+            if (!start) return;
+
+            const endDate = new Date(`${dateStr}T00:00:00`);
+
+            if (Number.isNaN(endDate.getTime())) return;
+
+            endDate.setDate(endDate.getDate() + 1);
+
+            const end = formatIcalDate(endDate.toISOString().slice(0, 10));
+
+            if (!end) return;
+
+            lines.push(
+                'BEGIN:VEVENT',
+                `UID:${escapeIcalText(`blocked-${aptId}-${start}@balatonessence.com`)}`,
+                `DTSTAMP:${nowStamp}`,
+                `DTSTART;VALUE=DATE:${start}`,
+                `DTEND;VALUE=DATE:${end}`,
+                `SUMMARY:${escapeIcalText('Blocked')}`,
+                `DESCRIPTION:${escapeIcalText('Blocked manually in Balaton Essence admin')}`,
+                'TRANSP:OPAQUE',
+                'STATUS:CONFIRMED',
+                'END:VEVENT'
+            );
+        });
+
         lines.push('END:VCALENDAR');
 
         res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
