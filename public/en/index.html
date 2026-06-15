@@ -440,6 +440,7 @@
             max-width: 900px;
             margin: -1rem auto 3.4rem;
             padding: 1.35rem;
+            position: relative;
             display: grid;
             grid-template-columns: 1fr 1fr auto auto;
             align-items: end;
@@ -463,7 +464,7 @@
             text-transform: uppercase;
         }
 
-        .availability-field input {
+        .availability-date-trigger {
             width: 100%;
             min-height: 48px;
             padding: 0 0.9rem;
@@ -472,12 +473,30 @@
             background: var(--bg);
             color: var(--text);
             font: inherit;
+            text-align: left;
+            cursor: pointer;
         }
 
-        .availability-field input:focus {
+        .availability-date-trigger:focus {
             outline: 2px solid rgba(92, 122, 77, 0.18);
             border-color: var(--accent);
         }
+
+        .availability-date-trigger.is-empty { color: #8b9087; }
+        .availability-calendar { position: absolute; z-index: 20; top: calc(100% + 0.7rem); left: 1.35rem; width: min(390px, calc(100% - 2.7rem)); padding: 1.25rem; background: #fff; border: 1px solid var(--border); box-shadow: 0 24px 70px rgba(44, 51, 37, 0.18); }
+        .availability-calendar[hidden] { display: none; }
+        .calendar-head { display: grid; grid-template-columns: 42px 1fr 42px; align-items: center; margin-bottom: 1rem; }
+        .calendar-month { font-family: 'Playfair Display', serif; font-size: 1.2rem; font-weight: 700; text-align: center; }
+        .calendar-nav { width: 42px; height: 42px; border: 1px solid var(--border); border-radius: 4px; background: #fff; color: var(--accent); font-size: 1.25rem; cursor: pointer; }
+        .calendar-weekdays, .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); }
+        .calendar-weekdays span { padding: 0.45rem 0; color: var(--text-light); font-size: 0.62rem; font-weight: 800; text-align: center; text-transform: uppercase; }
+        .calendar-day { position: relative; aspect-ratio: 1; border: 0; background: transparent; color: var(--text); font: inherit; font-size: 0.82rem; cursor: pointer; }
+        .calendar-day:hover:not(:disabled), .calendar-day.is-today:not(.is-selected) { box-shadow: inset 0 0 0 1px var(--gold); }
+        .calendar-day.is-in-range { background: rgba(92, 122, 77, 0.12); }
+        .calendar-day.is-selected { background: var(--accent); color: #fff; font-weight: 800; }
+        .calendar-day:disabled { color: #c6c9c3; cursor: not-allowed; }
+        .calendar-day.is-outside { visibility: hidden; }
+        .calendar-hint { margin: 0.9rem 0 0; color: var(--text-light); font-size: 0.75rem; text-align: center; }
 
         .availability-submit,
         .availability-clear {
@@ -1156,6 +1175,8 @@
                 margin-bottom: 3rem;
             }
 
+            .availability-calendar { left: 0; width: 100%; }
+
             .availability-submit,
             .availability-clear {
                 width: 100%;
@@ -1317,16 +1338,29 @@
     <form id="availability-filter" class="availability-filter">
         <div class="availability-field">
             <label for="availability-check-in">Arrival</label>
-            <input type="date" id="availability-check-in" required>
+            <input type="hidden" id="availability-check-in">
+            <button type="button" id="availability-check-in-trigger" class="availability-date-trigger is-empty">Select arrival</button>
         </div>
 
         <div class="availability-field">
             <label for="availability-check-out">Departure</label>
-            <input type="date" id="availability-check-out" required>
+            <input type="hidden" id="availability-check-out">
+            <button type="button" id="availability-check-out-trigger" class="availability-date-trigger is-empty">Select departure</button>
         </div>
 
         <button type="submit" class="availability-submit">Show availability</button>
         <button type="button" id="availability-clear" class="availability-clear">Clear</button>
+
+        <div id="availability-calendar" class="availability-calendar" hidden>
+            <div class="calendar-head">
+                <button type="button" id="calendar-prev" class="calendar-nav" aria-label="Previous month">‹</button>
+                <div id="calendar-month" class="calendar-month"></div>
+                <button type="button" id="calendar-next" class="calendar-nav" aria-label="Next month">›</button>
+            </div>
+            <div id="calendar-weekdays" class="calendar-weekdays"></div>
+            <div id="calendar-days" class="calendar-days"></div>
+            <p id="calendar-hint" class="calendar-hint">Select your arrival date.</p>
+        </div>
     </form>
 
     <div id="availability-status" class="availability-status" aria-live="polite"></div>
@@ -1526,29 +1560,132 @@
         const checkInInput = document.getElementById('availability-check-in');
         const checkOutInput = document.getElementById('availability-check-out');
         const clearButton = document.getElementById('availability-clear');
+        const checkInTrigger = document.getElementById('availability-check-in-trigger');
+        const checkOutTrigger = document.getElementById('availability-check-out-trigger');
+        const calendar = document.getElementById('availability-calendar');
 
-        if (!form || !checkInInput || !checkOutInput || !clearButton) return;
+        if (!form || !checkInInput || !checkOutInput || !clearButton || !checkInTrigger || !checkOutTrigger || !calendar) return;
 
-        const today = getLocalDateStringForIndex(new Date());
-        checkInInput.min = today;
-        checkOutInput.min = today;
-
-        checkInInput.addEventListener('change', () => {
-            checkOutInput.min = checkInInput.value || today;
-
-            if (checkOutInput.value && checkOutInput.value <= checkInInput.value) {
-                checkOutInput.value = '';
-            }
-        });
+        window.availabilityCalendarMonth = new Date();
+        window.availabilityCalendarMonth.setDate(1);
+        checkInTrigger.addEventListener('click', () => openAvailabilityCalendar('checkIn'));
+        checkOutTrigger.addEventListener('click', () => openAvailabilityCalendar('checkOut'));
+        document.getElementById('calendar-prev')?.addEventListener('click', () => changeAvailabilityMonth(-1));
+        document.getElementById('calendar-next')?.addEventListener('click', () => changeAvailabilityMonth(1));
 
         form.addEventListener('submit', filterApartmentsByAvailability);
 
         clearButton.addEventListener('click', () => {
             form.reset();
-            checkOutInput.min = today;
+            checkInInput.value = '';
+            checkOutInput.value = '';
+            calendar.hidden = true;
+            updateAvailabilityDateButtons();
             setAvailabilityStatus('');
             renderIndexApartments();
         });
+
+        document.addEventListener('click', event => {
+            if (!form.contains(event.target)) calendar.hidden = true;
+        });
+        updateAvailabilityDateButtons();
+    }
+
+    function getAvailabilityCalendarText() {
+        const lang = document.documentElement.lang || 'hu';
+        const texts = {
+            hu: { locale: 'hu-HU', weekdays: ['H', 'K', 'Sze', 'Cs', 'P', 'Szo', 'V'], arrival: 'Válasszon érkezést', departure: 'Válasszon távozást', arrivalHint: 'Válassza ki az érkezés napját.', departureHint: 'Most válassza ki a távozás napját.' },
+            en: { locale: 'en-GB', weekdays: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'], arrival: 'Select arrival', departure: 'Select departure', arrivalHint: 'Select your arrival date.', departureHint: 'Now select your departure date.' },
+            de: { locale: 'de-DE', weekdays: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'], arrival: 'Anreise wählen', departure: 'Abreise wählen', arrivalHint: 'Wählen Sie das Anreisedatum.', departureHint: 'Wählen Sie jetzt das Abreisedatum.' }
+        };
+        return texts[lang] || texts.hu;
+    }
+
+    function openAvailabilityCalendar(target) {
+        const checkIn = document.getElementById('availability-check-in').value;
+        const checkOut = document.getElementById('availability-check-out').value;
+        const preferredDate = target === 'checkOut' ? (checkOut || checkIn) : checkIn;
+        window.availabilityCalendarTarget = target;
+        if (preferredDate) {
+            const date = parseAvailabilityDate(preferredDate);
+            window.availabilityCalendarMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+        }
+        document.getElementById('availability-calendar').hidden = false;
+        renderAvailabilityCalendar();
+    }
+
+    function changeAvailabilityMonth(offset) {
+        const month = window.availabilityCalendarMonth || new Date();
+        month.setMonth(month.getMonth() + offset);
+        month.setDate(1);
+        renderAvailabilityCalendar();
+    }
+
+    function renderAvailabilityCalendar() {
+        const text = getAvailabilityCalendarText();
+        const month = window.availabilityCalendarMonth || new Date();
+        const todayStr = getLocalDateStringForIndex(new Date());
+        const checkIn = document.getElementById('availability-check-in').value;
+        const checkOut = document.getElementById('availability-check-out').value;
+        document.getElementById('calendar-month').textContent = new Intl.DateTimeFormat(text.locale, { year: 'numeric', month: 'long' }).format(month);
+        document.getElementById('calendar-weekdays').innerHTML = text.weekdays.map(day => `<span>${day}</span>`).join('');
+        document.getElementById('calendar-hint').textContent = checkIn && !checkOut ? text.departureHint : text.arrivalHint;
+        const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+        document.getElementById('calendar-prev').disabled = month <= currentMonthStart;
+        const firstDayOffset = (new Date(month.getFullYear(), month.getMonth(), 1).getDay() + 6) % 7;
+        const daysInMonth = new Date(month.getFullYear(), month.getMonth() + 1, 0).getDate();
+        let html = '';
+        for (let i = 0; i < firstDayOffset; i++) html += '<button type="button" class="calendar-day is-outside" disabled></button>';
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = getLocalDateStringForIndex(new Date(month.getFullYear(), month.getMonth(), day));
+            const classes = ['calendar-day'];
+            if (dateStr === todayStr) classes.push('is-today');
+            if (dateStr === checkIn || dateStr === checkOut) classes.push('is-selected');
+            if (checkIn && checkOut && dateStr > checkIn && dateStr < checkOut) classes.push('is-in-range');
+            html += `<button type="button" class="${classes.join(' ')}" data-date="${dateStr}" ${dateStr < todayStr ? 'disabled' : ''}>${day}</button>`;
+        }
+        const days = document.getElementById('calendar-days');
+        days.innerHTML = html;
+        days.querySelectorAll('[data-date]').forEach(button => button.addEventListener('click', () => selectAvailabilityDate(button.dataset.date)));
+    }
+
+    function selectAvailabilityDate(dateStr) {
+        const checkInInput = document.getElementById('availability-check-in');
+        const checkOutInput = document.getElementById('availability-check-out');
+        if (!checkInInput.value || checkOutInput.value || window.availabilityCalendarTarget === 'checkIn') {
+            checkInInput.value = dateStr;
+            checkOutInput.value = '';
+            window.availabilityCalendarTarget = 'checkOut';
+        } else if (dateStr <= checkInInput.value) {
+            checkInInput.value = dateStr;
+            checkOutInput.value = '';
+        } else {
+            checkOutInput.value = dateStr;
+            document.getElementById('availability-calendar').hidden = true;
+        }
+        updateAvailabilityDateButtons();
+        renderAvailabilityCalendar();
+    }
+
+    function updateAvailabilityDateButtons() {
+        const text = getAvailabilityCalendarText();
+        const checkIn = document.getElementById('availability-check-in').value;
+        const checkOut = document.getElementById('availability-check-out').value;
+        const checkInTrigger = document.getElementById('availability-check-in-trigger');
+        const checkOutTrigger = document.getElementById('availability-check-out-trigger');
+        checkInTrigger.textContent = checkIn ? formatAvailabilityDate(checkIn, text.locale) : text.arrival;
+        checkOutTrigger.textContent = checkOut ? formatAvailabilityDate(checkOut, text.locale) : text.departure;
+        checkInTrigger.classList.toggle('is-empty', !checkIn);
+        checkOutTrigger.classList.toggle('is-empty', !checkOut);
+    }
+
+    function parseAvailabilityDate(value) {
+        const [year, month, day] = value.split('-').map(Number);
+        return new Date(year, month - 1, day);
+    }
+
+    function formatAvailabilityDate(value, locale) {
+        return new Intl.DateTimeFormat(locale, { year: 'numeric', month: 'short', day: 'numeric' }).format(parseAvailabilityDate(value));
     }
 
     async function filterApartmentsByAvailability(event) {
