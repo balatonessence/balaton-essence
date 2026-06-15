@@ -661,18 +661,24 @@ function isBlockedBooking(booking) {
     );
 }
 
+function isCancelledBooking(booking) {
+    const status = normalizeText(booking?.status || booking?.paymentStatus || '');
+    return status === 'cancelled' || status === 'canceled';
+}
+
 function isBookingOverlapping(bookings, newBooking, ignoreStripeId = null, ignoreBookingId = null) {
     return (bookings || []).some(oldB => {
         if (String(oldB.aptId) !== String(newBooking.aptId)) return false;
+        if (isCancelledBooking(oldB)) return false;
         if (ignoreStripeId && oldB.stripeId === ignoreStripeId) return false;
         if (ignoreBookingId && String(oldB.id) === String(ignoreBookingId)) return false;
 
-        const start1 = new Date(newBooking.checkIn);
-        const end1 = new Date(newBooking.checkOut);
-        const start2 = new Date(oldB.checkIn);
-        const end2 = new Date(oldB.checkOut || oldB.end);
+        const start1 = parseDateOnly(newBooking.checkIn || newBooking.start);
+        const end1 = parseDateOnly(newBooking.checkOut || newBooking.end);
+        const start2 = parseDateOnly(oldB.checkIn || oldB.start);
+        const end2 = parseDateOnly(oldB.checkOut || oldB.end);
 
-        if (isNaN(start1) || isNaN(end1) || isNaN(start2) || isNaN(end2)) return false;
+        if (!start1 || !end1 || !start2 || !end2) return false;
 
         return start1 < end2 && end1 > start2;
     });
@@ -1567,6 +1573,51 @@ app.get('/api/get-db-content', async (req, res) => {
     } catch (err) {
         console.error('Lekérdezési hiba:', err);
         res.status(500).json({ error: 'Hiba az adatok lekérésekor' });
+    }
+});
+
+app.get('/api/apartment-availability', async (req, res) => {
+    try {
+        const checkIn = getBookingDateString(req.query.checkIn);
+        const checkOut = getBookingDateString(req.query.checkOut);
+        const checkInDate = parseDateOnly(checkIn);
+        const checkOutDate = parseDateOnly(checkOut);
+
+        if (!checkInDate || !checkOutDate || checkOutDate <= checkInDate) {
+            return res.status(400).json({
+                error: 'A távozás dátumának az érkezés után kell lennie.'
+            });
+        }
+
+        const db = await getDbContent();
+        const requestedStay = { checkIn, checkOut };
+
+        const availableApartmentIds = (db.apartments || [])
+            .filter(apartment => {
+                const booking = {
+                    ...requestedStay,
+                    aptId: apartment.id
+                };
+
+                return (
+                    getArrivalDepartureRestriction(apartment, booking).valid &&
+                    !hasDisabledDateInBookingRange(apartment, booking) &&
+                    !isBookingOverlapping(db.bookings, booking)
+                );
+            })
+            .map(apartment => String(apartment.id));
+
+        res.json({
+            success: true,
+            checkIn,
+            checkOut,
+            availableApartmentIds
+        });
+    } catch (err) {
+        console.error('Apartman elérhetőség lekérdezési hiba:', err);
+        res.status(500).json({
+            error: 'Az apartmanok elérhetősége jelenleg nem ellenőrizhető.'
+        });
     }
 });
 
