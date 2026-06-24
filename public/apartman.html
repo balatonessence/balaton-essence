@@ -767,13 +767,26 @@
         <input type="hidden" id="book-start">
         <input type="hidden" id="book-end">
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 1.5rem; align-items: center;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 1.5rem; align-items: start;">
             <div class="form-group">
                 <label style="font-size: 0.7rem; font-weight: 700; text-transform: uppercase; display: block; margin-bottom: 5px;">Vendégek</label>
-                <select id="book-guests" onchange="calculateStay()" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';"></select>
+
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:0.62rem; font-weight:800; color:var(--text-light); text-transform:uppercase; display:block; margin-bottom:4px;">Felnőtt</label>
+                        <input type="number" id="book-adults" min="1" value="2" onchange="calculateStay()" oninput="calculateStay()" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
+                    </div>
+
+                    <div>
+                        <label style="font-size:0.62rem; font-weight:800; color:var(--text-light); text-transform:uppercase; display:block; margin-bottom:4px;">Gyerek</label>
+                        <input type="number" id="book-children" min="0" value="0" onchange="calculateStay()" oninput="calculateStay()" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
+                    </div>
+                </div>
+
+                <div id="guest-count-info" style="font-size:0.72rem; color:var(--text-light); font-weight:700; margin-top:7px;">Összesen: 2 fő</div>
             </div>
 
-            <div id="stay-info" style="font-size: 0.8rem; color: var(--accent); font-weight: 600; padding-top: 15px;">
+            <div id="stay-info" style="font-size: 0.8rem; color: var(--accent); font-weight: 600; padding-top: 22px;">
                 Válassz dátumot!
             </div>
         </div>
@@ -785,6 +798,8 @@
                 <input type="email" id="book-email" placeholder="E-mail cím" autocomplete="email" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
                 <input type="tel" id="book-phone" placeholder="Telefonszám" autocomplete="tel" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
             </div>
+
+            <input type="text" id="book-billing-address" placeholder="Lakcím / számlázási cím" autocomplete="street-address" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
 
             <textarea id="book-msg" placeholder="Megjegyzés (opcionális)" rows="2" style="width: 100%; padding: 1rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat'; resize: none;"></textarea>
         </div>
@@ -1487,30 +1502,34 @@
         document.getElementById('display-start').innerText = '-';
         document.getElementById('display-end').innerText = '-';
 
-        const guestSelect = document.getElementById('book-guests');
         const info = getNextBookableInfo(currentApt);
         const maxAllowed = Number(info.maxGuests || currentApt.maxGuests || 2);
 
-        guestSelect.innerHTML = '';
-
-        for (let i = 2; i <= maxAllowed; i++) {
-            const label = i === 2 ? '1-2 fő' : `${i} fő`;
-            guestSelect.innerHTML += `<option value="${i}">${label}</option>`;
-        }
-
-        if (!guestSelect.innerHTML) {
-            guestSelect.innerHTML = '<option value="2">1-2 fő</option>';
-        }
-
+        const adultsInput = document.getElementById('book-adults');
+        const childrenInput = document.getElementById('book-children');
         const nameInput = document.getElementById('book-name');
         const emailInput = document.getElementById('book-email');
         const phoneInput = document.getElementById('book-phone');
+        const addressInput = document.getElementById('book-billing-address');
         const msgInput = document.getElementById('book-msg');
+
+        if (adultsInput) {
+            adultsInput.max = String(maxAllowed);
+            adultsInput.value = String(Math.min(2, maxAllowed));
+        }
+
+        if (childrenInput) {
+            childrenInput.max = String(Math.max(0, maxAllowed - Number(adultsInput?.value || 1)));
+            childrenInput.value = '0';
+        }
 
         if (nameInput) nameInput.value = '';
         if (emailInput) emailInput.value = '';
         if (phoneInput) phoneInput.value = '';
+        if (addressInput) addressInput.value = '';
         if (msgInput) msgInput.value = '';
+
+        updateGuestCountInfo();
 
         modal.style.display = 'flex';
 
@@ -1820,12 +1839,60 @@
         renderCalendar();
     }
 
+    function getBookingGuestBreakdown() {
+        const adultsInput = document.getElementById('book-adults');
+        const childrenInput = document.getElementById('book-children');
+
+        let adults = parseInt(adultsInput?.value, 10);
+        let children = parseInt(childrenInput?.value, 10);
+
+        if (!Number.isFinite(adults) || adults < 1) adults = 1;
+        if (!Number.isFinite(children) || children < 0) children = 0;
+
+        const info = currentApt ? getNextBookableInfo(currentApt) : {};
+        const maxAllowed = Number(info.maxGuests || currentApt?.maxGuests || 2);
+
+        if (adults > maxAllowed) adults = maxAllowed;
+        if (adults + children > maxAllowed) {
+            children = Math.max(0, maxAllowed - adults);
+        }
+
+        if (adultsInput) adultsInput.value = String(adults);
+        if (childrenInput) {
+            childrenInput.max = String(Math.max(0, maxAllowed - adults));
+            childrenInput.value = String(children);
+        }
+
+        return {
+            adults,
+            children,
+            total: adults + children,
+            maxAllowed
+        };
+    }
+
+    function updateGuestCountInfo() {
+        const guestInfo = getBookingGuestBreakdown();
+        const infoEl = document.getElementById('guest-count-info');
+
+        if (!infoEl) return;
+
+        infoEl.innerText = `Összesen: ${guestInfo.total} fő (${guestInfo.adults} felnőtt, ${guestInfo.children} gyerek)`;
+
+        if (guestInfo.total > guestInfo.maxAllowed) {
+            infoEl.style.color = 'var(--warning)';
+        } else {
+            infoEl.style.color = 'var(--text-light)';
+        }
+    }
+
     function calculateStay() {
         const startVal = document.getElementById('book-start').value;
         const endVal = document.getElementById('book-end').value;
 
-        const guestSelect = document.getElementById('book-guests');
-        const guests = parseInt(guestSelect.value, 10) || 2;
+        const guestInfo = getBookingGuestBreakdown();
+        updateGuestCountInfo();
+        const guests = guestInfo.total;
 
         const btn = document.getElementById('submit-booking-btn');
         const totalBox = document.getElementById('grand-total');
@@ -1848,10 +1915,10 @@
         const end = parseLocalDate(endVal);
 
         if (!start || !end || isNaN(start.getTime()) || isNaN(end.getTime()) || end <= start) {
-            infoText.innerText = 'Ungültige Datumsauswahl.';
+            infoText.innerText = 'Érvénytelen dátumválasztás.';
             totalBox.dataset.finalTotal = '0';
             totalBox.innerText = '0 Ft';
-            btn.innerText = 'Ungültige Daten';
+            btn.innerText = 'Érvénytelen dátum';
             return;
         }
 
@@ -1980,6 +2047,8 @@
 
         let cleanNumber = Number(totalElement?.dataset.finalTotal || 0);
 
+        const guestInfo = getBookingGuestBreakdown();
+
         const data = {
             aptId: currentApt.id,
             aptName:
@@ -1987,19 +2056,33 @@
             guestName: document.getElementById('book-name').value.trim(),
             email: document.getElementById('book-email').value.trim(),
             phone: document.getElementById('book-phone').value.trim(),
+            billingAddress: document.getElementById('book-billing-address').value.trim(),
+            address: document.getElementById('book-billing-address').value.trim(),
             checkIn: document.getElementById('book-start').value,
             checkOut: document.getElementById('book-end').value,
-            guests: document.getElementById('book-guests').value,
+            guests: String(guestInfo.total),
+            adults: guestInfo.adults,
+            children: guestInfo.children,
+            guestBreakdown: `${guestInfo.adults} felnőtt, ${guestInfo.children} gyerek`,
             totalPrice: cleanNumber,
             msg: document.getElementById('book-msg').value.trim(),
             lang: 'hu',
             source: 'Weboldal (HU)'
         };
 
-        if (!data.guestName || !data.email || !data.phone) {
+        if (!data.guestName || !data.email || !data.phone || !data.billingAddress) {
             showSuccess(
                 'Hiányzó adatok',
-                'Kérjük, add meg a nevedet, e-mail címedet és telefonszámodat.',
+                'Kérjük, add meg a nevedet, e-mail címedet, telefonszámodat és lakcímedet / számlázási címedet.',
+                'error'
+            );
+            return;
+        }
+
+        if (Number(data.adults || 0) < 1) {
+            showSuccess(
+                'Hiányzó vendégadat',
+                'Legalább 1 felnőtt vendéget meg kell adni.',
                 'error'
             );
             return;

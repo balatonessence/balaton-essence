@@ -1165,9 +1165,11 @@ async function sendAdminBookingEmail(newB) {
                         <p><strong>Vendég:</strong> ${escapeHtml(newB.guestName)}</p>
                         <p><strong>Email:</strong> ${escapeHtml(newB.email)}</p>
                         <p><strong>Telefon:</strong> ${escapeHtml(newB.phone || newB.tel || newB.telefon || '-')}</p>
+                        <p><strong>Lakcím / számlázási cím:</strong> ${escapeHtml(newB.billingAddress || newB.address || '-')}</p>
                         <p><strong>Apartman:</strong> ${escapeHtml(newB.aptName)}</p>
                         <p><strong>Időpont:</strong> ${escapeHtml(newB.checkIn)} — ${escapeHtml(newB.checkOut)}</p>
                         <p><strong>Vendégek száma:</strong> ${escapeHtml(newB.guests || '-')} fő</p>
+                        <p><strong>Megoszlás:</strong> ${escapeHtml(newB.guestBreakdown || `${newB.adults || '-'} felnőtt, ${newB.children || 0} gyerek`)}</p>
                         <p><strong>Befizetett előleg:</strong> ${formatMoney(newB.paidDeposit)} Ft</p>
                         <p><strong>Teljes összeg:</strong> ${formatMoney(newB.totalPrice)} Ft</p>
                         <div style="background: #fff4e5; padding: 10px; border-left: 4px solid #ffa500;">
@@ -1260,6 +1262,8 @@ async function sendGuestBookingEmail(req, newB) {
                                 <tr><td style="padding: 10px 0; color: #666;">${escapeHtml(t.checkIn)}</td><td style="padding: 10px 0; text-align: right; font-weight: bold; color: #2C3325;">${escapeHtml(newB.checkIn)}</td></tr>
                                 <tr><td style="padding: 10px 0; color: #666;">${escapeHtml(t.checkOut)}</td><td style="padding: 10px 0; text-align: right; font-weight: bold; color: #2C3325;">${escapeHtml(newB.checkOut)}</td></tr>
                                 <tr><td style="padding: 10px 0; color: #666;">${escapeHtml(t.guests)}</td><td style="padding: 10px 0; text-align: right; font-weight: bold; color: #2C3325;">${escapeHtml(newB.guests)}</td></tr>
+                                <tr><td style="padding: 10px 0; color: #666;">Vendégösszetétel</td><td style="padding: 10px 0; text-align: right; font-weight: bold; color: #2C3325;">${escapeHtml(newB.guestBreakdown || `${newB.adults || '-'} felnőtt, ${newB.children || 0} gyerek`)}</td></tr>
+                                <tr><td style="padding: 10px 0; color: #666;">Lakcím / számlázási cím</td><td style="padding: 10px 0; text-align: right; font-weight: bold; color: #2C3325;">${escapeHtml(newB.billingAddress || newB.address || '-')}</td></tr>
                                 <tr><td style="padding: 12px 0; border-top: 1px dashed #ccc; color: #666;">${escapeHtml(t.paid)}</td><td style="padding: 12px 0; border-top: 1px dashed #ccc; text-align: right; font-weight: bold; color: #5c7a4d; font-size: 16px;">${formatMoney(newB.paidDeposit)} Ft</td></tr>
                                 <tr><td style="padding: 10px 0; color: #666;">${escapeHtml(t.balance)}</td><td style="padding: 10px 0; text-align: right; font-weight: bold; color: #2C3325; font-size: 16px;">${formatMoney(balance)} Ft</td></tr>
                             </table>
@@ -2102,6 +2106,21 @@ app.post('/api/create-payment-intent-booking', async (req, res) => {
             return res.status(400).json({ error: 'Hiányos foglalási adatok.' });
         }
 
+        if (!String(newB.billingAddress || newB.address || '').trim()) {
+            return res.status(400).json({ error: 'A lakcím / számlázási cím megadása kötelező.' });
+        }
+
+        const adults = Math.max(1, Number.parseInt(newB.adults, 10) || 1);
+        const children = Math.max(0, Number.parseInt(newB.children, 10) || 0);
+        const totalGuests = adults + children;
+
+        newB.adults = adults;
+        newB.children = children;
+        newB.guests = String(totalGuests);
+        newB.guestBreakdown = `${adults} felnőtt, ${children} gyerek`;
+        newB.billingAddress = String(newB.billingAddress || newB.address || '').trim();
+        newB.address = newB.billingAddress;
+
         const leadTimeValidation = validateMinimumBookingLeadTime(newB.checkIn);
 
         if (!leadTimeValidation.valid) {
@@ -2195,6 +2214,21 @@ app.post('/api/create-checkout-session', async (req, res) => {
         if (!newB || !newB.aptId || !newB.checkIn || !newB.checkOut || !newB.email || !newB.guestName) {
             return res.status(400).json({ error: 'Hiányos foglalási adatok.' });
         }
+
+        if (!String(newB.billingAddress || newB.address || '').trim()) {
+            return res.status(400).json({ error: 'A lakcím / számlázási cím megadása kötelező.' });
+        }
+
+        const adults = Math.max(1, Number.parseInt(newB.adults, 10) || 1);
+        const children = Math.max(0, Number.parseInt(newB.children, 10) || 0);
+        const totalGuests = adults + children;
+
+        newB.adults = adults;
+        newB.children = children;
+        newB.guests = String(totalGuests);
+        newB.guestBreakdown = `${adults} felnőtt, ${children} gyerek`;
+        newB.billingAddress = String(newB.billingAddress || newB.address || '').trim();
+        newB.address = newB.billingAddress;
 
         const leadTimeValidation = validateMinimumBookingLeadTime(newB.checkIn);
 

@@ -3652,6 +3652,12 @@ function renderBookings() {
                 <td><strong>${escapeHtml(apt ? apt.name : 'Ismeretlen')}</strong></td>
                 <td>
                     <div style="font-weight:700;">${escapeHtml(b.guestName || 'Vendég')}</div>
+                    <div class="muted" style="font-size:0.75rem; line-height:1.55; margin-top:4px;">
+                        ${b.email ? `<div>Email: ${escapeHtml(b.email)}</div>` : ''}
+                        ${b.phone ? `<div>Telefon: ${escapeHtml(b.phone)}</div>` : ''}
+                        ${b.billingAddress || b.address ? `<div>Cím: ${escapeHtml(b.billingAddress || b.address)}</div>` : ''}
+                        ${b.adults || b.children || b.guestBreakdown ? `<div>Létszám: ${escapeHtml(b.guestBreakdown || `${b.adults || '-'} felnőtt, ${b.children || 0} gyerek`)}</div>` : ''}
+                    </div>
                     ${priceHtml}
                 </td>
             <td>
@@ -4509,6 +4515,23 @@ function ensureExternalGuestModal() {
             </div>
 
             <div class="form-group">
+                <label>Lakcím / számlázási cím</label>
+                <input type="text" id="external-guest-address" placeholder="Irányítószám, város, utca, házszám">
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div class="form-group">
+                    <label>Felnőttek száma</label>
+                    <input type="number" id="external-guest-adults" min="1" value="1">
+                </div>
+
+                <div class="form-group">
+                    <label>Gyerekek száma</label>
+                    <input type="number" id="external-guest-children" min="0" value="0">
+                </div>
+            </div>
+
+            <div class="form-group">
                 <label>Nyelv</label>
                 <select id="external-guest-lang">
                     <option value="hu">Magyar</option>
@@ -4564,6 +4587,9 @@ function openExternalGuestModal(bookingId) {
 
     document.getElementById('external-guest-email').value = booking.email || '';
     document.getElementById('external-guest-phone').value = booking.phone || '';
+    document.getElementById('external-guest-address').value = booking.billingAddress || booking.address || '';
+    document.getElementById('external-guest-adults').value = Math.max(1, Number.parseInt(booking.adults, 10) || 1);
+    document.getElementById('external-guest-children').value = Math.max(0, Number.parseInt(booking.children, 10) || 0);
     document.getElementById('external-guest-lang').value = booking.lang || 'hu';
 
     modal.style.display = 'flex';
@@ -4591,6 +4617,9 @@ async function saveExternalGuestData() {
     const guestName = modal.querySelector('#external-guest-name')?.value.trim() || '';
     const email = modal.querySelector('#external-guest-email')?.value.trim() || '';
     const phone = modal.querySelector('#external-guest-phone')?.value.trim() || '';
+    const billingAddress = modal.querySelector('#external-guest-address')?.value.trim() || '';
+    const adults = Math.max(1, Number.parseInt(modal.querySelector('#external-guest-adults')?.value, 10) || 1);
+    const children = Math.max(0, Number.parseInt(modal.querySelector('#external-guest-children')?.value, 10) || 0);
     const lang = modal.querySelector('#external-guest-lang')?.value || 'hu';
 
     if (!guestName) {
@@ -4600,6 +4629,11 @@ async function saveExternalGuestData() {
 
     if (!email) {
         alert('Az email cím kötelező az automatikus emailekhez.');
+        return;
+    }
+
+    if (!billingAddress) {
+        alert('A lakcím / számlázási cím kötelező.');
         return;
     }
 
@@ -4615,6 +4649,12 @@ const wasBlocked = isBlockedBooking(booking);
 booking.guestName = guestName;
 booking.email = email;
 booking.phone = phone;
+booking.billingAddress = billingAddress;
+booking.address = billingAddress;
+booking.adults = adults;
+booking.children = children;
+booking.guests = String(adults + children);
+booking.guestBreakdown = `${adults} felnőtt, ${children} gyerek`;
 booking.lang = ['hu', 'en', 'de'].includes(lang) ? lang : 'hu';
 
 booking.manualGuestData = true;
