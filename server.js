@@ -9,13 +9,70 @@ const crypto = require('crypto');
 
 const app = express();
 
+const resend = new Resend(process.env.RESEND_API_KEY);
+const stripe = stripeLib(process.env.STRIPE_SECRET_KEY);
+
+// -----------------------------------------------------------------------------
+// STRIPE WEBHOOK - ezt az express.json() ELÉ kell rakni
+// -----------------------------------------------------------------------------
+app.post('/api/stripe-webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+    const sig = req.headers['stripe-signature'];
+
+    if (!process.env.STRIPE_WEBHOOK_SECRET) {
+        console.error('Missing STRIPE_WEBHOOK_SECRET environment variable.');
+        return res.status(500).send('Stripe webhook secret is not configured.');
+    }
+
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(
+            req.body,
+            sig,
+            process.env.STRIPE_WEBHOOK_SECRET
+        );
+    } catch (err) {
+        console.error('Stripe webhook signature error:', err.message);
+        return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    try {
+        console.log('Stripe webhook received:', event.type);
+
+        if (event.type === 'payment_intent.succeeded') {
+            const paymentIntent = event.data.object;
+            console.log('PaymentIntent succeeded:', paymentIntent.id);
+        }
+
+        if (event.type === 'payment_intent.payment_failed') {
+            const paymentIntent = event.data.object;
+            console.log('PaymentIntent failed:', paymentIntent.id);
+        }
+
+        if (event.type === 'checkout.session.completed') {
+            const session = event.data.object;
+            console.log('Checkout session completed:', session.id);
+        }
+
+        return res.status(200).json({ received: true });
+    } catch (err) {
+        console.error('Stripe webhook processing error:', err);
+        return res.status(500).json({ error: 'Webhook feldolgozási hiba.' });
+    }
+});
+
+app.get('/api/stripe-webhook', (req, res) => {
+    res.status(200).json({
+        ok: true,
+        endpoint: 'stripe-webhook',
+        method: 'POST required for Stripe'
+    });
+});
+
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 app.use(express.static(path.join(__dirname, 'public')));
-
-const resend = new Resend(process.env.RESEND_API_KEY);
-const stripe = stripeLib(process.env.STRIPE_SECRET_KEY);
 
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
