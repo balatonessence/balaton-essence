@@ -4515,8 +4515,8 @@ function ensureExternalGuestModal() {
             </div>
 
             <div class="form-group">
-                <label>Lakcím / számlázási cím</label>
-                <input type="text" id="external-guest-address" placeholder="Irányítószám, város, utca, házszám">
+                <label>Lakcím / számlázási cím <span style="font-weight:600; color:#8a8f8a;">(opcionális)</span></label>
+                <input type="text" id="external-guest-address" placeholder="Irányítószám, város, utca, házszám - opcionális">
             </div>
 
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
@@ -4629,11 +4629,6 @@ async function saveExternalGuestData() {
 
     if (!email) {
         alert('Az email cím kötelező az automatikus emailekhez.');
-        return;
-    }
-
-    if (!billingAddress) {
-        alert('A lakcím / számlázási cím kötelező.');
         return;
     }
 
