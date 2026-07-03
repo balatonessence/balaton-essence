@@ -773,12 +773,22 @@
                 <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:0.62rem; font-weight:800; color:var(--text-light); text-transform:uppercase; display:block; margin-bottom:4px;">Adults</label>
-                        <input type="number" id="book-adults" min="1" max="6" step="1" value="2" onchange="calculateStay()" oninput="calculateStay()" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
+                        <div style="display:flex; align-items:center; justify-content:space-between; height:52px; border:1px solid var(--border); border-radius:6px; background:#fff; overflow:hidden;">
+                            <button type="button" onclick="changeBookingGuests('adults', -1)" style="width:54px; height:52px; border:none; background:rgba(42,48,43,0.06); color:var(--primary); font-size:1.45rem; font-weight:800; cursor:pointer; touch-action:manipulation;">−</button>
+                            <span id="book-adults-display" style="flex:1; text-align:center; font-size:1.05rem; font-weight:800; color:var(--primary);">2</span>
+                            <button type="button" onclick="changeBookingGuests('adults', 1)" style="width:54px; height:52px; border:none; background:rgba(42,48,43,0.06); color:var(--primary); font-size:1.45rem; font-weight:800; cursor:pointer; touch-action:manipulation;">+</button>
+                        </div>
+                        <input type="hidden" id="book-adults" value="2">
                     </div>
 
                     <div>
                         <label style="font-size:0.62rem; font-weight:800; color:var(--text-light); text-transform:uppercase; display:block; margin-bottom:4px;">Children</label>
-                        <input type="number" id="book-children" min="0" max="4" step="1" value="0" onchange="calculateStay()" oninput="calculateStay()" style="width: 100%; padding: 0.8rem; border: 1px solid var(--border); border-radius: 4px; font-family: 'Montserrat';">
+                        <div style="display:flex; align-items:center; justify-content:space-between; height:52px; border:1px solid var(--border); border-radius:6px; background:#fff; overflow:hidden;">
+                            <button type="button" onclick="changeBookingGuests('children', -1)" style="width:54px; height:52px; border:none; background:rgba(42,48,43,0.06); color:var(--primary); font-size:1.45rem; font-weight:800; cursor:pointer; touch-action:manipulation;">−</button>
+                            <span id="book-children-display" style="flex:1; text-align:center; font-size:1.05rem; font-weight:800; color:var(--primary);">0</span>
+                            <button type="button" onclick="changeBookingGuests('children', 1)" style="width:54px; height:52px; border:none; background:rgba(42,48,43,0.06); color:var(--primary); font-size:1.45rem; font-weight:800; cursor:pointer; touch-action:manipulation;">+</button>
+                        </div>
+                        <input type="hidden" id="book-children" value="0">
                     </div>
                 </div>
 
@@ -1834,12 +1844,51 @@ function formatApartmentName(value) {
             childrenInput.value = String(children);
         }
 
+        const adultsDisplay = document.getElementById('book-adults-display');
+        const childrenDisplay = document.getElementById('book-children-display');
+
+        if (adultsDisplay) adultsDisplay.innerText = String(adults);
+        if (childrenDisplay) childrenDisplay.innerText = String(children);
+
         return {
             adults,
             children,
             total: adults + children,
             maxAllowed
         };
+    }
+
+    function changeBookingGuests(type, direction) {
+        const guestInfo = getBookingGuestBreakdown();
+        const adultsInput = document.getElementById('book-adults');
+        const childrenInput = document.getElementById('book-children');
+
+        let adults = guestInfo.adults;
+        let children = guestInfo.children;
+        const maxAllowed = guestInfo.maxAllowed;
+
+        if (type === 'adults') {
+            const nextAdults = adults + direction;
+
+            if (nextAdults < 1) return;
+            if (nextAdults + children > maxAllowed) return;
+
+            adults = nextAdults;
+        }
+
+        if (type === 'children') {
+            const nextChildren = children + direction;
+
+            if (nextChildren < 0) return;
+            if (adults + nextChildren > maxAllowed) return;
+
+            children = nextChildren;
+        }
+
+        if (adultsInput) adultsInput.value = String(adults);
+        if (childrenInput) childrenInput.value = String(children);
+
+        calculateStay();
     }
 
     function updateGuestCountInfo() {
