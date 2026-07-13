@@ -1638,6 +1638,105 @@ function getLightweightImage(value) {
     return str;
 }
 
+function getApartmentCoverImageValue(apartment) {
+    if (!apartment) return '';
+
+    const coverCandidates = [
+        apartment.coverImage,
+        apartment.mainImage,
+        apartment.image,
+        Array.isArray(apartment.images) ? apartment.images[0] : '',
+        Array.isArray(apartment.gallery) ? apartment.gallery[0] : '',
+        Array.isArray(apartment.galleryImages) ? apartment.galleryImages[0] : '',
+        Array.isArray(apartment.photos) ? apartment.photos[0] : '',
+        Array.isArray(apartment.pictures) ? apartment.pictures[0] : ''
+    ];
+
+    return coverCandidates
+        .map(value => String(value || '').trim())
+        .find(Boolean) || '';
+}
+
+function buildPublicApartmentCoverCache(db, now = Date.now()) {
+    const values = new Map();
+
+    (db.apartments || []).forEach(apartment => {
+        const id = String(apartment.id || '');
+        const value = getApartmentCoverImageValue(apartment);
+
+        if (id && value) {
+            values.set(id, value);
+        }
+    });
+
+    publicApartmentCoverCache = {
+        expiresAt: now + PUBLIC_HOME_CACHE_TTL_MS,
+        values
+    };
+}
+
+async function getCachedPublicApartmentCoverValue(id) {
+    const key = String(id || '');
+    const now = Date.now();
+
+    if (publicApartmentCoverCache.values instanceof Map &&
+        publicApartmentCoverCache.expiresAt > now &&
+        publicApartmentCoverCache.values.has(key)) {
+        return publicApartmentCoverCache.values.get(key);
+    }
+
+    const db = await getDbContent();
+    buildPublicApartmentCoverCache(db, now);
+
+    return publicApartmentCoverCache.values.get(key) || '';
+}
+
+function sendImageValue(value, res) {
+    const str = String(value || '').trim();
+
+    if (!str) {
+        return res.status(404).send('Image not found');
+    }
+
+    res.set('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+
+    const dataUriMatch = str.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+
+    if (dataUriMatch) {
+        const mimeType = dataUriMatch[1];
+        const base64Data = dataUriMatch[2];
+        const buffer = Buffer.from(base64Data, 'base64');
+
+        res.set('Content-Type', mimeType);
+        return res.status(200).send(buffer);
+    }
+
+    // Biztonsági tartalék régi, prefix nélküli base64 JPEG/PNG mezőkre.
+    if (str.length > 1200 && /^[A-Za-z0-9+/=\s]+$/.test(str)) {
+        const cleanBase64 = str.replace(/\s/g, '');
+        const mimeType = cleanBase64.startsWith('iVBOR') ? 'image/png' : 'image/jpeg';
+        const buffer = Buffer.from(cleanBase64, 'base64');
+
+        res.set('Content-Type', mimeType);
+        return res.status(200).send(buffer);
+    }
+
+    if (str.startsWith('https://')) {
+        return res.redirect(302, str);
+    }
+
+    if (str.startsWith('/')) {
+        if (str.startsWith('//')) return res.status(400).send('Invalid image path');
+        return res.redirect(302, str);
+    }
+
+    if (str.startsWith('img/')) {
+        return res.redirect(302, '/' + str);
+    }
+
+    return res.status(404).send('Unsupported image format');
+}
+
 function getApartmentPublicCardData(apartment) {
     const seasons = Array.isArray(apartment.seasons)
         ? apartment.seasons.map(season => ({
@@ -1654,17 +1753,9 @@ function getApartmentPublicCardData(apartment) {
         }))
         : [];
 
-    const coverCandidates = [
-        apartment.coverImage,
-        apartment.mainImage,
-        apartment.image,
-        Array.isArray(apartment.images) ? apartment.images[0] : '',
-        Array.isArray(apartment.gallery) ? apartment.gallery[0] : ''
-    ];
-
-    const coverImage = coverCandidates
-        .map(getLightweightImage)
-        .find(Boolean) || '';
+    const coverImage = getApartmentCoverImageValue(apartment)
+        ? `/img/public-apartment-cover/${encodeURIComponent(String(apartment.id || ''))}`
+        : '';
 
     return {
         id: apartment.id,
@@ -1684,25 +1775,56 @@ function getApartmentPublicCardData(apartment) {
 // API - DATABASE
 // -----------------------------------------------------------------------------
 
+const PUBLIC_HOME_CACHE_TTL_MS = 5 * 60 * 1000;
+const PUBLIC_REVIEWS_CACHE_TTL_MS = 5 * 60 * 1000;
+
+let publicHomeDataCache = { expiresAt: 0, payload: null };
+let publicReviewsCache = { expiresAt: 0, payload: null };
+let publicApartmentCoverCache = { expiresAt: 0, values: new Map() };
 
 app.get('/api/public-home-data', async (req, res) => {
     try {
+        const now = Date.now();
+
+        if (publicHomeDataCache.payload && publicHomeDataCache.expiresAt > now) {
+            res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+            return res.status(200).json(publicHomeDataCache.payload);
+        }
+
         const db = await getDbContent();
+        buildPublicApartmentCoverCache(db, now);
 
         const apartments = Array.isArray(db.apartments)
             ? db.apartments.map(getApartmentPublicCardData)
             : [];
 
-        res.set('Cache-Control', 'public, max-age=60');
-        res.status(200).json({
+        const payload = {
             apartments,
             owners: [],
             bookings: [],
             extras: []
-        });
+        };
+
+        publicHomeDataCache = {
+            expiresAt: now + PUBLIC_HOME_CACHE_TTL_MS,
+            payload
+        };
+
+        res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+        return res.status(200).json(payload);
     } catch (err) {
         console.error('Publikus főoldali adatlekérdezési hiba:', err);
         res.status(500).json({ error: 'Hiba a publikus adatok lekérésekor' });
+    }
+});
+
+app.get('/img/public-apartment-cover/:id', async (req, res) => {
+    try {
+        const value = await getCachedPublicApartmentCoverValue(req.params.id);
+        return sendImageValue(value, res);
+    } catch (err) {
+        console.error('Publikus apartman kép lekérdezési hiba:', err);
+        return res.status(500).send('Image loading error');
     }
 });
 
@@ -4054,13 +4176,26 @@ app.delete('/api/recommendations/:id', requireAdmin, async (req, res) => {
 
 app.get('/api/reviews', async (req, res) => {
     try {
+        const now = Date.now();
+
+        if (publicReviewsCache.payload && publicReviewsCache.expiresAt > now) {
+            res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+            return res.json(publicReviewsCache.payload);
+        }
+
         const db = await getDbContent();
 
         const visibleReviews = (db.reviews || [])
             .filter(r => r.isVisible !== false)
             .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
 
-        res.json(visibleReviews);
+        publicReviewsCache = {
+            expiresAt: now + PUBLIC_REVIEWS_CACHE_TTL_MS,
+            payload: visibleReviews
+        };
+
+        res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=300');
+        return res.json(visibleReviews);
     } catch (e) {
         console.error('Review lekérési hiba:', e);
         res.status(500).json({ error: 'Szerver hiba' });

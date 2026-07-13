@@ -15,12 +15,15 @@ function shouldUsePublicHomeData() {
 
 async function initDatabase(callback) {
     try {
-        const timestamp = new Date().getTime();
-        const endpoint = shouldUsePublicHomeData()
+        const usePublicHomeData = shouldUsePublicHomeData();
+        const endpoint = usePublicHomeData
             ? '/api/public-home-data'
             : '/api/get-db-content';
 
-        const res = await fetch(endpoint + '?t=' + timestamp, { cache: 'no-store' });
+        const res = await fetch(
+            usePublicHomeData ? endpoint : endpoint + '?t=' + new Date().getTime(),
+            { cache: usePublicHomeData ? 'default' : 'no-store' }
+        );
 
         if (res.ok) {
             const data = await res.json();
