@@ -910,7 +910,7 @@ function ensureDbShape(db) {
             description_hu: '',
             description_en: '',
             description_de: '',
-            image: 'img/sup.png',
+            image: 'img/sup.webp',
             maxStock: 4,
             active: true
         },
@@ -926,7 +926,7 @@ function ensureDbShape(db) {
             description_hu: '',
             description_en: '',
             description_de: '',
-            image: 'img/napozoszek.png',
+            image: 'img/napozoszek.webp',
             maxStock: 8,
             active: true
         },
@@ -942,7 +942,7 @@ function ensureDbShape(db) {
             description_hu: '',
             description_en: '',
             description_de: '',
-            image: 'img/napernyo.png',
+            image: 'img/napernyo.webp',
             maxStock: 8,
             active: true
         },
@@ -958,7 +958,7 @@ function ensureDbShape(db) {
             description_hu: '',
             description_en: '',
             description_de: '',
-            image: 'img/hajo.png',
+            image: 'img/hajo.webp',
             maxStock: 1,
             active: true
         }
@@ -976,7 +976,7 @@ function ensureDbShape(db) {
                 description_hu: 'Friss péksütemények, válogatott felvágottak és sajtok, szezonális zöldségek, gyümölcsök és apró finomságok. Kényelmes, bőséges reggeli, amely tökéletes indítása a napnak. A tál összeállítása szezonálisan változhat.',
                 description_en: 'Fresh pastries, a selection of cold cuts and cheeses, seasonal vegetables, fruits, and small treats. A comfortable, hearty breakfast that is the perfect way to start your day. The contents of the platter may vary depending on the season.',
                 description_de: 'Frisches Gebäck, ausgewählte Wurst- und Käsesorten, Gemüse und Obst der Saison sowie kleine Köstlichkeiten. Ein gemütliches, reichhaltiges Frühstück, das den Tag perfekt einläutet. Die Zusammensetzung der Platte kann je nach Saison variieren.',
-                image: 'img/Reggeli tál.png',
+                image: 'img/Reggeli tál.webp',
                 active: true
             },
             {
@@ -988,7 +988,7 @@ function ensureDbShape(db) {
                 description_hu: 'Gondosan válogatott sajtok, friss gyümölcsök és harmonizáló kiegészítők elegáns tálalásban, egy palack dél-balatoni borral kiegészítve. Tökéletes választás egy nyugodt estéhez vagy különleges pillanathoz. A tál összeállítása szezonálisan változhat.',
                 description_en: 'Carefully selected cheeses, fresh fruits, and complementary accompaniments, elegantly presented and paired with a bottle of wine from the southern Balaton region. The perfect choice for a relaxing evening or a special occasion. The contents of the platter may vary seasonally.',
                 description_de: 'Sorgfältig ausgewählte Käsesorten, frisches Obst und dazu passende Beilagen, elegant angerichtet und ergänzt durch eine Flasche Wein aus dem südlichen Balaton. Die perfekte Wahl für einen ruhigen Abend oder einen besonderen Moment. Die Zusammensetzung der Platte kann je nach Saison variieren.',
-                image: 'img/Sajttál.png',
+                image: 'img/Sajttál.webp',
                 active: true
             },
             {
@@ -1000,7 +1000,7 @@ function ensureDbShape(db) {
                 description_hu: 'Egy üveg Prosecco, két szelet desszert és gondosan válogatott kiegészítők egy elegáns, meghitt pillanathoz. Ideális választás ünnepléshez, romantikus estékhez vagy évfordulóhoz. A tál összeállítása szezonálisan változhat.',
                 description_en: 'A bottle of Prosecco, two dessert slices, and carefully selected accompaniments for an elegant, intimate moment. The perfect choice for celebrations, romantic evenings, or anniversaries. The contents of the platter may vary by season.',
                 description_de: 'Eine Flasche Prosecco, zwei Dessertstücke und sorgfältig ausgewählte Beilagen für einen eleganten, gemütlichen Moment. Die ideale Wahl für Feierlichkeiten, romantische Abende oder Jahrestage. Die Zusammenstellung der Platte kann je nach Saison variieren.',
-                image: 'img/Születésnap, évforduló.png',
+                image: 'img/Születésnap, évforduló.webp',
                 active: true
             }
         ];
