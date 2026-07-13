@@ -901,28 +901,78 @@
         return checkInDateTime >= minimumAllowedDateTime;
     }
 
+
+    function getApartmanImages(apt) {
+        if (!apt) return [];
+
+        const candidates = [];
+
+        if (apt.coverImage) candidates.push(apt.coverImage);
+        if (apt.image) candidates.push(apt.image);
+
+        ['galleryImages', 'images', 'gallery'].forEach(key => {
+            if (Array.isArray(apt[key])) {
+                candidates.push(...apt[key]);
+            }
+        });
+
+        const seen = new Set();
+
+        return candidates
+            .map(value => String(value || '').trim())
+            .filter(Boolean)
+            .filter(src => {
+                if (seen.has(src)) return false;
+                seen.add(src);
+                return true;
+            });
+    }
+
+    async function loadPublicApartmentData(id) {
+        const timestamp = Date.now();
+        const response = await fetch(`/api/public-apartment/${encodeURIComponent(id)}?t=${timestamp}`, {
+            cache: 'no-store'
+        });
+
+        if (!response.ok) {
+            throw new Error('Apartment data loading failed');
+        }
+
+        const payload = await response.json();
+        const apartment = payload.apartment || null;
+
+        db = {
+            apartments: apartment ? [apartment] : [],
+            bookings: Array.isArray(payload.bookings) ? payload.bookings : [],
+            owners: Array.isArray(payload.owners) ? payload.owners : [],
+            extras: Array.isArray(payload.extras) ? payload.extras : []
+        };
+
+        return apartment;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
         initHeaderScroll();
 
         const params = new URLSearchParams(window.location.search);
         const id = params.get('id');
 
-        await initDatabase(() => {
-            currentApt = db.apartments.find(a => String(a.id) === String(id));
+        if (!id) {
+            window.location.href = 'index.html';
+            return;
+        }
+
+        try {
+            currentApt = await loadPublicApartmentData(id);
 
             if (currentApt) {
-                allImages = [];
-
-                if (currentApt.coverImage) {
-                    allImages.push(currentApt.coverImage);
-                }
-
-                if (Array.isArray(currentApt.galleryImages)) {
-                    allImages.push(...currentApt.galleryImages);
-                }
+                allImages = getApartmanImages(currentApt);
 
                 renderDetails();
-                updateSEO(currentApt.name || 'Apartment', currentApt.location || 'Lake Balaton');
+                updateSEO(
+                    currentApt.nameEn || currentApt.name_en || currentApt.name || 'Apartment',
+                    currentApt.locationEn || currentApt.location_en || currentApt.location || 'Lake Balaton'
+                );
 
                 const mainContent = document.getElementById('main-content');
                 if (mainContent) {
@@ -931,7 +981,10 @@
             } else {
                 window.location.href = 'index.html';
             }
-        });
+        } catch (error) {
+            console.error('Apartment loading error:', error);
+            window.location.href = 'index.html';
+        }
     });
 
     function decodeHtmlEntities(value) {

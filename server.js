@@ -1771,16 +1771,154 @@ function getApartmentPublicCardData(apartment) {
     };
 }
 
+
+function getApartmentImageValues(apartment) {
+    if (!apartment) return [];
+
+    const candidates = [];
+
+    if (apartment.coverImage) candidates.push(apartment.coverImage);
+    if (apartment.image) candidates.push(apartment.image);
+    if (apartment.mainImage) candidates.push(apartment.mainImage);
+
+    ['galleryImages', 'images', 'gallery', 'photos', 'pictures'].forEach(key => {
+        if (Array.isArray(apartment[key])) {
+            candidates.push(...apartment[key]);
+        }
+    });
+
+    const seen = new Set();
+
+    return candidates
+        .map(value => String(value || '').trim())
+        .filter(Boolean)
+        .filter(value => {
+            if (seen.has(value)) return false;
+            seen.add(value);
+            return true;
+        });
+}
+
+function buildPublicApartmentImageCache(db, now = Date.now()) {
+    const values = new Map();
+
+    (db.apartments || []).forEach(apartment => {
+        const id = String(apartment.id || '');
+        const images = getApartmentImageValues(apartment);
+
+        if (id && images.length) {
+            values.set(id, images);
+        }
+    });
+
+    publicApartmentImageCache = {
+        expiresAt: now + PUBLIC_APARTMENT_IMAGE_CACHE_TTL_MS,
+        values
+    };
+}
+
+async function getCachedPublicApartmentImageValue(id, index) {
+    const key = String(id || '');
+    const imageIndex = Math.max(0, Number(index || 0));
+    const now = Date.now();
+
+    if (publicApartmentImageCache.values instanceof Map &&
+        publicApartmentImageCache.expiresAt > now &&
+        publicApartmentImageCache.values.has(key)) {
+        return publicApartmentImageCache.values.get(key)[imageIndex] || '';
+    }
+
+    const db = await getDbContent();
+    buildPublicApartmentImageCache(db, now);
+
+    return publicApartmentImageCache.values.get(key)?.[imageIndex] || '';
+}
+
+function getApartmentPublicDetailData(apartment) {
+    const id = String(apartment.id || '');
+    const images = getApartmentImageValues(apartment);
+    const imageUrls = images.map((_, index) => `/img/public-apartment-image/${encodeURIComponent(id)}/${index}`);
+
+    return {
+        id: apartment.id,
+        name: apartment.name || '',
+        name_en: apartment.name_en || apartment.nameEn || apartment.nameEN || '',
+        nameEn: apartment.nameEn || apartment.name_en || apartment.nameEN || '',
+        name_de: apartment.name_de || apartment.nameDe || apartment.nameDE || '',
+        nameDe: apartment.nameDe || apartment.name_de || apartment.nameDE || '',
+
+        description: apartment.description || '',
+        description_en: apartment.description_en || apartment.descriptionEn || apartment.descriptionEN || apartment.desc_en || apartment.descEn || '',
+        descriptionEn: apartment.descriptionEn || apartment.description_en || apartment.descriptionEN || apartment.desc_en || apartment.descEn || '',
+        desc_en: apartment.desc_en || apartment.description_en || apartment.descriptionEn || '',
+        descEn: apartment.descEn || apartment.descriptionEn || apartment.description_en || '',
+        description_de: apartment.description_de || apartment.descriptionDe || apartment.descriptionDE || apartment.desc_de || apartment.descDe || '',
+        descriptionDe: apartment.descriptionDe || apartment.description_de || apartment.descriptionDE || apartment.desc_de || apartment.descDe || '',
+        desc_de: apartment.desc_de || apartment.description_de || apartment.descriptionDe || '',
+        descDe: apartment.descDe || apartment.descriptionDe || apartment.description_de || '',
+
+        location: apartment.location || '',
+        location_en: apartment.location_en || apartment.locationEn || apartment.locationEN || '',
+        locationEn: apartment.locationEn || apartment.location_en || apartment.locationEN || '',
+        location_de: apartment.location_de || apartment.locationDe || apartment.locationDE || '',
+        locationDe: apartment.locationDe || apartment.location_de || apartment.locationDE || '',
+
+        address: apartment.address || '',
+        price: Number(apartment.price || 0),
+        guests: Number(apartment.guests || apartment.maxGuests || apartment.capacity || apartment.maxCapacity || 2),
+        maxGuests: Number(apartment.maxGuests || apartment.capacity || apartment.maxCapacity || apartment.guests || 2),
+        max_guests: Number(apartment.max_guests || apartment.maxGuests || apartment.capacity || apartment.maxCapacity || apartment.guests || 2),
+        capacity: Number(apartment.capacity || apartment.maxCapacity || apartment.maxGuests || apartment.guests || 2),
+        seasons: Array.isArray(apartment.seasons) ? apartment.seasons : [],
+        disabledDates: Array.isArray(apartment.disabledDates) ? apartment.disabledDates : [],
+        noCheckInDates: Array.isArray(apartment.noCheckInDates) ? apartment.noCheckInDates : [],
+        noCheckOutDates: Array.isArray(apartment.noCheckOutDates) ? apartment.noCheckOutDates : [],
+        discount: apartment.discount || null,
+        nightlyDiscount: apartment.nightlyDiscount || null,
+        discountAmount: apartment.discountAmount || 0,
+        coverImage: imageUrls[0] || '',
+        image: imageUrls[0] || '',
+        galleryImages: imageUrls.slice(1)
+    };
+}
+
+function getPublicApartmentBookingData(db, apartmentId) {
+    return (db.bookings || [])
+        .filter(booking => {
+            const aptId = booking.aptId || booking.apartmentId || '';
+            if (String(aptId) !== String(apartmentId)) return false;
+            if (isCancelledBooking(booking)) return false;
+            return true;
+        })
+        .map(booking => ({
+            id: booking.id || '',
+            aptId: booking.aptId || booking.apartmentId || apartmentId,
+            apartmentId: booking.apartmentId || booking.aptId || apartmentId,
+            checkIn: booking.checkIn || booking.start || '',
+            checkOut: booking.checkOut || booking.end || '',
+            start: booking.start || booking.checkIn || '',
+            end: booking.end || booking.checkOut || '',
+            status: booking.status || '',
+            type: booking.type || '',
+            guestName: booking.guestName || '',
+            manualGuestData: booking.manualGuestData === true
+        }));
+}
+
 // -----------------------------------------------------------------------------
 // API - DATABASE
 // -----------------------------------------------------------------------------
 
 const PUBLIC_HOME_CACHE_TTL_MS = 5 * 60 * 1000;
 const PUBLIC_REVIEWS_CACHE_TTL_MS = 5 * 60 * 1000;
+const PUBLIC_APARTMENT_CACHE_TTL_MS = 60 * 1000;
+const PUBLIC_APARTMENT_IMAGE_CACHE_TTL_MS = 10 * 60 * 1000;
 
 let publicHomeDataCache = { expiresAt: 0, payload: null };
 let publicReviewsCache = { expiresAt: 0, payload: null };
 let publicApartmentCoverCache = { expiresAt: 0, values: new Map() };
+let publicApartmentImageCache = { expiresAt: 0, values: new Map() };
+let publicApartmentDetailCache = { expiresAt: 0, values: new Map() };
 
 app.get('/api/public-home-data', async (req, res) => {
     try {
@@ -1824,6 +1962,59 @@ app.get('/img/public-apartment-cover/:id', async (req, res) => {
         return sendImageValue(value, res);
     } catch (err) {
         console.error('Publikus apartman kép lekérdezési hiba:', err);
+        return res.status(500).send('Image loading error');
+    }
+});
+
+
+app.get('/api/public-apartment/:id', async (req, res) => {
+    try {
+        const id = String(req.params.id || '');
+        const now = Date.now();
+
+        if (publicApartmentDetailCache.values instanceof Map &&
+            publicApartmentDetailCache.expiresAt > now &&
+            publicApartmentDetailCache.values.has(id)) {
+            res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
+            return res.status(200).json(publicApartmentDetailCache.values.get(id));
+        }
+
+        const db = await getDbContent();
+        buildPublicApartmentImageCache(db, now);
+
+        const apartment = (db.apartments || []).find(item => String(item.id) === id);
+
+        if (!apartment) {
+            return res.status(404).json({ error: 'Apartman nem található.' });
+        }
+
+        const payload = {
+            apartment: getApartmentPublicDetailData(apartment),
+            bookings: getPublicApartmentBookingData(db, id),
+            owners: [],
+            extras: []
+        };
+
+        publicApartmentDetailCache = {
+            expiresAt: now + PUBLIC_APARTMENT_CACHE_TTL_MS,
+            values: new Map(publicApartmentDetailCache.values instanceof Map ? publicApartmentDetailCache.values : [])
+        };
+        publicApartmentDetailCache.values.set(id, payload);
+
+        res.set('Cache-Control', 'public, max-age=30, stale-while-revalidate=120');
+        return res.status(200).json(payload);
+    } catch (err) {
+        console.error('Publikus apartman adatlekérdezési hiba:', err);
+        return res.status(500).json({ error: 'Hiba az apartman adatainak lekérésekor.' });
+    }
+});
+
+app.get('/img/public-apartment-image/:id/:index', async (req, res) => {
+    try {
+        const value = await getCachedPublicApartmentImageValue(req.params.id, req.params.index);
+        return sendImageValue(value, res);
+    } catch (err) {
+        console.error('Publikus apartman galéria kép lekérdezési hiba:', err);
         return res.status(500).send('Image loading error');
     }
 });
