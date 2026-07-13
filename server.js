@@ -1623,9 +1623,88 @@ async function sendGuestOrderEmail(data, lang, method) {
     }
 }
 
+
+function getLightweightImage(value) {
+    const str = String(value || '').trim();
+
+    if (!str) return '';
+
+    // Ne küldjünk több MB-os base64 képeket a főoldali JSON-ban.
+    if (str.startsWith('data:')) return '';
+
+    // Ha véletlenül túl hosszú mező lenne, inkább hagyjuk ki a gyors listából.
+    if (str.length > 1200) return '';
+
+    return str;
+}
+
+function getApartmentPublicCardData(apartment) {
+    const seasons = Array.isArray(apartment.seasons)
+        ? apartment.seasons.map(season => ({
+            name: season.name || '',
+            start: season.start || '',
+            end: season.end || '',
+            price: Number(season.price || 0),
+            price3: Number(season.price3 || 0),
+            price4: Number(season.price4 || 0),
+            price5: Number(season.price5 || 0),
+            price6: Number(season.price6 || 0),
+            minNights: Number(season.minNights || 1),
+            maxGuests: Number(season.maxGuests || apartment.maxGuests || 2)
+        }))
+        : [];
+
+    const coverCandidates = [
+        apartment.coverImage,
+        apartment.mainImage,
+        apartment.image,
+        Array.isArray(apartment.images) ? apartment.images[0] : '',
+        Array.isArray(apartment.gallery) ? apartment.gallery[0] : ''
+    ];
+
+    const coverImage = coverCandidates
+        .map(getLightweightImage)
+        .find(Boolean) || '';
+
+    return {
+        id: apartment.id,
+        name: apartment.name || '',
+        description: apartment.description || '',
+        location: apartment.location || 'Balaton',
+        coverImage,
+        price: Number(apartment.price || 0),
+        maxGuests: Number(apartment.maxGuests || apartment.capacity || apartment.maxCapacity || 2),
+        capacity: Number(apartment.capacity || apartment.maxCapacity || apartment.maxGuests || 2),
+        seasons,
+        discount: apartment.discount || null
+    };
+}
+
 // -----------------------------------------------------------------------------
 // API - DATABASE
 // -----------------------------------------------------------------------------
+
+
+app.get('/api/public-home-data', async (req, res) => {
+    try {
+        const db = await getDbContent();
+
+        const apartments = Array.isArray(db.apartments)
+            ? db.apartments.map(getApartmentPublicCardData)
+            : [];
+
+        res.set('Cache-Control', 'public, max-age=60');
+        res.status(200).json({
+            apartments,
+            owners: [],
+            bookings: [],
+            extras: []
+        });
+    } catch (err) {
+        console.error('Publikus főoldali adatlekérdezési hiba:', err);
+        res.status(500).json({ error: 'Hiba a publikus adatok lekérésekor' });
+    }
+});
 
 app.get('/api/get-db-content', async (req, res) => {
     try {

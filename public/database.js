@@ -1,15 +1,46 @@
 var db = { apartments: [], owners: [], bookings: [], extras: [] };
 
+function shouldUsePublicHomeData() {
+    const path = window.location.pathname.toLowerCase();
+
+    return (
+        path === '/' ||
+        path === '/index.html' ||
+        path === '/en/' ||
+        path === '/en/index.html' ||
+        path === '/de/' ||
+        path === '/de/index.html'
+    );
+}
+
 async function initDatabase(callback) {
     try {
         const timestamp = new Date().getTime();
-        const res = await fetch('/api/get-db-content?t=' + timestamp, { cache: 'no-store' });
+        const endpoint = shouldUsePublicHomeData()
+            ? '/api/public-home-data'
+            : '/api/get-db-content';
+
+        const res = await fetch(endpoint + '?t=' + timestamp, { cache: 'no-store' });
+
         if (res.ok) {
             const data = await res.json();
             if (data) db = data;
             if (callback) callback();
+            return;
         }
-    } catch (e) { console.error("Hiba az adatok betöltésekor:", e); }
+
+        // Biztonsági tartalék: ha az új gyors endpoint még nincs fent, régi módon próbáljuk.
+        if (endpoint !== '/api/get-db-content') {
+            const fallback = await fetch('/api/get-db-content?t=' + timestamp, { cache: 'no-store' });
+            if (fallback.ok) {
+                const data = await fallback.json();
+                if (data) db = data;
+                if (callback) callback();
+            }
+        }
+    } catch (e) {
+        console.error("Hiba az adatok betöltésekor:", e);
+    }
 }
 
 function getAptStatusAndPrice(apt, date = new Date(), guests = 2) {
