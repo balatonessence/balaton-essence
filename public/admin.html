@@ -2430,6 +2430,49 @@
         }
     }
 
+    async function postAdminJson(endpoint, payload, fallbackError = 'Hiba a mentésnél!') {
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: getAdminHeaders(),
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                alert(err.error || fallbackError);
+                return null;
+            }
+
+            return await res.json().catch(() => ({ success: true }));
+        } catch (e) {
+            alert('Nem sikerült elérni a szervert!');
+            console.error(e);
+            return null;
+        }
+    }
+
+    async function deleteAdminJson(endpoint, fallbackError = 'Hiba a törlésnél!') {
+        try {
+            const res = await fetch(endpoint, {
+                method: 'DELETE',
+                headers: getAdminHeaders()
+            });
+
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                alert(err.error || fallbackError);
+                return null;
+            }
+
+            return await res.json().catch(() => ({ success: true }));
+        } catch (e) {
+            alert('Nem sikerült elérni a szervert!');
+            console.error(e);
+            return null;
+        }
+    }
+
     async function saveOwner() {
         const id = document.getElementById('edit-owner-id').value;
         const name = document.getElementById('edit-owner-name').value.trim();
@@ -2462,7 +2505,13 @@
             }
         }
 
-        await saveDb();
+        const savedOwner = (db.owners || []).find(o => String(o.id || o._id) === String(id || db.owners[db.owners.length - 1]?.id));
+        const saved = await postAdminJson('/api/admin/owner', { owner: savedOwner }, 'Hiba a partner mentésénél!');
+
+        if (!saved) return;
+
+        renderAll();
+        showSaveToast();
         closeModal();
     }
 
@@ -2649,7 +2698,16 @@ function renderAboutTeamPreview() {
     async function saveAboutHeritageImages() {
     db.aboutHeritageImages = currentAboutHeritageImages.slice(0, 4);
     db.aboutTeamImage = currentAboutTeamImage || '';
-    await saveDb();
+
+    const saved = await postAdminJson('/api/admin/about-images', {
+        aboutHeritageImages: db.aboutHeritageImages,
+        aboutTeamImage: db.aboutTeamImage
+    }, 'Hiba a rólunk képek mentésénél!');
+
+    if (!saved) return;
+
+    renderAll();
+    showSaveToast();
 }
 
     function removeCoverImage() {
@@ -2872,7 +2930,12 @@ function initGallerySorting() {
             if (idx !== -1) db.apartments[idx] = aptData;
         }
 
-        await saveDb();
+        const saved = await postAdminJson('/api/admin/apartment', { apartment: aptData }, 'Hiba az apartman mentésénél!');
+
+        if (!saved) return;
+
+        renderAll();
+        showSaveToast();
         closeModal();
     }
 
@@ -4669,9 +4732,13 @@ if (wasBlocked) {
     }
 }
 
-await saveDb();
+const saved = await postAdminJson('/api/admin/booking', { booking }, 'Hiba a vendégadatok mentésénél!');
+
+if (!saved) return;
+
 closeExternalGuestModal();
 renderAll();
+showSaveToast();
 }
 
     async function saveReview() {
@@ -4751,15 +4818,25 @@ renderAll();
     async function deleteApt(id) {
         if (!confirm('Törlöd az apartmant?')) return;
 
+        const deleted = await deleteAdminJson(`/api/admin/apartment/${encodeURIComponent(id)}`, 'Nem sikerült törölni az apartmant.');
+
+        if (!deleted) return;
+
         db.apartments = db.apartments.filter(a => String(a.id) !== String(id));
-        await saveDb();
+        renderAll();
+        showSaveToast();
     }
 
     async function deleteOwner(id) {
         if (!confirm('Törlöd a partnert?')) return;
 
+        const deleted = await deleteAdminJson(`/api/admin/owner/${encodeURIComponent(id)}`, 'Nem sikerült törölni a partnert.');
+
+        if (!deleted) return;
+
         db.owners = db.owners.filter(o => String(o.id || o._id) !== String(id));
-        await saveDb();
+        renderAll();
+        showSaveToast();
     }
 
     document.addEventListener('click', function (event) {

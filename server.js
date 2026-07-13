@@ -1049,6 +1049,8 @@ async function saveDbContent(data) {
         "UPDATE essence_data SET content = $1 WHERE key = 'main_db'",
         [ensureDbShape(data)]
     );
+
+    invalidatePublicCaches();
 }
 
 async function updateDbContent(mutator) {
@@ -1070,6 +1072,7 @@ async function updateDbContent(mutator) {
         );
 
         await client.query('COMMIT');
+        invalidatePublicCaches();
         return updatedDb;
     } catch (err) {
         await client.query('ROLLBACK');
@@ -1077,6 +1080,88 @@ async function updateDbContent(mutator) {
     } finally {
         client.release();
     }
+}
+
+const JSON_ARRAY_KEYS_ALLOWED_FOR_FAST_ADMIN_SAVE = new Set([
+    'apartments',
+    'owners',
+    'bookings'
+]);
+
+function assertFastAdminArrayKey(arrayKey) {
+    if (!JSON_ARRAY_KEYS_ALLOWED_FOR_FAST_ADMIN_SAVE.has(arrayKey)) {
+        throw new Error(`Nem engedélyezett admin mentési kulcs: ${arrayKey}`);
+    }
+}
+
+async function upsertDbArrayItemFast(arrayKey, itemId, item) {
+    assertFastAdminArrayKey(arrayKey);
+
+    const id = String(itemId || item?.id || item?._id || '');
+
+    if (!id) {
+        throw new Error('Hiányzó elem azonosító.');
+    }
+
+    const indexResult = await pool.query(`
+        SELECT (element.ordinality - 1)::int AS index
+        FROM essence_data e
+        CROSS JOIN LATERAL jsonb_array_elements(COALESCE(e.content -> $1, '[]'::jsonb))
+            WITH ORDINALITY AS element(value, ordinality)
+        WHERE e.key = 'main_db'
+          AND COALESCE(element.value ->> 'id', element.value ->> '_id') = $2
+        LIMIT 1
+    `, [arrayKey, id]);
+
+    if (indexResult.rowCount > 0) {
+        const index = String(indexResult.rows[0].index);
+
+        await pool.query(`
+            UPDATE essence_data
+            SET content = jsonb_set(content, ARRAY[$1, $2], $3::jsonb, true)
+            WHERE key = 'main_db'
+        `, [arrayKey, index, item]);
+    } else {
+        await pool.query(`
+            UPDATE essence_data
+            SET content = jsonb_set(
+                content,
+                ARRAY[$1],
+                COALESCE(content -> $1, '[]'::jsonb) || jsonb_build_array($2::jsonb),
+                true
+            )
+            WHERE key = 'main_db'
+        `, [arrayKey, item]);
+    }
+
+    invalidatePublicCaches();
+}
+
+async function deleteDbArrayItemFast(arrayKey, itemId) {
+    assertFastAdminArrayKey(arrayKey);
+
+    const id = String(itemId || '');
+
+    if (!id) {
+        throw new Error('Hiányzó elem azonosító.');
+    }
+
+    await pool.query(`
+        UPDATE essence_data
+        SET content = jsonb_set(
+            content,
+            ARRAY[$1],
+            COALESCE((
+                SELECT jsonb_agg(element.value)
+                FROM jsonb_array_elements(COALESCE(content -> $1, '[]'::jsonb)) AS element(value)
+                WHERE COALESCE(element.value ->> 'id', element.value ->> '_id') <> $2
+            ), '[]'::jsonb),
+            true
+        )
+        WHERE key = 'main_db'
+    `, [arrayKey, id]);
+
+    invalidatePublicCaches();
 }
 
 initDb().catch(console.error);
@@ -1920,6 +2005,18 @@ let publicApartmentCoverCache = { expiresAt: 0, values: new Map() };
 let publicApartmentImageCache = { expiresAt: 0, values: new Map() };
 let publicApartmentDetailCache = { expiresAt: 0, values: new Map() };
 
+function invalidatePublicCaches() {
+    try {
+        publicHomeDataCache = { expiresAt: 0, payload: null };
+        publicReviewsCache = { expiresAt: 0, payload: null };
+        publicApartmentCoverCache = { expiresAt: 0, values: new Map() };
+        publicApartmentImageCache = { expiresAt: 0, values: new Map() };
+        publicApartmentDetailCache = { expiresAt: 0, values: new Map() };
+    } catch (err) {
+        console.error('Cache törlési hiba:', err);
+    }
+}
+
 app.get('/api/public-home-data', async (req, res) => {
     try {
         const now = Date.now();
@@ -2142,6 +2239,130 @@ app.post('/api/admin/services', requireAdmin, async (req, res) => {
     } catch (err) {
         console.error('Services mentési hiba:', err);
         res.status(500).json({ error: 'Hiba a szolgáltatások mentésekor.' });
+    }
+});
+
+
+app.post('/api/admin/apartment', requireAdmin, async (req, res) => {
+    try {
+        const apartment = req.body?.apartment || req.body;
+
+        if (!apartment || typeof apartment !== 'object') {
+            return res.status(400).json({ error: 'Hiányzó apartman adat.' });
+        }
+
+        if (!apartment.id || !apartment.name) {
+            return res.status(400).json({ error: 'Az apartman azonosítója és neve kötelező.' });
+        }
+
+        await upsertDbArrayItemFast('apartments', apartment.id, apartment);
+
+        res.status(200).json({
+            success: true,
+            apartment
+        });
+    } catch (err) {
+        console.error('Gyors apartman mentési hiba:', err);
+        res.status(500).json({ error: 'Hiba az apartman gyors mentésekor.' });
+    }
+});
+
+app.delete('/api/admin/apartment/:id', requireAdmin, async (req, res) => {
+    try {
+        await deleteDbArrayItemFast('apartments', req.params.id);
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.error('Gyors apartman törlési hiba:', err);
+        res.status(500).json({ error: 'Hiba az apartman törlésekor.' });
+    }
+});
+
+app.post('/api/admin/owner', requireAdmin, async (req, res) => {
+    try {
+        const owner = req.body?.owner || req.body;
+
+        if (!owner || typeof owner !== 'object') {
+            return res.status(400).json({ error: 'Hiányzó partner adat.' });
+        }
+
+        if (!owner.id && !owner._id) {
+            owner.id = Date.now().toString();
+        }
+
+        if (!owner.name) {
+            return res.status(400).json({ error: 'A partner neve kötelező.' });
+        }
+
+        await upsertDbArrayItemFast('owners', owner.id || owner._id, owner);
+
+        res.status(200).json({
+            success: true,
+            owner
+        });
+    } catch (err) {
+        console.error('Gyors partner mentési hiba:', err);
+        res.status(500).json({ error: 'Hiba a partner gyors mentésekor.' });
+    }
+});
+
+app.delete('/api/admin/owner/:id', requireAdmin, async (req, res) => {
+    try {
+        await deleteDbArrayItemFast('owners', req.params.id);
+        res.status(200).json({ success: true });
+    } catch (err) {
+        console.error('Gyors partner törlési hiba:', err);
+        res.status(500).json({ error: 'Hiba a partner törlésekor.' });
+    }
+});
+
+app.post('/api/admin/booking', requireAdmin, async (req, res) => {
+    try {
+        const booking = req.body?.booking || req.body;
+
+        if (!booking || typeof booking !== 'object' || !booking.id) {
+            return res.status(400).json({ error: 'Hiányzó foglalás adat.' });
+        }
+
+        await upsertDbArrayItemFast('bookings', booking.id, booking);
+
+        res.status(200).json({
+            success: true,
+            booking
+        });
+    } catch (err) {
+        console.error('Gyors foglalás mentési hiba:', err);
+        res.status(500).json({ error: 'Hiba a foglalás gyors mentésekor.' });
+    }
+});
+
+app.post('/api/admin/about-images', requireAdmin, async (req, res) => {
+    try {
+        const aboutHeritageImages = Array.isArray(req.body?.aboutHeritageImages)
+            ? req.body.aboutHeritageImages.slice(0, 4)
+            : [];
+        const aboutTeamImage = req.body?.aboutTeamImage || '';
+
+        await pool.query(`
+            UPDATE essence_data
+            SET content = jsonb_set(
+                jsonb_set(content, '{aboutHeritageImages}', $1::jsonb, true),
+                '{aboutTeamImage}',
+                $2::jsonb,
+                true
+            )
+            WHERE key = 'main_db'
+        `, [aboutHeritageImages, aboutTeamImage]);
+
+        invalidatePublicCaches();
+
+        res.status(200).json({
+            success: true,
+            aboutHeritageImages,
+            aboutTeamImage
+        });
+    } catch (err) {
+        console.error('Gyors rólunk képek mentési hiba:', err);
+        res.status(500).json({ error: 'Hiba a rólunk képek gyors mentésekor.' });
     }
 });
 
