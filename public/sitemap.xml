@@ -2,20 +2,152 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://balatonessence.com/</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/" />
     <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://balatonessence.com/en/</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/" />
     <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://balatonessence.com/de/</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/" />
     <lastmod>2026-09-02</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/rolunk.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/rolunk.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/rolunk.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/rolunk.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/rolunk.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/en/rolunk.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/rolunk.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/rolunk.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/rolunk.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/rolunk.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/de/rolunk.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/rolunk.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/rolunk.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/rolunk.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/rolunk.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/ajanlasok.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/ajanlasok.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/ajanlasok.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/ajanlasok.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/ajanlasok.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/en/ajanlasok.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/ajanlasok.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/ajanlasok.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/ajanlasok.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/ajanlasok.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/de/ajanlasok.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/ajanlasok.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/ajanlasok.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/ajanlasok.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/ajanlasok.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/sun.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/en/sun.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/de/sun.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/morning.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/morning.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/morning.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/morning.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/morning.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/en/morning.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/morning.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/morning.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/morning.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/morning.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://balatonessence.com/de/morning.html</loc>
+    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/morning.html" />
+    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/morning.html" />
+    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/morning.html" />
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/morning.html" />
+    <lastmod>2026-09-02</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
   </url>
 </urlset>

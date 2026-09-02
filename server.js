@@ -12,131 +12,23 @@ const app = express();
 const resend = new Resend(process.env.RESEND_API_KEY);
 const stripe = stripeLib(process.env.STRIPE_SECRET_KEY);
 
-
 // -----------------------------------------------------------------------------
-// HARD FIX: SITEMAP.XML - must answer before static files / other routes
+// SITEMAP.XML - végleges statikus XML válasz
 // -----------------------------------------------------------------------------
-app.use('/sitemap.xml', async (req, res) => {
-    try {
-        const baseUrl = 'https://balatonessence.com';
-        const today = new Date().toISOString().slice(0, 10);
+const BALATON_STATIC_SITEMAP_XML = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n  <url>\n    <loc>https://balatonessence.com/</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/en/</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/de/</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/rolunk.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/rolunk.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/en/rolunk.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/rolunk.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/de/rolunk.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/rolunk.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/ajanlasok.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/ajanlasok.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/en/ajanlasok.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/ajanlasok.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/de/ajanlasok.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/ajanlasok.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/sun.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/en/sun.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/de/sun.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/morning.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/morning.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/morning.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/morning.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/morning.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/en/morning.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/morning.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/morning.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/morning.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/morning.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/de/morning.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/morning.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/morning.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/morning.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/morning.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n</urlset>\n';
 
-        const escapeXml = value => String(value ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
-
-        const absoluteUrl = pathValue => {
-            const p = String(pathValue || '/');
-            return p === '/' ? `${baseUrl}/` : `${baseUrl}${p}`;
-        };
-
-        const sitemapEntry = (pathValue, alternates, priority, changefreq) => {
-            const alternateTags = Object.entries(alternates || {})
-                .map(([lang, href]) => `    <xhtml:link rel="alternate" hreflang="${escapeXml(lang)}" href="${escapeXml(absoluteUrl(href))}" />`)
-                .join('\n');
-
-            return `<url>
-    <loc>${escapeXml(absoluteUrl(pathValue))}</loc>
-${alternateTags}
-    <lastmod>${today}</lastmod>
-    <changefreq>${escapeXml(changefreq)}</changefreq>
-    <priority>${escapeXml(priority)}</priority>
-</url>`;
-        };
-
-        const groups = [
-            { hu: '/', en: '/en/', de: '/de/', priority: '1.0', changefreq: 'weekly' },
-            { hu: '/rolunk.html', en: '/en/rolunk.html', de: '/de/rolunk.html', priority: '0.7', changefreq: 'monthly' },
-            { hu: '/ajanlasok.html', en: '/en/ajanlasok.html', de: '/de/ajanlasok.html', priority: '0.7', changefreq: 'weekly' },
-            { hu: '/sun.html', en: '/en/sun.html', de: '/de/sun.html', priority: '0.8', changefreq: 'weekly' },
-            { hu: '/morning.html', en: '/en/morning.html', de: '/de/morning.html', priority: '0.7', changefreq: 'weekly' }
-        ];
-
-        const urls = [];
-
-        groups.forEach(group => {
-            const alternates = {
-                hu: group.hu,
-                en: group.en,
-                de: group.de,
-                'x-default': group.hu
-            };
-
-            urls.push(sitemapEntry(group.hu, alternates, group.priority, group.changefreq));
-            urls.push(sitemapEntry(group.en, alternates, group.priority, group.changefreq));
-            urls.push(sitemapEntry(group.de, alternates, group.priority, group.changefreq));
-        });
-
-        const db = await getDbContent();
-        const apartments = Array.isArray(db.apartments) ? db.apartments : [];
-
-        apartments
-            .filter(apartment => apartment && apartment.id)
-            .forEach(apartment => {
-                const id = encodeURIComponent(String(apartment.id));
-                const alternates = {
-                    hu: `/apartman.html?id=${id}`,
-                    en: `/en/apartman.html?id=${id}`,
-                    de: `/de/apartman.html?id=${id}`,
-                    'x-default': `/apartman.html?id=${id}`
-                };
-
-                urls.push(sitemapEntry(`/apartman.html?id=${id}`, alternates, '0.9', 'daily'));
-                urls.push(sitemapEntry(`/en/apartman.html?id=${id}`, alternates, '0.8', 'daily'));
-                urls.push(sitemapEntry(`/de/apartman.html?id=${id}`, alternates, '0.8', 'daily'));
-            });
-
-        const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${urls.join('\n')}
-</urlset>`;
-
-        res.status(200);
-        res.setHeader('Content-Type', 'text/xml; charset=UTF-8');
-        res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
-        res.setHeader('Pragma', 'no-cache');
-        res.setHeader('Expires', '0');
-        res.setHeader('X-Content-Type-Options', 'nosniff');
-        return res.send(xml);
-    } catch (error) {
-        console.error('Sitemap generation error:', error);
-        res.status(500).type('text/plain').send('Sitemap generation error');
-    }
+app.get('/sitemap.xml', (req, res) => {
+    return res.status(200)
+        .set({
+            'Content-Type': 'application/xml; charset=UTF-8',
+            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0',
+            'X-Content-Type-Options': 'nosniff',
+            'X-Sitemap-Fix': 'balaton-static-xml-v2'
+        })
+        .send(BALATON_STATIC_SITEMAP_XML.trim());
 });
-
-const SEO_BASE_URL = 'https://balatonessence.com';
-
-function seoEscapeXml(value) {
-    return String(value ?? '')
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&apos;');
-}
-
-function seoAbsoluteUrl(pathValue) {
-    if (!pathValue || pathValue === '/') return SEO_BASE_URL + '/';
-    return SEO_BASE_URL + pathValue;
-}
-
-function seoSitemapUrl(pathValue, alternates, priority = '0.7', changefreq = 'weekly') {
-    const lastmod = new Date().toISOString().slice(0, 10);
-    const altTags = Object.entries(alternates || {})
-        .map(([lang, href]) => `    <xhtml:link rel="alternate" hreflang="${seoEscapeXml(lang)}" href="${seoEscapeXml(seoAbsoluteUrl(href))}" />`)
-        .join('\n');
-
-    return `  <url>
-    <loc>${seoEscapeXml(seoAbsoluteUrl(pathValue))}</loc>
-${altTags}
-    <lastmod>${lastmod}</lastmod>
-    <changefreq>${changefreq}</changefreq>
-    <priority>${priority}</priority>
-  </url>`;
-}
 
 
 // -----------------------------------------------------------------------------
@@ -194,96 +86,6 @@ app.get('/api/stripe-webhook', (req, res) => {
         endpoint: 'stripe-webhook',
         method: 'POST required for Stripe'
     });
-});
-
-
-app.get('/sitemap.xml', async (req, res) => {
-    try {
-        const baseUrl = 'https://balatonessence.com';
-        const today = new Date().toISOString().slice(0, 10);
-
-        const escapeXml = value => String(value ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&apos;');
-
-        const absoluteUrl = urlPath => {
-            const cleanPath = String(urlPath || '/');
-            return cleanPath === '/' ? `${baseUrl}/` : `${baseUrl}${cleanPath}`;
-        };
-
-        const sitemapEntry = (urlPath, alternates, priority, changefreq) => {
-            const alternateTags = Object.entries(alternates || {})
-                .map(([lang, href]) => `        <xhtml:link rel="alternate" hreflang="${escapeXml(lang)}" href="${escapeXml(absoluteUrl(href))}" />`)
-                .join('\n');
-
-            return `    <url>
-        <loc>${escapeXml(absoluteUrl(urlPath))}</loc>
-        <lastmod>${today}</lastmod>
-        <changefreq>${escapeXml(changefreq)}</changefreq>
-        <priority>${escapeXml(priority)}</priority>
-${alternateTags}
-    </url>`;
-        };
-
-        const staticGroups = [
-            { hu: '/', en: '/en/', de: '/de/', priority: '1.0', changefreq: 'weekly' },
-            { hu: '/rolunk.html', en: '/en/rolunk.html', de: '/de/rolunk.html', priority: '0.7', changefreq: 'monthly' },
-            { hu: '/ajanlasok.html', en: '/en/ajanlasok.html', de: '/de/ajanlasok.html', priority: '0.7', changefreq: 'weekly' },
-            { hu: '/sun.html', en: '/en/sun.html', de: '/de/sun.html', priority: '0.8', changefreq: 'weekly' },
-            { hu: '/morning.html', en: '/en/morning.html', de: '/de/morning.html', priority: '0.7', changefreq: 'weekly' }
-        ];
-
-        const urls = [];
-
-        staticGroups.forEach(group => {
-            const alternates = {
-                hu: group.hu,
-                en: group.en,
-                de: group.de,
-                'x-default': group.hu
-            };
-
-            urls.push(sitemapEntry(group.hu, alternates, group.priority, group.changefreq));
-            urls.push(sitemapEntry(group.en, alternates, group.priority, group.changefreq));
-            urls.push(sitemapEntry(group.de, alternates, group.priority, group.changefreq));
-        });
-
-        const db = await getDbContent();
-        const apartments = Array.isArray(db.apartments) ? db.apartments : [];
-
-        apartments
-            .filter(apartment => apartment && apartment.id)
-            .forEach(apartment => {
-                const id = encodeURIComponent(String(apartment.id));
-                const alternates = {
-                    hu: `/apartman.html?id=${id}`,
-                    en: `/en/apartman.html?id=${id}`,
-                    de: `/de/apartman.html?id=${id}`,
-                    'x-default': `/apartman.html?id=${id}`
-                };
-
-                urls.push(sitemapEntry(`/apartman.html?id=${id}`, alternates, '0.9', 'daily'));
-                urls.push(sitemapEntry(`/en/apartman.html?id=${id}`, alternates, '0.8', 'daily'));
-                urls.push(sitemapEntry(`/de/apartman.html?id=${id}`, alternates, '0.8', 'daily'));
-            });
-
-        const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
-${urls.join('\n')}
-</urlset>`;
-
-        res.status(200);
-        res.setHeader('Content-Type', 'application/xml; charset=UTF-8');
-        res.setHeader('Cache-Control', 'no-store, max-age=0');
-        res.setHeader('X-Content-Type-Options', 'nosniff');
-        return res.send(xml.trim());
-    } catch (error) {
-        console.error('Sitemap generation error:', error);
-        res.status(500).type('text/plain').send('Sitemap generation error');
-    }
 });
 
 app.use(express.json({ limit: '100mb' }));
