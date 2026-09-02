@@ -104,6 +104,32 @@ app.get('/api/stripe-webhook', (req, res) => {
 
 app.get('/sitemap.xml', async (req, res) => {
     try {
+        const baseUrl = 'https://balatonessence.com';
+        const today = new Date().toISOString().split('T')[0];
+
+        const escapeXml = value => String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&apos;');
+
+        const absoluteUrl = path => `${baseUrl}${path}`;
+
+        const sitemapEntry = (path, alternates, priority, changefreq) => {
+            const alternateTags = Object.entries(alternates)
+                .map(([lang, href]) => `        <xhtml:link rel="alternate" hreflang="${escapeXml(lang)}" href="${escapeXml(absoluteUrl(href))}" />`)
+                .join('\n');
+
+            return `    <url>
+        <loc>${escapeXml(absoluteUrl(path))}</loc>
+        <lastmod>${today}</lastmod>
+        <changefreq>${escapeXml(changefreq)}</changefreq>
+        <priority>${escapeXml(priority)}</priority>
+${alternateTags}
+    </url>`;
+        };
+
         const staticGroups = [
             { hu: '/', en: '/en/', de: '/de/', priority: '1.0', changefreq: 'weekly' },
             { hu: '/rolunk.html', en: '/en/rolunk.html', de: '/de/rolunk.html', priority: '0.7', changefreq: 'monthly' },
@@ -122,9 +148,9 @@ app.get('/sitemap.xml', async (req, res) => {
                 'x-default': group.hu
             };
 
-            urls.push(seoSitemapUrl(group.hu, alternates, group.priority, group.changefreq));
-            urls.push(seoSitemapUrl(group.en, alternates, group.priority, group.changefreq));
-            urls.push(seoSitemapUrl(group.de, alternates, group.priority, group.changefreq));
+            urls.push(sitemapEntry(group.hu, alternates, group.priority, group.changefreq));
+            urls.push(sitemapEntry(group.en, alternates, group.priority, group.changefreq));
+            urls.push(sitemapEntry(group.de, alternates, group.priority, group.changefreq));
         });
 
         const db = await getDbContent();
@@ -134,6 +160,7 @@ app.get('/sitemap.xml', async (req, res) => {
             .filter(apartment => apartment && apartment.id)
             .forEach(apartment => {
                 const id = encodeURIComponent(String(apartment.id));
+
                 const alternates = {
                     hu: `/apartman.html?id=${id}`,
                     en: `/en/apartman.html?id=${id}`,
@@ -141,9 +168,9 @@ app.get('/sitemap.xml', async (req, res) => {
                     'x-default': `/apartman.html?id=${id}`
                 };
 
-                urls.push(seoSitemapUrl(`/apartman.html?id=${id}`, alternates, '0.9', 'daily'));
-                urls.push(seoSitemapUrl(`/en/apartman.html?id=${id}`, alternates, '0.8', 'daily'));
-                urls.push(seoSitemapUrl(`/de/apartman.html?id=${id}`, alternates, '0.8', 'daily'));
+                urls.push(sitemapEntry(`/apartman.html?id=${id}`, alternates, '0.9', 'daily'));
+                urls.push(sitemapEntry(`/en/apartman.html?id=${id}`, alternates, '0.8', 'daily'));
+                urls.push(sitemapEntry(`/de/apartman.html?id=${id}`, alternates, '0.8', 'daily'));
             });
 
         const xml = `<?xml version="1.0" encoding="UTF-8"?>
