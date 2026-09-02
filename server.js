@@ -13,23 +13,64 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 const stripe = stripeLib(process.env.STRIPE_SECRET_KEY);
 
 // -----------------------------------------------------------------------------
-// SITEMAP.XML - végleges statikus XML válasz
+// SITEMAP - egyszerű, Google által támogatott TXT formátum
 // -----------------------------------------------------------------------------
-const BALATON_STATIC_SITEMAP_XML = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n  <url>\n    <loc>https://balatonessence.com/</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/en/</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/de/</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>1.0</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/rolunk.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/rolunk.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/en/rolunk.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/rolunk.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/de/rolunk.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/rolunk.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/rolunk.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>monthly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/ajanlasok.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/ajanlasok.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/en/ajanlasok.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/ajanlasok.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/de/ajanlasok.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/ajanlasok.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/ajanlasok.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/sun.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/en/sun.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/de/sun.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/sun.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/sun.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/sun.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/sun.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.8</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/morning.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/morning.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/morning.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/morning.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/morning.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/en/morning.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/morning.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/morning.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/morning.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/morning.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n  <url>\n    <loc>https://balatonessence.com/de/morning.html</loc>\n    <xhtml:link rel="alternate" hreflang="hu" href="https://balatonessence.com/morning.html" />\n    <xhtml:link rel="alternate" hreflang="en" href="https://balatonessence.com/en/morning.html" />\n    <xhtml:link rel="alternate" hreflang="de" href="https://balatonessence.com/de/morning.html" />\n    <xhtml:link rel="alternate" hreflang="x-default" href="https://balatonessence.com/morning.html" />\n    <lastmod>2026-09-02</lastmod>\n    <changefreq>weekly</changefreq>\n    <priority>0.7</priority>\n  </url>\n</urlset>\n';
+app.get('/sitemap.txt', async (req, res) => {
+    try {
+        const baseUrl = 'https://balatonessence.com';
 
-app.get('/sitemap.xml', (req, res) => {
-    return res.status(200)
-        .set({
-            'Content-Type': 'application/xml; charset=UTF-8',
-            'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0',
-            'X-Content-Type-Options': 'nosniff',
-            'X-Sitemap-Fix': 'balaton-static-xml-v2'
-        })
-        .send(BALATON_STATIC_SITEMAP_XML.trim());
+        const urls = [
+            `${baseUrl}/`,
+            `${baseUrl}/en/`,
+            `${baseUrl}/de/`,
+            `${baseUrl}/rolunk.html`,
+            `${baseUrl}/en/rolunk.html`,
+            `${baseUrl}/de/rolunk.html`,
+            `${baseUrl}/ajanlasok.html`,
+            `${baseUrl}/en/ajanlasok.html`,
+            `${baseUrl}/de/ajanlasok.html`,
+            `${baseUrl}/sun.html`,
+            `${baseUrl}/en/sun.html`,
+            `${baseUrl}/de/sun.html`,
+            `${baseUrl}/morning.html`,
+            `${baseUrl}/en/morning.html`,
+            `${baseUrl}/de/morning.html`
+        ];
+
+        try {
+            const db = await getDbContent();
+            const apartments = Array.isArray(db?.apartments) ? db.apartments : [];
+
+            apartments
+                .filter(apartment => apartment && apartment.id)
+                .forEach(apartment => {
+                    const id = encodeURIComponent(String(apartment.id));
+                    urls.push(`${baseUrl}/apartman.html?id=${id}`);
+                    urls.push(`${baseUrl}/en/apartman.html?id=${id}`);
+                    urls.push(`${baseUrl}/de/apartman.html?id=${id}`);
+                });
+        } catch (dbError) {
+            console.error('Sitemap apartment loading warning:', dbError);
+        }
+
+        const uniqueUrls = [...new Set(urls)];
+
+        return res.status(200)
+            .set({
+                'Content-Type': 'text/plain; charset=UTF-8',
+                'Cache-Control': 'public, max-age=3600'
+            })
+            .send(`${uniqueUrls.join('\n')}\n`);
+    } catch (error) {
+        console.error('Text sitemap generation error:', error);
+        return res.status(500).type('text/plain').send('Sitemap generation error');
+    }
 });
 
+// A régi sitemap.xml URL ne legyen 404: irányítsuk át a biztosan működő TXT sitemapre.
+app.get('/sitemap.xml', (req, res) => {
+    return res.redirect(301, '/sitemap.txt');
+});
 
 // -----------------------------------------------------------------------------
 // STRIPE WEBHOOK - ezt az express.json() ELÉ kell rakni

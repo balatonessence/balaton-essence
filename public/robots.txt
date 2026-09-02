@@ -19,4 +19,4 @@ Disallow: /api/save
 Disallow: /api/login
 Disallow: /api/logout
 
-Sitemap: https://balatonessence.com/sitemap.xml
+Sitemap: https://balatonessence.com/sitemap.txt
