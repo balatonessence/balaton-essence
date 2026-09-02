@@ -12,6 +12,38 @@ const app = express();
 const resend = new Resend(process.env.RESEND_API_KEY);
 const stripe = stripeLib(process.env.STRIPE_SECRET_KEY);
 
+const SEO_BASE_URL = 'https://balatonessence.com';
+
+function seoEscapeXml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
+
+function seoAbsoluteUrl(pathValue) {
+    if (!pathValue || pathValue === '/') return SEO_BASE_URL + '/';
+    return SEO_BASE_URL + pathValue;
+}
+
+function seoSitemapUrl(pathValue, alternates, priority = '0.7', changefreq = 'weekly') {
+    const lastmod = new Date().toISOString().slice(0, 10);
+    const altTags = Object.entries(alternates || {})
+        .map(([lang, href]) => `    <xhtml:link rel="alternate" hreflang="${seoEscapeXml(lang)}" href="${seoEscapeXml(seoAbsoluteUrl(href))}" />`)
+        .join('\n');
+
+    return `  <url>
+    <loc>${seoEscapeXml(seoAbsoluteUrl(pathValue))}</loc>
+${altTags}
+    <lastmod>${lastmod}</lastmod>
+    <changefreq>${changefreq}</changefreq>
+    <priority>${priority}</priority>
+  </url>`;
+}
+
+
 // -----------------------------------------------------------------------------
 // STRIPE WEBHOOK - ezt az express.json() ELÉ kell rakni
 // -----------------------------------------------------------------------------
@@ -67,6 +99,63 @@ app.get('/api/stripe-webhook', (req, res) => {
         endpoint: 'stripe-webhook',
         method: 'POST required for Stripe'
     });
+});
+
+
+app.get('/sitemap.xml', async (req, res) => {
+    try {
+        const staticGroups = [
+            { hu: '/', en: '/en/', de: '/de/', priority: '1.0', changefreq: 'weekly' },
+            { hu: '/rolunk.html', en: '/en/rolunk.html', de: '/de/rolunk.html', priority: '0.7', changefreq: 'monthly' },
+            { hu: '/ajanlasok.html', en: '/en/ajanlasok.html', de: '/de/ajanlasok.html', priority: '0.7', changefreq: 'weekly' },
+            { hu: '/sun.html', en: '/en/sun.html', de: '/de/sun.html', priority: '0.8', changefreq: 'weekly' },
+            { hu: '/morning.html', en: '/en/morning.html', de: '/de/morning.html', priority: '0.7', changefreq: 'weekly' }
+        ];
+
+        const urls = [];
+
+        staticGroups.forEach(group => {
+            const alternates = {
+                hu: group.hu,
+                en: group.en,
+                de: group.de,
+                'x-default': group.hu
+            };
+
+            urls.push(seoSitemapUrl(group.hu, alternates, group.priority, group.changefreq));
+            urls.push(seoSitemapUrl(group.en, alternates, group.priority, group.changefreq));
+            urls.push(seoSitemapUrl(group.de, alternates, group.priority, group.changefreq));
+        });
+
+        const db = await getDbContent();
+        const apartments = Array.isArray(db.apartments) ? db.apartments : [];
+
+        apartments
+            .filter(apartment => apartment && apartment.id)
+            .forEach(apartment => {
+                const id = encodeURIComponent(String(apartment.id));
+                const alternates = {
+                    hu: `/apartman.html?id=${id}`,
+                    en: `/en/apartman.html?id=${id}`,
+                    de: `/de/apartman.html?id=${id}`,
+                    'x-default': `/apartman.html?id=${id}`
+                };
+
+                urls.push(seoSitemapUrl(`/apartman.html?id=${id}`, alternates, '0.9', 'daily'));
+                urls.push(seoSitemapUrl(`/en/apartman.html?id=${id}`, alternates, '0.8', 'daily'));
+                urls.push(seoSitemapUrl(`/de/apartman.html?id=${id}`, alternates, '0.8', 'daily'));
+            });
+
+        const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+${urls.join('\n')}
+</urlset>`;
+
+        res.type('application/xml').send(xml);
+    } catch (error) {
+        console.error('Sitemap generation error:', error);
+        res.status(500).type('text/plain').send('Sitemap generation error');
+    }
 });
 
 app.use(express.json({ limit: '100mb' }));

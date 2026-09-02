@@ -3,8 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Apartment Details | Balaton Essence</title>
-    <link rel="icon" type="image/png" href="../img/bebetolto.png">
+    <title>Apartmentdetails in Fonyód | Balaton Essence</title>
+    <meta name="description" content="Buchen Sie ein Premium-Apartment in Fonyód oder am Balaton. Fotos, Preise, Verfügbarkeiten und Online-Buchung auf einer Seite.">
+    <meta name="keywords" content="Apartment Fonyód buchen, Balaton Apartment, Premium Unterkunft Ungarn, Balaton Essence Apartment">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <link rel="canonical" href="https://balatonessence.com/de/apartman.html">
+    <link rel="alternate" hreflang="hu" href="https://balatonessence.com/apartman.html">
+    <link rel="alternate" hreflang="en" href="https://balatonessence.com/en/apartman.html">
+    <link rel="alternate" hreflang="de" href="https://balatonessence.com/de/apartman.html">
+    <link rel="alternate" hreflang="x-default" href="https://balatonessence.com/apartman.html">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Balaton Essence">
+    <meta property="og:locale" content="de_DE">
+    <meta property="og:url" content="https://balatonessence.com/de/apartman.html">
+    <meta property="og:title" content="Apartmentdetails in Fonyód | Balaton Essence">
+    <meta property="og:description" content="Buchen Sie ein Premium-Apartment in Fonyód oder am Balaton. Fotos, Preise, Verfügbarkeiten und Online-Buchung auf einer Seite.">
+    <meta property="og:image" content="https://balatonessence.com/img/hatter.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Apartmentdetails in Fonyód | Balaton Essence">
+    <meta name="twitter:description" content="Buchen Sie ein Premium-Apartment in Fonyód oder am Balaton. Fotos, Preise, Verfügbarkeiten und Online-Buchung auf einer Seite.">
+    <meta name="twitter:image" content="https://balatonessence.com/img/hatter.webp">
+<link rel="icon" type="image/png" href="../img/bebetolto.png">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&display=swap" rel="stylesheet">
 
@@ -478,7 +499,6 @@
             background: #f0f5ec !important;
             color: var(--accent) !important;
         }
-
 
         .cal-day.no-checkin,
         .cal-day.no-checkout,
@@ -2313,26 +2333,94 @@ function formatApartmentName(value) {
             window.alertCallback = null;
         }
     }
+    function setMeta(selector, attrName, attrValue, content) {
+        let tag = document.querySelector(selector);
 
-    function updateSEO(apartmentName, location) {
-        document.title = `${apartmentName} - Luxus Apartment ${location} | Balaton Essence`;
-
-        let metaDesc = document.querySelector('meta[name="description"]');
-
-        if (!metaDesc) {
-            metaDesc = document.createElement('meta');
-            metaDesc.setAttribute('name', 'description');
-            document.head.appendChild(metaDesc);
+        if (!tag) {
+            tag = document.createElement('meta');
+            tag.setAttribute(attrName, attrValue);
+            document.head.appendChild(tag);
         }
 
-        metaDesc.setAttribute(
-            'content',
-            `Buchen Sie Ihren Aufenthalt im ${apartmentName} in ${location}. Premium-Unterkunft am Balaton, Strandausrüstung und entspannte Atmosphäre am See.`
-        );
+        tag.setAttribute('content', content);
+    }
+
+    function setLink(selector, rel, href, hreflang = null) {
+        let tag = document.querySelector(selector);
+
+        if (!tag) {
+            tag = document.createElement('link');
+            tag.setAttribute('rel', rel);
+            if (hreflang) tag.setAttribute('hreflang', hreflang);
+            document.head.appendChild(tag);
+        }
+
+        tag.setAttribute('href', href);
+    }
+
+    function updateSEO(apartmentName, location) {
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id') || '';
+        const cleanName = decodeHtmlEntities(apartmentName || 'Apartment');
+        const cleanLocation = decodeHtmlEntities(location || 'Fonyód');
+        const encodedId = encodeURIComponent(id);
+        const baseUrl = 'https://balatonessence.com';
+        const huUrl = encodedId ? `${baseUrl}/apartman.html?id=${encodedId}` : `${baseUrl}/apartman.html`;
+        const enUrl = encodedId ? `${baseUrl}/en/apartman.html?id=${encodedId}` : `${baseUrl}/en/apartman.html`;
+        const canonicalUrl = encodedId ? `${baseUrl}/de/apartman.html?id=${encodedId}` : `${baseUrl}/de/apartman.html`;
+        const title = `${cleanName} | Apartment in ${cleanLocation} | Balaton Essence`;
+        const description = `${cleanName} in ${cleanLocation} buchen. Premium-Apartment am Balaton mit Preisen, Galerie, Verfügbarkeit und Online-Buchung.`;
+        const imageUrl = allImages && allImages.length ? allImages[0] : `${baseUrl}/img/hatter.webp`;
+        const absoluteImage = String(imageUrl).startsWith('http') ? imageUrl : `${baseUrl}${String(imageUrl).startsWith('/') ? '' : '/'}${imageUrl}`;
+
+        document.title = title;
+        setMeta('meta[name="description"]', 'name', 'description', description);
+        setMeta('meta[name="keywords"]', 'name', 'keywords', `${cleanName}, Apartment ${cleanLocation}, Unterkunft ${cleanLocation}, Balaton Apartment, Premium Apartment Ungarn`);
+        setLink('link[rel="canonical"]', 'canonical', canonicalUrl);
+        setLink('link[rel="alternate"][hreflang="hu"]', 'alternate', huUrl, 'hu');
+        setLink('link[rel="alternate"][hreflang="en"]', 'alternate', enUrl, 'en');
+        setLink('link[rel="alternate"][hreflang="de"]', 'alternate', canonicalUrl, 'de');
+        setLink('link[rel="alternate"][hreflang="x-default"]', 'alternate', huUrl, 'x-default');
+        setMeta('meta[property="og:url"]', 'property', 'og:url', canonicalUrl);
+        setMeta('meta[property="og:title"]', 'property', 'og:title', title);
+        setMeta('meta[property="og:description"]', 'property', 'og:description', description);
+        setMeta('meta[property="og:image"]', 'property', 'og:image', absoluteImage);
+        setMeta('meta[name="twitter:title"]', 'name', 'twitter:title', title);
+        setMeta('meta[name="twitter:description"]', 'name', 'twitter:description', description);
+        setMeta('meta[name="twitter:image"]', 'name', 'twitter:image', absoluteImage);
+
+        const schema = {
+            '@context': 'https://schema.org',
+            '@type': 'LodgingBusiness',
+            '@id': `${canonicalUrl}#apartment`,
+            name: cleanName,
+            url: canonicalUrl,
+            image: absoluteImage,
+            description,
+            address: {
+                '@type': 'PostalAddress',
+                addressLocality: cleanLocation,
+                addressCountry: 'HU'
+            },
+            parentOrganization: {
+                '@type': 'Organization',
+                name: 'Balaton Essence',
+                url: baseUrl + '/'
+            }
+        };
+
+        let schemaTag = document.getElementById('apartment-schema-json');
+        if (!schemaTag) {
+            schemaTag = document.createElement('script');
+            schemaTag.type = 'application/ld+json';
+            schemaTag.id = 'apartment-schema-json';
+            document.head.appendChild(schemaTag);
+        }
+        schemaTag.textContent = JSON.stringify(schema);
     }
 </script>
 <link rel="stylesheet" href="../mobile.css?v=106">
 <script src="../site-mobile.js?v=106"></script>
-<script src="../chat-assistant.js"></script>
+<!-- <script src="../chat-assistant.js"></script> -->
 </body>
 </html>

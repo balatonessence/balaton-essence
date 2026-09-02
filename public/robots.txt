@@ -1,12 +1,22 @@
 User-agent: *
 Allow: /
+Allow: /api/public-home-data
+Allow: /api/public-apartment/
+Allow: /img/public-apartment-cover/
+Allow: /img/public-apartment-image/
+
 Disallow: /admin.html
 Disallow: /todo.html
 Disallow: /tulaj.html
+Disallow: /payment.html
 Disallow: /success.html
 Disallow: /success-extra.html
 Disallow: /cancel.html
 Disallow: /review.html
 Disallow: /morningorder.html
+Disallow: /api/admin/
+Disallow: /api/save
+Disallow: /api/login
+Disallow: /api/logout
 
 Sitemap: https://balatonessence.com/sitemap.xml

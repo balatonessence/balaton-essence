@@ -3,11 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Journal | Balaton Essence</title>
-    <meta name="description" content="Balaton Essence Journal: válogatott balatoni helyek, ízek, séták, programok és hangulatok vendégeinknek.">
+    <title>Balaton Essence Journal | Programok és tippek Fonyód környékén</title>
+    <meta name="description" content="Balatoni programok, kirándulások, éttermek és helyi tippek Fonyód környékén a Balaton Essence vendégeinek.">
+    <meta name="keywords" content="Fonyód programok, Balaton programok, balatoni tippek, Balaton Essence Journal, Fonyód éttermek">
+    <meta name="robots" content="index, follow, max-image-preview:large">
     <link rel="canonical" href="https://balatonessence.com/ajanlasok.html">
-
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="alternate" hreflang="hu" href="https://balatonessence.com/ajanlasok.html">
+    <link rel="alternate" hreflang="en" href="https://balatonessence.com/en/ajanlasok.html">
+    <link rel="alternate" hreflang="de" href="https://balatonessence.com/de/ajanlasok.html">
+    <link rel="alternate" hreflang="x-default" href="https://balatonessence.com/ajanlasok.html">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Balaton Essence">
+    <meta property="og:locale" content="hu_HU">
+    <meta property="og:url" content="https://balatonessence.com/ajanlasok.html">
+    <meta property="og:title" content="Balaton Essence Journal | Programok és tippek Fonyód környékén">
+    <meta property="og:description" content="Balatoni programok, kirándulások, éttermek és helyi tippek Fonyód környékén a Balaton Essence vendégeinek.">
+    <meta property="og:image" content="https://balatonessence.com/img/moments.webp">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Balaton Essence Journal | Programok és tippek Fonyód környékén">
+    <meta name="twitter:description" content="Balatoni programok, kirándulások, éttermek és helyi tippek Fonyód környékén a Balaton Essence vendégeinek.">
+    <meta name="twitter:image" content="https://balatonessence.com/img/moments.webp">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
     <link rel="icon" type="image/png" href="img/bebetolto.png">
 
     <style>
@@ -126,7 +144,7 @@
             inset: 0;
             background:
                 linear-gradient(rgba(10, 15, 12, 0.72), rgba(10, 15, 12, 0.72)),
-                url('img/sunkartya.png') center/cover no-repeat;
+                url('img/sunkartya.webp') center/cover no-repeat;
             transform: scale(1.02);
         }
 
@@ -605,7 +623,7 @@
         }
 
         grid.innerHTML = items.map(item => {
-            const image = safeImageUrl(item.image) || 'img/sunkartya.png';
+            const image = safeImageUrl(item.image) || 'img/sunkartya.webp';
             const description = item.description_hu || '';
 
             return `
@@ -668,7 +686,7 @@
 </script>
 
 <script src="site-mobile.js?v=106"></script>
-<script src="chat-assistant.js"></script>
+<!-- <script src="chat-assistant.js"></script> -->
 <script src="cookie-consent.js?v=2"></script>
 </body>
 </html>
