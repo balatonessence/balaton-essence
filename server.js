@@ -16,58 +16,69 @@ const stripe = stripeLib(process.env.STRIPE_SECRET_KEY);
 // SITEMAP - egyszerű, Google által támogatott TXT formátum
 // -----------------------------------------------------------------------------
 app.get('/sitemap.txt', async (req, res) => {
+    const baseUrl = 'https://balatonessence.com';
+
+    const urls = [
+        `${baseUrl}/`,
+        `${baseUrl}/en/`,
+        `${baseUrl}/de/`,
+        `${baseUrl}/rolunk.html`,
+        `${baseUrl}/en/rolunk.html`,
+        `${baseUrl}/de/rolunk.html`,
+        `${baseUrl}/ajanlasok.html`,
+        `${baseUrl}/en/ajanlasok.html`,
+        `${baseUrl}/de/ajanlasok.html`,
+        `${baseUrl}/sun.html`,
+        `${baseUrl}/en/sun.html`,
+        `${baseUrl}/de/sun.html`,
+        `${baseUrl}/morning.html`,
+        `${baseUrl}/en/morning.html`,
+        `${baseUrl}/de/morning.html`
+    ];
+
     try {
-        const baseUrl = 'https://balatonessence.com';
+        // FONTOS: itt NEM kérjük le a teljes 10+ MB-os main_db JSON-t.
+        // A Postgres csak az apartman ID-kat adja vissza, így a sitemap
+        // gyorsan válaszol a Google Search Console-nak is.
+        const result = await pool.query(`
+            SELECT jsonb_path_query_array(content, '$.apartments[*].id') AS apartment_ids
+            FROM essence_data
+            WHERE key = 'main_db'
+            LIMIT 1
+        `);
 
-        const urls = [
-            `${baseUrl}/`,
-            `${baseUrl}/en/`,
-            `${baseUrl}/de/`,
-            `${baseUrl}/rolunk.html`,
-            `${baseUrl}/en/rolunk.html`,
-            `${baseUrl}/de/rolunk.html`,
-            `${baseUrl}/ajanlasok.html`,
-            `${baseUrl}/en/ajanlasok.html`,
-            `${baseUrl}/de/ajanlasok.html`,
-            `${baseUrl}/sun.html`,
-            `${baseUrl}/en/sun.html`,
-            `${baseUrl}/de/sun.html`,
-            `${baseUrl}/morning.html`,
-            `${baseUrl}/en/morning.html`,
-            `${baseUrl}/de/morning.html`
-        ];
+        const apartmentIds = Array.isArray(result.rows[0]?.apartment_ids)
+            ? result.rows[0].apartment_ids
+            : [];
 
-        try {
-            const db = await getDbContent();
-            const apartments = Array.isArray(db?.apartments) ? db.apartments : [];
-
-            apartments
-                .filter(apartment => apartment && apartment.id)
-                .forEach(apartment => {
-                    const id = encodeURIComponent(String(apartment.id));
-                    urls.push(`${baseUrl}/apartman.html?id=${id}`);
-                    urls.push(`${baseUrl}/en/apartman.html?id=${id}`);
-                    urls.push(`${baseUrl}/de/apartman.html?id=${id}`);
-                });
-        } catch (dbError) {
-            console.error('Sitemap apartment loading warning:', dbError);
-        }
-
-        const uniqueUrls = [...new Set(urls)];
-
-        return res.status(200)
-            .set({
-                'Content-Type': 'text/plain; charset=UTF-8',
-                'Cache-Control': 'public, max-age=3600'
-            })
-            .send(`${uniqueUrls.join('\n')}\n`);
-    } catch (error) {
-        console.error('Text sitemap generation error:', error);
-        return res.status(500).type('text/plain').send('Sitemap generation error');
+        apartmentIds
+            .filter(id => id !== null && id !== undefined && String(id).trim() !== '')
+            .forEach(rawId => {
+                const id = encodeURIComponent(String(rawId));
+                urls.push(`${baseUrl}/apartman.html?id=${id}`);
+                urls.push(`${baseUrl}/en/apartman.html?id=${id}`);
+                urls.push(`${baseUrl}/de/apartman.html?id=${id}`);
+            });
+    } catch (dbError) {
+        // A sitemap akkor is 200-zal elérhető marad, ha a DB épp nem válaszol.
+        // Így a Google legalább a statikus publikus oldalakat mindig fel tudja venni.
+        console.error('Sitemap apartment ID loading warning:', dbError.message || dbError);
     }
+
+    const uniqueUrls = [...new Set(urls)];
+    const body = `${uniqueUrls.join('\n')}\n`;
+
+    return res
+        .status(200)
+        .set({
+            'Content-Type': 'text/plain; charset=utf-8',
+            'Cache-Control': 'public, max-age=300, s-maxage=300',
+            'X-Content-Type-Options': 'nosniff'
+        })
+        .send(body);
 });
 
-// A régi sitemap.xml URL ne legyen 404: irányítsuk át a biztosan működő TXT sitemapre.
+// A régi XML URL átirányít a tényleges sitemapre.
 app.get('/sitemap.xml', (req, res) => {
     return res.redirect(301, '/sitemap.txt');
 });

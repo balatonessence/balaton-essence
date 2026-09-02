@@ -1,13 +1,7 @@
-Bontsd ki a projekt gyökerébe és engedd felülírni a fájlokat.
+Balaton Essence sitemap fast fix
 
-A csomag:
-- server.js: dinamikus /sitemap.txt, az apartman URL-eket is hozzáadja az adatbázisból
-- public/sitemap.txt: statikus fallback
-- public/robots.txt: a sitemap.txt-re mutat
+1. server.js -> project root/server.js
+2. public/robots.txt -> project public/robots.txt
+3. git add -A && git commit -m "Speed up Google sitemap fetch" && git push
 
-Deploy után ezt használd:
-https://balatonessence.com/sitemap.txt
-
-Google Search Console -> Sitemaps -> sitemap.txt
-
-A /sitemap.xml automatikusan 301-gyel a /sitemap.txt-re irányít.
+A /sitemap.txt most nem tolti le a teljes main_db JSON-t; csak az apartman ID-kat keri le Postgresbol.
