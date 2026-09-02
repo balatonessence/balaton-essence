@@ -151,7 +151,12 @@ app.get('/sitemap.xml', async (req, res) => {
 ${urls.join('\n')}
 </urlset>`;
 
-        res.type('application/xml').send(xml);
+        res.status(200)
+            .set({
+                'Content-Type': 'application/xml; charset=UTF-8',
+                'Cache-Control': 'public, max-age=3600'
+            })
+            .send(xml.trim());
     } catch (error) {
         console.error('Sitemap generation error:', error);
         res.status(500).type('text/plain').send('Sitemap generation error');
