@@ -105,24 +105,27 @@ app.get('/api/stripe-webhook', (req, res) => {
 app.get('/sitemap.xml', async (req, res) => {
     try {
         const baseUrl = 'https://balatonessence.com';
-        const today = new Date().toISOString().split('T')[0];
+        const today = new Date().toISOString().slice(0, 10);
 
-        const escapeXml = value => String(value)
+        const escapeXml = value => String(value ?? '')
             .replace(/&/g, '&amp;')
             .replace(/</g, '&lt;')
             .replace(/>/g, '&gt;')
             .replace(/"/g, '&quot;')
             .replace(/'/g, '&apos;');
 
-        const absoluteUrl = path => `${baseUrl}${path}`;
+        const absoluteUrl = urlPath => {
+            const cleanPath = String(urlPath || '/');
+            return cleanPath === '/' ? `${baseUrl}/` : `${baseUrl}${cleanPath}`;
+        };
 
-        const sitemapEntry = (path, alternates, priority, changefreq) => {
-            const alternateTags = Object.entries(alternates)
+        const sitemapEntry = (urlPath, alternates, priority, changefreq) => {
+            const alternateTags = Object.entries(alternates || {})
                 .map(([lang, href]) => `        <xhtml:link rel="alternate" hreflang="${escapeXml(lang)}" href="${escapeXml(absoluteUrl(href))}" />`)
                 .join('\n');
 
             return `    <url>
-        <loc>${escapeXml(absoluteUrl(path))}</loc>
+        <loc>${escapeXml(absoluteUrl(urlPath))}</loc>
         <lastmod>${today}</lastmod>
         <changefreq>${escapeXml(changefreq)}</changefreq>
         <priority>${escapeXml(priority)}</priority>
@@ -160,7 +163,6 @@ ${alternateTags}
             .filter(apartment => apartment && apartment.id)
             .forEach(apartment => {
                 const id = encodeURIComponent(String(apartment.id));
-
                 const alternates = {
                     hu: `/apartman.html?id=${id}`,
                     en: `/en/apartman.html?id=${id}`,
@@ -178,12 +180,11 @@ ${alternateTags}
 ${urls.join('\n')}
 </urlset>`;
 
-        res.status(200)
-            .set({
-                'Content-Type': 'application/xml; charset=UTF-8',
-                'Cache-Control': 'public, max-age=3600'
-            })
-            .send(xml.trim());
+        res.status(200);
+        res.setHeader('Content-Type', 'application/xml; charset=UTF-8');
+        res.setHeader('Cache-Control', 'no-store, max-age=0');
+        res.setHeader('X-Content-Type-Options', 'nosniff');
+        return res.send(xml.trim());
     } catch (error) {
         console.error('Sitemap generation error:', error);
         res.status(500).type('text/plain').send('Sitemap generation error');
